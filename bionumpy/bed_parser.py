@@ -1,4 +1,5 @@
 from .parser import FileBuffer, NEWLINE, get_mask_from_intervals
+from .chromosome_map import *
 from dataclasses import dataclass
 import numpy as np
 
@@ -38,6 +39,16 @@ class DelimitedBuffer(FileBuffer):
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         return self._move_intervals_to_2d_array(starts, ends)
 
+    def get_text_range(self, col, start=0, end=None):
+        self.validate_if_not()
+        # delimiters = self._delimiters.reshape(-1, self._n_cols)
+        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col]+1+start
+        if end is not None:
+            ends = starts+end
+        else:
+            ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+        return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
+
     def _validate(self):
         chunk = self._data
         delimiters = self._delimiters[1:]
@@ -49,7 +60,6 @@ class DelimitedBuffer(FileBuffer):
         delimiters = delimiters.reshape(-1, n_delimiters_per_line)
         assert np.all(chunk[delimiters[:, -1]] == NEWLINE)
         self._validated = True
-
         
 class StrandEncoding:
     MIN_CODE = ord("+")
@@ -95,59 +105,27 @@ class SortedIntervals:
         self.ends = self.data[..., 1]
 
     def in_intervals(self, position):
-        idx = np.searchsorted(self.starts, position)
-        return position < self.ends[idx]
+        idx = np.minimum(np.searchsorted(self.starts, position, side="left"), self.starts.size-1)
+        return (position >=self.starts[idx]) & (position < self.ends[idx])
+
+    @classmethod
+    def concatenate(cls, elements):
+        return cls(np.vstack([element.data for element in elements]))
 
 class BedBuffer(DelimitedBuffer):
+    data_class=SortedIntervals
     def get_intervals(self):
         self.validate_if_not()
-        data =  self.get_integers(cols=[1, 2])
+        data = self.get_data()
         return Interval(data)
 
-class ChromosomeProvider:
-    @staticmethod
-    def get_chrom_name(char_array):
-        return "".join(chr(c) for c in char_array).replace("\x00", "")
-        
-    @staticmethod
-    def _is_same_chromosome(chrom_1, chrom_2):
-        return FullBedFile.get_chrom_name(chrom_1) == FullBedFile.get_chrom_name(chrom_2)
+    def get_data(self):
+        self.validate_if_not()
+        return self.get_integers(cols=[1, 2])
 
-    @staticmethod
-    def _get_chromosome_changes(chromosomes):
-        return np.flatnonzero(
-            np.all(chromosomes[1:] != chromosomes[:-1], axis=-1))+1
-
-class ChromosomeDictProvider:
-    pass
-
-class ChromosomeStreamProvider:
-    def __init__(self, file_buffers):
-        self._buffers = file_buffers
-
-    def __iter__(self):
-        cur_data = []
-        last_chromosome = np.zeros(3, dtype=np.uint8)
-        for file_buffer in self._buffers:
-            chromosomes = file_buffer.get_chromosomes()
-            if not len(chromosomes):
-                break
-            if not cls._is_same_chromosome(last_chromosome, chromosomes[0]):
-                yield (cls.get_chrom_name(last_chromosome), np.concatenate(cur_data))
-                last_chromosome = chromosomes[0]
-                cur_data = []
-            data = file_buffer.get_data()
-            chromosome_changes = cls._get_chromosome_changes(chromosomes)
-            if len(chromosome_changes)==0:
-                cur_data.append(data)
-                
-            cur_intervals.append(data[:chromosome_changes[0]])
-            yield np.get_chrom_name(last_chromosome), np.concatenate(cur_intervals)
-            for start, end in zip(chromosome_changes[:-1], chromosome_changes[1:]):
-                yield np.get_chrom_name(chromosomes[start]), data[start:end]
-            last_chromosome = chromosomes[-1]
-            cur_data.append(data[chromosome_changes[-1]:])
-        yield cls.get_chrom_name(last_chromosome). np.concatenate(cur_data)
+    def get_chromosomes(self):
+        self.validate_if_not()
+        return self.get_text(col=0)
 
 class FullBedFile(ChromosomeDictProvider):
     def __init__(self, chrom_dict, all_intervals):
@@ -186,6 +164,9 @@ class SNP:
     position: np.array
     ref_seq: np.array
     alt_seq: np.array
+
+    def filter(self, mask):
+        return SNP(self.chromosome[mask], self.position[mask], self.ref_seq[mask], self.alt_seq[mask])
 #     def __init__(self, chromosome, position, ref_seq, alt_seq):
 #         self._chromosome = chromosome
 #         self._position = position
@@ -196,34 +177,42 @@ class VCFBuffer(DelimitedBuffer):
     def get_snps(self):
         self.validate_if_not()
         chromosomes = self.get_text(0)
+        position = self.get_integers(1).ravel()-1
+        from_seq = self.get_text(3).ravel()
+        to_seq = self.get_text(4).ravel()
+        return SNP(chromosomes, position, from_seq, to_seq)
+
+    def get_data(self):
+        self.validate_if_not()
+        chromosomes = self.get_text(0)
         position = self.get_integers(1)
         from_seq = self.get_text(3)
         to_seq = self.get_text(4)
-        return SNP(chromosomes, position, from_seq, to_seq)
+        return SNP(chromosomes, position, from_seq.ravel(), to_seq.ravel())
 
-def apply_to_chromosomes(func):
-    def new_func(*args, **kwargs):
-        assert all(isinstance(arg, ChromosomeProvider) for arg in chain(args, kwargs.values()))
-        args_streams = [isinstance(a, ChromosomeStreamProvider) for a in args]
-        kwargs_streams = {key: isinstance(value, ChromosomeStreamProvider) for key, value in kwargs.items()}
-        n_streams = sum(chain(args_streams, kwarg_streams))
-        assert sum(chain(args_streams, kwarg_streams)) <= 1
-        if n_streams == 0:
-            all_chroms = {key for provider in chain(args, kwargs.values()) for   key in proivder.keys()}
-            sorted_chroms = sorted(all_chroms)
-            for chromsome in sorted_chroms:
-                new_args = [arg[chrom] for arg in args]
+class GenotypeEncoding:
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        assert bytes_array.shape[-1]==3
+        return (bytes_array[..., 0]==ord("1"))+(bytes_array[..., 2]==ord("1")).astype("int")
 
-                new_kwargs = {key: val[chrom] for kwy, val in kwargs.items()}
-                yield (chrom, func(*new_args, **new_kwargs)
-        else:
-            stream = next(chain(
-                (arg for is_stream, arg in zip(args_streams, args) if is_stream),
-                (val for key, val in kwargs.items() if kwarg_streams[key])))
+class VCFMatrixBuffer(VCFBuffer):
+    def get_entries(self):
+        self.validate_if_not()
+        chromosomes = self.get_text(0)
+        position = self.get_integers(1).ravel()-1
+        from_seq = self.get_text(3).ravel()
+        to_seq = self.get_text(4).ravel()
+        n_samples = self._n_cols-9
+        genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
+        return SNP(chromosomes, position, from_seq, to_seq), GenotypeEncoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
 
-            for chromosome, data in stream:
-                new_args = [data if is_stream else arg[chromosome] for is_stream, arg in zip(arg_streams, args)]
-                nww_kwargs = {key: data if kwargs_streams[key] else value[chromosome]
-                              for key, value in kwargs.items()}
-                yield chromosome, func(*new_args, **new_kwargs)
-    return new_func
+    def get_data(self):
+        self.validate_if_not()
+        chromosomes = self.get_text(0)
+        position = self.get_integers(1)
+        from_seq = self.get_text(3)
+        to_seq = self.get_text(4)
+        return SNP(chromosomes, position, from_seq.ravel(), to_seq.ravel())
+
+

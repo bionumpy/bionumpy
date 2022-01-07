@@ -20,6 +20,13 @@ class ThreeBitEncoding:
 
 class BaseEncoding:
     """ Basic ACII byte encoding """
+    complements = np.zeros(256, dtype=np.uint8)
+    complements[[ord(c) for c in "ACGT"]] = [ord(c) for c in "TGCA"]
+    complements[[ord(c) for c in "acgt"]] = [ord(c) for c in "tgca"]
+
+    @classmethod
+    def complement(cls, sequence):
+        return cls.complements[sequence]
 
     @classmethod
     def from_string(cls, sequence):
@@ -90,6 +97,21 @@ class ACTGTwoBitEncoding:
         bit_mask = np.uint8(3) # last two bits
         all_bytes = (sequence[:, None]>>cls._shift_2bits) & bit_mask
         return cls.reverse[all_bytes.flatten()]+96
+
+class ACTGEncoding:
+    _lookup_byte_to_2bits = np.zeros(256, dtype=np.uint8)
+    _lookup_byte_to_2bits[[97, 65]] = 0
+    _lookup_byte_to_2bits[[99, 67]] = 1
+    _lookup_byte_to_2bits[[116, 84]] = 2
+    _lookup_byte_to_2bits[[103, 71]] = 3
+    reverse = np.array([ord(c) for c in "ACTG"], dtype=np.uint8)
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        return cls._lookup_byte_to_2bits[bytes_array]
+
+    @classmethod
+    def to_bytes(cls, encoded):
+        return cls.reverse[encoded]
 
 
 class SimpleEncoding(ACTGTwoBitEncoding):
