@@ -1,4 +1,16 @@
 from .encodings import ACTGTwoBitEncoding, BaseEncoding
+from npstructures import RaggedArray
+
+
+class Sequences(RaggedArray):
+
+    @classmethod
+    def from_sequences(cls, sequences):
+        return cls([[ord(c) for c in seq] for seq in sequences], dtype=np.uint8)
+
+    def to_sequences(self):
+        return ["".join(chr(i) for i in array) for array in self.to_list()]
+
 
 class Sequences:
     def __init__(self, sequences, intervals, encoding=BaseEncoding):
