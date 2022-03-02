@@ -77,9 +77,12 @@ class OneLineBuffer(FileBuffer):
         self.validate_if_not()
         sequence_starts = self._new_lines[::self.n_lines_per_entry]+1
         sequence_ends = self._new_lines[1::self.n_lines_per_entry]
+        
         seq, new_intervals = self._move_intervals_to_contigous_array(sequence_starts, sequence_ends)
         seq = self._encoding.from_bytes(seq)
-        return Sequences(seq, new_intervals, encoding=self._encoding)
+        print(seq, new_intervals)
+        lens = new_intervals[1]-new_intervals[0]
+        return Sequences(seq, lens, encoding=self._encoding)
 
     def _validate(self):
         n_lines = self._new_lines.size
@@ -93,6 +96,7 @@ class OneLineFastaBuffer(OneLineBuffer):
     n_lines_per_entry = 2
 
 class FastQBuffer(OneLineBuffer):
+    HEADER= 64
     n_lines_per_entry = 4
     _encoding = BaseEncoding
 
