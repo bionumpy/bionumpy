@@ -33,32 +33,6 @@ class FileBuffer:
     def validate_if_not(self):
         if not self._is_validated:
             self._validate()
-    
-    def _move_intervals_to_contigous_array(self, starts, ends):
-        """
-        Create a mask for where the sequences are and move sequences to continous array
-        """
-        mask = get_mask_from_intervals((starts, ends), self._data.size)
-        removed_areas = np.cumsum(starts-np.insert(ends[:-1], 0, 0))
-        new_intervals = (starts-removed_areas, ends-removed_areas)
-        m = np.sum(mask)
-        d = m % self._buffer_divisor
-        seq = np.empty(m-d+self._buffer_divisor, dtype=self._data.dtype)
-        seq[:m] = self._data[mask]
-        return seq, new_intervals
-
-    def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
-        n_intervals = starts.size
-        n_chars = ends-starts
-        max_chars = np.max(n_chars)
-        array = np.full((n_intervals, max_chars), fill_value, dtype=np.uint8)
-        from_mask = get_mask_from_intervals((starts, ends), self._data.size)
-        to_ends = max_chars*np.arange(1, n_intervals+1)
-        to_starts = to_ends-n_chars
-        to_mask = get_mask_from_intervals((to_starts, to_ends), array.size).reshape(array.shape)
-        array[to_mask] = self._data[from_mask]
-        return array
-
 
 class OneLineBuffer(FileBuffer):
     n_lines_per_entry = 2
