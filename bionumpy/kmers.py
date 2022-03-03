@@ -1,5 +1,4 @@
 import numpy as np
-from .parser import get_mask_from_intervals
 from .encodings import twobit_swap, ACTGTwoBitEncoding
 from npstructures import RaggedArray
 

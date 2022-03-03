@@ -1,21 +1,9 @@
-import time
-import logging
-import sys
-from shared_memory_wrapper import SingleSharedArray, to_shared_memory, from_shared_memory
 import gzip
 import numpy as np
 from npstructures import RaggedArray, RaggedView
 from .sequences import Sequences
 from .encodings import BaseEncoding, ACTGTwoBitEncoding
 NEWLINE = 10
-
-def get_mask_from_intervals(intervals, size):
-    """ intervals = (starts, ends) """
-    mask_changes = np.zeros(size+1, dtype="bool")
-    mask_changes[intervals[0]]=True
-    mask_changes[intervals[1]]^=True
-    mask = np.logical_xor.accumulate(mask_changes)
-    return mask[:-1]
 
 class FileBuffer:
     _buffer_divisor = 1
@@ -72,14 +60,6 @@ class FastQBuffer(OneLineBuffer):
     n_lines_per_entry = 4
     _encoding = BaseEncoding
 
-class OneLineFastaBuffer2Bit(OneLineFastaBuffer):
-    _encoding = ACTGTwoBitEncoding
-    _buffer_divisor = 32
-
-class FastQBuffer2Bit(FastQBuffer):
-    _encoding = ACTGTwoBitEncoding
-    _buffer_divisor = 32
-
 class BufferedNumpyParser:
 
     def __init__(self, file_obj, buffer_type, chunk_size=1000000):
@@ -91,9 +71,9 @@ class BufferedNumpyParser:
     @classmethod
     def from_filename(cls, filename, *args, **kwargs):
         if any(filename.endswith(suffix) for suffix in ("fasta", "fa", "fasta.gz", "fa.gz")):
-            buffer_type = OneLineFastaBuffer2Bit
+            buffer_type = OneLineFastaBuffer
         elif any(filename.lower().endswith(suffix) for suffix in ("fastq", "fq", "fastq.gz", "fq.gz")):
-            buffer_type = FastQBuffer2Bit
+            buffer_type = FastQBuffer
         else:
             raise NotImplemented
         if filename.endswith(".gz"):
