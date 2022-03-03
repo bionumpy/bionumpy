@@ -30,7 +30,6 @@ class FileBuffer:
     def from_raw_buffer(cls, chunk):
         raise NotImplemented
 
-
     def validate_if_not(self):
         if not self._is_validated:
             self._validate()

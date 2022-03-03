@@ -1,12 +1,7 @@
 import numpy as np
 from .parser import get_mask_from_intervals
 from .encodings import twobit_swap, ACTGTwoBitEncoding
-
-def get_kmer_mask(intervals, size, k=31):
-    starts, ends = intervals
-    ends = np.maximum(starts, ends-k+1)
-    return get_mask_from_intervals((starts, ends), size-k+1)
-
+from npstructures import RaggedArray
 
 class TwoBitHash:
     def __init__(self, k=31, dtype=np.uint64):
@@ -17,55 +12,29 @@ class TwoBitHash:
         self._shifts = dtype(2)*np.arange(self._n_letters_in_dtype, dtype=dtype)
         self._rev_shifts = self._shifts[::-1]+dtype(2)
 
-    def _get_kmer_hashes(self, sequences):
-        """Matching old interface"""
-        last_end = sequences.intervals[1][-1]
-        mask = get_kmer_mask(sequences.intervals, last_end, self.k)
-        kmers = self.np_get_kmers(sequences.sequences.view(self._dtype))[:mask.size]
-        reverse_hashes = sequences.encoding.complement(kmers) & self._dtype(4**self.k-1)
-        forward_hashes = twobit_swap(kmers) >> ((self._n_letters_in_dtype-self.k)*2)
-        return forward_hashes, reverse_hashes, mask
-
-    def np_get_kmers_with_buffer(self, sequence):
+    def get_kmers_with_buffer(self, sequence):
         res = (sequence[:-1, None] >> self._shifts)
         res |= (sequence[1:, None] << self._rev_shifts)
         return res
-    get_kmers_with_buffer = np_get_kmers_with_buffer
 
-    def np_get_kmers(self, sequence, is_internal=False):
+    def get_kmers(self, sequence, is_internal=False):
         assert sequence.dtype==self._dtype, sequence.dtype
         result = (sequence[:, None] >> self._shifts)
         result[:-1] |= (sequence[1:, None] << self._rev_shifts)
-        if is_internal:
-            return result
-        result &= self._mask
-        n_kmers = self._n_letters_in_dtype*sequence.size-self.k+1
-        return result.ravel()[:n_kmers]
-
-    def get_kmers(self, sequence):
-        return self.np_get_kmers(sequence, is_internal=True)
+        return result
 
     def _has_buffer(self, sequences):
         last_end = sequences.shape.size # intervals[1][-1]
         return sequences._data.size*4 - last_end>=self._n_letters_in_dtype-self.k+1
 
-    def get_new_kmer_hashes(self, sequences):
-        func = self.get_kmers_with_buffer if self._has_buffer(sequences) else self.get_kmers
-        kmers = func(sequences._data.view(self._dtype))
-        last_end = sequences.shape.size# sequences.intervals[1][-1]
-        mask = get_kmer_mask((sequences.shape.starts, sequences.shape.ends), last_end, self.k)
-        print(mask)
-        return kmers.ravel()[:mask.size][mask] & self._mask
-
     def get_kmer_hashes(self, sequences):
         data = ACTGTwoBitEncoding.from_bytes(sequences._data)
         shape = sequences.shape
-        func = self.get_kmers_with_buffer if self._has_buffer(sequences) else self.get_kmers        
+        func = self.get_kmers_with_buffer if self._has_buffer(sequences) else self.get_kmers
         kmers = func(data.view(self._dtype)).ravel()
-        last_end = sequences.shape.size# sequences.intervals[1][-1]
-        mask = get_kmer_mask((shape.starts, sequences.shape.ends), last_end, self.k)
-        kmers = kmers[:mask.size][mask]
-        return ACTGTwoBitEncoding.complement(kmers) & self._dtype(4**self.k-1)
+        ra = RaggedArray(kmers, shape)
+        ra = ra[:, :-(self.k-1)]
+        return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4**self.k-1)
 
 class KmerHash:
     CODES = np.zeros(256, dtype=np.uint64)
