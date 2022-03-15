@@ -9,8 +9,8 @@ class FileBuffer:
     _buffer_divisor = 1
     COMMENT = 0
     def __init__(self, data, new_lines):
-        self._data = data
-        self._new_lines = new_lines
+        self._data = data #np.array
+        self._new_lines = new_lines #np.array
         self._is_validated = False
         self.size = self._data.size
 

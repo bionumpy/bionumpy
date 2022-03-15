@@ -63,7 +63,7 @@ class ACTGTwoBitEncoding:
 
     @classmethod
     def join_4bits_to_byte(cls, four_bits):
-        return np.bitwise_or.reduce(four_bits << cls._shift_4bits, axis=1)
+        return np.sum(four_bits << cls._shift_4bits, axis=1, dtype=np.uint8)
 
     @classmethod
     def complement(cls, char):
