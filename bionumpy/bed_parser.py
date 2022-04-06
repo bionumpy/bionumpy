@@ -1,4 +1,4 @@
-from .parser import FileBuffer, NEWLINE, get_mask_from_intervals
+from .parser import FileBuffer, NEWLINE
 from .chromosome_map import *
 from dataclasses import dataclass
 import numpy as np
@@ -56,7 +56,7 @@ class DelimitedBuffer(FileBuffer):
         self._n_cols = n_delimiters_per_line
         last_new_line = next(i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE)
         delimiters = delimiters[:delimiters.size-last_new_line]
-        assert delimiters.size % n_delimiters_per_line == 0, "irregular number of delimiters per line"
+        assert delimiters.size % n_delimiters_per_line == 0, f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})"
         delimiters = delimiters.reshape(-1, n_delimiters_per_line)
         assert np.all(chunk[delimiters[:, -1]] == NEWLINE)
         self._validated = True

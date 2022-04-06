@@ -14,7 +14,7 @@ class Sequences(RaggedArray):
         return cls([[ord(c) for c in seq] for seq in sequences])
 
     def to_sequences(self):
-        return ["".join(chr(i) for i in array) for array in self.to_list()]
+        return ["".join(chr(i) for i in array) for array in self.tolist()]
 
 
 class _Sequences:

@@ -1,6 +1,5 @@
-from itertools import product
 import numpy as np
-
+from itertools import product
 
 class ThreeBitEncoding:
     reverse=np.array([0, ord("A"), 0, ord("C"), ord("G"), 0, 0, ord("T")], dtype=np.uint8)
