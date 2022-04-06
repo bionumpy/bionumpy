@@ -22,8 +22,8 @@ def test_bed_buffer(bed_buffer):
     buf = BedBuffer.from_raw_buffer(bed_buffer)
     intervals = buf.get_intervals()
     assert intervals == Interval(
-        [[10, 30],
+        [[1, 3],
          [40, 60],
-         [40, 60]])
+         [400, 600]])
 
 # def test_vcf_buffer(

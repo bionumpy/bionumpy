@@ -84,13 +84,16 @@ class DigitEncoding:
 class Interval:
     def __init__(self, data):
         self.data = np.asanyarray(data)
-        assert data.shape[-1] == 2
+        assert self.data.shape[-1] == 2
         
         self.start = self.data[..., 0]
         self.end = self.data[..., 1]
 
     def __repr__(self):
         return repr(self.data)
+
+    def __eq__(self, other):
+        return np.all(self.data==other.data)
 
     def in_interval(self, position):
         return (self.start <= position) & (position < self.end)
