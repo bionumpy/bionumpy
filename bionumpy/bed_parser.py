@@ -1,3 +1,4 @@
+from .npdataclass import NpDataClass, VarLenArray
 from .parser import FileBuffer, NEWLINE
 from .chromosome_provider import *
 from dataclasses import dataclass
@@ -9,7 +10,7 @@ class DelimitedBuffer(FileBuffer):
 
     def __init__(self, data, new_lines):
         super().__init__(data, new_lines)
-        self._delimiters = np.concatenate(([0],
+        self._delimiters = np.concatenate(([-1],
             np.flatnonzero(self._data == self.DELIMITER),
             self._new_lines))
         self._delimiters.sort(kind="mergesort")
@@ -162,31 +163,21 @@ class FullBedFile(ChromosomeDictProvider):
         return cls(interval_dict, np.concatenate(intervals))
 
 @dataclass
-class SNP:
+class SNP(NpDataClass):
     chromosome: np.array
     position: np.array
     ref_seq: np.array
     alt_seq: np.array
 
-    def __iter__(self):
-        return (SNP(*comb) for comb in zip(self.chromosome, self.position, self.ref_seq, self.alt_seq))
-
-    def __getitem__(self, idx):
-        return SNP(self.chromosome[idx], self.position[idx], self.ref_seq[idx], self.alt_seq[idx])
-
-#     def __init__(self, chromosome, position, ref_seq, alt_seq):
-#         self._chromosome = chromosome
-#         self._position = position
-#         self._ref_seq = ref_seq
-#         self._alt_seq = alt_seq
 
 class VCFBuffer(DelimitedBuffer):
     def get_snps(self):
         self.validate_if_not()
-        chromosomes = self.get_text(0)
+        chromosomes = VarLenArray(self.get_text(0))
         position = self.get_integers(1).ravel()-1
         from_seq = self.get_text(3).ravel()
         to_seq = self.get_text(4).ravel()
+        print("#", self.get_text(3))
         return SNP(chromosomes, position, from_seq, to_seq)
 
     def get_data(self):

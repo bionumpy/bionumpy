@@ -15,7 +15,7 @@ class ChromosomeProvider:
     @staticmethod
     def _get_chromosome_changes(chromosomes):
         return np.flatnonzero(
-            np.any(chromosomes[1:] != chromosomes[:-1], axis=-1))+1
+            np.any(chromosomes[1:].__neq__(chromosomes[:-1]), axis=-1))+1
 
 class ChromosomeStreamProvider(ChromosomeProvider):
     def __init__(self, file_buffers):
@@ -33,17 +33,19 @@ class ChromosomeStreamProvider(ChromosomeProvider):
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:
-                yield (start_chrom, group[0].concatenate(overlay + group))
+                yield (start_chrom, np.concatenate(overlay + group))
                 overlay = []
             else:
-                yield (start_chrom, group[0].concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
+                yield (start_chrom, np.concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
                 overlay = [last_buffer[chrom_changes[-1]:]]
                 if len(chrom_changes>1):
                     chunks = (last_buffer[start:end] for start, end in zip(chrom_changes[:-1], chrom_changes[1:]))
                     for chunk in chunks:
                         yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
             last_chrom = last_buffer[-1].chromosome
-# 
+        if len(overlay):
+            chunk = overlay[0]
+            yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
 # 
 #         cur_data = []
 #         last_chromosome = np.zeros(3, dtype=np.uint8)

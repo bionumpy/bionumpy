@@ -5,26 +5,31 @@ import numpy as np
 import pytest
 
 from bionumpy.chromosome_provider import ChromosomeStreamProvider
+from bionumpy.npdataclass import NpDataClass, VarLenArray
 
 
 @dataclass
-class DummyClass:
+class DummyClass(NpDataClass):
     chromosome: np.ndarray
     data: np.ndarray
 
     def __post_init__(self):
-        if not isinstance(self.chromosome, np.ndarray):
-            self.chromosome = np.asanyarray([[ord(c) for c in chrom] for chrom in self.chromosome])
+        if not isinstance(self.chromosome, VarLenArray):
+            print("#", self.chromosome)
+            self.chromosome = VarLenArray(np.asanyarray([[ord(c) for c in chrom] for chrom in self.chromosome]))
         self.data = np.asanyarray(self.data)
-
-    def __getitem__(self, idx):
-        return self.__class__(self.chromosome[idx], self.data[idx])
+# 
+#     def __getitem__(self, idx):
+#         return self.__class__(self.chromosome[idx], self.data[idx])
+# 
+#     def __eq__(self, other):
+#         return np.all(self.chromosome == other.chromosome) and np.all(self.data == other.data)
+# 
+#     def __len__(self):
+#         return len(self.chromosome)
 
     def __eq__(self, other):
-        return np.all(self.chromosome == other.chromosome) and np.all(self.data == other.data)
-
-    def __len__(self):
-        return len(self.chromosome)
+        return all(np.all(s == o) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))
 
     @classmethod
     def concatenate(cls, objects):
