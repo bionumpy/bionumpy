@@ -1,5 +1,5 @@
 from .parser import FileBuffer, NEWLINE
-from .chromosome_map import *
+from .chromosome_provider import *
 from dataclasses import dataclass
 import numpy as np
 
@@ -168,8 +168,12 @@ class SNP:
     ref_seq: np.array
     alt_seq: np.array
 
-    def filter(self, mask):
-        return SNP(self.chromosome[mask], self.position[mask], self.ref_seq[mask], self.alt_seq[mask])
+    def __iter__(self):
+        return (SNP(*comb) for comb in zip(self.chromosome, self.position, self.ref_seq, self.alt_seq))
+
+    def __getitem__(self, idx):
+        return SNP(self.chromosome[idx], self.position[idx], self.ref_seq[idx], self.alt_seq[idx])
+
 #     def __init__(self, chromosome, position, ref_seq, alt_seq):
 #         self._chromosome = chromosome
 #         self._position = position
@@ -217,5 +221,3 @@ class VCFMatrixBuffer(VCFBuffer):
         from_seq = self.get_text(3)
         to_seq = self.get_text(4)
         return SNP(chromosomes, position, from_seq.ravel(), to_seq.ravel())
-
-
