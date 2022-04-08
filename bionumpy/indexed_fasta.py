@@ -22,15 +22,16 @@ class IndexedFasta(ChromosomeDictProvider):
         if chromosome not in self._index:
             print(chromosome, list(self._index.keys()))
         idx = self._index[chromosome]
-        print(idx)
         lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
         n_rows = (rlen+lenc-1)//lenc
         data = np.empty(lenb*n_rows, dtype=np.uint8)
-
+        bytes_to_read = (n_rows-1)*lenb+(rlen-(n_rows-1)*lenc)
         self._f_obj.seek(idx.offset)
-        self._f_obj.readinto(data[:rlen])
+        self._f_obj.readinto(data[:bytes_to_read])
+        assert np.all(data[:bytes_to_read]>0), data[:bytes_to_read]
         data = data.reshape(n_rows, lenb)
-        ret = data[:, :idx["lenc"]].ravel()[:idx["rlen"]]
+        ret = data[:, :lenc].ravel()[:rlen]
+        assert np.all(ret[:rlen]>0), ret
         assert ret.size == idx["rlen"], (ret.size, idx["rlen"], ret.size -idx["rlen"], data.shape)
         return ret
     
