@@ -1,7 +1,8 @@
 import numpy as np
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.kmers import TwoBitHash
-from bionumpy.bed_parser import Interval, BedBuffer, VCFBuffer, SNP
+from bionumpy.bed_parser import Interval, SNP
+from bionumpy.delimited_buffers import BedBuffer, VCFBuffer
 
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2
 
