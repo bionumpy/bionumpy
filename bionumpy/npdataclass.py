@@ -2,7 +2,25 @@ import dataclasses
 from itertools import accumulate
 import numpy as np
 
+class SeqArray(np.ndarray):
+    @staticmethod
+    def asseqarray(array):
+        if isinstance(array, str):
+            return np.array([ord(c) for c in array], dtype=np.uint8)
+        elif isinstance(array, list):
+            return np.array([SeqArray.asseqarray(row) for row in array])
+        else:
+            return array
+
 class NpDataClass:
+
+    def __post_init__(self):
+        for field in dataclasses.fields(self):
+            if field.type == np.ndarray:
+                setattr(self, field.name, np.asanyarray(getattr(self, field.name)))
+            elif field.type == SeqArray:
+                setattr(self, field.name, SeqArray.asseqarray(getattr(self, field.name)))
+                
     def shallow_tuple(self):
         return tuple(getattr(self, field.name) for field in dataclasses.fields(self))
 

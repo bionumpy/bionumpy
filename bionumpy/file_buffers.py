@@ -24,6 +24,12 @@ class FileBuffer:
         array[to_indices] = self._data[from_indices]
         return array.reshape((n_intervals, max_chars))
 
+    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
+        if lens is None:
+            lens = ends-starts
+        indices, shape = RaggedView(starts, lens).get_flat_indices()
+        return RaggedArray(self._data[indices], shape)
+
     @classmethod
     def from_raw_buffer(cls, chunk):
         raise NotImplemented

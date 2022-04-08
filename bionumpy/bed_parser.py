@@ -1,4 +1,4 @@
-from .npdataclass import NpDataClass, VarLenArray
+from .npdataclass import NpDataClass, VarLenArray, SeqArray
 from .parser import FileBuffer, NEWLINE
 from .chromosome_provider import *
 from dataclasses import dataclass
@@ -33,12 +33,15 @@ class DelimitedBuffer(FileBuffer):
         powers = np.uint32(10)**np.arange(n_digits)[::-1]
         return DigitEncoding.from_bytes(digit_chars) @ powers
 
-    def get_text(self, col):
+    def get_text(self, col, fixed_length=True):
         self.validate_if_not()
         # delimiters = self._delimiters.reshape(-1, self._n_cols)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col]+1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
-        return self._move_intervals_to_2d_array(starts, ends)
+        if fixed_length:
+            return self._move_intervals_to_2d_array(starts, ends)
+        else:
+            return self._move_intervals_to_ragged_array(starts, ends)
 
     def get_text_range(self, col, start=0, end=None):
         self.validate_if_not()
@@ -163,22 +166,30 @@ class FullBedFile(ChromosomeDictProvider):
         return cls(interval_dict, np.concatenate(intervals))
 
 @dataclass
-class SNP(NpDataClass):
-    chromosome: np.array
-    position: np.array
-    ref_seq: np.array
-    alt_seq: np.array
+class Variant(NpDataClass):
+    chromosome: SeqArray
+    position: np.ndarray
+    ref_seq: SeqArray
+    alt_seq: SeqArray
 
+    def __eq__(self, other):
+        return all(np.all(np.equal(s, o)) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))
+
+class SNP(Variant):
+    pass
 
 class VCFBuffer(DelimitedBuffer):
-    def get_snps(self):
+    def get_variants(self, fixed_length=False):
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))
         position = self.get_integers(1).ravel()-1
-        from_seq = self.get_text(3).ravel()
-        to_seq = self.get_text(4).ravel()
+        from_seq = self.get_text(3, fixed_length=fixed_length)
+        to_seq = self.get_text(4, fixed_length=fixed_length)
         print("#", self.get_text(3))
         return SNP(chromosomes, position, from_seq, to_seq)
+
+    def get_snps(self):
+        return self.get_variants(fixed_length=True)
 
     def get_data(self):
         self.validate_if_not()
