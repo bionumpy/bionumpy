@@ -10,7 +10,7 @@ if __name__ == "__main__":
     vcf_filename = sys.argv[1]
     reference_filename = sys.argv[2]
     vcf_file = bnp_open(vcf_filename)
-    reference = IndexedFasta(reference_filename, remove_chr=True)
+    reference = bnp_open(reference_filename, remove_chr=True)
     print(func(vcf_file, reference))
 
     #for chromosome, variants in vcf_file:

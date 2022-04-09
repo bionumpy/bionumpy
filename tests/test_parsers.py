@@ -21,11 +21,11 @@ def test_fastq_buffer(fastq_buffer):
 
 def test_bed_buffer(bed_buffer):
     buf = BedBuffer.from_raw_buffer(bed_buffer)
-    intervals = buf.get_intervals()
-    assert intervals == Interval(
-        [[1, 3],
-         [40, 60],
-         [400, 600]])
+    intervals = list(buf.get_intervals())
+    assert intervals == [
+        Interval("chr1", 1, 3),
+        Interval("chr1", 40, 60),
+        Interval("chr2",  400, 600)]
 
 def test_vcf_buffer(vcf_buffer):
     buf = VCFBuffer.from_raw_buffer(vcf_buffer)

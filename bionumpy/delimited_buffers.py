@@ -69,16 +69,11 @@ class BedBuffer(DelimitedBuffer):
     data_class=SortedIntervals
     def get_intervals(self):
         self.validate_if_not()
-        data = self.get_data()
-        return Interval(data)
+        chromosomes = VarLenArray(self.get_text(0))
+        positions = self.get_integers(cols=[1, 2])
+        return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
-    def get_data(self):
-        self.validate_if_not()
-        return self.get_integers(cols=[1, 2])
-
-    def get_chromosomes(self):
-        self.validate_if_not()
-        return self.get_text(col=0)
+    get_data = get_intervals
 
 class VCFBuffer(DelimitedBuffer):
     def get_variants(self, fixed_length=False):
@@ -87,19 +82,12 @@ class VCFBuffer(DelimitedBuffer):
         position = self.get_integers(1).ravel()-1
         from_seq = self.get_text(3, fixed_length=fixed_length)
         to_seq = self.get_text(4, fixed_length=fixed_length)
-        return SNP(chromosomes, position, from_seq, to_seq)
+        return Variant(chromosomes, position, from_seq, to_seq)
 
     def get_snps(self):
         return self.get_variants(fixed_length=True)
 
-    def get_data(self):
-        self.validate_if_not()
-        chromosomes = self.get_text(0)
-        position = self.get_integers(1)
-        from_seq = self.get_text(3)
-        to_seq = self.get_text(4)
-        return SNP(chromosomes, position, from_seq.ravel(), to_seq.ravel())
-
+    get_data = get_variants
 
 class VCFMatrixBuffer(VCFBuffer):
     def get_entries(self):

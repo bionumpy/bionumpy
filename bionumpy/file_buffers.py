@@ -38,6 +38,10 @@ class FileBuffer:
         if not self._is_validated:
             self._validate()
 
+    def get_data(self):
+        """Default way to get data from buffer"""
+        return NotImplemented
+
 class OneLineBuffer(FileBuffer):
     n_lines_per_entry = 2
     _buffer_divisor = 32
@@ -60,6 +64,8 @@ class OneLineBuffer(FileBuffer):
         seq[:m] = self._data[indices]
         return Sequences(seq, shape)
     
+    get_data = get_sequences
+
     def _validate(self):
         n_lines = self._new_lines.size
         assert n_lines % self.n_lines_per_entry == 0, "Wrong number of lines in buffer"

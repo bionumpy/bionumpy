@@ -36,7 +36,6 @@ class ChromosomeStreamProvider(ChromosomeProvider):
                 yield (start_chrom, np.concatenate(overlay + group))
                 overlay = []
             else:
-                print(chrom_changes[0])
                 yield (start_chrom, np.concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
                 overlay = [last_buffer[chrom_changes[-1]:]]
                 if len(chrom_changes>1):
@@ -47,6 +46,9 @@ class ChromosomeStreamProvider(ChromosomeProvider):
         if len(overlay):
             chunk = overlay[0]
             yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
+
+
+
 # 
 #         cur_data = []
 #         last_chromosome = np.zeros(3, dtype=np.uint8)
@@ -74,4 +76,30 @@ class ChromosomeStreamProvider(ChromosomeProvider):
 
 class ChromosomeDictProvider:
     pass
+
+class FullChromosomeDictProvider(ChromosomeDictProvider):
+    def __init__(self, buffers):
+        self._d = dict(ChromosomeStreamProvider(buffers))
+
+    def __getitem__(self, key):
+        return self._d[key]
+
+class LazyChromosomeDictProvider(ChromosomeDictProvider):
+    def __init__(self, buffers):
+        self._stream = ChromosomeStreamProvider(buffers)
+        self._back_log = {}
+
+    def _find_item(self, chromosome):
+        for chromosome, data in self._stream:
+            if chromosome != chromosome:
+                self._back_log[chromosome] = data
+            else:
+                return data
+
+    def __getitem__(self, key):
+        if key in self._back_log:
+            ret  = self._back_log[key]
+            del self._back_log[key]
+            return ret
+        return self._find_item
 

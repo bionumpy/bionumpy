@@ -30,6 +30,14 @@ class NpDataClass:
     def __len__(self):
         return len(self.shallow_tuple()[0])
 
+    def __eq__(self, other):
+        for s, o in zip(self.shallow_tuple(), other.shallow_tuple()):
+            print(s, o)
+            if not np.all(np.equal(s, o)):
+                return False
+        return True
+        return all(np.all(np.equal(s, o)) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))
+
     def __array_function__(self, func, types, args, kwargs):
         if func==np.concatenate:
             objects = args[0]
@@ -91,4 +99,57 @@ class VarLenArray:
         return self.__class__(self.array[idx])
 
 
+def npdataclass(base_class):
+    new_class = dataclasses.dataclass(base_class)
+    class NpDataClass(base_class):
 
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            for field in dataclasses.fields(self):
+                if field.type == np.ndarray:
+                    setattr(self, field.name, np.asanyarray(getattr(self, field.name)))
+                elif field.type == SeqArray:
+                    setattr(self, field.name, SeqArray.asseqarray(getattr(self, field.name)))
+
+        def __post_init__(self):
+            for field in dataclasses.fields(self):
+                if field.type == np.ndarray:
+                    setattr(self, field.name, np.asanyarray(getattr(self, field.name)))
+                elif field.type == SeqArray:
+                    setattr(self, field.name, SeqArray.asseqarray(getattr(self, field.name)))
+                    
+        def shallow_tuple(self):
+            return tuple(getattr(self, field.name) for field in dataclasses.fields(self))
+    
+        def __getitem__(self, idx):
+            return self.__class__(*[f[idx] for f in self.shallow_tuple()])
+    
+        def __len__(self):
+            return len(self.shallow_tuple()[0])
+    
+        def __eq__(self, other):
+            for s, o in zip(self.shallow_tuple(), other.shallow_tuple()):
+                if not np.all(np.equal(s, o)):
+                    print(s, o)
+                    return False
+            return True
+            #return all(np.all(np.equal(s, o)) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))
+    
+        def __array_function__(self, func, types, args, kwargs):
+            if func==np.concatenate:
+                objects = args[0]
+                tuples = [o.shallow_tuple() for o in objects]
+                new_tuple = tuple
+                return self.__class__(*(np.concatenate(list(t)) for t in zip(*tuples)))
+            if func == np.equal:
+                one, other = args
+                return all(np.equal(s, o) for s, o in zip(one.shallow_tuple(), other.shallow_tuple()))
+                
+            return NotImplemented
+    
+        def __iter__(self):
+            return (self.__class__(*comb) for comb in zip(*self.shallow_tuple()))
+
+    #class full_class(new_class, NpDataClass):
+    #     pass
+    return NpDataClass

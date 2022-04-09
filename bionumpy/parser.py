@@ -1,11 +1,21 @@
 import gzip
 import numpy as np
+from pathlib import PurePath
 from npstructures import RaggedArray, RaggedView
 from .sequences import Sequences
 from .encodings import BaseEncoding, ACTGTwoBitEncoding
 from .file_buffers import *
+from .delimited_buffers import *
+
 
 class BufferedNumpyParser:
+    buffer_types = {".vcf": VCFBuffer,
+                    ".bed": BedBuffer,
+                    ".fasta": TwoLineFastaBuffer,
+                    ".fa": TwoLineFastaBuffer,
+                    ".fastq": FastQBuffer,
+                    ".fq": FastQBuffer}
+
 
     def __init__(self, file_obj, buffer_type, chunk_size=1000000):
         self._file_obj = file_obj
@@ -15,17 +25,17 @@ class BufferedNumpyParser:
 
     @classmethod
     def from_filename(cls, filename, *args, **kwargs):
-        if any(filename.endswith(suffix) for suffix in ("fasta", "fa", "fasta.gz", "fa.gz")):
-            buffer_type = OneLineFastaBuffer
-        elif any(filename.lower().endswith(suffix) for suffix in ("fastq", "fq", "fastq.gz", "fq.gz")):
-            buffer_type = FastQBuffer
-        else:
-            raise NotImplemented
-        if filename.endswith(".gz"):
-            file_obj = gzip.open(filename, "rb")
-        else:
-            file_obj = open(filename, "rb")
-        return cls(file_obj, buffer_type, *args, **kwargs)
+        path = PurePath(filename)
+        suffixes = path.suffixes
+
+        open_func = open
+        if suffixes[-1] == ".gz":
+            open_func = gzip.open
+            suffixes = suffixes[:-1]
+        buffer_type = cls.buffer_types[suffixes[-1]]
+        return cls(open_func(filename, "rb"),
+                   buffer_type,
+                   *args, **kwargs)
 
     def get_chunk(self):
         a, bytes_read = self.read_raw_chunk()
@@ -51,6 +61,9 @@ class BufferedNumpyParser:
             if line[0] != self._buffer_type.COMMENT:
                 self._file_obj.seek(-len(line), 1)
                 break
+
+    def __iter__(self):
+        return self.get_chunks()
 
     def get_chunks(self):
         self.remove_initial_comments()
