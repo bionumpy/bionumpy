@@ -68,7 +68,7 @@ class BufferedNumpyParser:
     def get_chunks(self):
         self.remove_initial_comments()
         chunk = self.get_chunk()
-        buff = self._buffer_type.from_raw_buffer(chunk)
+        # buff = self._buffer_type.from_raw_buffer(chunk)
         while not self._is_finished:
             buff = self._buffer_type.from_raw_buffer(chunk)
             self._file_obj.seek(buff.size-self._chunk_size, 1)

@@ -1,7 +1,8 @@
 import numpy as np
-from npstructures import RaggedArray, RaggedView
+from npstructures import RaggedArray, RaggedView, RaggedShape
 from .encodings import BaseEncoding, ACTGTwoBitEncoding
 from .sequences import Sequences
+from .npdataclass import npdataclass, SeqArray
 NEWLINE = 10
 
 class FileBuffer:
@@ -32,7 +33,11 @@ class FileBuffer:
 
     @classmethod
     def from_raw_buffer(cls, chunk):
-        raise NotImplemented
+        return NotImplemented
+
+    @classmethod
+    def from_data(cls, data):
+        return NotImplemented
 
     def validate_if_not(self):
         if not self._is_validated:
@@ -64,7 +69,14 @@ class OneLineBuffer(FileBuffer):
         seq[:m] = self._data[indices]
         return Sequences(seq, shape)
     
-    get_data = get_sequences
+    def get_data(self):
+        self.validate_if_not()
+        starts = np.insert(self._new_lines, 0, -1)
+        lengths = np.diff(starts)
+        self.lines = RaggedArray(self._data, RaggedShape(lengths))
+        sequences = self.lines[1::self.n_lines_per_entry][:, :-1]
+        headers = self.lines[::self.n_lines_per_entry][:, 1:-1]
+        return SequenceEntry(headers, sequences)
 
     def _validate(self):
         n_lines = self._new_lines.size
@@ -82,3 +94,19 @@ class FastQBuffer(OneLineBuffer):
     HEADER= 64
     n_lines_per_entry = 4
     _encoding = BaseEncoding
+
+    def get_data(self):
+        seq_entry = super().get_data()
+        quality = self.lines[3::self.n_lines_per_entry][:, :-1]-ord("!")
+        return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
+
+@npdataclass
+class SequenceEntry:
+    name: SeqArray
+    sequence: SeqArray
+
+@npdataclass
+class SequenceEntryWithQuality:
+    name: SeqArray
+    sequence: SeqArray
+    quality: np.ndarray

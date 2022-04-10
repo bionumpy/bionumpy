@@ -129,6 +129,7 @@ def npdataclass(base_class):
     
         def __eq__(self, other):
             for s, o in zip(self.shallow_tuple(), other.shallow_tuple()):
+                print(s, o)
                 if not np.all(np.equal(s, o)):
                     print(s, o)
                     return False

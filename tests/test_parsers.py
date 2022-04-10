@@ -1,13 +1,27 @@
+import pytest
 import numpy as np
-from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.kmers import TwoBitHash
+from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.bed_parser import Interval, SNP
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer
 
-from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2
+from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, combos
 
 def chunk_from_text(text):
     return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
+
+
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta"])
+def test_buffer_read(buffer_name):
+    buf, true_data, buf_type = combos[buffer_name]
+    data = buf_type.from_raw_buffer(buf).get_data()
+    assert list(data) == true_data
+
+@pytest.mark.parametrize("buffer_name", [])# "bed", "vcf2", "vcf", "fastq", "fasta"])
+def test_buffer_write(buffer_name):
+    true_buf, data, buf_type = combos[buffer_name]    
+    buf = buf_type.from_data(data)
+    assert true_buf == buf
 
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
     buf = TwoLineFastaBuffer.from_raw_buffer(twoline_fasta_buffer)
