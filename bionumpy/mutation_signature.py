@@ -1,6 +1,8 @@
 import numpy as np
 from .encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
 from .chromosome_map import chromosome_map
+import logging
+logger = logging.getLogger(__name__)
 
 def get_kmer_indexes(position, flank=2):
     relative = np.concatenate((np.arange(-flank, 0),
@@ -15,7 +17,7 @@ class SNPEncoding:
     lookup[ord("T")][[ord(c) for c in "ACG"]] = 3+np.arange(3)
     lookup[ord("A")][[ord(c) for c in "TGC"]] = 3+np.arange(3)
 
-    text = np.array([f"C->{c}" for c in "AGT"]+[f"T->{c}" for c in "ACG"])
+    text = np.array([f"C>{c}" for c in "AGT"] + [f"T->{c}" for c in "ACG"])
 
     @classmethod
     def to_string(cls, encoded):
@@ -43,8 +45,9 @@ class MutationSignatureEncoding:
     def to_string(cls, encoded, k):
         snp = SNPEncoding.to_string(encoded>>(2*k))
         chars = (encoded>>(2*np.arange(k))) & 3
+
         kmer = "".join(chr(b) for b in ACTGEncoding.to_bytes(chars))
-        kmer = kmer[:k//2]+snp[0]+kmer[k//2:]
+        return kmer[:k//2]+"["+snp+"]"+kmer[k//2:]
         return snp+ ":" +kmer
         kmer_bytes = ACTGEncoding.to_bytes(encoded)
 

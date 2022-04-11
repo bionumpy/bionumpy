@@ -36,7 +36,6 @@ class ChromosomeStreamProvider(ChromosomeProvider):
                 yield (start_chrom, np.concatenate(overlay + group))
                 overlay = []
             else:
-                print(chrom_changes, chrom_changes[0])
                 l = last_buffer[:chrom_changes[0]]
                 tmp = np.concatenate(overlay + group[:-1] + [l])
                 yield (start_chrom, tmp)# np.concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
