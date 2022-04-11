@@ -17,6 +17,7 @@ def chromosome_map(reduction=None):
             dicts = [args[i] for i in dict_indices]
             dicts_kw = [kwargs[key] for key in dict_keys]
             for chromosome, data in stream:
+                print(f"Running chromosome {chromosome}")
                 for i, d in zip(dict_indices, dicts):
                     new_args[i] = d[chromosome]
     

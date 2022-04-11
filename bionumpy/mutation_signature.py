@@ -1,10 +1,6 @@
 import numpy as np
-from bionumpy.bed_parser import VCFBuffer, BedBuffer, FullBedFile, SortedIntervals, VCFMatrixBuffer, SNP
-from bionumpy.parser import BufferedNumpyParser
-from bionumpy.chromosome_provider import ChromosomeStreamProvider
-from bionumpy.indexed_fasta import IndexedFasta
-from bionumpy.encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
-
+from .encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
+from .chromosome_map import chromosome_map
 
 def get_kmer_indexes(position, flank=2):
     relative = np.concatenate((np.arange(-flank, 0),
@@ -52,11 +48,13 @@ class MutationSignatureEncoding:
         return snp+ ":" +kmer
         kmer_bytes = ACTGEncoding.to_bytes(encoded)
 
-
-def get_kmers(snps, intervals, reference, flank):
-    snps, genotypes=snps
-    for snp, _ in zip(snps, range(10)):
-        print(snp)
+@chromosome_map(reduction=sum)
+def get_kmers(variants, genotypes, intervals, reference, flank):
+    
+    assert np.all(reference[variants.position] == variants.ref_seq[:, 0:1].ravel())
+    snps = variants[variants.is_snp()]
+    snps.ref_seq = snps.ref_seq.ravel()# to_numpy_array().ravel()
+    snps.alt_seq = snps.alt_seq.ravel()# to_numpy_array().ravel()
     assert np.all(reference[snps.position] == snps.ref_seq), (reference[snps.position], snps.ref_seq)
     if intervals is not None:
         valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
@@ -72,7 +70,6 @@ def get_kmers(snps, intervals, reference, flank):
     forward_hashes = MutationSignatureEncoding.from_kmers_and_snp(kmers[forward_idxs], snps[forward_idxs])
     reverse_hashes = MutationSignatureEncoding.from_kmers_and_snp(
         BaseEncoding.complement(kmers[reverse_idxs, ::-1]), snps[reverse_idxs])
-    # kmers[reverse_idxs], snps.filter(reverse_idxs))
     all_hashes = np.zeros_like(snps.position)
     all_hashes[forward_mask] = forward_hashes
     all_hashes[~forward_mask] = reverse_hashes
@@ -86,55 +83,12 @@ def get_kmers(snps, intervals, reference, flank):
     else:
         count_matrix = np.bincount(all_hashes, minlength=n_hashes)
     return count_matrix
-
-    for sample in range(genotypes.shape[-1]):
-        if sample != 0:
-            continue
-        counts = np.bincount(all_hashes, weights=genotypes[:, sample]>0, minlength=n_hashes)
-
-        for i in np.argsort(counts):
-            c = counts[i]
-            if not c:
-                continue
             
-
+"""
 def test_get_kmers():
     seq = np.array([ord(c) for c in "AAAGCAAAATGCAAATTCAAAGAA"],dtype=np.uint8)
     intervals = SortedIntervals(np.array([[0, 100]], dtype=int))
     snps = SNP(np.ones((4, 1)), 4+6*np.arange(4), np.array([ord(c) for c in "CGTA"], dtype=np.uint8),
                np.array([ord(c) for c in "TAGC"], dtype=np.uint8))
     print(get_kmers((snps, np.ones((4, 1))), intervals, seq, 1))
-
-
-def simple_main(vcf_filename, fasta_filename):
-    vcf = BufferedNumpyParser(open(vcf_filename, "rb"), VCFBuffer).get_chunks()
-    snps_stream = ChromosomeStreamProvider(b.get_snps() for b in vcf)  #     next(vcf).get_snps()
-    reference_dict = IndexedFasta(fasta_filename, remove_chr=True)
-    counts = 0
-    for chromosome, snps in snps_stream:
-        print(f"Running chromosome {chromosome}")
-        reference = reference_dict[chromosome]
-        counts += get_kmers((snps, None), None, reference, 1)
-
-    print(",".join(MutationSignatureEncoding.to_string(c, 2) for c in range(counts.size)))
-    print(",".join(str(c) for c in counts))
-
-
-def main(vcf_filename, bed_filename, fasta_filename):
-    # bed_file = FullBedFile.from_bed_buffer_stream(
-    # bedfile = BufferedNumpyParser(open(bed_filename, "rb"), BedBuffer).get_chunks()
-    # intervals = SortedIntervals(next(bedfile).get_data())
-    vcf = BufferedNumpyParser(open(vcf_filename, "rb"), VCFMatrixBuffer).get_chunks()
-    snps, genotypes = next(vcf).get_entries()
-    reference = IndexedFasta(fasta_filename, add_chr=True)["chr1"]
-                                 #counts = get_kmers((snps, genotypes), None, reference, 1)
-    counts = get_kmers((snps, None), None, reference, 1)
-    print(",".join(MutationSignatureEncoding.to_string(c, 2) for c in range(counts.shape[-1])))
-    for row in counts:
-        print(",".join(str(c) for c in row))
-
-
-if __name__ == "__main__":
-    import sys
-    # test_get_kmers()
-    simple_main(sys.argv[1], sys.argv[2])
+"""

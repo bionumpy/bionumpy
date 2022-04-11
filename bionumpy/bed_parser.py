@@ -57,6 +57,9 @@ class Variant:
     ref_seq: SeqArray
     alt_seq: SeqArray
 
+    def is_snp(self):
+        return np.logical_and(self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1)
+
 class SNP(Variant):
     pass
 

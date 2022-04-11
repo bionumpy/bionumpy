@@ -33,7 +33,7 @@ class IndexedFasta(ChromosomeDictProvider):
         ret = data[:, :lenc].ravel()[:rlen]
         assert np.all(ret[:rlen]>0), ret
         assert ret.size == idx["rlen"], (ret.size, idx["rlen"], ret.size -idx["rlen"], data.shape)
-        return ret
+        return ((ret-ord("A"))%32)+ord("A")
     
 to_str = lambda x: "".join(chr(c) for c in x)
 
