@@ -1,8 +1,9 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape
 from .encodings import BaseEncoding, ACTGTwoBitEncoding
+from .datatypes import SequenceEntry, SequenceEntryWithQuality
 from .sequences import Sequences
-from .npdataclass import npdataclass, SeqArray
+
 NEWLINE = 10
 
 class FileBuffer:
@@ -149,14 +150,3 @@ class FastQBuffer(OneLineBuffer):
 
         return buf
 
-
-@npdataclass
-class SequenceEntry:
-    name: SeqArray
-    sequence: SeqArray
-
-@npdataclass
-class SequenceEntryWithQuality:
-    name: SeqArray
-    sequence: SeqArray
-    quality: SeqArray

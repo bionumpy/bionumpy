@@ -1,6 +1,6 @@
 import pytest
-from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer, SequenceEntry, SequenceEntryWithQuality
-from bionumpy.bed_parser import Interval, SNP
+from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer
 
 import numpy as np

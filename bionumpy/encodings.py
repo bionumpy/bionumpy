@@ -148,3 +148,29 @@ def twobit_swap(number):
         byte_lookup[np.sum(power_array*two_bit_string)] = np.sum(rev_power_array*two_bit_string)
     new_bytes = byte_lookup[number.view(np.uint8)]
     return new_bytes.view(dtype).byteswap()
+
+class StrandEncoding:
+    MIN_CODE = ord("+")
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        return (bytes_array & np.uint8(2)) >> np.uint8(1)
+
+    @classmethod
+    def to_bytes(cls, strands):
+        return 2*strands + cls.MIN_CODE
+
+class DigitEncoding:
+    MIN_CODE = ord("0")
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        return bytes_array-cls.MIN_CODE
+
+    @classmethod
+    def to_bytes(cls, digits):
+        return digits+cls.MIN_CODE
+
+class GenotypeEncoding:
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        assert bytes_array.shape[-1]==3
+        return (bytes_array[..., 0]==ord("1"))+(bytes_array[..., 2]==ord("1")).astype("int")

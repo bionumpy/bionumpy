@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 def repr_bytes(n):
     if n< 10**4:
-        return str(n)
+        return str(n)+ "b"
     elif n<10**7:
         return str(n//1000) + "kb"
     elif n<10**11:

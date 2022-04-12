@@ -1,6 +1,7 @@
 from .npdataclass import NpDataClass, VarLenArray, SeqArray
 from .file_buffers import FileBuffer, NEWLINE
-from .bed_parser import *
+from .datatypes import Interval, Variant, SNP
+from .encodings import DigitEncoding
 from dataclasses import dataclass
 import numpy as np
 
@@ -66,7 +67,7 @@ class DelimitedBuffer(FileBuffer):
         self._validated = True
 
 class BedBuffer(DelimitedBuffer):
-    data_class=SortedIntervals
+
     def get_intervals(self):
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))

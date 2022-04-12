@@ -1,8 +1,8 @@
 from pathlib import PurePath
 import gzip
 from .file_buffers import *
-from .parser import *
 from .delimited_buffers import *
+from .parser import *
 from .chromosome_provider import *
 from .indexed_fasta import IndexedFasta
 
