@@ -74,9 +74,25 @@ class OneLineBuffer(FileBuffer):
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         self.lines = RaggedArray(self._data, RaggedShape(lengths))
-        sequences = self.lines[1::self.n_lines_per_entry][:, :-1]
-        headers = self.lines[::self.n_lines_per_entry][:, 1:-1]
+        sequences = self.lines[1::self.n_lines_per_entry,:-1]
+        headers = self.lines[::self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
+
+    @classmethod
+    def from_data(cls, entries):
+        name_lengths = entries.name.shape.lengths
+        sequence_lengths = entries.sequence.shape.lengths
+        line_lengths = np.hstack((name_lengths[:, None]+2, sequence_lengths[:, None]+1)).ravel()
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        
+        lines[0::2, 1:-1] = entries.name
+        lines[1::2, :-1] = entries.sequence
+
+        lines[0::2, 0] = ord(">")
+
+        lines[:, -1] = ord("\n")
+        return buf
 
     def _validate(self):
         n_lines = self._new_lines.size
@@ -97,7 +113,7 @@ class FastQBuffer(OneLineBuffer):
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = self.lines[3::self.n_lines_per_entry][:, :-1]-ord("!")
+        quality = self.lines[3::self.n_lines_per_entry, :-1]-ord("!")
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
 
 @npdataclass
@@ -109,4 +125,4 @@ class SequenceEntry:
 class SequenceEntryWithQuality:
     name: SeqArray
     sequence: SeqArray
-    quality: np.ndarray
+    quality: SeqArray

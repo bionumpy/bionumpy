@@ -14,7 +14,7 @@ if __name__ == "__main__":
     print(func(vcf_file, reference))
 
     #for chromosome, variants in vcf_file:
-    #     print(func(variants, reference[chromosome]))
+    #     print(func(variants, reference[chromosome])) 
         # 
         # ref_seq = reference[chromosome]
         # s = ref_seq[variants.position]
