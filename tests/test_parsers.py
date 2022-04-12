@@ -17,11 +17,13 @@ def test_buffer_read(buffer_name):
     data = buf_type.from_raw_buffer(buf).get_data()
     assert list(data) == true_data
 
-@pytest.mark.parametrize("buffer_name", ["fasta"])# "bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])# "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     data = data[0].stack_with_ragged(data)
     buf = buf_type.from_data(data)
+    print(buf)
+    print(true_buf)
     assert np.all(true_buf == buf)
 
 def test_twoline_fasta_buffer(twoline_fasta_buffer):

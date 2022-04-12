@@ -85,11 +85,11 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack((name_lengths[:, None]+2, sequence_lengths[:, None]+1)).ravel()
         buf = np.empty(line_lengths.sum(), dtype=np.uint8)
         lines = RaggedArray(buf, line_lengths)
-        
-        lines[0::2, 1:-1] = entries.name
-        lines[1::2, :-1] = entries.sequence
+        step = cls.n_lines_per_entry
+        lines[0::step, 1:-1] = entries.name
+        lines[1::step, :-1] = entries.sequence
 
-        lines[0::2, 0] = ord(">")
+        lines[0::step, 0] = ord(">")
 
         lines[:, -1] = ord("\n")
         return buf
@@ -106,6 +106,13 @@ class TwoLineFastaBuffer(OneLineBuffer):
     n_lines_per_entry = 2
     _encoding = BaseEncoding
 
+class QualityEncoding:
+    def from_bytes(byte_array):
+        return byte_array-ord("!")
+
+    def to_bytes(quality):
+        return quality + ord("!")
+
 class FastQBuffer(OneLineBuffer):
     HEADER= 64
     n_lines_per_entry = 4
@@ -113,8 +120,35 @@ class FastQBuffer(OneLineBuffer):
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = self.lines[3::self.n_lines_per_entry, :-1]-ord("!")
+        quality = QualityEncoding.from_bytes(self.lines[3::self.n_lines_per_entry, :-1])
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
+
+    @classmethod
+    def _get_line_lens(cls, entries):
+        name_lengths = entries.name.shape.lengths[:, None]
+        sequence_lengths = entries.sequence.shape.lengths[:, None]
+        return np.hstack((name_lengths+1,
+                          sequence_lengths,
+                          np.ones_like(sequence_lengths),
+                          sequence_lengths)).ravel()+1
+
+    @classmethod
+    def from_data(cls, entries):
+        name_lengths = entries.name.shape.lengths
+        sequence_lengths = entries.sequence.shape.lengths
+        line_lengths = cls._get_line_lens(entries)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        step = cls.n_lines_per_entry
+        lines[0::step, 1:-1] = entries.name
+        lines[1::step, :-1] = entries.sequence
+        lines[2::step, 0] = ord("+")
+        lines[3::step, :-1] = QualityEncoding.to_bytes(entries.quality)
+        lines[0::step, 0] = cls.HEADER
+        lines[:, -1] = ord("\n")
+
+        return buf
+
 
 @npdataclass
 class SequenceEntry:
