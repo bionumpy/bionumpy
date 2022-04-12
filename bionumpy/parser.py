@@ -1,55 +1,37 @@
-import gzip
 import numpy as np
-from pathlib import PurePath
-from npstructures import RaggedArray, RaggedView
-from .sequences import Sequences
-from .encodings import BaseEncoding, ACTGTwoBitEncoding
-from .file_buffers import *
-from .delimited_buffers import *
+import logging
+logger = logging.getLogger(__name__)
 
+def repr_bytes(n):
+    if n< 10**4:
+        return str(n)
+    elif n<10**7:
+        return str(n//1000) + "kb"
+    elif n<10**11:
+        return str(n//1000000) + "Mb"
+    return str(n//1000000000) + "Gb"
 
-class BufferedNumpyParser:
-    buffer_types = {".vcf": VCFBuffer,
-                    ".bed": BedBuffer,
-                    ".fasta": TwoLineFastaBuffer,
-                    ".fa": TwoLineFastaBuffer,
-                    ".fastq": FastQBuffer,
-                    ".fq": FastQBuffer}
-
-
-    def __init__(self, file_obj, buffer_type, chunk_size=1000000):
+class NpBufferStream:
+    def __init__(self, file_obj, buffer_type, chunk_size=5000000):
         self._file_obj = file_obj
         self._chunk_size = chunk_size
         self._is_finished = False
         self._buffer_type = buffer_type
+        self._f_name = self._file_obj.name if hasattr(self._file_obj, "name") else str(self._file_obj)
 
-    @classmethod
-    def from_filename(cls, filename, *args, **kwargs):
-        path = PurePath(filename)
-        suffixes = path.suffixes
-
-        open_func = open
-        if suffixes[-1] == ".gz":
-            open_func = gzip.open
-            suffixes = suffixes[:-1]
-        buffer_type = cls.buffer_types[suffixes[-1]]
-        return cls(open_func(filename, "rb"),
-                   buffer_type,
-                   *args, **kwargs)
-
-    def get_chunk(self):
-        a, bytes_read = self.read_raw_chunk()
+    def __get_buffer(self):
+        a, bytes_read = self.__read_raw_chunk()
         self._is_finished = bytes_read < self._chunk_size
         if bytes_read == 0:
             return None
         
         # Ensure that the last entry ends with newline. Makes logic easier later
-        if self._is_finished  and a[bytes_read-1] != NEWLINE:
-            a[bytes_read] = NEWLINE
+        if self._is_finished  and a[bytes_read-1] != ord("\n"):
+            a[bytes_read] = ord("\n")
             bytes_read += 1
         return a[:bytes_read]
 
-    def read_raw_chunk(self):
+    def __read_raw_chunk(self):
         array = np.empty(self._chunk_size, dtype="uint8")
         bytes_read = self._file_obj.readinto(array)
         return array, bytes_read
@@ -63,16 +45,28 @@ class BufferedNumpyParser:
                 break
 
     def __iter__(self):
-        return self.get_chunks()
-
-    def get_chunks(self):
         self.remove_initial_comments()
-        chunk = self.get_chunk()
-        # buff = self._buffer_type.from_raw_buffer(chunk)
+        chunk = self.__get_buffer()
+        total_bytes = 0
+
         while not self._is_finished:
+            total_bytes += chunk.size
+            logger.debug(f"Read chunk of size {repr_bytes(chunk.size)} from {self._f_name}. (Total {repr_bytes(total_bytes)})")
             buff = self._buffer_type.from_raw_buffer(chunk)
             self._file_obj.seek(buff.size-self._chunk_size, 1)
             yield buff
-            chunk = self.get_chunk()
+            chunk = self.__get_buffer()
         if chunk is not None and chunk.size:
             yield self._buffer_type.from_raw_buffer(chunk)
+
+class NpBufferedWriter:
+    def __init__(self, file_obj, buffer_type):
+        self._file_obj = file_obj
+        self._buffer_type = buffer_type
+        self._f_name = self._file_obj.name if hasattr(self._file_obj, "name") else str(self._file_obj)
+
+    def write(self, data):
+        # TODO: this is ugly
+        bytes_array = self._buffer_type.from_data(data)
+        self._file_obj.write(bytes(bytes_array))# .tofile(self._file_obj)
+        logger.debug(f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}")

@@ -1,5 +1,5 @@
 from .npdataclass import NpDataClass, VarLenArray, SeqArray
-from .parser import FileBuffer, NEWLINE
+from .file_buffers import FileBuffer, NEWLINE
 from .bed_parser import *
 from dataclasses import dataclass
 import numpy as np
