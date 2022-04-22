@@ -1,4 +1,5 @@
 import dataclasses
+from npstructures import RaggedArray
 from itertools import accumulate
 import numpy as np
 
@@ -151,6 +152,18 @@ def npdataclass(base_class):
         def __iter__(self):
             return (self.__class__(*comb) for comb in zip(*self.shallow_tuple()))
 
+        @classmethod
+        def stack_with_ragged(cls, objects):
+            tuples = [o.shallow_tuple() for o in objects]
+            new_tuple = tuple
+            new_entries = (list(t) for t in zip(*tuples))
+            new_entries = (RaggedArray(e) if hasattr(e[0], "__len__") and not all(len(i) == len(e[0]) for i in e)
+                           else np.array(e) for e in new_entries)
+            return cls(*new_entries)
+            
+
     #class full_class(new_class, NpDataClass):
     #     pass
+    NpDataClass.__name__ = base_class.__name__
+    NpDataClass.__qualname__ = base_class.__qualname__
     return NpDataClass

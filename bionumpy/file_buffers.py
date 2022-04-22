@@ -1,8 +1,9 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape
 from .encodings import BaseEncoding, ACTGTwoBitEncoding
+from .datatypes import SequenceEntry, SequenceEntryWithQuality
 from .sequences import Sequences
-from .npdataclass import npdataclass, SeqArray
+
 NEWLINE = 10
 
 class FileBuffer:
@@ -74,9 +75,25 @@ class OneLineBuffer(FileBuffer):
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         self.lines = RaggedArray(self._data, RaggedShape(lengths))
-        sequences = self.lines[1::self.n_lines_per_entry][:, :-1]
-        headers = self.lines[::self.n_lines_per_entry][:, 1:-1]
+        sequences = self.lines[1::self.n_lines_per_entry,:-1]
+        headers = self.lines[::self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
+
+    @classmethod
+    def from_data(cls, entries):
+        name_lengths = entries.name.shape.lengths
+        sequence_lengths = entries.sequence.shape.lengths
+        line_lengths = np.hstack((name_lengths[:, None]+2, sequence_lengths[:, None]+1)).ravel()
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        step = cls.n_lines_per_entry
+        lines[0::step, 1:-1] = entries.name
+        lines[1::step, :-1] = entries.sequence
+
+        lines[0::step, 0] = ord(">")
+
+        lines[:, -1] = ord("\n")
+        return buf
 
     def _validate(self):
         n_lines = self._new_lines.size
@@ -90,6 +107,13 @@ class TwoLineFastaBuffer(OneLineBuffer):
     n_lines_per_entry = 2
     _encoding = BaseEncoding
 
+class QualityEncoding:
+    def from_bytes(byte_array):
+        return byte_array-ord("!")
+
+    def to_bytes(quality):
+        return quality + ord("!")
+
 class FastQBuffer(OneLineBuffer):
     HEADER= 64
     n_lines_per_entry = 4
@@ -97,16 +121,32 @@ class FastQBuffer(OneLineBuffer):
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = self.lines[3::self.n_lines_per_entry][:, :-1]-ord("!")
+        quality = QualityEncoding.from_bytes(self.lines[3::self.n_lines_per_entry, :-1])
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
 
-@npdataclass
-class SequenceEntry:
-    name: SeqArray
-    sequence: SeqArray
+    @classmethod
+    def _get_line_lens(cls, entries):
+        name_lengths = entries.name.shape.lengths[:, None]
+        sequence_lengths = entries.sequence.shape.lengths[:, None]
+        return np.hstack((name_lengths+1,
+                          sequence_lengths,
+                          np.ones_like(sequence_lengths),
+                          sequence_lengths)).ravel()+1
 
-@npdataclass
-class SequenceEntryWithQuality:
-    name: SeqArray
-    sequence: SeqArray
-    quality: np.ndarray
+    @classmethod
+    def from_data(cls, entries):
+        name_lengths = entries.name.shape.lengths
+        sequence_lengths = entries.sequence.shape.lengths
+        line_lengths = cls._get_line_lens(entries)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        step = cls.n_lines_per_entry
+        lines[0::step, 1:-1] = entries.name
+        lines[1::step, :-1] = entries.sequence
+        lines[2::step, 0] = ord("+")
+        lines[3::step, :-1] = QualityEncoding.to_bytes(entries.quality)
+        lines[0::step, 0] = cls.HEADER
+        lines[:, -1] = ord("\n")
+
+        return buf
+
