@@ -6,7 +6,8 @@ logging.basicConfig(level="INFO")
 
 
 def print_file(counts, flank):
-    print(",".join(MutationSignatureEncoding.to_string(i, 2*flank) for i in counts.size))
+    print(",".join(MutationSignatureEncoding.to_string(i, 2*flank)
+                   for i in range(counts.size)))
     for row in np.atleast_2d(counts):
         print(",".join(str(c) for c in counts))
 
@@ -15,7 +16,7 @@ def simple_main(vcf_filename, fasta_filename, flank):
     variants = bnp_open(vcf_filename)
     reference = bnp_open(fasta_filename, remove_chr=True)
     counts = get_kmers(variants, None, None, reference, flank)
-    print_file(flank, counts)
+    print_file(counts, flank)
     # print('"","test"')
     # for i, count in enumerate(counts):
     #     text = MutationSignatureEncoding.to_string(i, 2*flank)

@@ -86,12 +86,3 @@ def get_kmers(variants, genotypes, intervals, reference, flank):
     else:
         count_matrix = np.bincount(all_hashes, minlength=n_hashes)
     return count_matrix
-            
-"""
-def test_get_kmers():
-    seq = np.array([ord(c) for c in "AAAGCAAAATGCAAATTCAAAGAA"],dtype=np.uint8)
-    intervals = SortedIntervals(np.array([[0, 100]], dtype=int))
-    snps = SNP(np.ones((4, 1)), 4+6*np.arange(4), np.array([ord(c) for c in "CGTA"], dtype=np.uint8),
-               np.array([ord(c) for c in "TAGC"], dtype=np.uint8))
-    print(get_kmers((snps, np.ones((4, 1))), intervals, seq, 1))
-"""
