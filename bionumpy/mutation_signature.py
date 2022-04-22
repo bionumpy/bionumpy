@@ -1,6 +1,6 @@
 import numpy as np
 from .encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
-from .chromosome_map import chromosome_map, ChromosomeMap
+from .chromosome_map import ChromosomeMap
 import logging
 logger = logging.getLogger(__name__)
 
