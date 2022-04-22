@@ -1,6 +1,6 @@
 import numpy as np
 from .encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
-from .chromosome_map import chromosome_map
+from .chromosome_map import chromosome_map, ChromosomeMap
 import logging
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class MutationSignatureEncoding:
         return snp+ ":" +kmer
         kmer_bytes = ACTGEncoding.to_bytes(encoded)
 
-@chromosome_map(reduction=sum)
+@ChromosomeMap(reduction=sum)
 def get_kmers(variants, genotypes, intervals, reference, flank):
     
     assert np.all(reference[variants.position] == variants.ref_seq[:, 0:1].ravel())

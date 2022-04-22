@@ -2,8 +2,13 @@ from .chromosome_provider import ChromosomeDictProvider, ChromosomeStreamProvide
 import logging
 logger = logging.getLogger(__name__)
 
-def chromosome_map(reduction=None):
-    def decorator(func):
+
+
+class ChromosomeMap:
+    def __init__(self, reduction=None):
+        self._reduction = reduction
+
+    def __call__(self, func):
         def mapped(*args, **kwargs):
             stream_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeStreamProvider)]
             dict_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeDictProvider)]
@@ -32,10 +37,9 @@ def chromosome_map(reduction=None):
                     
                 yield func(*new_args, **kwargs)
                 
-        if reduction is None:
+        if self._reduction is None:
             return mapped
-        return lambda *args, **kwargs: reduction(mapped(*args, **kwargs))
-    return decorator
+        return lambda *args, **kwargs: self._reduction(mapped(*args, **kwargs))
 
 
 def sorted_streams_juggler(streams):
