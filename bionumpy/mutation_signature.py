@@ -68,14 +68,10 @@ def get_kmers(variants, reference, flank):
     kmer_indexes = get_kmer_indexes(snps.position[:, None], flank=flank)
     kmers = reference[kmer_indexes]
     forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq==ord("T"))
-    forward_idxs = np.flatnonzero(forward_mask)
-    reverse_idxs = np.flatnonzero(~forward_mask)
-    forward_hashes = MutationSignatureEncoding.from_kmers_and_snp(kmers[forward_idxs], snps[forward_idxs])
-    reverse_hashes = MutationSignatureEncoding.from_kmers_and_snp(
-        BaseEncoding.complement(kmers[reverse_idxs, ::-1]), snps[reverse_idxs])
-    all_hashes = np.zeros_like(snps.position)
-    all_hashes[forward_mask] = forward_hashes
-    all_hashes[~forward_mask] = reverse_hashes
+    kmers = np.where(forward_mask[:, None],
+                     kmers,
+                     BaseEncoding.complement(kmers[:, ::-1]))
+    all_hashes = MutationSignatureEncoding.from_kmers_and_snp(kmers, snps)
 
     n_hashes = 4**(flank*2)*6
 
