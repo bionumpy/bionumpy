@@ -51,22 +51,22 @@ class MutationSignatureEncoding:
         return snp+ ":" +kmer
         kmer_bytes = ACTGEncoding.to_bytes(encoded)
 
-@ChromosomeMap(reduction=sum)
-def get_kmers(variants, genotypes, intervals, reference, flank):
+def filter_snps(snps, intervals):
+    valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
+    return snps[valid_indexes]
     
-    assert np.all(reference[variants.position] == variants.ref_seq[:, 0:1].ravel())
+def get_snps(variants):
     snps = variants[variants.is_snp()]
     snps.ref_seq = snps.ref_seq.ravel()# to_numpy_array().ravel()
     snps.alt_seq = snps.alt_seq.ravel()# to_numpy_array().ravel()
-    assert np.all(reference[snps.position] == snps.ref_seq), (reference[snps.position], snps.ref_seq)
-    if intervals is not None:
-        valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
-        snps = snps[valid_indexes]
-        if genotypes is not None:
-            genotypes = genotypes[valid_indexes]
+    return snps
+
+@ChromosomeMap(reduction=sum)
+def get_kmers(variants, reference, flank):
+    snps = get_snps(variants)
+    assert np.all(reference[snps.position] == snps.ref_seq)
     kmer_indexes = get_kmer_indexes(snps.position[:, None], flank=flank)
     kmers = reference[kmer_indexes]
-
     forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq==ord("T"))
     forward_idxs = np.flatnonzero(forward_mask)
     reverse_idxs = np.flatnonzero(~forward_mask)
@@ -79,7 +79,7 @@ def get_kmers(variants, genotypes, intervals, reference, flank):
 
     n_hashes = 4**(flank*2)*6
 
-    if genotypes is not None:
+    if hasattr(snps, "genotypes"):
         count_matrix = np.array([
             np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)
             for sample in range(genotypes.shape[-1])], dtype=int)

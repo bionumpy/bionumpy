@@ -1,6 +1,6 @@
 import numpy as np
 from bionumpy import bnp_open
-from bionumpy.mutation_signature import get_kmers, MutationSignatureEncoding
+from bionumpy.mutation_signature import get_kmers, MutationSignatureEncoding, get_snps
 import logging
 logging.basicConfig(level="INFO")
 
@@ -15,7 +15,7 @@ def print_file(counts, flank):
 def simple_main(vcf_filename, fasta_filename, flank):
     variants = bnp_open(vcf_filename)
     reference = bnp_open(fasta_filename, remove_chr=True)
-    counts = get_kmers(variants, None, None, reference, flank)
+    counts = get_kmers(variants, reference, flank)
     print_file(counts, flank)
     # print('"","test"')
     # for i, count in enumerate(counts):
