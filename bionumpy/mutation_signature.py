@@ -72,13 +72,9 @@ def get_kmers(variants, reference, flank):
                      kmers,
                      BaseEncoding.complement(kmers[:, ::-1]))
     all_hashes = MutationSignatureEncoding.from_kmers_and_snp(kmers, snps)
-
     n_hashes = 4**(flank*2)*6
-
-    if hasattr(snps, "genotypes"):
-        count_matrix = np.array([
-            np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)
-            for sample in range(genotypes.shape[-1])], dtype=int)
-    else:
-        count_matrix = np.bincount(all_hashes, minlength=n_hashes)
-    return count_matrix
+    if not hasattr(snps, "genotypes"):
+        return np.bincount(all_hashes, minlength=n_hashes)
+    return np.array([
+        np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)
+        for sample in range(genotypes.shape[-1])], dtype=int)
