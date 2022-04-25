@@ -14,13 +14,10 @@ def print_file(counts, flank):
 
 def simple_main(vcf_filename, fasta_filename, flank):
     variants = bnp_open(vcf_filename)
+    snps = get_snps(variants)
     reference = bnp_open(fasta_filename, remove_chr=True)
-    counts = get_kmers(variants, reference, flank)
+    counts = get_kmers(snps, reference, flank)
     print_file(counts, flank)
-    # print('"","test"')
-    # for i, count in enumerate(counts):
-    #     text = MutationSignatureEncoding.to_string(i, 2*flank)
-    #     print(f'"{text}",{count}')
 
 
 def main(vcf_filename, bed_filename, fasta_filename):

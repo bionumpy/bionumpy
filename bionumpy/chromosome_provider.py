@@ -18,6 +18,14 @@ class ChromosomeProvider:
             np.any(chromosomes[1:].__neq__(chromosomes[:-1]), axis=-1))+1
 
 class ChromosomeStreamProvider(ChromosomeProvider):
+    def __init__(self, stream):
+        self._stream = stream
+
+    def __iter__(self):
+        return iter(self._stream)
+
+    
+class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
     def __init__(self, file_buffers):
         self._buffers = file_buffers
 
@@ -81,14 +89,14 @@ class ChromosomeDictProvider:
 
 class FullChromosomeDictProvider(ChromosomeDictProvider):
     def __init__(self, buffers):
-        self._d = dict(ChromosomeStreamProvider(buffers))
+        self._d = dict(ChromosomeFileStreamProvider(buffers))
 
     def __getitem__(self, key):
         return self._d[key]
 
 class LazyChromosomeDictProvider(ChromosomeDictProvider):
     def __init__(self, buffers):
-        self._stream = ChromosomeStreamProvider(buffers)
+        self._stream = ChromosomeFileStreamProvider(buffers)
         self._back_log = {}
 
     def _find_item(self, chromosome):

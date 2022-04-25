@@ -13,7 +13,7 @@ buffer_types = {".vcf": VCFBuffer,
                 ".fastq": FastQBuffer,
                 ".fq": FastQBuffer}
 
-wrappers = {"chromosome_stream": ChromosomeStreamProvider,
+wrappers = {"chromosome_stream": ChromosomeFileStreamProvider,
             "dict": ChromosomeDictProvider,
             "stream": lambda x: x}
 

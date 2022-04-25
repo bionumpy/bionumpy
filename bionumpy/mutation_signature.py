@@ -58,10 +58,12 @@ class MutationSignatureEncoding:
         kmer = "".join(chr(b) for b in ACTGEncoding.to_bytes(chars))
         return kmer[:self.k//2]+"["+snp+"]"+kmer[self.k//2:]
 
+# @ChromosomeMap
 def filter_snps(snps, intervals):
     valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
     return snps[valid_indexes]
-    
+
+@ChromosomeMap()
 def get_snps(variants):
     snps = variants[variants.is_snp()]
     snps.ref_seq = snps.ref_seq.ravel()# to_numpy_array().ravel()
@@ -69,8 +71,7 @@ def get_snps(variants):
     return snps
 
 @ChromosomeMap(reduction=sum)
-def get_kmers(variants, reference, flank):
-    snps = get_snps(variants)
+def get_kmers(snps, reference, flank):
     assert np.all(reference[snps.position] == snps.ref_seq)
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
@@ -83,7 +84,6 @@ def get_kmers(variants, reference, flank):
     n_hashes = 4**(flank*2)*6
     if not hasattr(snps, "genotypes"):
         counts = np.bincount(all_hashes, minlength=n_hashes)
-        assert counts.size == n_hashes, (counts.size, n_hashes)
         return counts
     return np.array([
         np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)

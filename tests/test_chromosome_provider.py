@@ -4,7 +4,7 @@ import numpy as np
 
 import pytest
 
-from bionumpy.chromosome_provider import ChromosomeStreamProvider
+from bionumpy.chromosome_provider import ChromosomeFileStreamProvider
 from bionumpy.npdataclass import NpDataClass, VarLenArray
 
 
@@ -24,7 +24,7 @@ class DummyClass(NpDataClass):
 # 
 #     def __eq__(self, other):
 #         return np.all(self.chromosome == other.chromosome) and np.all(self.data == other.data)
-# 
+# '
 #     def __len__(self):
 #         return len(self.chromosome)
 
@@ -55,7 +55,7 @@ def buffers():
 
 
 def test_chromosome_stream(buffers):
-    for val, true in zip(ChromosomeStreamProvider(buffers),
+    for val, true in zip(ChromosomeFileStreamProvider(buffers),
                          [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),
                           ("chr2", DummyClass(["chr2"], [3])),
                           ("chr3", DummyClass(["chr3"], [4])),

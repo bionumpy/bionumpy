@@ -8,38 +8,48 @@ class ChromosomeMap:
     def __init__(self, reduction=None):
         self._reduction = reduction
 
+    def get_args(self, args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys):
+        if len(stream_indices) == 1:
+            stream = args[stream_indices[0]]
+        elif len(stream_keys) == 1:
+            stream = kwargs[stream_keys[0]]
+        new_args = list(args)
+        dicts = [args[i] for i in dict_indices]
+        dicts_kw = [kwargs[key] for key in dict_keys]
+        for chromosome, data in stream:
+            for i, d in zip(dict_indices, dicts):
+                new_args[i] = d[chromosome]
+            for key, d in zip(dict_keys, dicts_kw):
+                kwargs[key] = d[chromosome]
+            for i in stream_indices:
+                new_args[i] = data
+            for key in stream_keys:
+                kwargs[key] = data
+                
+            yield chromosome, new_args, kwargs
+        
     def __call__(self, func):
         def mapped(*args, **kwargs):
             stream_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeStreamProvider)]
             dict_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeDictProvider)]
             stream_keys = [key for key, val in kwargs.items() if isinstance(val, ChromosomeStreamProvider)]
             dict_keys = [key for key, val in kwargs.items() if isinstance(val, ChromosomeDictProvider)]
+            is_stream = len(stream_indices)+len(stream_keys) > 0
+            is_dict = not is_stream and (len(dict_keys)+len(dict_indices) >0)
+
+            if not (is_stream or is_dict):
+                return func(*args, **kwargs)
             assert len(stream_indices)+len(stream_keys) <= 1
-    
-            if len(stream_indices) == 1:
-                stream = args[stream_indices[0]]
-            elif len(stream_keys) == 1:
-                stream = kwargs[stream_keys[0]]
-            new_args = list(args)
-            dicts = [args[i] for i in dict_indices]
-            dicts_kw = [kwargs[key] for key in dict_keys]
-            for chromosome, data in stream:
-                logger.info(f"Running '{func.__name__}' on chromosome {chromosome}")
-                for i, d in zip(dict_indices, dicts):
-                    new_args[i] = d[chromosome]
-    
-                for key, d in zip(dict_keys, dicts_kw):
-                    kwargs[key] = d[chromosome]
-                for i in stream_indices:
-                    new_args[i] = data
-                for key in stream_keys:
-                    kwargs[key] = data
-                    
-                yield func(*new_args, **kwargs)
+            new_args = self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys)
+            if is_stream:
+                return ChromosomeStreamProvider(
+                    (chromosome, func(*args, **kwargs)) for chromosome, args, kwargs in
+                    self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys))
+            assert False
                 
         if self._reduction is None:
             return mapped
-        return lambda *args, **kwargs: self._reduction(mapped(*args, **kwargs))
+        return lambda *args, **kwargs: self._reduction((m[1] for m in mapped(*args, **kwargs)))
 
 
 def sorted_streams_juggler(streams):
