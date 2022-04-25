@@ -1,5 +1,6 @@
 import numpy as np
 from bionumpy import bnp_open
+from bionumpy.delimited_buffers import VCFMatrixBuffer
 from bionumpy.mutation_signature import get_kmers, MutationSignatureEncoding, get_snps
 import logging
 logging.basicConfig(level="INFO")
@@ -7,34 +8,24 @@ logging.basicConfig(level="INFO")
 
 def print_file(counts, flank):
     print(",".join(MutationSignatureEncoding(2*flank+1).to_string(i)
-                   for i in range(counts.size)))
+                   for i in range(counts.shape[-1])))
     for row in np.atleast_2d(counts):
-        print(",".join(str(c) for c in counts))
+        print(",".join(str(c) for c in row))
 
 
-def simple_main(vcf_filename, fasta_filename, flank):
-    variants = bnp_open(vcf_filename)
+def simple_main(vcf_filename, fasta_filename, flank, do_matrix=False):
+    if do_matrix:
+        variants = bnp_open(vcf_filename, buffer_type=VCFMatrixBuffer)
+    else:
+        variants = bnp_open(vcf_filename)
     snps = get_snps(variants)
     reference = bnp_open(fasta_filename, remove_chr=True)
     counts = get_kmers(snps, reference, flank)
     print_file(counts, flank)
 
 
-def main(vcf_filename, bed_filename, fasta_filename):
-    # bed_file = FullBedFile.from_bed_buffer_stream(
-    # bedfile = BufferedNumpyParser(open(bed_filename, "rb"), BedBuffer).get_chunks()
-    # intervals = SortedIntervals(next(bedfile).get_data())
-    vcf = BufferedNumpyParser(open(vcf_filename, "rb"), VCFMatrixBuffer).get_chunks()
-    snps, genotypes = next(vcf).get_entries()
-    reference = IndexedFasta(fasta_filename, add_chr=True)["chr1"]
-                                 #counts = get_kmers((snps, genotypes), None, reference, 1)
-    counts = get_kmers((snps, None), None, reference, 1)
-    print(",".join(MutationSignatureEncoding.to_string(c, 4) for c in range(counts.shape[-1])))
-    for row in counts:
-        print(",".join(str(c) for c in row))
-
-
 if __name__ == "__main__":
     import sys
-    # test_get_kmers()
-    simple_main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+    vcf_filename, fasta_filename, flank = sys.argv[1:4]
+    do_matrix = len(sys.argv) > 4 and int(sys.argv[4]) == 1
+    simple_main(vcf_filename, fasta_filename, int(flank), do_matrix)

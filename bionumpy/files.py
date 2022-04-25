@@ -20,9 +20,10 @@ wrappers = {"chromosome_stream": ChromosomeFileStreamProvider,
 default_modes = {".vcf": "chromosome_stream",
                  ".bed": "dict"}
 
-def get_buffered_file(filename, suffix, mode, is_gzip=False):
+def get_buffered_file(filename, suffix, mode, is_gzip=False, buffer_type=None):
     open_func = gzip.open if is_gzip else open
-    buffer_type = buffer_types[suffix]
+    if buffer_type is None:
+        buffer_type = buffer_types[suffix]
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
@@ -39,7 +40,7 @@ def bnp_open(filename, mode=None, **kwargs):
     if suffix == ".gz":
         suffix = path.suffixes[-2]
     if suffix in buffer_types:
-        return get_buffered_file(filename, suffix, mode, is_gzip=is_gzip)
+        return get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)

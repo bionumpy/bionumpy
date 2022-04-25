@@ -32,6 +32,11 @@ class Variant:
     def is_snp(self):
         return np.logical_and(self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1)
 
+@npdataclass
+class VariantWithGenotypes(Variant):
+    genotypes: np.ndarray
+
+
 class SNP(Variant):
     pass
 

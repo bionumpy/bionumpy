@@ -86,5 +86,5 @@ def get_kmers(snps, reference, flank):
         counts = np.bincount(all_hashes, minlength=n_hashes)
         return counts
     return np.array([
-        np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)
-        for sample in range(genotypes.shape[-1])], dtype=int)
+        np.bincount(all_hashes, weights=snps.genotypes[:, sample] > 0, minlength=n_hashes)
+        for sample in range(snps.genotypes.shape[-1])], dtype=int)

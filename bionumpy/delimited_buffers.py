@@ -1,7 +1,7 @@
 from .npdataclass import NpDataClass, VarLenArray, SeqArray
 from .file_buffers import FileBuffer, NEWLINE
-from .datatypes import Interval, Variant, SNP
-from .encodings import DigitEncoding
+from .datatypes import Interval, Variant, SNP, VariantWithGenotypes
+from .encodings import DigitEncoding, GenotypeEncoding
 from dataclasses import dataclass
 import numpy as np
 
@@ -91,20 +91,12 @@ class VCFBuffer(DelimitedBuffer):
     get_data = get_variants
 
 class VCFMatrixBuffer(VCFBuffer):
-    def get_entries(self):
+    def get_entries(self, fixed_length=False):
         self.validate_if_not()
-        chromosomes = self.get_text(0)
-        position = self.get_integers(1).ravel()-1
-        from_seq = self.get_text(3).ravel()
-        to_seq = self.get_text(4).ravel()
-        n_samples = self._n_cols-9
+        variants = self.get_variants(fixed_length)
         genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
-        return SNP(chromosomes, position, from_seq, to_seq), GenotypeEncoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
+        n_samples = self._n_cols-9
+        genotypes = GenotypeEncoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
+        return VariantWithGenotypes(variants.chromosome, variants.position, variants.ref_seq, variants.alt_seq, genotypes)
 
-    def get_data(self):
-        self.validate_if_not()
-        chromosomes = self.get_text(0)
-        position = self.get_integers(1)
-        from_seq = self.get_text(3)
-        to_seq = self.get_text(4)
-        return SNP(chromosomes, position, from_seq.ravel(), to_seq.ravel())
+    get_data = get_entries
