@@ -6,7 +6,7 @@ logging.basicConfig(level="INFO")
 
 
 def print_file(counts, flank):
-    print(",".join(MutationSignatureEncoding.to_string(i, 2*flank)
+    print(",".join(MutationSignatureEncoding(2*flank+1).to_string(i)
                    for i in range(counts.size)))
     for row in np.atleast_2d(counts):
         print(",".join(str(c) for c in counts))

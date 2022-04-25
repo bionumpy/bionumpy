@@ -9,6 +9,12 @@ def get_kmer_indexes(position, flank=2):
                                np.arange(1, flank+1)))
     return position + relative
 
+def get_kmer_indexes(position, flank=2):
+    return position[..., None] + np.arange(-flank, flank+1)
+    relative = np.concatenate((np.arange(-flank, 0),
+                               np.arange(1, flank+1)))
+    return position + relative
+
 
 class SNPEncoding:
     lookup = np.zeros((256, 256), dtype=np.uint8)
@@ -33,23 +39,24 @@ class SNPEncoding:
 
 
 class MutationSignatureEncoding:
-    @classmethod
-    def from_kmers_and_snp(cls, kmer, snp):
-        k = kmer.shape[-1]
-        h = 4**np.arange(k)
-        kmer_hashes = np.sum(ACTGEncoding.from_bytes(kmer)*h, axis=-1)
+    def __init__(self, k):
+        self.k = k
+        self.h = 4**np.arange(k)
+        self.h[k//2+1:] = self.h[k//2:-1]
+        self.h[k//2] = 0
+
+
+    def from_kmers_and_snp(self, kmer, snp):
+        assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
+        kmer_hashes = np.sum(ACTGEncoding.from_bytes(kmer)*self.h, axis=-1)
         snp_hashes = SNPEncoding.from_snp(snp)
-        return kmer_hashes + 4**k*snp_hashes
+        return kmer_hashes + 4**(self.k-1)*snp_hashes
 
-    @classmethod
-    def to_string(cls, encoded, k):
-        snp = SNPEncoding.to_string(encoded>>(2*k))
-        chars = (encoded>>(2*np.arange(k))) & 3
-
+    def to_string(self, encoded):
+        snp = SNPEncoding.to_string(encoded>>(2*(self.k-1)))
+        chars = (encoded>>(2*np.arange(self.k-1))) & 3
         kmer = "".join(chr(b) for b in ACTGEncoding.to_bytes(chars))
-        return kmer[:k//2]+"["+snp+"]"+kmer[k//2:]
-        return snp+ ":" +kmer
-        kmer_bytes = ACTGEncoding.to_bytes(encoded)
+        return kmer[:self.k//2]+"["+snp+"]"+kmer[self.k//2:]
 
 def filter_snps(snps, intervals):
     valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
@@ -65,16 +72,19 @@ def get_snps(variants):
 def get_kmers(variants, reference, flank):
     snps = get_snps(variants)
     assert np.all(reference[snps.position] == snps.ref_seq)
-    kmer_indexes = get_kmer_indexes(snps.position[:, None], flank=flank)
+    kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
     forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq==ord("T"))
     kmers = np.where(forward_mask[:, None],
                      kmers,
                      BaseEncoding.complement(kmers[:, ::-1]))
-    all_hashes = MutationSignatureEncoding.from_kmers_and_snp(kmers, snps)
+    signature_encoding = MutationSignatureEncoding(flank*2+1)
+    all_hashes = signature_encoding.from_kmers_and_snp(kmers, snps)
     n_hashes = 4**(flank*2)*6
     if not hasattr(snps, "genotypes"):
-        return np.bincount(all_hashes, minlength=n_hashes)
+        counts = np.bincount(all_hashes, minlength=n_hashes)
+        assert counts.size == n_hashes, (counts.size, n_hashes)
+        return counts
     return np.array([
         np.bincount(all_hashes, weights=genotypes[:, sample] > 0, minlength=n_hashes)
         for sample in range(genotypes.shape[-1])], dtype=int)
