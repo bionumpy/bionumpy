@@ -10,7 +10,8 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=7.0', ]
+requirements = ['numpy>=1.19',
+                'npstructures @ https://github.com/knutdrand/npstructures.git']
 
 test_requirements = ['pytest>=3', ]
 
