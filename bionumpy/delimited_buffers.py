@@ -67,7 +67,7 @@ class DelimitedBuffer(FileBuffer):
         self._validated = True
 
 class BedBuffer(DelimitedBuffer):
-
+    dataclass = Interval
     def get_intervals(self):
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))
@@ -77,6 +77,7 @@ class BedBuffer(DelimitedBuffer):
     get_data = get_intervals
 
 class VCFBuffer(DelimitedBuffer):
+    dataclass = Variant
     def get_variants(self, fixed_length=False):
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))
@@ -91,6 +92,7 @@ class VCFBuffer(DelimitedBuffer):
     get_data = get_variants
 
 class VCFMatrixBuffer(VCFBuffer):
+    dataclass = VariantWithGenotypes
     def get_entries(self, fixed_length=False):
         self.validate_if_not()
         variants = self.get_variants(fixed_length)

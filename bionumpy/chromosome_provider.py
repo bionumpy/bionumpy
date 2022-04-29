@@ -1,6 +1,9 @@
 import numpy as np
 from itertools import groupby
 
+import logging
+logger = logging.getLogger(__name__)
+
 class ChromosomeProvider:
     @staticmethod
     def get_chrom_name(char_array):
@@ -26,8 +29,9 @@ class ChromosomeStreamProvider(ChromosomeProvider):
 
     
 class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
-    def __init__(self, file_buffers):
+    def __init__(self, file_buffers, default_value=None):
         self._buffers = file_buffers
+        self._default_value = default_value
 
     def __iter__(self):
         chrom_func = lambda b: self.get_chrom_name(b.chromosome[0])
@@ -84,15 +88,33 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
 #             cur_data.append(data[chromosome_changes[-1]:])
 #         yield self.get_chrom_name(last_chromosome). np.concatenate(cur_data)
 
-class ChromosomeDictProvider:
-    pass
-
-class FullChromosomeDictProvider(ChromosomeDictProvider):
-    def __init__(self, buffers):
-        self._d = dict(ChromosomeFileStreamProvider(buffers))
+class ChromosomeDictProvider(ChromosomeProvider):
+    def items(self):
+        return self._d.items()
 
     def __getitem__(self, key):
-        return self._d[key]
+        possible_keys = [key]
+        if key.startswith("chr"):
+            possible_keys.append(key[3:])
+        else:
+            possible_keys.append("chr"+key)
+        for k in possible_keys:
+            if k in self._d:
+                return self._d[k]
+        logger.warning(f"Chromosomedict missing data for chrom: {possible_keys}, inserting {self._default_value}")
+        return self._default_value
+
+
+class PureChromosomeDictProvider(ChromosomeDictProvider):
+    def __init__(self, *args, **kwargs):
+        self._d = dict(*args, **kwargs)
+
+class FullChromosomeDictProvider(ChromosomeDictProvider):
+    def __init__(self, buffers, default_value=None):
+        self._d = dict(ChromosomeFileStreamProvider(buffers))
+        self._default_value = default_value
+
+
 
 class LazyChromosomeDictProvider(ChromosomeDictProvider):
     def __init__(self, buffers):

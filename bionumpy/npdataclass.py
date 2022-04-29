@@ -112,6 +112,14 @@ def npdataclass(base_class):
                 elif field.type == SeqArray:
                     setattr(self, field.name, SeqArray.asseqarray(getattr(self, field.name)))
 
+        #def __repr__(self):
+        #    fields = dataclasses.fields(self)
+        #    return f"{self.__class__.__name__}({field.name}: {getattr(self, field.name)}"
+
+        @classmethod
+        def empty(cls):
+            return cls(*(np.array([]) for field in dataclasses.fields(cls)))
+
         def __post_init__(self):
             for field in dataclasses.fields(self):
                 if field.type == np.ndarray:
@@ -130,9 +138,7 @@ def npdataclass(base_class):
     
         def __eq__(self, other):
             for s, o in zip(self.shallow_tuple(), other.shallow_tuple()):
-                print(s, o)
                 if not np.all(np.equal(s, o)):
-                    print(s, o)
                     return False
             return True
             #return all(np.all(np.equal(s, o)) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))

@@ -40,8 +40,6 @@ class VariantWithGenotypes(Variant):
 class SNP(Variant):
     pass
 
-
-"""
 class SortedIntervals:
     def __init__(self, data):
         self.data = np.asanyarray(data)
@@ -58,4 +56,3 @@ class SortedIntervals:
     @classmethod
     def concatenate(cls, elements):
         return cls(np.vstack([element.data for element in elements]))
-"""

@@ -5,8 +5,10 @@ from bionumpy.delimited_buffers import BedBuffer, VCFBuffer
 
 import numpy as np
 
+
 def chunk_from_text(text):
     return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
+
 
 buffer_texts = {
     "fastq": """\

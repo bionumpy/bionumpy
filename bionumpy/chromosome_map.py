@@ -1,4 +1,4 @@
-from .chromosome_provider import ChromosomeDictProvider, ChromosomeStreamProvider
+from .chromosome_provider import ChromosomeDictProvider, ChromosomeStreamProvider, PureChromosomeDictProvider
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,6 +13,13 @@ class ChromosomeMap:
             stream = args[stream_indices[0]]
         elif len(stream_keys) == 1:
             stream = kwargs[stream_keys[0]]
+        elif len(dict_indices) >0:
+            stream_indices.append(dict_indices.pop(0))
+            stream = args[stream_indices[-1]].items()
+        elif len(dict_keys)>0:
+            stream_keys.append(dict_keys.pop(0))
+            stream = kwargs[stream_keys[-1]].items()
+
         new_args = list(args)
         dicts = [args[i] for i in dict_indices]
         dicts_kw = [kwargs[key] for key in dict_keys]
@@ -29,6 +36,11 @@ class ChromosomeMap:
             yield chromosome, new_args, kwargs
         
     def __call__(self, func):
+        def log(sequence):
+            for chromosome, args, kwargs in sequence:
+                logger.info(f"Running {func.__name__} on chromosome {chromosome}")
+                yield chromosome, args, kwargs
+
         def mapped(*args, **kwargs):
             stream_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeStreamProvider)]
             dict_indices = [i for i, a in enumerate(args) if isinstance(a, ChromosomeDictProvider)]
@@ -44,7 +56,13 @@ class ChromosomeMap:
             if is_stream:
                 return ChromosomeStreamProvider(
                     (chromosome, func(*args, **kwargs)) for chromosome, args, kwargs in
-                    self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys))
+                    log(new_args))
+# self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys)))
+            elif is_dict:
+                return PureChromosomeDictProvider(
+                    (chromosome, func(*args, **kwargs)) for chromosome, args, kwargs in
+                    log(new_args))
+            # self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys))
             assert False
                 
         if self._reduction is None:

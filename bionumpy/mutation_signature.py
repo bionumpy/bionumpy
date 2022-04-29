@@ -1,19 +1,12 @@
 import numpy as np
 from .encodings import SimpleEncoding, ACTGEncoding, BaseEncoding
 from .chromosome_map import ChromosomeMap
+from .util import filter_on_intervals, get_snps
 import logging
 logger = logging.getLogger(__name__)
 
 def get_kmer_indexes(position, flank=2):
-    relative = np.concatenate((np.arange(-flank, 0),
-                               np.arange(1, flank+1)))
-    return position + relative
-
-def get_kmer_indexes(position, flank=2):
     return position[..., None] + np.arange(-flank, flank+1)
-    relative = np.concatenate((np.arange(-flank, 0),
-                               np.arange(1, flank+1)))
-    return position + relative
 
 
 class SNPEncoding:
@@ -45,7 +38,6 @@ class MutationSignatureEncoding:
         self.h[k//2+1:] = self.h[k//2:-1]
         self.h[k//2] = 0
 
-
     def from_kmers_and_snp(self, kmer, snp):
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
         kmer_hashes = np.sum(ACTGEncoding.from_bytes(kmer)*self.h, axis=-1)
@@ -58,17 +50,6 @@ class MutationSignatureEncoding:
         kmer = "".join(chr(b) for b in ACTGEncoding.to_bytes(chars))
         return kmer[:self.k//2]+"["+snp+"]"+kmer[self.k//2:]
 
-# @ChromosomeMap
-def filter_snps(snps, intervals):
-    valid_indexes = np.flatnonzero(intervals.in_intervals(snps.position))
-    return snps[valid_indexes]
-
-@ChromosomeMap()
-def get_snps(variants):
-    snps = variants[variants.is_snp()]
-    snps.ref_seq = snps.ref_seq.ravel()# to_numpy_array().ravel()
-    snps.alt_seq = snps.alt_seq.ravel()# to_numpy_array().ravel()
-    return snps
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
