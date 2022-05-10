@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from bionumpy.chromosome_provider import ChromosomeFileStreamProvider
-from bionumpy.npdataclass import NpDataClass, VarLenArray
+from npstructures.npdataclasses import NpDataClass, VarLenArray
 
 
 @dataclass

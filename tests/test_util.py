@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from bionumpy.util import filter_on_intervals, get_snps
 from bionumpy.intervals import sort_intervals, merge_intervals
-from bionumpy.npdataclass import npdataclass
+from npstructures import npdataclass
 
 @npdataclass
 class Entry:
