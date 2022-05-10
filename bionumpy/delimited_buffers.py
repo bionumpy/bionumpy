@@ -1,4 +1,4 @@
-from .npdataclass import NpDataClass, VarLenArray, SeqArray
+from npstructures import VarLenArray, SeqArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, SNP, VariantWithGenotypes
 from .encodings import DigitEncoding, GenotypeEncoding
