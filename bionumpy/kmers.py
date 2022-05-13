@@ -1,6 +1,14 @@
 import numpy as np
-from .encodings import twobit_swap, ACTGTwoBitEncoding
+from .encodings import ACTGTwoBitEncoding
 from npstructures import RaggedArray
+
+
+class KmerHash:
+    def __init__(self, alphabet_size, k):
+        self._powers = alphabet_size**np.arange(k)
+
+    def hash(self, kmer):
+        return kmer.dot(self._powers)
 
 
 class TwoBitHash:
@@ -43,7 +51,7 @@ class TwoBitHash:
         return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4 ** self.k - 1)
 
 
-class KmerHash:
+class _KmerHash:
     CODES = np.zeros(256, dtype=np.uint64)
     CODES[[97, 65]] = 0
     CODES[[99, 67]] = 1
@@ -58,7 +66,7 @@ class KmerHash:
         )
 
     def _to_text(self, seq):
-        return "".join(letters[n] for n in seq)
+        return "".join(seq[n] for n in seq)
 
     def _get_kmers(self, seq):
         return [

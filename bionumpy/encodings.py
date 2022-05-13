@@ -202,3 +202,28 @@ class QualityEncoding:
     def to_bytes(quality):
         return quality + ord("!")
 
+
+def alphabet_encoding(_alphabet, name):
+    _alphabet = np.asanyarray(_alphabet)
+    _lookup = np.zeros(np.max(_alphabet)+1, dtype=np.uint8)
+    _lookup[_alphabet] = np.arange(_alphabet.size)
+
+    class cls:
+        alphabet = _alphabet
+        lookup = _lookup
+
+        @classmethod
+        def from_bytes(cls, byte_array):
+            return cls.lookup[byte_array]
+
+        @classmethod
+        def to_bytes(cls, encoded):
+            return cls.alphabet[encoded]
+
+    cls.__name__ = name
+    return cls
+
+
+AminoAcidEncoding = alphabet_encoding(
+    [65, 67, 68, 69, 70, 71, 72, 73, 75, 76, 77, 78, 80, 81, 82, 83, 84, 86, 87, 89],
+    "AminoAcidEncoding")
