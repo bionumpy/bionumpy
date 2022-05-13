@@ -1,6 +1,6 @@
 import pytest
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, GfaSequenceEntry
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 
 import numpy as np
@@ -74,8 +74,8 @@ data = {
             SequenceEntry("header", "CTTGTTGA"),
             SequenceEntry("header2", "CGG")],
         "gfa_sequence": [
-            GfaSequenceEntry("id1", "AACCTTGG"),
-            GfaSequenceEntry("id4", "ACTG")
+            SequenceEntry("id1", "AACCTTGG"),
+            SequenceEntry("id4", "ACTG")
         ]
 }
 

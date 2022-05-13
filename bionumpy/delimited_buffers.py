@@ -1,6 +1,6 @@
 from npstructures import VarLenArray
 from .file_buffers import FileBuffer, NEWLINE
-from .datatypes import Interval, Variant, VariantWithGenotypes, GfaSequenceEntry
+from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .encodings import DigitEncoding, GenotypeEncoding
 import numpy as np
 
@@ -199,12 +199,12 @@ class VCFMatrixBuffer(VCFBuffer):
 
 
 class GfaSequenceBuffer(DelimitedBuffer):
-    dataclass = GfaSequenceEntry
+    dataclass = SequenceEntry
 
     def get_sequences(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)
-        return GfaSequenceEntry(ids, sequences)
+        return SequenceEntry(ids, sequences)
 
     get_data = get_sequences
 

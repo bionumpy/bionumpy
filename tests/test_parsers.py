@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from bionumpy.kmers import TwoBitHash
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import Interval, SNP, GfaSequenceEntry
+from bionumpy.datatypes import Interval, SNP, SequenceEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 np.seterr(all='raise')
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
@@ -45,8 +45,8 @@ def test_gfa_sequence_buffer(gfa_sequence_buffer):
     buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
     entries = list(buf.get_sequences())
     true = [
-        GfaSequenceEntry("id1", "AACCTTGG"),
-        GfaSequenceEntry("id4", "ACTG")
+        SequenceEntry("id1", "AACCTTGG"),
+        SequenceEntry("id4", "ACTG")
     ]
     print("NAM")
     print(entries[0].name)
