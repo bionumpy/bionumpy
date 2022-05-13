@@ -1,8 +1,6 @@
 from .chromosome_provider import ChromosomeDictProvider
 import numpy as np
 
-from pyfaidx import Fasta, Faidx
-
 
 class IndexedFasta(ChromosomeDictProvider):
     def __init__(self, filename, add_chr=False, remove_chr=False):
@@ -35,10 +33,11 @@ class IndexedFasta(ChromosomeDictProvider):
         assert ret.size == idx["rlen"], (ret.size, idx["rlen"], ret.size -idx["rlen"], data.shape)
         return ((ret-ord("A"))%32)+ord("A")
     
+
 to_str = lambda x: "".join(chr(c) for c in x)
 
 if __name__ == "__main__":
-
+    from pyfaidx import Fasta, Faidx
     filename = "/home/knut/Data/human_g1k_v37.fasta"
     f = Fasta(filename)
     f2 = IndexedFasta(filename, add_chr=True)

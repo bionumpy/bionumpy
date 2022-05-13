@@ -1,8 +1,7 @@
-from npstructures import VarLenArray, SeqArray
+from npstructures import VarLenArray
 from .file_buffers import FileBuffer, NEWLINE
-from .datatypes import Interval, Variant, SNP, VariantWithGenotypes
+from .datatypes import Interval, Variant, VariantWithGenotypes
 from .encodings import DigitEncoding, GenotypeEncoding
-from dataclasses import dataclass
 import numpy as np
 
 
@@ -12,30 +11,56 @@ class DelimitedBuffer(FileBuffer):
 
     def __init__(self, data, new_lines):
         super().__init__(data, new_lines)
-        self._delimiters = np.concatenate(([-1],
+        self._delimiters = np.concatenate((
+            [-1],
             np.flatnonzero(self._data == self.DELIMITER),
             self._new_lines))
         self._delimiters.sort(kind="mergesort")
 
     @classmethod
     def from_raw_buffer(cls, chunk):
-        new_lines = np.flatnonzero(chunk==NEWLINE)
+        new_lines = np.flatnonzero(chunk == NEWLINE)
         return cls(chunk[:new_lines[-1]+1], new_lines)
 
-    def get_integers(self, cols):
+    def get_integers(self, cols) -> np.ndarray:
+        """Get integers from integer string
+
+        Extract integers from the specified columns
+
+        Parameters
+        ----------
+        cols : list
+            list of columns containing integers
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
         cols = np.asanyarray(cols)
         integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols]+1
         integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
         integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
         return integers.reshape(-1, cols.size)
 
-    def _extract_integers(self, integer_starts, integer_ends):
-        digit_chars = self._move_intervals_to_2d_array(integer_starts, integer_ends, DigitEncoding.MIN_CODE)
-        n_digits = digit_chars.shape[-1]
-        powers = np.uint32(10)**np.arange(n_digits)[::-1]
-        return DigitEncoding.from_bytes(digit_chars) @ powers
-
     def get_text(self, col, fixed_length=True):
+        """Extract text from a column
+
+        Extract strings from the specified column into either a 2d
+        array or a RaggedArray
+
+        Parameters
+        ----------
+        col : int
+            column index
+        fixed_length : bool
+            whether all strings have equal length
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
         self.validate_if_not()
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col]+1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
@@ -44,7 +69,30 @@ class DelimitedBuffer(FileBuffer):
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
 
-    def get_text_range(self, col, start=0, end=None):
+    def get_text_range(self, col, start=0, end=None) -> np.ndarray:
+        """Get substrings of a column
+
+        Extract the text from start to end of each entry in column
+
+        Parameters
+        ----------
+        col : int
+            column index
+        start : int
+            start of substring
+        end : int
+            end of substring
+
+        Returns
+        -------
+        np.ndarray
+            array containing the extracted substrings
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
         self.validate_if_not()
         # delimiters = self._delimiters.reshape(-1, self._n_cols)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col]+1+start
@@ -53,6 +101,12 @@ class DelimitedBuffer(FileBuffer):
         else:
             ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
+
+    def _extract_integers(self, integer_starts, integer_ends):
+        digit_chars = self._move_intervals_to_2d_array(integer_starts, integer_ends, DigitEncoding.MIN_CODE)
+        n_digits = digit_chars.shape[-1]
+        powers = np.uint32(10)**np.arange(n_digits)[::-1]
+        return DigitEncoding.from_bytes(digit_chars) @ powers
 
     def _validate(self):
         chunk = self._data
@@ -66,8 +120,10 @@ class DelimitedBuffer(FileBuffer):
         assert np.all(chunk[delimiters[:, -1]] == NEWLINE)
         self._validated = True
 
+
 class BedBuffer(DelimitedBuffer):
     dataclass = Interval
+
     def get_intervals(self):
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))
@@ -76,9 +132,30 @@ class BedBuffer(DelimitedBuffer):
 
     get_data = get_intervals
 
+
 class VCFBuffer(DelimitedBuffer):
     dataclass = Variant
-    def get_variants(self, fixed_length=False):
+
+    def get_variants(self, fixed_length=False) -> Variant:
+        """Extract variants from VCFBuffer
+
+        Fetches the basic data for a variant from a VCFBuffer and returns a Variant dataset
+
+        Parameters
+        ----------
+        fixed_length : False
+            Wheter or not all sequences are the same length
+
+        Returns
+        -------
+        Variant
+            Variant dataset
+
+        Examples
+        --------
+        5
+
+        """
         self.validate_if_not()
         chromosomes = VarLenArray(self.get_text(0))
         position = self.get_integers(1).ravel()-1
@@ -91,8 +168,10 @@ class VCFBuffer(DelimitedBuffer):
 
     get_data = get_variants
 
+
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VariantWithGenotypes
+
     def get_entries(self, fixed_length=False):
         self.validate_if_not()
         variants = self.get_variants(fixed_length)
