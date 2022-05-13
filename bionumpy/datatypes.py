@@ -65,3 +65,9 @@ class SortedIntervals:
     @classmethod
     def concatenate(cls, elements):
         return cls(np.vstack([element.data for element in elements]))
+
+
+@npdataclass
+class GfaSequenceEntry:
+    name: SeqArray
+    sequence: SeqArray

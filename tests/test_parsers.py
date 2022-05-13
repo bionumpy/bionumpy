@@ -2,21 +2,22 @@ import pytest
 import numpy as np
 from bionumpy.kmers import TwoBitHash
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import Interval, SNP
-from bionumpy.delimited_buffers import BedBuffer, VCFBuffer
+from bionumpy.datatypes import Interval, SNP, GfaSequenceEntry
+from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 np.seterr(all='raise')
-from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, combos
+from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
 
 
 def chunk_from_text(text):
     return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
 
 
-@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence"])
 def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
     assert list(data) == true_data
+
 
 @pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])# "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
@@ -38,6 +39,18 @@ def test_fastq_buffer(fastq_buffer):
     buf = FastQBuffer.from_raw_buffer(fastq_buffer)
     seqs = buf.get_sequences()
     assert seqs.to_sequences() == ["CTTGTTGA", "CGG"]
+
+
+def test_gfa_sequence_buffer(gfa_sequence_buffer):
+    buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
+    entries = list(buf.get_sequences())
+    true = [
+        GfaSequenceEntry("id1", "AACCTTGG"),
+        GfaSequenceEntry("id4", "ACTG")
+    ]
+    print("NAM")
+    print(entries[0].name)
+    assert entries == true
 
 
 def test_bed_buffer(bed_buffer):

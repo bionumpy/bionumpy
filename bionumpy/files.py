@@ -13,12 +13,13 @@ buffer_types = {
     ".fa": TwoLineFastaBuffer,
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
+    ".gfa": GfaSequenceBuffer,
 }
 
 wrappers = {
     "chromosome_stream": ChromosomeFileStreamProvider,
     "dict": FullChromosomeDictProvider,
-    "stream": lambda x: x,
+    "stream": lambda x, y: x,
 }
 
 default_modes = {".vcf": "chromosome_stream", ".bed": "dict"}
@@ -33,7 +34,8 @@ def get_buffered_file(
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
-    buffers = NpBufferStream(open_func(filename, "rb"), buffer_type)
+    kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size"]}
+    buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
     data = (buf.get_data() for buf in buffers)
     if mode is None:
         mode = default_modes.get(suffix, "stream")
