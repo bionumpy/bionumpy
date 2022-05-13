@@ -4,7 +4,6 @@ from npstructures import RaggedArray
 
 
 class Sequences(RaggedArray):
-
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
         self.encoding = encoding

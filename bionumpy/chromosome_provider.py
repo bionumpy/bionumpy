@@ -2,23 +2,30 @@ import numpy as np
 from itertools import groupby
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class ChromosomeProvider:
     @staticmethod
     def get_chrom_name(char_array):
         return "".join(chr(c) for c in char_array).replace("\x00", "")
-        
+
     @staticmethod
     def _is_same_chromosome(chrom_1, chrom_2):
         if chrom_1 is None:
             return False
-        return FullBedFile.get_chrom_name(chrom_1) == FullBedFile.get_chrom_name(chrom_2)
+        return FullBedFile.get_chrom_name(chrom_1) == FullBedFile.get_chrom_name(
+            chrom_2
+        )
 
     @staticmethod
     def _get_chromosome_changes(chromosomes):
-        return np.flatnonzero(
-            np.any(chromosomes[1:].__neq__(chromosomes[:-1]), axis=-1))+1
+        return (
+            np.flatnonzero(np.any(chromosomes[1:].__neq__(chromosomes[:-1]), axis=-1))
+            + 1
+        )
+
 
 class ChromosomeStreamProvider(ChromosomeProvider):
     def __init__(self, stream):
@@ -27,7 +34,7 @@ class ChromosomeStreamProvider(ChromosomeProvider):
     def __iter__(self):
         return iter(self._stream)
 
-    
+
 class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
     def __init__(self, file_buffers, default_value=None):
         self._buffers = file_buffers
@@ -41,19 +48,28 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
             group = list(group)
             last_buffer = group[-1]
             chrom_changes = self._get_chromosome_changes(last_buffer.chromosome)
-            if len(overlay) and self.get_chrom_name(overlay[0][0].chromosome) != start_chrom:
+            if (
+                len(overlay)
+                and self.get_chrom_name(overlay[0][0].chromosome) != start_chrom
+            ):
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:
                 yield (start_chrom, np.concatenate(overlay + group))
                 overlay = []
             else:
-                l = last_buffer[:chrom_changes[0]]
+                l = last_buffer[: chrom_changes[0]]
                 tmp = np.concatenate(overlay + group[:-1] + [l])
-                yield (start_chrom, tmp)# np.concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
-                overlay = [last_buffer[chrom_changes[-1]:]]
-                if len(chrom_changes>1):
-                    chunks = (last_buffer[start:end] for start, end in zip(chrom_changes[:-1], chrom_changes[1:]))
+                yield (
+                    start_chrom,
+                    tmp,
+                )  # np.concatenate(overlay + group[:-1] + [last_buffer[:chrom_changes[0]]]))
+                overlay = [last_buffer[chrom_changes[-1] :]]
+                if len(chrom_changes > 1):
+                    chunks = (
+                        last_buffer[start:end]
+                        for start, end in zip(chrom_changes[:-1], chrom_changes[1:])
+                    )
                     for chunk in chunks:
                         yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
             last_chrom = last_buffer[-1].chromosome
@@ -62,8 +78,7 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
             yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
 
 
-
-# 
+#
 #         cur_data = []
 #         last_chromosome = np.zeros(3, dtype=np.uint8)
 #         last_chromosome = None
@@ -88,6 +103,7 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
 #             cur_data.append(data[chromosome_changes[-1]:])
 #         yield self.get_chrom_name(last_chromosome). np.concatenate(cur_data)
 
+
 class ChromosomeDictProvider(ChromosomeProvider):
     def items(self):
         return self._d.items()
@@ -97,11 +113,13 @@ class ChromosomeDictProvider(ChromosomeProvider):
         if key.startswith("chr"):
             possible_keys.append(key[3:])
         else:
-            possible_keys.append("chr"+key)
+            possible_keys.append("chr" + key)
         for k in possible_keys:
             if k in self._d:
                 return self._d[k]
-        logger.warning(f"Chromosomedict missing data for chrom: {possible_keys}, inserting {self._default_value}")
+        logger.warning(
+            f"Chromosomedict missing data for chrom: {possible_keys}, inserting {self._default_value}"
+        )
         return self._default_value
 
 
@@ -109,11 +127,11 @@ class PureChromosomeDictProvider(ChromosomeDictProvider):
     def __init__(self, *args, **kwargs):
         self._d = dict(*args, **kwargs)
 
+
 class FullChromosomeDictProvider(ChromosomeDictProvider):
     def __init__(self, buffers, default_value=None):
         self._d = dict(ChromosomeFileStreamProvider(buffers))
         self._default_value = default_value
-
 
 
 class LazyChromosomeDictProvider(ChromosomeDictProvider):
@@ -130,8 +148,7 @@ class LazyChromosomeDictProvider(ChromosomeDictProvider):
 
     def __getitem__(self, key):
         if key in self._back_log:
-            ret  = self._back_log[key]
+            ret = self._back_log[key]
             del self._back_log[key]
             return ret
         return self._find_item
-

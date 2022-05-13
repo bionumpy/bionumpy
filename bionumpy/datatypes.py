@@ -1,16 +1,19 @@
 import numpy as np
 from npstructures import npdataclass, SeqArray
 
+
 @npdataclass
 class SequenceEntry:
     name: SeqArray
     sequence: SeqArray
+
 
 @npdataclass
 class SequenceEntryWithQuality:
     name: SeqArray
     sequence: SeqArray
     quality: SeqArray
+
 
 @npdataclass
 class Interval:
@@ -21,6 +24,7 @@ class Interval:
     def in_interval(self, position):
         return (self.start <= position) & (position < self.end)
 
+
 @npdataclass
 class Variant:
     chromosome: SeqArray
@@ -29,7 +33,10 @@ class Variant:
     alt_seq: SeqArray
 
     def is_snp(self):
-        return np.logical_and(self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1)
+        return np.logical_and(
+            self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1
+        )
+
 
 @npdataclass
 class VariantWithGenotypes(Variant):
@@ -39,18 +46,21 @@ class VariantWithGenotypes(Variant):
 class SNP(Variant):
     pass
 
+
 class SortedIntervals:
     def __init__(self, data):
         self.data = np.asanyarray(data)
         assert data.shape[-1] == 2
         assert len(data.shape) == 2
-        
+
         self.starts = self.data[..., 0]
         self.ends = self.data[..., 1]
 
     def in_intervals(self, position):
-        idx = np.minimum(np.searchsorted(self.starts, position, side="left"), self.starts.size-1)
-        return (position >=self.starts[idx]) & (position < self.ends[idx])
+        idx = np.minimum(
+            np.searchsorted(self.starts, position, side="left"), self.starts.size - 1
+        )
+        return (position >= self.starts[idx]) & (position < self.ends[idx])
 
     @classmethod
     def concatenate(cls, elements):
