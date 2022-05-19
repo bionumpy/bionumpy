@@ -1,7 +1,7 @@
 import numpy as np
-from .encodings import ACTGTwoBitEncoding
+from .encodings import ACTGTwoBitEncoding, ACTGEncoding
 from npstructures import RaggedArray
-
+from npstructures.bitarray import BitArray
 
 class KmerHash:
     def __init__(self, alphabet_size, k):
@@ -10,6 +10,41 @@ class KmerHash:
     def hash(self, kmer):
         return kmer.dot(self._powers)
 
+
+def fast_hash(sequence, k):
+    encoded = ACTGEncoding.from_bytes(sequence)
+    bit_array = BitArray.pack(encoded, bit_stride=2)
+    hashes = bit_array.sliding_window(k)
+    return hashes
+
+
+def hash_sequences(sequences, k, hash_func):
+    sequence = sequences.ravel()
+    kmers = hash_func(sequence, k)
+    ragged_array = RaggedArray(kmers, sequences.shape)
+    return ragged_array[:, :-k+1]
+
+class KmerEncoding:
+    def __init__(self, k, alphabet_size=4):
+        self._k = k
+        self._alphabet_size = 4
+        self._convolution = self._alphabet_size**np.arange(self._k)
+
+    def from_bytes(self, array):
+        assert array.shape[-1] == self._k
+        return array.dot(self._convolution)
+
+    def to_bytes(self, array):
+        return (array[:, np.newaxis] // self._convolution) % self._alphabet_size
+
+    def in_range(self, codes):
+        return np.all(codes<self._alphabet_size**self._k)
+
+    def sample_domain(self, n):
+        return np.random.randint(0, self._alphabet_size, size=self._k*n).reshape(n, self._k)
+        
+
+        
 
 class TwoBitHash:
     def __init__(self, k=31, dtype=np.uint64):
@@ -38,7 +73,8 @@ class TwoBitHash:
         )
 
     def get_kmer_hashes(self, sequences):
-        data = ACTGTwoBitEncoding.from_bytes(sequences._data)
+        
+        data = ACTGTwoBitEncoding.from_bytes(sequences.ravel())#_data)
         shape = sequences.shape
         func = (
             self.get_kmers_with_buffer
