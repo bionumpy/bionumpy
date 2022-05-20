@@ -27,7 +27,7 @@ def hash_sequences(sequences, k, hash_func):
 class KmerEncoding:
     def __init__(self, k, alphabet_size=4):
         self._k = k
-        self._alphabet_size = 4
+        self._alphabet_size = alphabet_size
         self._convolution = self._alphabet_size**np.arange(self._k)
 
     def from_bytes(self, array):
