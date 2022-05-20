@@ -28,7 +28,7 @@ def get_kmers(ra):
 
 
 if True or __name__ == "__main__":
-    default_name = "/home/knut/Downloads/datasets_for_knut/n_kmers_64_repsize_100k_witnessrate_0.0005/immuneml/repertoires/7cd3afc8601e4a889da231c6eff7179b.npy.gz"
+    default_name = "/home/knut/Data/datasets_for_knut/n_kmers_64_repsize_100k_witnessrate_0.0005/immuneml/repertoires/7cd3afc8601e4a889da231c6eff7179b.npy.gz"
     filename = default_name
     print(filename)
     seqs = read_repertoire(filename, filename.replace(".npy.gz", "_metadata.yaml"))
