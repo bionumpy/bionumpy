@@ -1,6 +1,6 @@
 from npstructures import VarLenArray
 from .file_buffers import FileBuffer, NEWLINE
-from .datatypes import Interval, Variant, VariantWithGenotypes
+from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .encodings import DigitEncoding, GenotypeEncoding
 import numpy as np
 
@@ -19,6 +19,8 @@ class DelimitedBuffer(FileBuffer):
     @classmethod
     def from_raw_buffer(cls, chunk):
         new_lines = np.flatnonzero(chunk == NEWLINE)
+        print("CHUNKS: %s" % chunk)
+        print("NEWLINES: %s" % new_lines)
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
     def get_integers(self, cols) -> np.ndarray:
@@ -194,3 +196,15 @@ class VCFMatrixBuffer(VCFBuffer):
         )
 
     get_data = get_entries
+
+
+class GfaSequenceBuffer(DelimitedBuffer):
+    dataclass = SequenceEntry
+
+    def get_sequences(self):
+        ids = self.get_text(1, fixed_length=False)
+        sequences = self.get_text(col=2, fixed_length=False)
+        return SequenceEntry(ids, sequences)
+
+    get_data = get_sequences
+
