@@ -1,16 +1,15 @@
-from dataclasses import dataclass
 from itertools import accumulate
 import numpy as np
 
 import pytest
 
 from bionumpy.chromosome_provider import ChromosomeFileStreamProvider
-from npstructures.npdataclasses import NpDataClass, VarLenArray
+from npstructures.npdataclasses import VarLenArray, npdataclass
 
 
-@dataclass
-class DummyClass(NpDataClass):
-    chromosome: np.ndarray
+@npdataclass
+class DummyClass:
+    chromosome: VarLenArray
     data: np.ndarray
 
     def __post_init__(self):

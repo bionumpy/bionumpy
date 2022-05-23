@@ -186,6 +186,7 @@ class FastQBuffer(OneLineBuffer):
     HEADER = 64
     n_lines_per_entry = 4
     _encoding = BaseEncoding
+    dataclass = SequenceEntryWithQuality
 
     def get_data(self):
         seq_entry = super().get_data()

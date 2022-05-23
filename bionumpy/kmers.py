@@ -3,6 +3,7 @@ from .encodings import ACTGTwoBitEncoding, ACTGEncoding
 from npstructures import RaggedArray
 from npstructures.bitarray import BitArray
 
+
 class KmerHash:
     def __init__(self, alphabet_size, k):
         self._powers = alphabet_size**np.arange(k)
@@ -24,6 +25,7 @@ def hash_sequences(sequences, k, hash_func):
     ragged_array = RaggedArray(kmers, sequences.shape)
     return ragged_array[:, :-k+1]
 
+
 class KmerEncoding:
     def __init__(self, k, alphabet_size=4):
         self._k = k
@@ -38,13 +40,11 @@ class KmerEncoding:
         return (array[:, np.newaxis] // self._convolution) % self._alphabet_size
 
     def in_range(self, codes):
-        return np.all(codes<self._alphabet_size**self._k)
+        return np.all(codes < self._alphabet_size**self._k)
 
     def sample_domain(self, n):
         return np.random.randint(0, self._alphabet_size, size=self._k*n).reshape(n, self._k)
-        
 
-        
 
 class TwoBitHash:
     def __init__(self, k=31, dtype=np.uint64):
@@ -73,7 +73,6 @@ class TwoBitHash:
         )
 
     def get_kmer_hashes(self, sequences):
-        
         data = ACTGTwoBitEncoding.from_bytes(sequences.ravel())#_data)
         shape = sequences.shape
         func = (
