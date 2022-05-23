@@ -80,7 +80,7 @@ class ACTGTwoBitEncoding:
     @classmethod
     def from_bytes(cls, sequence):
         if sequence.size % 16 != 0:
-            sequence = np.append(sequence, np.empty(16-(sequence.size % 16)))
+            sequence = np.append(sequence, np.empty(16-(sequence.size % 16), dtype=np.uint8))
         assert sequence.dtype == np.uint8
         assert sequence.size % 4 == 0, sequence.size
         sequence = sequence & 31

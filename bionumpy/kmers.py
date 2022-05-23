@@ -2,6 +2,7 @@ import numpy as np
 from .encodings import ACTGTwoBitEncoding, ACTGEncoding
 from npstructures import RaggedArray
 from npstructures.bitarray import BitArray
+from .util import convolution
 
 
 class KmerHash:
@@ -12,6 +13,7 @@ class KmerHash:
         return kmer.dot(self._powers)
 
 
+@convolution
 def fast_hash(sequence, k):
     encoded = ACTGEncoding.from_bytes(sequence)
     bit_array = BitArray.pack(encoded, bit_stride=2)
@@ -74,6 +76,7 @@ class TwoBitHash:
 
     def get_kmer_hashes(self, sequences):
         data = ACTGTwoBitEncoding.from_bytes(sequences.ravel())#_data)
+        # data = np.lib.stride_tricks.as_strided(data, shape=(data.size+((-data.size) % 16),), writeable=False)
         shape = sequences.shape
         func = (
             self.get_kmers_with_buffer
