@@ -14,7 +14,6 @@ def print_file(counts, flank):
     print(",".join(MutationSignatureEncoding(2*flank+1).to_string(i)
                    for i in range(counts.shape[-1])))
     for row in np.atleast_2d(counts):
-        # print(row.sum())
         print(",".join(str(c) for c in row))
 
 
