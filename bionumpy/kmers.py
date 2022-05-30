@@ -1,6 +1,7 @@
 import numpy as np
 from .encodings import ACTGTwoBitEncoding
 from npstructures import RaggedArray
+import logging
 
 
 class KmerHash:
@@ -26,7 +27,7 @@ class TwoBitHash:
         return res
 
     def get_kmers(self, sequence, is_internal=False):
-        assert sequence.dtype == self._dtype, sequence.dtype
+        assert sequence.dtype == self._dtype, "%s != %s" % (sequence.dtype, self._dtype)
         result = sequence[:, None] >> self._shifts
         result[:-1] |= sequence[1:, None] << self._rev_shifts
         return result
@@ -47,8 +48,14 @@ class TwoBitHash:
         )
         kmers = func(data.view(self._dtype)).ravel()
         ra = RaggedArray(kmers, shape)
-        ra = ra[:, : -(self.k - 1)]
-        return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4 ** self.k - 1)
+
+        try:
+            ra = ra[:, : -(self.k - 1)]
+        except IndexError:
+            logging.error("Shape is %s" % (shape))
+            raise
+        return ra
+        #return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4 ** self.k - 1)
 
 
 class _KmerHash:

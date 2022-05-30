@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from itertools import product
 
@@ -79,6 +80,11 @@ class ACTGTwoBitEncoding:
 
     @classmethod
     def from_bytes(cls, sequence):
+        if sequence.size % 64 != 0:
+            #logging.warning("Sequence is not divisible by 32. Size is now %d. Will be padded" % sequence.size)
+            sequence = np.pad(sequence, (0, 64 - (sequence.size % 64)))
+            #logging.warning("New size: %d" % sequence.size)
+
         assert sequence.dtype == np.uint8
         assert sequence.size % 4 == 0, sequence.size
         sequence = sequence & 31
