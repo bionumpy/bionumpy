@@ -1,10 +1,13 @@
 from .kmers import KmerEncoding
-from .util import convolution
-import numpy as np
+from .rollable import RollableFunction
 
 
-@convolution
-def get_minimizers(sequence, window_size, k):
-    kmers = KmerEncoding(k)(np.lib.stride_tricks.sliding_window_view(sequence, k))
-    minimizers = np.lib.stride_tricks.sliding_window_view(kmers, window_size-k+1).min(axis=-1)
-    return minimizers
+class Minimizers(RollableFunction):
+    def __init__(self, n_kmers, kmer_encoding=KmerEncoding):
+        self._n_kmers = n_kmers
+        self._kmer_encoding = kmer_encoding
+        self.window_size = n_kmers+kmer_encoding.window_size-1
+
+    def __call__(self, sequence):
+        kmer_hashes = self._kmer_encoding.rolling_window(sequence)
+        return kmer_hashes.min(axis=-1)
