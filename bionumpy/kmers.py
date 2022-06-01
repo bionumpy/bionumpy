@@ -1,8 +1,9 @@
 import numpy as np
+from .rollable import RollableFunction
 from .encodings import ACTGTwoBitEncoding, ACTGEncoding
 from npstructures import RaggedArray
 from npstructures.bitarray import BitArray
-from .util import convolution
+from .util import convolution, rolling_window_function
 import logging
 
 
@@ -13,6 +14,10 @@ class KmerHash:
     def hash(self, kmer):
         return kmer.dot(self._powers)
 
+@rolling_window_function
+def rolling_hash(sequence, k, alphabet_size=4):
+    return KmerEncoding(k, alphabet_size).from_bytes(sequence)
+    
 
 @convolution
 def fast_hash(sequence, k):
@@ -29,21 +34,24 @@ def hash_sequences(sequences, k, hash_func):
     return ragged_array[:, :-k+1]
 
 
-class KmerEncoding:
+class KmerEncoding(RollableFunction):
     def __init__(self, k, alphabet_size=4):
+        self.window_size = k
         self._k = k
         self._alphabet_size = alphabet_size
         self._convolution = self._alphabet_size**np.arange(self._k)
 
-    def from_bytes(self, array):
+
+    def __call__(self, array):
         assert array.shape[-1] == self._k
         return array.dot(self._convolution)
 
-    def to_bytes(self, array):
+    def inverse(self, array):
         return (array[:, np.newaxis] // self._convolution) % self._alphabet_size
 
-    def in_range(self, codes):
-        return np.all(codes < self._alphabet_size**self._k)
+    @property
+    def range(self):
+        return ranges.Z(self._alphabet_size**self._k)
 
     def sample_domain(self, n):
         return np.random.randint(0, self._alphabet_size, size=self._k*n).reshape(n, self._k)

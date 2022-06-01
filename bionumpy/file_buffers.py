@@ -37,7 +37,7 @@ class FileBuffer:
 
         Examples
         --------
-        8
+        
 
         """
 
@@ -93,7 +93,7 @@ class FileBuffer:
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return RaggedArray(self._data[indices], shape)
+        return Sequences(self._data[indices], shape)
 
 
 class OneLineBuffer(FileBuffer):
@@ -142,7 +142,7 @@ class OneLineBuffer(FileBuffer):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
-        self.lines = RaggedArray(self._data, RaggedShape(lengths))
+        self.lines = Sequences(self._data, RaggedShape(lengths))
         sequences = self.lines[1::self.n_lines_per_entry, :-1]
         headers = self.lines[::self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
