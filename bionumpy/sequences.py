@@ -7,6 +7,7 @@ class Sequences(RaggedArray):
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
         self.encoding = encoding
+
     @classmethod
     def from_sequences(cls, sequences):
         return cls([[ord(c) for c in seq] for seq in sequences])
