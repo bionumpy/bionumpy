@@ -19,8 +19,6 @@ class DelimitedBuffer(FileBuffer):
     @classmethod
     def from_raw_buffer(cls, chunk):
         new_lines = np.flatnonzero(chunk == NEWLINE)
-        print("CHUNKS: %s" % chunk)
-        print("NEWLINES: %s" % new_lines)
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
     def get_integers(self, cols) -> np.ndarray:

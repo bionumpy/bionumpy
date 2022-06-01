@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class ChromosomeProvider:
+    _default_value = None
     @staticmethod
     def get_chrom_name(char_array):
         return "".join(chr(c) for c in char_array).replace("\x00", "")
