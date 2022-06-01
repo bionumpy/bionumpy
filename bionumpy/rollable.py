@@ -1,4 +1,5 @@
 import numpy as np
+from .sequences import Sequence, Sequences
 from npstructures import RaggedArray
 
 from abc import abstractmethod
@@ -7,14 +8,40 @@ from abc import abstractmethod
 class RollableFunction:
 
     @abstractmethod
-    def __call__(self, sequence):
+    def __call__(self, sequence: Sequence):
+        """Function that returns a single value
+
+        Broadcastable function that maps a sequence to a single value.
+
+
+        Parameters
+        ----------
+        sequence : Sequence
+            A sequence (or set of sequences) of length given by `self.window_size`
+
+        Examples
+        --------
+        4
+
+        """
         return NotImplemented
 
-    def rolling_window(self, _sequence, window_size=None):
+    def rolling_window(self, _sequence: Sequences, window_size: int = None):
+        """Applies the function `self.__call__` to all subsequences in _sequence
 
+        Uses sliding_window_view to apply `self.__call__` to all subsequences of length
+        `self.window_size` or `window_size` in `_sequence`
+
+
+        Parameters
+        ----------
+        _sequence : Sequences
+            Sequence or set of Sequences to apply the rolling window to
+        window_size : int
+            The size of the rolling window (can also be set by `self.window_size`
+        """
         if window_size is None:
             window_size = self.window_size
-
 
         shape, sequence = (_sequence.shape, _sequence.ravel())
         windows = np.lib.stride_tricks.sliding_window_view(
