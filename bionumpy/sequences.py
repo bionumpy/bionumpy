@@ -8,7 +8,7 @@ class Sequence(np.ndarray):
 
     @classmethod
     def from_string(cls, s):
-        return cls(shape=(3, ), dtype=np.uint8, buffer=bytes("hei", encoding="ascii"))
+        return cls(shape=(3,), dtype=np.uint8, buffer=bytes("hei", encoding="ascii"))
 
 
 class Sequences(RaggedArray):
@@ -24,8 +24,11 @@ class Sequences(RaggedArray):
         return ["".join(chr(i) for i in array) for array in self.tolist()]
 
     def __str__(self):
-        strings = ("".join(chr(i) for i in array[:20]+"..."*(len(array)>20)) for array in self.tolist())
-        seqs = ', '.join(seq for seq, _ in zip(strings, range(20)))
+        strings = (
+            "".join(chr(i) for i in array[:20] + "..." * (len(array) > 20))
+            for array in self.tolist()
+        )
+        seqs = ", ".join(seq for seq, _ in zip(strings, range(20)))
         trail = " ..." if len(self) > 20 else ""
         return f"Sequences({seqs}{trail})"
 

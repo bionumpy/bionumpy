@@ -34,7 +34,8 @@ def convolution(func):
             out = RaggedArray(convoluted, shape)
         elif isinstance(_sequence, np.ndarray):
             out = np.lib.stride_tricks.as_strided(convoluted, shape)
-        return out[..., :(-window_size+1)]
+        return out[..., : (-window_size + 1)]
+
     return new_func
 
 
@@ -42,15 +43,16 @@ def rolling_window_function(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
         print(sequence, window_size)
-        windows = np.lib.stride_tricks.sliding_window_view(
-            sequence, window_size)
+        windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = func(windows, window_size, *args, **kwargs)
         if isinstance(_sequence, RaggedArray):
             out = RaggedArray(convoluted, shape)
         elif isinstance(_sequence, np.ndarray):
             out = np.lib.stride_tricks.as_strided(convoluted, shape)
-        return out[..., :(-window_size+1)]
+        return out[..., : (-window_size + 1)]
+
     return new_func
+
 
 def pprint_one(sequence):
     return "".join(chr(c) for c in sequence)

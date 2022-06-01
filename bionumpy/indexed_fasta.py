@@ -2,6 +2,7 @@ from .chromosome_provider import ChromosomeDictProvider
 import numpy as np
 from pyfaidx import Faidx
 
+
 class IndexedFasta(ChromosomeDictProvider):
     def __init__(self, filename, add_chr=False, remove_chr=False):
         self._filename = filename

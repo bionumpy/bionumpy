@@ -9,15 +9,16 @@ import logging
 
 class KmerHash:
     def __init__(self, alphabet_size, k):
-        self._powers = alphabet_size**np.arange(k)
+        self._powers = alphabet_size ** np.arange(k)
 
     def hash(self, kmer):
         return kmer.dot(self._powers)
 
+
 @rolling_window_function
 def rolling_hash(sequence, k, alphabet_size=4):
     return KmerEncoding(k, alphabet_size).from_bytes(sequence)
-    
+
 
 @convolution
 def fast_hash(sequence, k):
@@ -31,7 +32,7 @@ def hash_sequences(sequences, k, hash_func):
     sequence = sequences.ravel()
     kmers = hash_func(sequence, k)
     ragged_array = RaggedArray(kmers, sequences.shape)
-    return ragged_array[:, :-k+1]
+    return ragged_array[:, : -k + 1]
 
 
 class KmerEncoding(RollableFunction):
@@ -39,8 +40,7 @@ class KmerEncoding(RollableFunction):
         self.window_size = k
         self._k = k
         self._alphabet_size = alphabet_size
-        self._convolution = self._alphabet_size**np.arange(self._k)
-
+        self._convolution = self._alphabet_size ** np.arange(self._k)
 
     def __call__(self, array):
         assert array.shape[-1] == self._k
@@ -51,10 +51,12 @@ class KmerEncoding(RollableFunction):
 
     @property
     def range(self):
-        return ranges.Z(self._alphabet_size**self._k)
+        return ranges.Z(self._alphabet_size ** self._k)
 
     def sample_domain(self, n):
-        return np.random.randint(0, self._alphabet_size, size=self._k*n).reshape(n, self._k)
+        return np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
+            n, self._k
+        )
 
 
 class TwoBitHash:
@@ -84,7 +86,7 @@ class TwoBitHash:
         )
 
     def get_kmer_hashes(self, sequences):
-        data = ACTGTwoBitEncoding.from_bytes(sequences.ravel())#_data)
+        data = ACTGTwoBitEncoding.from_bytes(sequences.ravel())  # _data)
         # data = np.lib.stride_tricks.as_strided(data, shape=(data.size+((-data.size) % 16),), writeable=False)
         shape = sequences.shape
         func = (
@@ -101,7 +103,7 @@ class TwoBitHash:
             logging.error("Shape is %s" % (shape))
             raise
         return ra
-        #return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4 ** self.k - 1)
+        # return ACTGTwoBitEncoding.complement(ra._data) & self._dtype(4 ** self.k - 1)
 
 
 class _KmerHash:
