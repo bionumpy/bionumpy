@@ -1,4 +1,4 @@
-from bionumpy.kmers import KmerEncoding, rolling_hash
+from bionumpy.kmers import KmerEncoding
 import numpy as np
 from npstructures import RaggedArray, RaggedShape
 

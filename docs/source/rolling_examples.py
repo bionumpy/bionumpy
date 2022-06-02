@@ -7,7 +7,6 @@ class MatchSequence(RollableFunction):
     def __init__(self, matching_sequence):
         self._matching_sequence = as_sequence_array(matching_sequence)
         self.window_size = self._matching_sequence.size
-
     def __call__(self, sequence):
         sequence = as_sequence_array(sequence)
         element_matches = sequence == self._matching_sequence

@@ -22,4 +22,26 @@ For instance, if we want to check for instances of "CGGT" in a set of sequences,
         def __call__(self, sequence):
             return np.all(sequence == self._matching_sequence, axis=-1)
 
-The `__call__` function here just checks that all the letters in the sequence are equal to the corresponding letters in the matching sequence. Specifying `axis=-1` for the all function makes the function broadcastable.
+The `__call__` function here just checks that all the letters in the sequence are equal to the corresponding letters in the matching sequence. Specifying `axis=-1` for the all function makes the function broadcastable::
+
+    >>> match = MatchSequence("CGGT")
+    >>> match("CGGT")
+    Sequence(True)
+
+Giving a sequence of different length to the `__call__` function returns `False`, since the sequneces are then not equal::
+
+    >>> match("CGGTA")
+    <stdin>:7: DeprecationWarning: elementwise comparison failed; this will raise an error in the future.
+    False
+
+However we can use the `rolling_window` method to match every subsequence of length 4 to "CGGT"::
+
+    >>> match.rolling_window("CGGTA")
+    array([ True, False])
+    >>> match.rolling_window(["CGGTA", "ACGGTG"])
+    RaggedArray([[True, False], [False, True, False]])
+
+For examples of rollable function implementations see:
+* `Minimizers`
+* `KmerEncoding`
+* `PositionWeightMatrix`

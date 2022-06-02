@@ -57,7 +57,7 @@ This works for a single letter, but would fail for even a single sequence. To ma
 However, this will fail for arrays of sequences, since it assumes that the `letter` array is one-dimensional. The best, most broadcastable and general, solution is to add the last axis using a `...` to denote the exisitng axes::
   
     def one_hot(letter, alphabet):
-        return letter[:, np.newaxis] == alphabet
+        return letter[..., np.newaxis] == alphabet
 
 This will work for any-dimensional arrays of sequences.
 
