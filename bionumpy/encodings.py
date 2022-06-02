@@ -81,7 +81,9 @@ class ACTGTwoBitEncoding:
     @classmethod
     def from_bytes(cls, sequence):
         if sequence.size % 16 != 0:
-            sequence = np.append(sequence, np.empty(16-(sequence.size % 16), dtype=np.uint8))
+            sequence = np.append(
+                sequence, np.empty(16 - (sequence.size % 16), dtype=np.uint8)
+            )
 
         assert sequence.dtype == np.uint8
         assert sequence.size % 4 == 0, sequence.size
@@ -209,7 +211,7 @@ class QualityEncoding:
 
 def alphabet_encoding(_alphabet, name):
     _alphabet = np.asanyarray(_alphabet)
-    _lookup = np.zeros(np.max(_alphabet)+1, dtype=np.uint8)
+    _lookup = np.zeros(np.max(_alphabet) + 1, dtype=np.uint8)
     _lookup[_alphabet] = np.arange(_alphabet.size)
 
     class cls:
@@ -230,4 +232,5 @@ def alphabet_encoding(_alphabet, name):
 
 AminoAcidEncoding = alphabet_encoding(
     [65, 67, 68, 69, 70, 71, 72, 73, 75, 76, 77, 78, 80, 81, 82, 83, 84, 86, 87, 89],
-    "AminoAcidEncoding")
+    "AminoAcidEncoding",
+)

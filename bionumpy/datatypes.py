@@ -25,8 +25,7 @@ class Interval:
         return (self.start <= position) & (position < self.end)
 
     def __plot__(self, plt):
-        return [plt.hist(self.end-self.start, name="size"),
-                plt.hist("start")]
+        return [plt.hist(self.end - self.start, name="size"), plt.hist("start")]
 
 
 @npdataclass
@@ -42,11 +41,17 @@ class Variant:
         )
 
     def __plot__(self, plt):
-        return [plt.hist("position"),
-                plt.bar({"snp": self.is_snp().sum(),
-                         "ins": self.is_insertion().sum(),
-                         "del": self.is_deletion().sum()}),
-                plt.count_matrix()]
+        return [
+            plt.hist("position"),
+            plt.bar(
+                {
+                    "snp": self.is_snp().sum(),
+                    "ins": self.is_insertion().sum(),
+                    "del": self.is_deletion().sum(),
+                }
+            ),
+            plt.count_matrix(),
+        ]
 
 
 @npdataclass

@@ -205,4 +205,3 @@ class GfaSequenceBuffer(DelimitedBuffer):
         return SequenceEntry(ids, sequences)
 
     get_data = get_sequences
-

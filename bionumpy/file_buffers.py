@@ -18,7 +18,7 @@ class FileBuffer:
         self.size = self._data.size
 
     @classmethod
-    def from_raw_buffer(cls, raw_buffer) -> 'FileBuffer':
+    def from_raw_buffer(cls, raw_buffer) -> "FileBuffer":
         """Create a buffer with full entries
 
         A raw buffer can end with data that does not represent full entries.
@@ -37,14 +37,14 @@ class FileBuffer:
 
         Examples
         --------
-        8
+        
 
         """
 
         return NotImplemented
 
     @classmethod
-    def from_data(cls, data: npdataclass) -> 'FileBuffer':
+    def from_data(cls, data: npdataclass) -> "FileBuffer":
         """Create FileBuffer from a data set
 
         Create a FileBuffer that can be written to file
@@ -93,7 +93,7 @@ class FileBuffer:
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return RaggedArray(self._data[indices], shape)
+        return Sequences(self._data[indices], shape)
 
 
 class OneLineBuffer(FileBuffer):
@@ -101,7 +101,7 @@ class OneLineBuffer(FileBuffer):
     _buffer_divisor = 32
 
     @classmethod
-    def from_raw_buffer(cls, chunk) -> 'OneLineBuffer':
+    def from_raw_buffer(cls, chunk) -> "OneLineBuffer":
         """Create a buffer with full entries
 
         Extract complete entries, i. e. a number of lines that is divisible by lines per entry
@@ -129,8 +129,8 @@ class OneLineBuffer(FileBuffer):
 
     def get_sequences(self) -> Sequences:
         self.validate_if_not()
-        sequence_starts = self._new_lines[::self.n_lines_per_entry] + 1
-        sequence_lens = self._new_lines[1::self.n_lines_per_entry] - sequence_starts
+        sequence_starts = self._new_lines[:: self.n_lines_per_entry] + 1
+        sequence_lens = self._new_lines[1 :: self.n_lines_per_entry] - sequence_starts
         indices, shape = RaggedView(sequence_starts, sequence_lens).get_flat_indices()
         m = indices.size
         d = m % self._buffer_divisor
@@ -142,9 +142,9 @@ class OneLineBuffer(FileBuffer):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
-        self.lines = RaggedArray(self._data, RaggedShape(lengths))
-        sequences = self.lines[1::self.n_lines_per_entry, :-1]
-        headers = self.lines[::self.n_lines_per_entry, 1:-1]
+        self.lines = Sequences(self._data, RaggedShape(lengths))
+        sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
+        headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
     @classmethod

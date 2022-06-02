@@ -41,7 +41,7 @@ class DummyClass:
             chroms = np.zeros((sum(lens), max_len), dtype=objects[0].chromosome.dtype)
             for start, end, o, l in zip(accumulate(lens, initial=0), accumulate(lens), objects, chrom_str_lens):
                 chroms[start:end, -l:] = o.chromosome
-        
+       
         return cls(chroms, np.concatenate([o.data for o in objects]))
 
 

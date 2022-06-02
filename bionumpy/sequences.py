@@ -1,6 +1,14 @@
 import numpy as np
-from .encodings import ACTGTwoBitEncoding, BaseEncoding
+from .encodings import BaseEncoding
 from npstructures import RaggedArray
+
+
+class Sequence(np.ndarray):
+    encoding = BaseEncoding
+
+    @classmethod
+    def from_string(cls, s):
+        return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
 
 class Sequences(RaggedArray):
@@ -9,31 +17,36 @@ class Sequences(RaggedArray):
         self.encoding = encoding
 
     @classmethod
-    def from_sequences(cls, sequences):
-        return cls([[ord(c) for c in seq] for seq in sequences])
+    def from_strings(cls, sequences):
+        return cls([Sequence.from_string(seq) for seq in sequences])
 
     def to_sequences(self):
         return ["".join(chr(i) for i in array) for array in self.tolist()]
 
+    def __str__(self):
+        strings = (
+            "".join(chr(i) for i in array[:20]) + "..." * (len(array) > 20)
+            for array in self.tolist()
+        )
+        seqs = ", ".join(seq for seq, _ in zip(strings, range(20)))
+        trail = " ..." if len(self) > 20 else ""
+        return f"Sequences({seqs}{trail})"
 
-class _Sequences:
-    def __init__(self, sequences, intervals, encoding=BaseEncoding):
-        assert intervals[0].size == intervals[1].size
-        self.sequences = sequences
-        self.intervals = intervals
-        self.intervals_start = intervals[0]
-        self.intervals_end = intervals[1]
-        self.encoding = encoding
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        r = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        if ufunc not in (np.equal, np.not_equal):
+            return r
 
-    def __len__(self):
-        return len(self.intervals_start)
+        return RaggedArray(r._data, r.shape)
 
-    def __getitem__(self, i):
-        start, end = (self.intervals_start[i], self.intervals_end[i])
-        return self.sequences[start:end]
 
-    def __iter__(self):
-        return (self.sequences[start:end] for start, end in zip(*self.intervals))
-
-    def __repr__(self):
-        return "Seqs(%s, %s)" % (str(self.sequences), self.intervals)
+def as_sequence_array(s, encoding=BaseEncoding):
+    if isinstance(s, (Sequence, Sequences, np.ndarray, RaggedArray)):
+        # assert s.encoding == encoding
+        return s
+    elif isinstance(s, str):
+        return Sequence.from_string(s)
+    elif isinstance(s, list):
+        return Sequences.from_strings(s)
+    else:
+        raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
