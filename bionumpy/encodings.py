@@ -120,11 +120,11 @@ class ACTGEncoding:
     reverse = np.array([ord(c) for c in "ACTG"], dtype=np.uint8)
 
     @classmethod
-    def from_bytes(cls, bytes_array):
+    def encode(cls, bytes_array):
         return cls._lookup_byte_to_2bits[bytes_array]
 
     @classmethod
-    def to_bytes(cls, encoded):
+    def decode(cls, encoded):
         return cls.reverse[encoded]
 
 

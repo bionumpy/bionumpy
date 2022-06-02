@@ -1,7 +1,7 @@
 import numpy as np
 from .rollable import RollableFunction
 from .encodings import ACTGEncoding
-from .sequences import Sequence
+from .sequences import Sequence, as_sequence_array
 from npstructures.bitarray import BitArray
 from .util import convolution
 import logging
@@ -10,16 +10,18 @@ logger = logging.getLogger(__name__)
 
 class KmerEncoding(RollableFunction):
 
-    def __init__(self, k, alphabet_size=4):
+    def __init__(self, k, alphabet_size=4, encoding=ACTGEncoding):
         self.window_size = k
         self._k = k
         self._alphabet_size = alphabet_size
         self._convolution = self._alphabet_size ** np.arange(self._k)
+        self._encoding = encoding
 
-    def __call__(self, sequence: Sequence) -> np.ndarray:
+    def __call__(self, sequence: Sequence) -> int:
+        sequence = as_sequence_array(sequence, encoding=self._encoding)
         return sequence.dot(self._convolution)
 
-    def inverse(self, array: np.ndarray) -> Sequence:
+    def inverse(self, array: int) -> Sequence:
         return Sequence.from_array(
             (array[:, np.newaxis] // self._convolution) % self._alphabet_size)
 

@@ -27,6 +27,12 @@ class Sequences(RaggedArray):
         super().__init__(data, shape, dtype=np.uint8)
         self.encoding = encoding
 
+    def ravel(self):
+        d = super().ravel()
+        s = Sequence.from_array(d)
+        s.encoding = self.encoding
+        return s
+
     @classmethod
     def from_strings(cls, sequences):
         return cls([Sequence.from_string(seq) for seq in sequences])
@@ -55,12 +61,23 @@ class Sequences(RaggedArray):
 
 
 def as_sequence_array(s, encoding=BaseEncoding):
-    if isinstance(s, (Sequence, Sequences, np.ndarray, RaggedArray)):
-        # assert s.encoding == encoding
+    if isinstance(s, (Sequences, Sequence)):
+        if s.encoding != encoding:
+            assert s.encoding == BaseEncoding
+            if isinstance(s, Sequences):
+                return Sequences(encoding.encode(s.ravel()), s.shape)
+            else:
+                e = encoding.encode(s)
+                s = Sequence.from_array(e)
+                s.encoding=encoding
+                return s
+        return s
+    elif isinstance(s, (np.ndarray, RaggedArray)):
         return s
     elif isinstance(s, str):
-        return Sequence.from_string(s)
+        return encoding.encode(Sequence.from_string(s))
     elif isinstance(s, list):
-        return Sequences.from_strings(s)
+        s = Sequences.from_strings(s)
+        return Sequences(encoding.encode(s.ravel()), s.shape)
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")

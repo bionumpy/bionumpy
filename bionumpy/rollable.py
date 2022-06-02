@@ -39,10 +39,14 @@ class RollableFunction:
         window_size : int
             The size of the rolling window (can also be set by `self.window_size`
         """
+        
         if window_size is None:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
-            _sequence = as_sequence_array(_sequence)
+            if hasattr(self, "_encoding"):
+                _sequence = as_sequence_array(_sequence, encoding=self._encoding)
+            else:
+                _sequence = as_sequence_array(_sequence)
         shape, sequence = (_sequence.shape, _sequence.ravel())
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = self(windows)

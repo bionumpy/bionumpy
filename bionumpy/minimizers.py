@@ -1,5 +1,6 @@
 from .kmers import KmerEncoding
 from .rollable import RollableFunction
+from .encodings import ACTGEncoding
 
 
 class Minimizers(RollableFunction):

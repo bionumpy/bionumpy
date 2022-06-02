@@ -61,19 +61,79 @@ The main point of bioNumpy is to leverage the computational power of numpy for b
 
 Summarization
 ~~~~~~~~~~~~~
-A key application is to extract features from data sets. A large set of interresting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weigh Matrix scores (sequence->float). bioNumpy provides functionality to apply such functions to rolling windows across large  seuqence sets, through the `rolling_window_function` decorator. The `rolling_window_function` decorator applies the function to all windows in a `ndarray` or `RaggedArray` of sequences. The only requirement is that the function is broadcastable::
+A key application is to extract features from sequence data sets. A large set of interresting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weigh Matrix scores (sequence->float). bioNumpy provides functionality to apply such functions to rolling windows across large  seuqence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
 
-    sequences = Sequences(["acgttgta", "gcttca", "gttattc"], encoding=ACGTEncoding)
+
+    class PositionWeightMatrix(RollableFunction):
+        def __init__(self, matrix, encoding=ACTGEncoding):
+            self._matrix = np.asanyarray(matrix)
+            self.window_size = self._matrix.shape[-1]
+            self._indices = np.arange(self.window_size)
+            self._encoding = ACTGEncoding
     
-    matrix = np.log([[0.1, 0.2],
-                     [0.2, 0.3],
-                     [0.4, 0.1],
-                     [0.3, 0.4]])
+        def __call__(self, sequence: Sequence) -> float:
+            sequence = as_sequence_array(sequence, self._encoding)
+            scores = self._matrix[sequence, self._indices]
+            return scores.sum(axis=-1)
+
+It's `__call__` method specifies how to calculate the score of a sequence. Calling it's rolling_window function will calculate the scores for all windows in a data set::
+
+    >>> import numpy as np
+    >>> sequences = bnp.as_sequence_array(["acgttgta", "gcttca", "gttattc"], encoding=bnp.encodings.ACTGEncoding)
+    >>> 
+    >>> matrix = np.log([[0.1, 0.2],
+    ...                  [0.2, 0.3],
+    ...                  [0.4, 0.1],
+    ...                  [0.3, 0.4]])
+    >>> pwm = bnp.position_weight_matrix.PositionWeightMatrix(matrix)
+    >>> pwm("ac")
+    -3.506557897319982
+    >>> pwm(["ac", "cg"])
+    array([-3.5065579 , -2.52572864])
+    >>> pwm.rolling_window(sequences)
+    RaggedArray([[-3.506557897319982, -2.525728644308255, -3.506557897319982, -3.2188758248682006, -1.83258146374831, -3.506557897319982, -2.525728644308255], [-2.4079456086518722, -3.9120230054281455, -3.2188758248682006, -2.120263536200091, -3.2188758248682006], [-3.506557897319982, -3.2188758248682006, -2.525728644308255, -4.605170185988091, -3.2188758248682006, -2.120263536200091]])
+
+Further processing can be done with numpy functions, for instance finding the max score for each sequence in the set::
+
+    >>> pwm.rolling_window(sequences).max(axis=-1)
+    array([-1.83258146, -2.12026354, -2.12026354])
+
+
+kmers
+~~~~~
+Another example of this concept is the kmer hashing class::
+
+    class KmerEncoding(RollableFunction):
     
-    pwm = PositionWeightMatrix(matrix)
-    pwm.calculate_score("ac")
-    pwm.calculate_score(["ac", "cg"])
-    rolling_pwm(sequences, 2, pwm)
+        def __init__(self, k, alphabet_size=4):
+            self.window_size = k
+            self._k = k
+            self._alphabet_size = alphabet_size
+            self._convolution = self._alphabet_size ** np.arange(self._k)
+    
+        def __call__(self, sequence: Sequence) -> np.ndarray:
+            return sequence.dot(self._convolution)
+
+Here, the `__call__` function specifies how to hash a kmer into a single number. Calling its `rolling_window` method will hash all the kmers in a sequence set.
+
+    >>> bnp.KmerEncoding(3).rolling_window(sequences)
+    RaggedArray([[52, 45, 43, 58, 46, 11], [39, 41, 26, 6], [43, 10, 34, 40, 26]])
+
+To count all the 3-mers in the 'reads.fq' sequences we can do as follows:
+
+    >>> fastq_entries_stream = bnp.open("example_data/reads.fq")
+    >>> counts = np.zeros(4**3, dtype=int)
+    >>> kmer_encoding = bnp.KmerEncoding(3)
+    >>> for fastq_entries in fastq_entries_stream:
+    ...     kmer_hashes = kmer_encoding.rolling_window(fastq_entries.sequence)
+    ...     counts += np.bincount(kmer_hashes.ravel(), minlength=4**3)
+    ... 
+    >>> counts
+    array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
+           0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0])
+
+
 
 Credits
 -------
