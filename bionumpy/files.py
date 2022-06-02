@@ -1,9 +1,9 @@
 from pathlib import PurePath
 import gzip
-from .file_buffers import *
-from .delimited_buffers import *
-from .parser import *
-from .chromosome_provider import *
+from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer)
+from .parser import NpBufferStream, NpBufferedWriter
+from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider
 from .indexed_fasta import IndexedFasta
 
 buffer_types = {
@@ -25,7 +25,7 @@ wrappers = {
 default_modes = {".vcf": "chromosome_stream", ".bed": "dict"}
 
 
-def get_buffered_file(
+def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
 ):
     open_func = gzip.open if is_gzip else open
@@ -49,7 +49,7 @@ def bnp_open(filename, mode=None, **kwargs):
     if suffix == ".gz":
         suffix = path.suffixes[-2]
     if suffix in buffer_types:
-        return get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
+        return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)

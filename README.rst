@@ -30,9 +30,29 @@ bioNumpy is a library for handling large biological sequence date sets in Python
 
 IO
 ~~
-The main function for file input and output is the `bnp_open` function, which by default deduces the file type based on the suffix, and creates a buffered reader of a sensible type. For instance::
+The main function for file input and output is the `open` function, which by default deduces the file type based on the suffix, and creates a buffered reader of a sensible type. For instance::
 
+    >>> import bionumpy as bnp
     >>> 
+    >>> fastq_entries_stream = bnp.open("example_data/reads.fq")
+    >>> for fastq_entries in fastq_entries_stream:
+    ...     print(fastq_entries)
+    ... 
+    SequenceEntryWithQuality(name=Sequences(headerishere, anotherheader), sequence=Sequences(CTTGTTGA, CGG), quality=Sequences(!!!!!!!!, ~~~))
+
+A couple of things to note: Firstly the `bnp.open` function understands that the `.fq` suffix means it's a fastq file and reads it as such. It also knowns that usually a `fastq` file is usually too big to keep in memory so instead of reading in the whole file, it reads in chunks of data and delivers it as a stream (In this particular case, the file is so small that we only get one chunk). Third, it delivers the data for each chunk as a `npdataclass` where there is one array-like object for each field. This means that if we only care about the acutal DNA-sequences, we can operate on that on it's own.
+
+Another example would be to read in a vcf-file as such::
+
+    >>> variants_stream = bnp.open("example_data/variants.vcf")
+    >>> for chromosome, variants in variants_stream:
+    ...     print(variants)
+    ... 
+    Variant(chromosome=['chr1' 'chr1' 'chr1'], position=array([883624, 887559, 887800]), ref_seq=Sequences(A, A, A), alt_seq=Sequences(G, C, G))
+    Variant(chromosome=['chr9' 'chr9' 'chr9'], position=array([883624, 887559, 887800]), ref_seq=Sequences(A, A, A), alt_seq=Sequences(G, C, G))
+
+
+Again, `bnp.open` recognizes that this is a vcf file, and again it chooses an appropriate format to output it in. For vcf file this is a stream variant chunks, where each chunk is the variants for one chromosome. This format together with the `ChromosomeMap` decorator makes it easy to work with genomic data.
 
 Encodings
 ~~~~~~~~~

@@ -38,12 +38,12 @@ class BaseEncoding:
         return np.array([ord(c) for c in sequence], dtype=np.uint8)
 
     @classmethod
-    def from_bytes(cls, sequence):
+    def encode(cls, sequence):
         """Identity"""
         return sequence
 
     @classmethod
-    def to_bytes(cls, sequence):
+    def decode(cls, sequence):
         """Identity"""
         return sequence
 
@@ -202,11 +202,15 @@ class GenotypeEncoding:
 
 
 class QualityEncoding:
-    def from_bytes(byte_array):
-        return byte_array - ord("!")
+    def encode(byte_array):
+        res = byte_array - ord("!")
+        res.encoding = QualityEncoding
+        return res
 
-    def to_bytes(quality):
-        return quality + ord("!")
+    def decode(quality):
+        res = quality + ord("!")
+        res.encoding = BaseEncoding
+        return res
 
 
 def alphabet_encoding(_alphabet, name):

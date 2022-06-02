@@ -13,8 +13,7 @@ class DummyClass:
     data: np.ndarray
 
     def __post_init__(self):
-        if not isinstance(self.chromosome, VarLenArray):
-            print("#", self.chromosome)
+        if isinstance(self.chromosome, (str, list)):# VarLenArray):
             self.chromosome = VarLenArray(np.asanyarray([[ord(c) for c in chrom] for chrom in self.chromosome]))
         self.data = np.asanyarray(self.data)
 # 

@@ -10,6 +10,17 @@ class Sequence(np.ndarray):
     def from_string(cls, s):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
+    def __str__(self):
+        if len(self.shape) == 1:
+            return "".join(chr(n) for n in self)
+        return str(np.array(["".join(chr(n) for n in seq) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1]))
+
+    __repr__ = __str__
+
+    @classmethod
+    def from_array(cls, a):
+        return cls(a.shape, a.dtype, a.data)
+
 
 class Sequences(RaggedArray):
     def __init__(self, data, shape=None, encoding=BaseEncoding):
@@ -24,6 +35,7 @@ class Sequences(RaggedArray):
         return ["".join(chr(i) for i in array) for array in self.tolist()]
 
     def __str__(self):
+        self = self.encoding.decode(self)
         strings = (
             "".join(chr(i) for i in array[:20]) + "..." * (len(array) > 20)
             for array in self.tolist()
@@ -31,6 +43,8 @@ class Sequences(RaggedArray):
         seqs = ", ".join(seq for seq, _ in zip(strings, range(20)))
         trail = " ..." if len(self) > 20 else ""
         return f"Sequences({seqs}{trail})"
+
+    __repr__ = __str__
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         r = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)

@@ -190,7 +190,7 @@ class FastQBuffer(OneLineBuffer):
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = QualityEncoding.from_bytes(
+        quality = QualityEncoding.encode(
             self.lines[3 :: self.n_lines_per_entry, :-1]
         )
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
@@ -220,7 +220,7 @@ class FastQBuffer(OneLineBuffer):
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = ord("+")
-        lines[3::step, :-1] = QualityEncoding.to_bytes(entries.quality)
+        lines[3::step, :-1] = QualityEncoding.decode(entries.quality)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = ord("\n")
 

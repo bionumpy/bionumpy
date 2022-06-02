@@ -1,6 +1,6 @@
 import numpy as np
 from itertools import groupby
-
+from .sequences import Sequence
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,6 @@ class ChromosomeProvider:
 
     @staticmethod
     def get_chrom_name(char_array):
-        print(char_array)
         return "".join(chr(c) for c in char_array).replace("\x00", "")
 
     @staticmethod
@@ -55,6 +54,9 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                 len(overlay)
                 and self.get_chrom_name(overlay[0][0].chromosome) != start_chrom
             ):
+                print(overlay[0])
+                overlay[0].chromosome = Sequence.from_array(overlay[0].chromosome.array)
+                print(overlay[0])
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:
@@ -63,6 +65,7 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
             else:
                 l = last_buffer[: chrom_changes[0]]
                 tmp = np.concatenate(overlay + group[:-1] + [l])
+                tmp.chromosome = Sequence.from_array(tmp.chromosome.array)
                 yield (
                     start_chrom,
                     tmp,
@@ -74,10 +77,12 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                         for start, end in zip(chrom_changes[:-1], chrom_changes[1:])
                     )
                     for chunk in chunks:
+                        chunk.chromosome = Sequence.from_array(chunk.chromosome.array)
                         yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
             last_chrom = last_buffer[-1].chromosome
         if len(overlay):
             chunk = overlay[0]
+            chunk.chromosome = Sequence.from_array(chunk.chromosome.array)
             yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
 
 
