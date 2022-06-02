@@ -1,5 +1,5 @@
 import numpy as np
-from .sequences import Sequence, Sequences
+from .sequences import Sequence, Sequences, as_sequence_array
 from npstructures import RaggedArray
 
 from abc import abstractmethod
@@ -41,7 +41,8 @@ class RollableFunction:
         """
         if window_size is None:
             window_size = self.window_size
-
+        if not isinstance(_sequence, np.ndarray):
+            _sequence = as_sequence_array(_sequence)
         shape, sequence = (_sequence.shape, _sequence.ravel())
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = self(windows)
