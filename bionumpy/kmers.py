@@ -33,7 +33,7 @@ class KmerEncoding(RollableFunction):
 
 @convolution
 def fast_hash(sequence, k):
-    encoded = ACTGEncoding.from_bytes(sequence)
+    encoded = ACTGEncoding.encode(sequence)
     bit_array = BitArray.pack(encoded, bit_stride=2)
     hashes = bit_array.sliding_window(k)
     return hashes

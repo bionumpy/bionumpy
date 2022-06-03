@@ -108,7 +108,7 @@ class DelimitedBuffer(FileBuffer):
         )
         n_digits = digit_chars.shape[-1]
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
-        return DigitEncoding.from_bytes(digit_chars) @ powers
+        return DigitEncoding.encode(digit_chars) @ powers
 
     def _validate(self):
         chunk = self._data
@@ -185,7 +185,7 @@ class VCFMatrixBuffer(VCFBuffer):
         variants = self.get_variants(fixed_length)
         genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
         n_samples = self._n_cols - 9
-        genotypes = GenotypeEncoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
+        genotypes = GenotypeEncoding.encode(genotypes.reshape(-1, n_samples, 3))
         return VariantWithGenotypes(
             variants.chromosome,
             variants.position,
