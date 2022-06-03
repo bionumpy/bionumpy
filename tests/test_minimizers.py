@@ -1,6 +1,7 @@
 from bionumpy.minimizers import Minimizers
-from bionumpy.sequences import Sequences
+from bionumpy.sequences import Sequences, Sequence
 from bionumpy.kmers import KmerEncoding
+from bionumpy.encodings import ACTGEncoding
 import numpy as np
 import pytest
 
@@ -15,12 +16,14 @@ def sequences():
     return Sequences([[0, 3, 1, 2, 2, 1, 0],
                       [0, 3, 1, 2, 2, 1],
                       [0, 3, 1, 2, 2],
-                      [0, 3, 1, 2]])
+                      [0, 3, 1, 2]], encoding=ACTGEncoding)
 
 
 @pytest.fixture
 def window():
-    return np.array([0, 3, 1, 2])
+    s = Sequence.from_array(np.array([0, 3, 1, 2]))
+    s.encoding = ACTGEncoding
+    return s
 
 
 @pytest.fixture
@@ -29,7 +32,7 @@ def encoding():
 
 
 def test_window(window, encoding):
-    minimizer = encoding.rolling_window(window)
+    minimizer = encoding(window)
     np.testing.assert_equal(minimizer, 7)
 
 

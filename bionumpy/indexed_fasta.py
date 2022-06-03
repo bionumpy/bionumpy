@@ -1,4 +1,6 @@
 from .chromosome_provider import ChromosomeDictProvider
+from .encodings import BaseEncoding
+from .sequences import as_sequence_array
 import numpy as np
 from pyfaidx import Faidx
 
@@ -37,7 +39,10 @@ class IndexedFasta(ChromosomeDictProvider):
             ret.size - idx["rlen"],
             data.shape,
         )
-        return ((ret - ord("A")) % 32) + ord("A")
+        ret = as_sequence_array(((ret - ord("A")) % 32) + ord("A"), encoding=BaseEncoding)
+        print(type(ret))
+        return ret
+        # return ((ret - ord("A")) % 32) + ord("A")
 
 
 to_str = lambda x: "".join(chr(c) for c in x)

@@ -72,7 +72,12 @@ def as_sequence_array(s, encoding=BaseEncoding):
                 s.encoding=encoding
                 return s
         return s
-    elif isinstance(s, (np.ndarray, RaggedArray)):
+    elif isinstance(s, np.ndarray):
+        s = encoding.encode(s)
+        s = Sequence.from_array(s)
+        s.encoding = encoding
+        return s
+    elif isinstance(s, RaggedArray):
         return s
     elif isinstance(s, str):
         return encoding.encode(Sequence.from_string(s))

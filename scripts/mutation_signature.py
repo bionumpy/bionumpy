@@ -1,5 +1,5 @@
 import numpy as np
-from bionumpy import bnp_open
+import bionumpy as bnp
 from bionumpy.delimited_buffers import VCFMatrixBuffer
 from bionumpy.mutation_signature import (
     get_kmers, MutationSignatureEncoding)
@@ -19,15 +19,15 @@ def print_file(counts, flank):
 
 def simple_main(vcf_filename, fasta_filename, flank, do_matrix=False, bed_filename=None):
     if do_matrix:
-        variants = bnp_open(vcf_filename, buffer_type=VCFMatrixBuffer)
+        variants = bnp.open(vcf_filename, buffer_type=VCFMatrixBuffer)
     else:
-        variants = bnp_open(vcf_filename)
+        variants = bnp.open(vcf_filename)
     snps = get_snps(variants)
     if bed_filename:
-        intervals = bnp_open(bed_filename, remove_chr=True)
+        intervals = bnp.open(bed_filename, remove_chr=True)
         intervals = merge_intervals(sort_intervals(intervals))
         snps = filter_on_intervals(snps, intervals)
-    reference = bnp_open(fasta_filename, remove_chr=True)
+    reference = bnp.open(fasta_filename, remove_chr=True)
     counts = get_kmers(snps, reference, flank)
     print_file(counts, flank)
 
