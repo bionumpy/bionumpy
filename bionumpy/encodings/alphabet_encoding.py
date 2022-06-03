@@ -21,6 +21,7 @@ class AlphabetEncoding(Encoding):
     def decode(self, encoded):
         return self._alphabet[encoded]
 
+    @property
     def alphabet_size(self):
         return self._alphabet.size
 
@@ -31,4 +32,5 @@ class AlphabetEncoding(Encoding):
 
 
 ACTGEncoding = AlphabetEncoding("ACTG")
+ACTGnEncoding = AlphabetEncoding("ACTGn")
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')

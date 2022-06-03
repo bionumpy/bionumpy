@@ -10,20 +10,20 @@ logger = logging.getLogger(__name__)
 
 class KmerEncoding(RollableFunction):
 
-    def __init__(self, k, alphabet_size=4, encoding=ACTGEncoding):
+    def __init__(self, k, alphabet_encoding=ACTGEncoding):
         self.window_size = k
         self._k = k
-        self._alphabet_size = alphabet_size
+        self._alphabet_size = alphabet_encoding.alphabet_size
         self._convolution = self._alphabet_size ** np.arange(self._k)
-        self._encoding = encoding
+        self._encoding = alphabet_encoding
 
     def __call__(self, sequence: Sequence) -> int:
         sequence = as_sequence_array(sequence, encoding=self._encoding)
         return sequence.dot(self._convolution)
 
-    def inverse(self, array: int) -> Sequence:
+    def inverse(self, kmer_hash: int) -> Sequence:
         return Sequence.from_array(
-            (array[:, np.newaxis] // self._convolution) % self._alphabet_size)
+            (kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size)
 
     def sample_domain(self, n):
         return np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
