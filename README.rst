@@ -54,6 +54,13 @@ Another example would be to read in a vcf-file as such::
 
 Again, `bnp.open` recognizes that this is a vcf file, and again it chooses an appropriate format to output it in. For vcf file this is a stream variant chunks, where each chunk is the variants for one chromosome. This format together with the `ChromosomeMap` decorator makes it easy to work with genomic data.
 
+Sequences
+~~~~~~~~~
+`bnp.Sequences` objects are numpy arrays structured in a way that allows them to hold many seqeunces of unequal lenght. Under the hood they are `npstructures.RaggedArray` objects that holds byte-arrays, with an encoding that specifies which characters each byte represents. Most of the time, it is not necessary to think about these inner workings, but one can think of them as lists of strings (with the possibility of performing numpy functions on them). The most common way to get `Sequences` objects is to read a file, but they can also be created from lists of strings using the `bnp.as_sequence_array` function::
+
+    >>> bnp.as_sequence_array(["acgttgta", "gcttca", "gttattc"])
+    Sequences(acgttgta, gcttca, gttattc)
+
 Encodings
 ~~~~~~~~~
 The main point of bioNumpy is to leverage the computational power of numpy for biological data. A key element to this is to represent different types of biological data as numbers (in numpy arrays). The basic mechanism for doing this is by Encoding classes that can encode data types into numbers, and decode them back in to the data type.
