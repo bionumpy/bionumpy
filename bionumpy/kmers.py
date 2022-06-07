@@ -15,8 +15,11 @@ class KmerHash:
 
 
 @convolution
-def fast_hash(sequence, k):
-    encoded = ACTGEncoding.from_bytes(sequence)
+def fast_hash(sequence, k, do_encoding=True):
+    if do_encoding:
+        encoded = ACTGEncoding.from_bytes(sequence)
+    else:
+        encoded = sequence
     bit_array = BitArray.pack(encoded, bit_stride=2)
     hashes = bit_array.sliding_window(k)
     return hashes
