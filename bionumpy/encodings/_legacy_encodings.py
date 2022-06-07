@@ -1,6 +1,3 @@
-import logging
-import numpy as np
-from itertools import product
 
 
 class ThreeBitEncoding:
@@ -10,11 +7,11 @@ class ThreeBitEncoding:
     complements = np.array([0, 7, 0, 4, 3, 0, 0, 1], dtype=np.uint8)
 
     @classmethod
-    def from_bytes(cls, sequence):
+    def encode(cls, sequence):
         return sequence & (2 ** 3 - 1)
 
     @classmethod
-    def to_bytes(cls, sequence):
+    def decode(cls, sequence):
         return cls.reverse[sequence]
 
     @classmethod
@@ -79,7 +76,7 @@ class ACTGTwoBitEncoding:
         return (char.view(np.uint8) ^ complements).view(dtype)
 
     @classmethod
-    def from_bytes(cls, sequence):
+    def encode(cls, sequence):
         if sequence.size % 16 != 0:
             sequence = np.append(
                 sequence, np.empty(16 - (sequence.size % 16), dtype=np.uint8)
@@ -96,15 +93,15 @@ class ACTGTwoBitEncoding:
     @classmethod
     def from_string(cls, string):
         byte_repr = np.array([ord(c) for c in string], dtype=np.uint8)
-        return cls.from_bytes(byte_repr)
+        return cls.encode(byte_repr)
 
     @classmethod
     def to_string(cls, bits):
-        byte_repr = cls.to_bytes(bits)
+        byte_repr = cls.decode(bits)
         return "".join(chr(b) for b in byte_repr)
 
     @classmethod
-    def to_bytes(cls, sequence):
+    def decode(cls, sequence):
         assert sequence.dtype == np.uint8
         bit_mask = np.uint8(3)  # last two bits
         all_bytes = (sequence[:, None] >> cls._shift_2bits) & bit_mask
@@ -147,7 +144,7 @@ class SimpleEncoding(ACTGTwoBitEncoding):
         return np.bitwise_or.reduce(two_bits_vector << cls._shift_2bits, axis=-1)
 
     @classmethod
-    def from_bytes(cls, sequence):
+    def encode(cls, sequence):
         assert sequence.dtype == np.uint8
         assert sequence.size % 4 == 0, sequence.size
         two_bits = cls.convert_byte_to_2bits(sequence)
@@ -168,50 +165,6 @@ def twobit_swap(number):
     return new_bytes.view(dtype).byteswap()
 
 
-class StrandEncoding:
-    MIN_CODE = ord("+")
-
-    @classmethod
-    def from_bytes(cls, bytes_array):
-        return (bytes_array & np.uint8(2)) >> np.uint8(1)
-
-    @classmethod
-    def to_bytes(cls, strands):
-        return 2 * strands + cls.MIN_CODE
-
-
-class DigitEncoding:
-    MIN_CODE = ord("0")
-
-    @classmethod
-    def from_bytes(cls, bytes_array):
-        return bytes_array - cls.MIN_CODE
-
-    @classmethod
-    def to_bytes(cls, digits):
-        return digits + cls.MIN_CODE
-
-
-class GenotypeEncoding:
-    @classmethod
-    def from_bytes(cls, bytes_array):
-        assert bytes_array.shape[-1] == 3
-        return (bytes_array[..., 0] == ord("1")) + (
-            bytes_array[..., 2] == ord("1")
-        ).astype("int")
-
-
-class QualityEncoding:
-    def encode(byte_array):
-        res = byte_array - ord("!")
-        res.encoding = QualityEncoding
-        return res
-
-    def decode(quality):
-        res = quality + ord("!")
-        res.encoding = BaseEncoding
-        return res
-
 
 def alphabet_encoding(_alphabet, name):
     _alphabet = np.asanyarray(_alphabet)
@@ -223,11 +176,11 @@ def alphabet_encoding(_alphabet, name):
         lookup = _lookup
 
         @classmethod
-        def from_bytes(cls, byte_array):
+        def encode(cls, byte_array):
             return cls.lookup[byte_array]
 
         @classmethod
-        def to_bytes(cls, encoded):
+        def decode(cls, encoded):
             return cls.alphabet[encoded]
 
     cls.__name__ = name
