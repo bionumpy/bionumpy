@@ -19,7 +19,7 @@ class AlphabetEncoding(Encoding):
         return self._lookup[byte_array]
 
     def decode(self, encoded):
-        return self._alphabet[encoded]
+        return self._alphabet[np.asarray(encoded)]
 
     @property
     def alphabet_size(self):

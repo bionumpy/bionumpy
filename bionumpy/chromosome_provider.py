@@ -54,9 +54,7 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                 len(overlay)
                 and self.get_chrom_name(overlay[0][0].chromosome) != start_chrom
             ):
-                print(overlay[0])
                 overlay[0].chromosome = Sequence.from_array(overlay[0].chromosome.array)
-                print(overlay[0])
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:

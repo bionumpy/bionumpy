@@ -28,7 +28,7 @@ def window():
 
 @pytest.fixture
 def encoding():
-    return Minimizers(3, KmerEncoding(2))
+    return Minimizers(3, KmerEncoding(2, alphabet_size=4))
 
 
 def test_window(window, encoding):

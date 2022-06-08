@@ -20,8 +20,6 @@ class IndexedFasta(ChromosomeDictProvider):
         if self._remove_chr:
             assert not chromosome.startswith("chr"), chromosome
             chromosome = "chr" + chromosome
-        if chromosome not in self._index:
-            print(chromosome, list(self._index.keys()))
         idx = self._index[chromosome]
         lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
         n_rows = (rlen + lenc - 1) // lenc
@@ -40,7 +38,6 @@ class IndexedFasta(ChromosomeDictProvider):
             data.shape,
         )
         ret = as_sequence_array(((ret - ord("A")) % 32) + ord("A"), encoding=BaseEncoding)
-        print(type(ret))
         return ret
         # return ((ret - ord("A")) % 32) + ord("A")
 
@@ -53,6 +50,3 @@ if __name__ == "__main__":
     filename = "/home/knut/Data/human_g1k_v37.fasta"
     f = Fasta(filename)
     f2 = IndexedFasta(filename, add_chr=True)
-    print(f["2"][100000:100020])
-    print(f2["chr2"][100000:100020])
-    print(to_str(f2["chr2"][100000:100020]))
