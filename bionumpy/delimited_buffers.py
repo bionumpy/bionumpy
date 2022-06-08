@@ -2,7 +2,7 @@ from npstructures import VarLenArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
-from .encodings import DigitEncoding, GenotypeEncoding
+from .encodings import DigitEncoding, GenotypeEncoding, BaseEncoding
 import numpy as np
 
 

@@ -37,7 +37,7 @@ class RollableFunction:
         _sequence : Sequences
             Sequence or set of Sequences to apply the rolling window to
         window_size : int
-            The size of the rolling window (can also be set by `self.window_size`
+            The size of the rolling window (should ideally be set by `self.window_size`)
         """
         
         if window_size is None:
