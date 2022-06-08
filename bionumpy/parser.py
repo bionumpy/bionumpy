@@ -99,6 +99,7 @@ class NpBufferedWriter:
         """
         bytes_array = self._buffer_type.from_data(data)
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
+        self._file_obj.flush()
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )

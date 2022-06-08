@@ -93,7 +93,6 @@ def test_line_chunker(vcf_buffer2):
     for line, t in zip(lines, true):
         print(line, t)
         assert line == t
-        #assert lines == true
         
         
     
