@@ -2,7 +2,7 @@ from pathlib import PurePath
 import gzip
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer)
-from .parser import NpBufferStream, NpBufferedWriter
+from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider
 from .indexed_fasta import IndexedFasta
 
@@ -37,6 +37,8 @@ def _get_buffered_file(
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size"]}
     buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
     data = (buf.get_data() for buf in buffers)
+    if "n_entries" in kwargs:
+        data = chunk_lines(data, kwargs["n_entries"])
     if mode is None:
         mode = default_modes.get(suffix, "stream")
     return wrappers[mode](data, buffer_type.dataclass)

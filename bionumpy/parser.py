@@ -108,7 +108,7 @@ def chunk_lines(stream, n_lines):
     remaining_lines = n_lines
     for chunk in stream:
         n_lines_in_chunk = len(chunk)
-        if n_lines_in_chunk >= remaining_lines:
+        while n_lines_in_chunk >= remaining_lines:
             cur_buffers.append(chunk[:remaining_lines])
             yield np.concatenate(cur_buffers)
             cur_buffers = []
