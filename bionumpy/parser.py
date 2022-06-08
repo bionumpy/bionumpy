@@ -1,10 +1,12 @@
 import numpy as np
+my_empty =  np.empty
+
 import logging
 
 from npstructures import npdataclass
 
 logger = logging.getLogger(__name__)
-
+wrapper = lambda x: x
 
 def repr_bytes(n):
     if n < 10 ** 4:
@@ -45,7 +47,7 @@ class NpBufferStream:
             )
             buff = self._buffer_type.from_raw_buffer(chunk)
             self._file_obj.seek(buff.size - self._chunk_size, 1)
-            yield buff
+            yield wrapper(buff)
             chunk = self.__get_buffer()
         if chunk is not None and chunk.size:
             yield self._buffer_type.from_raw_buffer(chunk)
@@ -63,7 +65,7 @@ class NpBufferStream:
         return a[:bytes_read]
 
     def __read_raw_chunk(self):
-        array = np.empty(self._chunk_size, dtype="uint8")
+        array = my_empty(self._chunk_size, dtype="uint8")
         bytes_read = self._file_obj.readinto(array)
         return array, bytes_read
 
@@ -100,3 +102,18 @@ class NpBufferedWriter:
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
+
+def chunk_lines(stream, n_lines):
+    cur_buffers = []
+    remaining_lines = n_lines
+    for chunk in stream:
+        n_lines_in_chunk = len(chunk)
+        if n_lines_in_chunk >= remaining_lines:
+            yield np.concatenate(cur_buffers+[chunk[:remaining_lines]])
+            cur_buffers = []
+            chunk = chunk[remaining_lines:]
+            remaining_lines = n_lines
+            n_lines_in_chunk = len(chunk)
+        cur_buffers.append(chunk)
+        remaining_lines -= n_lines_in_chunk
+    yield np.concatenate(cur_buffers)

@@ -4,6 +4,7 @@ from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
+from bionumpy.parser import chunk_lines
 
 np.seterr(all='raise')
 
@@ -81,3 +82,17 @@ def test_vcf_buffer2(vcf_buffer2):
             SNP("chr1",	887559,	"A",	"CAA"),
             SNP("chr2",	8877,	"AGG",	"C")]
     assert list(variants) == true
+
+
+def _test_line_chunker(vcf_buffer2):
+    lines = chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)
+    print(lines)
+    true = [SNP("chr1",	88361,	"A",	"G"),
+            SNP("chr1",	887559,	"A",	"CAA"),
+            SNP("chr2",	8877,	"AGG",	"C")]
+    for line in lines:
+        assert line == true
+        
+        
+    
+
