@@ -11,9 +11,10 @@ class Sequence(np.ndarray):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
     def __str__(self):
+        self = self.encoding.decode(self)
         if len(self.shape) == 1:
-            return "".join(chr(n) for n in self)
-        return str(np.array(["".join(chr(n) for n in seq) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1]))
+            return "Sequence(" + "".join(chr(n) for n in self[:20]) + ")"
+        return "Sequence(" + str(np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]) + ")"
 
     __repr__ = __str__
 
@@ -41,7 +42,8 @@ class Sequences(RaggedArray):
         return ["".join(chr(i) for i in array) for array in self.tolist()]
 
     def __str__(self):
-        self = self.encoding.decode(self)
+        self = self.__class__(self.encoding.decode(self.ravel()),
+                              self.shape)
         strings = (
             "".join(chr(i) for i in array[:20]) + "..." * (len(array) > 20)
             for array in self.tolist()
@@ -83,6 +85,6 @@ def as_sequence_array(s, encoding=BaseEncoding):
         return encoding.encode(Sequence.from_string(s))
     elif isinstance(s, list):
         s = Sequences.from_strings(s)
-        return Sequences(encoding.encode(s.ravel()), s.shape)
+        return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
