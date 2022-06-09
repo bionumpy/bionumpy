@@ -56,19 +56,19 @@ Again, `bnp.open` recognizes that this is a vcf file, and again it chooses an ap
 
 Sequences
 ~~~~~~~~~
-`bnp.Sequences` objects are numpy arrays structured in a way that allows them to hold many seqeunces of unequal lenght. Under the hood they are `npstructures.RaggedArray` objects that holds byte-arrays, with an encoding that specifies which characters each byte represents. Most of the time, it is not necessary to think about these inner workings, but one can think of them as lists of strings (with the possibility of performing numpy functions on them). The most common way to get `Sequences` objects is to read a file, but they can also be created from lists of strings using the `bnp.as_sequence_array` function::
+`bnp.Sequences` objects are numpy arrays structured in a way that allows them to hold many sequences of unequal lenght. Under the hood they are `npstructures.RaggedArray` objects that hold byte-arrays, with an encoding that specifies which characters each byte represents. Most of the time, it is not necessary to think about these inner workings, but one can think of them as lists of strings (with the possibility of performing numpy functions on them). The most common way to get `Sequences` objects is to read a file, but they can also be created from lists of strings using the `bnp.as_sequence_array` function::
 
     >>> bnp.as_sequence_array(["acgttgta", "gcttca", "gttattc"])
     Sequences(acgttgta, gcttca, gttattc)
 
 Encodings
 ~~~~~~~~~
-The main point of bioNumpy is to leverage the computational power of numpy for biological data. A key element to this is to represent different types of biological data as numbers (in numpy arrays). The basic mechanism for doing this is by Encoding classes that can encode data types into numbers, and decode them back in to the data type.
+The main point of bioNumpy is to leverage the computational power of numpy for biological data. A key element to this is to represent different types of biological data as numbers (in numpy arrays). The basic mechanism for doing this is by Encoding classes that can encode data types into numbers, and decode them back in to the data type. A driving idea in bionumpy is to make this happen automatically under the hood, so that a user can choose to ignore the inner workings and (in most cases) relate to sequence data sets in the same way as one would with standard numerical numpy data structures.
 
 
 Summarization
 ~~~~~~~~~~~~~
-A key application is to extract features from sequence data sets. A large set of interresting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weigh Matrix scores (sequence->float). bioNumpy provides functionality to apply such functions to rolling windows across large  seuqence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
+A key application is to extract features from sequence data sets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weight Matrix scores (sequence->float). bioNumpy provides functionality to apply such functions to rolling windows across large sequence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
 
 
     class PositionWeightMatrix(RollableFunction):
