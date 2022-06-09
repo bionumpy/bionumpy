@@ -48,7 +48,6 @@ class RollableFunction:
             else:
                 _sequence = RaggedArray(_sequence)
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        print("TEMP: ", sequence)
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
