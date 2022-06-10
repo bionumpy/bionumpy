@@ -81,3 +81,16 @@ class SortedIntervals:
     @classmethod
     def concatenate(cls, elements):
         return cls(np.vstack([element.data for element in elements]))
+
+
+@npdataclass
+class GFFEntry:
+    chromosome: str
+    source: str
+    feature_type: str
+    start: int
+    end: int
+    score: None
+    strand: str
+    phase: int
+    atributes: str
