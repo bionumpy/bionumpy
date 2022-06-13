@@ -1,7 +1,6 @@
 import numpy as np
 from .base_encoding import BaseEncoding, Encoding
 from .alphabet_encoding import AlphabetEncoding, ACTGEncoding, AminoAcidEncoding
-from itertools import product
 
 __all__ = ["BaseEncoding", "Encoding",
            "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]

@@ -94,3 +94,18 @@ class GFFEntry:
     strand: str
     phase: int
     atributes: str
+
+
+@npdataclass
+class SAMEntry:
+    name: str
+    flag: int
+    chromosome: str
+    position: int
+    mapq: int
+    cigar: str
+    next_chromosome: str
+    next_position: int
+    length: int
+    sequence: str
+    quality: str
