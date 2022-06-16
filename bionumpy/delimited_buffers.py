@@ -1,7 +1,8 @@
+import logging
 from npstructures import VarLenArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
-from .encodings import DigitEncoding, GenotypeEncoding
+from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 import numpy as np
 
 
@@ -19,6 +20,9 @@ class DelimitedBuffer(FileBuffer):
     @classmethod
     def from_raw_buffer(cls, chunk):
         new_lines = np.flatnonzero(chunk == NEWLINE)
+        if len(new_lines) == 0:
+            logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
+
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
     def get_integers(self, cols) -> np.ndarray:
@@ -178,13 +182,14 @@ class VCFBuffer(DelimitedBuffer):
 
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VariantWithGenotypes
+    genotype_encoding = GenotypeEncoding
 
     def get_entries(self, fixed_length=False):
         self.validate_if_not()
         variants = self.get_variants(fixed_length)
         genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
         n_samples = self._n_cols - 9
-        genotypes = GenotypeEncoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
+        genotypes = self.genotype_encoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
         return VariantWithGenotypes(
             variants.chromosome,
             variants.position,
@@ -194,6 +199,10 @@ class VCFMatrixBuffer(VCFBuffer):
         )
 
     get_data = get_entries
+
+
+class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
+    genotype_encoding = PhasedGenotypeEncoding
 
 
 class GfaSequenceBuffer(DelimitedBuffer):

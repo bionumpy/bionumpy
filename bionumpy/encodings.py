@@ -190,13 +190,22 @@ class DigitEncoding:
         return digits + cls.MIN_CODE
 
 
+class PhasedGenotypeEncoding:
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        assert bytes_array.shape[-1] == 3
+        return 2*(bytes_array[..., 0] == ord("1")) + (
+            bytes_array[..., 2] == ord("1")
+        ).astype(np.uint8)
+
+
 class GenotypeEncoding:
     @classmethod
     def from_bytes(cls, bytes_array):
         assert bytes_array.shape[-1] == 3
         return (bytes_array[..., 0] == ord("1")) + (
             bytes_array[..., 2] == ord("1")
-        ).astype("int")
+        ).astype(np.uint8)
 
 
 class QualityEncoding:
