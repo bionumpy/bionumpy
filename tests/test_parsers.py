@@ -91,7 +91,7 @@ def test_line_chunker(vcf_buffer2):
             Variant("chr1",	887559,	"A",	"CAA"),
             Variant("chr2",	8877,	"AGG",	"C")]
     for line, t in zip(lines, true):
-        print(line, t)
+        # print(line, t)
         assert line == t
         
         
