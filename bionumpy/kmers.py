@@ -37,8 +37,20 @@ class KmerEncoding(RollableFunction):
 
 
 @convolution
-def fast_hash(sequence, k):
-    encoded = ACTGEncoding.encode(sequence)
+def fast_hash(sequence, k, do_encoding=True):
+    if do_encoding:
+        encoded = ACTGEncoding.encode(sequence)
+    else:
+        encoded = sequence
     bit_array = BitArray.pack(encoded, bit_stride=2)
     hashes = bit_array.sliding_window(k)
     return hashes
+
+
+@convolution
+def safe_hash(sequence, k):
+    if not hasattr(sequence, "encoded"):
+        sequence = ACTGEncoding.encode(sequence)
+
+    return np.convolve(sequence, 4**np.arange(k))
+

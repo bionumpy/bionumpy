@@ -1,6 +1,7 @@
-from bionumpy.kmers import KmerEncoding
+from bionumpy.kmers import KmerEncoding, safe_hash
 import numpy as np
 from npstructures import RaggedArray, RaggedShape
+from bionumpy.encodings import ACTGEncoding
 
 
 def test_kmer_encoding():
@@ -19,3 +20,18 @@ def test_rolling_hash():
     ragged = RaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)
     assert encoded.shape == RaggedShape(lengths-3+1)
+
+
+
+def test_safe_hash():
+    sequence = np.array([1, 2, 3, 1, 2, 3, 1, 1, 1, 1], dtype=np.uint8)
+
+    k = 5
+    hashes = safe_hash(sequence, k)
+    print(hashes)
+
+    hasher = KmerEncoding(k, None, 4)
+    hashes = hasher.rolling_window(sequence)
+    #print(hasher(sequence))
+    print(type(hashes))
+    print(hashes)
