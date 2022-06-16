@@ -102,7 +102,7 @@ class DelimitedBuffer(FileBuffer):
         # delimiters = self._delimiters.reshape(-1, self._n_cols)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
         if end is not None:
-            ends = starts + end
+            return self._data[starts[..., np.newaxis] + np.arange(end-start)].reshape(-1, end-start)
         else:
             ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())

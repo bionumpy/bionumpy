@@ -65,9 +65,11 @@ class NpBufferStream:
         return a[:bytes_read]
 
     def __read_raw_chunk(self):
-        array = my_empty(self._chunk_size, dtype="uint8")
-        bytes_read = self._file_obj.readinto(array)
-        return array, bytes_read
+        b = np.frombuffer(self._file_obj.read(self._chunk_size), dtype="uint8")
+        return b, b.size
+        # array = my_empty(self._chunk_size, dtype="uint8")
+        # bytes_read = self._file_obj.readinto(array)
+        #return array, bytes_read
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
