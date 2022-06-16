@@ -36,7 +36,16 @@ class GenotypeEncoding(Encoding):
         assert bytes_array.shape[-1] == 3
         return (bytes_array[..., 0] == ord("1")) + (
             bytes_array[..., 2] == ord("1")
-        ).astype("int")
+        ).astype(np.int8)
+
+
+class PhasedGenotypeEncoding:
+    @classmethod
+    def from_bytes(cls, bytes_array):
+        assert bytes_array.shape[-1] == 3
+        return 2*(bytes_array[..., 0] == ord("1")) + (
+            bytes_array[..., 2] == ord("1")
+        ).astype(np.int8)
 
 
 class QualityEncoding(Encoding):

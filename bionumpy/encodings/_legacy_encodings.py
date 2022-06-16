@@ -165,7 +165,6 @@ def twobit_swap(number):
     return new_bytes.view(dtype).byteswap()
 
 
-
 def alphabet_encoding(_alphabet, name):
     _alphabet = np.asanyarray(_alphabet)
     _lookup = np.zeros(np.max(_alphabet) + 1, dtype=np.uint8)
