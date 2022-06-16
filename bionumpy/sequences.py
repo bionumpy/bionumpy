@@ -10,13 +10,16 @@ class Sequence(np.ndarray):
     def from_string(cls, s):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
-    def __str__(self):
+    def __repr__(self):
         self = self.encoding.decode(self)
         if len(self.shape) == 1:
             return "Sequence(" + "".join(chr(n) for n in self[:20]) + ")"
         return "Sequence(" + str(np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]) + ")"
 
-    __repr__ = __str__
+    def __str__(self):
+        if len(self.shape) == 1:
+            return "".join(chr(n) for n in self.encoding.decode(self)[:10])
+        return self.__repr__()
 
     @classmethod
     def from_array(cls, a):
@@ -26,6 +29,8 @@ class Sequence(np.ndarray):
 class Sequences(RaggedArray):
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
+        self._data = Sequence.from_array(self._data)
+        self._data.encoding = encoding
         self.encoding = encoding
 
     def ravel(self):

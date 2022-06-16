@@ -90,8 +90,8 @@ def test_line_chunker(vcf_buffer2):
     true = [Variant("chr1",	88361,	"A",	"G"),
             Variant("chr1",	887559,	"A",	"CAA"),
             Variant("chr2",	8877,	"AGG",	"C")]
+    print(VCFBuffer.from_raw_buffer(vcf_buffer2).get_data())
     for line, t in zip(lines, true):
-        # print(line, t)
         assert line == t
         
         

@@ -50,7 +50,13 @@ chr1	887801	rs3828047	A	G\t.\t.\t.\t.\t./.	1/1:0,17:17:39:398,39,0	1/1:0,3:3:9:1
     , "gfa_sequence": """\
 S\tid1\tAACCTTGG\t.\t.
 S\tid4\tACTG\t*\t*
-"""}
+""", "gff_entry": """\
+CHROMOSOME_I	Allele	substitution	10017380	10017380	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=4.49151;public_name=q504;substitution=G/A;variation=WBVar00241143
+CHROMOSOME_I	Allele	substitution	10573196	10573196	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=5.05579;public_name=vc56;substitution=G/A;variation=WBVar00275020
+CHROMOSOME_I	Allele	substitution	13447169	13447169	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=20.7564;public_name=ar197;strain=GS3412;substitution=G/A;variation=WBVar00000227
+CHROMOSOME_I	Allele	substitution	13721389	13721389	.	+.	aachange=A to V;consequence=Missense;interpolated_map_position=21.6433;public_name=mg334;substitution=G/A;variation=WBVar00088937
+"""
+}
 
 buffers = {key: chunk_from_text(val) for key, val in buffer_texts.items()}
 

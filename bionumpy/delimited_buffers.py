@@ -3,6 +3,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
 from .encodings import DigitEncoding, GenotypeEncoding, BaseEncoding
+import dataclasses
 import numpy as np
 
 
@@ -206,3 +207,29 @@ class GfaSequenceBuffer(DelimitedBuffer):
         return SequenceEntry(ids, sequences)
 
     get_data = get_sequences
+
+
+def get_bufferclass_for_datatype(_dataclass):
+    class DatatypeBuffer(DelimitedBuffer):
+        dataclass = _dataclass
+
+        def get_data(self):
+            self.validate_if_not()
+            columns = []
+            for col_number, field in enumerate(dataclasses.fields(self.dataclass)):
+                if field.type is None:
+                    col = None
+                elif field.type == str:
+                    col = self.get_text(col_number, fixed_length=False)
+                elif field.type == int:
+                    col = self.get_integers(col_number)
+                else:
+                    assert False, field
+                columns.append(col)
+            n_entries = len(next(col for col in columns if col is not None))
+            columns = [c if c is not None else np.empty((n_entries, 0))
+                       for c in columns]
+            return self.dataclass(*columns)
+    DatatypeBuffer.__name__ = _dataclass.__name__+"Buffer"
+    DatatypeBuffer.__qualname__ = _dataclass.__qualname__+"Buffer"
+    return DatatypeBuffer

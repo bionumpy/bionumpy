@@ -1,7 +1,8 @@
 from pathlib import PurePath
 import gzip
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer)
+from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .datatypes import GFFEntry, SAMEntry
 from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider
 from .indexed_fasta import IndexedFasta
@@ -14,6 +15,9 @@ buffer_types = {
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
+    ".gff": get_bufferclass_for_datatype(GFFEntry),
+    ".gff3": get_bufferclass_for_datatype(GFFEntry),
+    ".sam": get_bufferclass_for_datatype(SAMEntry)
 }
 
 wrappers = {
