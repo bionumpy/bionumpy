@@ -7,10 +7,10 @@ from bionumpy.position_weight_matrix import PositionWeightMatrix
 @pytest.fixture
 def matrix():
     with np.errstate(divide='ignore'):
-        m = np.log([[0.5, 0.25],
-                    [0, 0.25],
-                    [0.5, 0.25],
-                    [0, 0.25]])
+        m = np.log([[0.4, 0.25],
+                    [0.1, 0.25],
+                    [0.4, 0.25],
+                    [0.1, 0.25]])
     return m
 
 
@@ -31,4 +31,4 @@ def test_window(window, matrix):
 
 def test_sequence(sequence, matrix):
     log_prob = PositionWeightMatrix(matrix).rolling_window(sequence)
-    np.testing.assert_allclose(np.exp(log_prob), [0.5*0.25, 0, 0.5*0.25])
+    np.testing.assert_allclose(np.exp(log_prob), [0.4*0.25, 0.025, 0.4*0.25])
