@@ -7,7 +7,7 @@ import numpy as np
 def read_index(filename):
     split_lines =(line.split() for line in open(filename))
     return {chromosome:
-            {"rlen": int(rlen), "offset": int(offset), "lenb": int(lenc), "lenc": int(lenb)}
+            {"rlen": int(rlen), "offset": int(offset), "lenc": int(lenc), "lenb": int(lenb)}
             for chromosome, rlen, offset, lenc, lenb in split_lines}
 
 class IndexedFasta(ChromosomeDictProvider):
