@@ -2,13 +2,18 @@ from .chromosome_provider import ChromosomeDictProvider
 from .encodings import BaseEncoding
 from .sequences import as_sequence_array
 import numpy as np
-from pyfaidx import Faidx
 
+
+def read_index(filename):
+    split_lines =(line.split() for line in open(filename))
+    return {chromosome:
+            {"rlen": int(rlen), "offset": int(offset), "lenb": int(lenc), "lenc": int(lenb)}
+            for chromosome, rlen, offset, lenc, lenb in split_lines}
 
 class IndexedFasta(ChromosomeDictProvider):
     def __init__(self, filename, add_chr=False, remove_chr=False):
         self._filename = filename
-        self._index = Faidx(filename).index
+        self._index = read_index(filename+".fai")# Faidx(filename).index
         self._f_obj = open(filename, "rb")
         self._add_chr = add_chr
         self._remove_chr = remove_chr
@@ -25,7 +30,7 @@ class IndexedFasta(ChromosomeDictProvider):
         n_rows = (rlen + lenc - 1) // lenc
         data = np.empty(lenb * n_rows, dtype=np.uint8)
         bytes_to_read = (n_rows - 1) * lenb + (rlen - (n_rows - 1) * lenc)
-        self._f_obj.seek(idx.offset)
+        self._f_obj.seek(idx["offset"])
         self._f_obj.readinto(data[:bytes_to_read])
         assert np.all(data[:bytes_to_read] > 0), data[:bytes_to_read]
         data = data.reshape(n_rows, lenb)
