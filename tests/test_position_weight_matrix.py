@@ -26,7 +26,7 @@ def sequence():
 
 def test_window(window, matrix):
     log_prob = PositionWeightMatrix(matrix)(window)
-    np.testing.assert_allclose(np.exp(log_prob), 0.5*0.25)
+    np.testing.assert_allclose(np.exp(log_prob), 0.4*0.25)
 
 
 def test_sequence(sequence, matrix):
