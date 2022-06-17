@@ -1,13 +1,7 @@
 import sys
-from bionumpy.parser import BufferedNumpyParser
-from bionumpy.kmers import TwoBitHash
+import bionumpy as bnp
+from bionumpy.kmers import fast_hash
 
-parser = BufferedNumpyParser.from_filename(sys.argv[1], chunk_size=10000000)
-hasher = TwoBitHash(k=31)
-for chunk in parser.get_chunks():
-    #Can move data to gpu already here
-    #chunk is FileBuffer object
-
-    sequences = chunk.get_sequences()
-    kmers = hasher.get_kmer_hashes(sequences)
-    # kmers can be passed to counter
+for chunk in bnp.open(sys.argv[1]):
+    kmers = fast_hash(chunk.sequence, 31)
+    print(kmers.ravel())
