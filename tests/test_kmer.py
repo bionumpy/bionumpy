@@ -1,6 +1,7 @@
-from bionumpy.kmers import KmerEncoding
+from bionumpy.kmers import KmerEncoding, safe_hash
 import numpy as np
 from npstructures import RaggedArray, RaggedShape
+from bionumpy.encodings import ACTGEncoding
 
 
 def test_kmer_encoding():
@@ -19,3 +20,4 @@ def test_rolling_hash():
     ragged = RaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)
     assert encoded.shape == RaggedShape(lengths-3+1)
+
