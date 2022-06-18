@@ -1,4 +1,4 @@
-from bionumpy.kmers import KmerEncoding, safe_hash
+from bionumpy.kmers import KmerEncoding
 import numpy as np
 from npstructures import RaggedArray, RaggedShape
 from bionumpy.encodings import ACTGEncoding
