@@ -1,6 +1,9 @@
 import numpy as np
 from npstructures import npdataclass, SeqArray
 
+@npdataclass
+class RawSeqeuence:
+    sequence: SeqArray
 
 @npdataclass
 class SequenceEntry:
