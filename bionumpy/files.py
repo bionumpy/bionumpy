@@ -1,11 +1,14 @@
 from pathlib import PurePath
 import gzip
+import numpy as np
+
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
 from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider
 from .indexed_fasta import IndexedFasta
+
 
 buffer_types = {
     ".vcf": VCFBuffer,
@@ -24,9 +27,10 @@ wrappers = {
     "chromosome_stream": ChromosomeFileStreamProvider,
     "dict": FullChromosomeDictProvider,
     "stream": lambda x, y: x,
+    "full": lambda x, y: np.concatenate(list(x))
 }
 
-default_modes = {".vcf": "chromosome_stream", ".bed": "dict"}
+default_modes = {".vcf": "chromosome_stream", ".bed": "dict", "csv": "full"}
 
 
 def _get_buffered_file(

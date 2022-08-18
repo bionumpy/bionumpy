@@ -218,8 +218,9 @@ class GfaSequenceBuffer(DelimitedBuffer):
     get_data = get_sequences
 
 
-def get_bufferclass_for_datatype(_dataclass):
+def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
     class DatatypeBuffer(DelimitedBuffer):
+        DELIMITER = ord(delimiter)
         dataclass = _dataclass
 
         def get_data(self):
