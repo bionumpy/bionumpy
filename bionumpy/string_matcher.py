@@ -69,7 +69,7 @@ def construct_fixed_len_regex_matchers(matching_regex : str, encoding):
 def construct_wildcard_matcher(matching_regex : str, encoding):
     mask = np.array( [symbol=='.' for symbol in matching_regex] )
 
-    assert encoding == bnp.encodings.ACTGEncoding, "NotImplemented: Support for other encodings awaits a generic way to replace '.'with an arbitrary symbol supported by the encoding"
+    assert encoding in (bnp.encodings.ACTGEncoding, bnp.encodings.AminoAcidEncoding), "NotImplemented: Support for other encodings awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
     base_seq = as_sequence_array( matching_regex.replace('.', 'A'), encoding=encoding )
 
     return MaskedStringMatcher(base_seq, mask)
