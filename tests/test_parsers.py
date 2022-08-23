@@ -1,9 +1,11 @@
+import os
 from itertools import chain
 import pytest
 import numpy as np
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, Variant
-from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
+from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
+from bionumpy.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
 from bionumpy.parser import chunk_lines
 
@@ -21,7 +23,7 @@ def test_buffer_read(buffer_name):
     assert list(data) == true_data
 
 
-@pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])# "bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     data = data[0].stack_with_ragged(data)
@@ -29,6 +31,24 @@ def test_buffer_write(buffer_name):
     print(buf)
     print(true_buf)
     assert np.all(true_buf == buf)
+
+
+def test_custom_read():
+    from npstructures import npdataclass
+
+    @npdataclass
+    class SampleDC:
+        sequence: str
+
+    for extension, delimiter in {"tsv": "\t", "csv": ","}.items():
+        path = f"./tmp.{extension}"
+        with open(path, 'w') as file:
+            file.writelines(f"sequence{delimiter}sequence_aa\nAACCTAGGC{delimiter}ATF\nAACCTAGGC{delimiter}ATF")
+
+        data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter), has_header=True)
+        assert np.array_equal(data.sequence.to_sequences(), np.array(["AACCTAGGC", "AACCTAGGC"]))
+
+        os.remove(path)
 
 
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
@@ -61,15 +81,15 @@ def test_bed_buffer(bed_buffer):
     assert intervals == [
         Interval("chr1", 1, 3),
         Interval("chr1", 40, 60),
-        Interval("chr2",  400, 600)]
+        Interval("chr2", 400, 600)]
 
 
 def test_vcf_buffer(vcf_buffer):
     buf = VCFBuffer.from_raw_buffer(vcf_buffer)
     snps = list(buf.get_snps())
-    true = [SNP("chr1",	88361,	"A",	"G"),
-            SNP("chr1",	887559,	"A",	"C"),
-            SNP("chr2",	8877,	"A",	"G")]
+    true = [SNP("chr1", 88361, "A", "G"),
+            SNP("chr1", 887559, "A", "C"),
+            SNP("chr2", 8877, "A", "G")]
     print(true)
     print(snps)
     assert snps == true
@@ -79,21 +99,17 @@ def test_vcf_buffer2(vcf_buffer2):
     buf = VCFBuffer.from_raw_buffer(vcf_buffer2)
     variants = buf.get_variants()
     print(variants)
-    true = [SNP("chr1",	88361,	"A",	"G"),
-            SNP("chr1",	887559,	"A",	"CAA"),
-            SNP("chr2",	8877,	"AGG",	"C")]
+    true = [SNP("chr1", 88361, "A", "G"),
+            SNP("chr1", 887559, "A", "CAA"),
+            SNP("chr2", 8877, "AGG", "C")]
     assert list(variants) == true
 
 
 def test_line_chunker(vcf_buffer2):
     lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
-    true = [Variant("chr1",	88361,	"A",	"G"),
-            Variant("chr1",	887559,	"A",	"CAA"),
-            Variant("chr2",	8877,	"AGG",	"C")]
+    true = [Variant("chr1", 88361, "A", "G"),
+            Variant("chr1", 887559, "A", "CAA"),
+            Variant("chr2", 8877, "AGG", "C")]
     print(VCFBuffer.from_raw_buffer(vcf_buffer2).get_data())
     for line, t in zip(lines, true):
         assert line == t
-        
-        
-    
-

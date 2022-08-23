@@ -1,5 +1,6 @@
 import numpy as np
-my_empty =  np.empty
+
+my_empty = np.empty
 
 import logging
 
@@ -7,6 +8,7 @@ from npstructures import npdataclass
 
 logger = logging.getLogger(__name__)
 wrapper = lambda x: x
+
 
 def repr_bytes(n):
     if n < 10 ** 4:
@@ -24,11 +26,12 @@ class NpBufferStream:
     from file that corresponds to full entries.
     """
 
-    def __init__(self, file_obj, buffer_type, chunk_size=5000000):
+    def __init__(self, file_obj, buffer_type, chunk_size=5000000, has_header=False):
         self._file_obj = file_obj
         self._chunk_size = chunk_size
         self._is_finished = False
         self._buffer_type = buffer_type
+        self._has_header = has_header
         self._f_name = (
             self._file_obj.name
             if hasattr(self._file_obj, "name")
@@ -37,6 +40,7 @@ class NpBufferStream:
 
     def __iter__(self):
         self._remove_initial_comments()
+        self._remove_header()
         chunk = self.__get_buffer()
         total_bytes = 0
 
@@ -60,7 +64,7 @@ class NpBufferStream:
 
         # Ensure that the last entry ends with newline. Makes logic easier later
         if self._is_finished and a[bytes_read - 1] != ord("\n"):
-            a[bytes_read] = ord("\n")
+            a = np.append(a, ord("\n"))
             bytes_read += 1
         return a[:bytes_read]
 
@@ -69,7 +73,7 @@ class NpBufferStream:
         return b, b.size
         # array = my_empty(self._chunk_size, dtype="uint8")
         # bytes_read = self._file_obj.readinto(array)
-        #return array, bytes_read
+        # return array, bytes_read
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
@@ -78,6 +82,10 @@ class NpBufferStream:
             if line[0] != self._buffer_type.COMMENT:
                 self._file_obj.seek(-len(line), 1)
                 break
+
+    def _remove_header(self):
+        if self._has_header:
+            self._file_obj.readline()
 
 
 class NpBufferedWriter:
@@ -105,6 +113,7 @@ class NpBufferedWriter:
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
+
 
 def chunk_lines(stream, n_lines):
     cur_buffers = []

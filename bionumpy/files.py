@@ -23,6 +23,8 @@ buffer_types = {
     ".sam": get_bufferclass_for_datatype(SAMEntry)
 }
 
+generic_buffers = ['.csv', '.tsv']
+
 wrappers = {
     "chromosome_stream": ChromosomeFileStreamProvider,
     "dict": FullChromosomeDictProvider,
@@ -42,7 +44,7 @@ def _get_buffered_file(
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
-    kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size"]}
+    kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
     buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
     data = (buf.get_data() for buf in buffers)
     if "n_entries" in kwargs:
@@ -58,7 +60,7 @@ def bnp_open(filename, mode=None, **kwargs):
     is_gzip = suffix == ".gz"
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    if suffix in buffer_types:
+    if suffix in buffer_types or suffix in generic_buffers:
         return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
