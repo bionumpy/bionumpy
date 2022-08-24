@@ -98,6 +98,9 @@ class NpBufferedWriter:
             else str(self._file_obj)
         )
 
+    def close(self):
+        self._file_obj.close()
+
     def write(self, data: npdataclass):
         """Write the provided data to file
 

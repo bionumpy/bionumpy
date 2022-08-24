@@ -20,6 +20,7 @@ class WindowFunction:
         sequences = as_sequence_array(sequences, encoding=self._encoding)
         assert np.all(sequences.shape.lengths % self.window_size == 0)
         tuples = sequences.ravel().reshape(-1, self.window_size)
+        tuples.encoding = self._encoding
         new_data = self(tuples)
         return Sequences(new_data, sequences.shape.lengths // self.window_size, encoding=self._table.to_encoding)
 

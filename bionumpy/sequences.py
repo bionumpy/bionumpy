@@ -72,7 +72,7 @@ def as_sequence_array(s, encoding=BaseEncoding):
         if s.encoding != encoding:
             assert s.encoding == BaseEncoding
             if isinstance(s, Sequences):
-                return Sequences(encoding.encode(s.ravel()), s.shape)
+                return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
             else:
                 e = encoding.encode(s)
                 s = Sequence.from_array(e)
