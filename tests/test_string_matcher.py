@@ -1,7 +1,7 @@
 import re
 
 from npstructures import RaggedArray
-from bionumpy.string_matcher import FixedLenRegexMatcher, FlexibleLenRegexMatcher
+from bionumpy.string_matcher import RegexMatcher
 import bionumpy as bnp
 
 
@@ -25,7 +25,7 @@ def test_fixedlen_regex_matching():
                   for seq in sequences]
 
     sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
-    matcher = FixedLenRegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
+    matcher = RegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding, allow_flexible_lengths=False)
     matches = matcher.rolling_window(sequence_array)
     print(matches, re_matches)
     assert matches == RaggedArray(re_matches) #TODO: switch to correct assertion..
@@ -39,7 +39,7 @@ def test_flexible_len_regex_matching():
                   [True, False, False, False, False, False]]
 
     sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
-    matcher = FlexibleLenRegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
+    matcher = RegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding, allow_flexible_lengths=True)
     matches = matcher.rolling_window(sequence_array)
     print(matches, re_matches)
     assert matches == RaggedArray(re_matches)  # TODO: switch to correct assertion..

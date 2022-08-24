@@ -20,26 +20,12 @@ class StringMatcher(RollableFunction):
         return np.all(sequence == self._matching_sequence_array, axis=-1)
 
 
-class FixedLenRegexMatcher(RollableFunction):
-    def __init__(self, matching_regex, encoding):
-        self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
-
-    @property
-    def window_size(self):
-        return self._sub_matchers[0].window_size
-
-    def __call__(self, sequence):
-        union_of_sub_matches = self._sub_matchers[0](sequence)
-        for matcher in self._sub_matchers:
-            union_of_sub_matches = np.logical_or(union_of_sub_matches, matcher(sequence))
-        return union_of_sub_matches
-
-        return np.all(sequence == self._matching_sequence_array, axis=-1)
-
-
-class FlexibleLenRegexMatcher(RollableFunction):
-    def __init__(self, matching_regex, encoding):
-        self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
+class RegexMatcher(RollableFunction):
+    def __init__(self, matching_regex, encoding, allow_flexible_lengths: bool = False):
+        if allow_flexible_lengths:
+            self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
+        else:
+            self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
 
     @property
     def window_size(self):

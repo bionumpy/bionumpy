@@ -1,6 +1,6 @@
 import bionumpy as bnp
 import numpy as np
-from bionumpy.string_matcher import StringMatcher, FixedLenRegexMatcher
+from bionumpy.string_matcher import StringMatcher, RegexMatcher
 
 #For small exploration, we can define our list of sequences directly:
 sequences = bnp.as_sequence_array(["ACGT", "AATGAT"], encoding=bnp.encodings.ACTGEncoding)
@@ -11,7 +11,7 @@ matches = matcher.rolling_window(sequences)
 print("Matches for AT: ", matches)
 
 #One can also efficiently match regular expressions with fixed length (alternative letters and wildcards):
-matcher = FixedLenRegexMatcher("[AG].[AT]", encoding=bnp.encodings.ACTGEncoding)
+matcher = RegexMatcher("[AG].[AT]", encoding=bnp.encodings.ACTGEncoding)
 matches = matcher.rolling_window(sequences)
 print("Matches for [AG].[AT]: ", matches)
 
