@@ -35,5 +35,8 @@ class Translate(WindowFunction):
         return 3# np.log(self._table._lookup.size, self._table.from_encoding.alphabet_size)
 
     def __call__(self, sequence):
+        e = sequence.encoding
+        sequence = sequence[..., ::-1]
+        sequence.encoding = e
         kmer = KmerEncoding(self.window_size,  alphabet_encoding=self._encoding)(sequence)
         return self._table[kmer]
