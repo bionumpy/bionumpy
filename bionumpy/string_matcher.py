@@ -51,6 +51,7 @@ class MaskedStringMatcher(RollableFunction):
         return len(self._matching_sequence_array)
 
     def __call__(self, sequence):
+        assert sequence.shape[-1] == self.window_size, (sequence.shape, self._matching_sequence_array)
         direct_match = (sequence == self._matching_sequence_array)
         masked_or_match = np.logical_or(direct_match, self._mask)
         return np.all(masked_or_match, axis=-1)
