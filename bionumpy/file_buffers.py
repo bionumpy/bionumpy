@@ -95,6 +95,18 @@ class FileBuffer:
         indices, shape = RaggedView(starts, lens).get_flat_indices()
         return Sequences(self._data[indices], shape)
 
+    def _move_2d_array_to_intervals(self, array, starts, ends):
+        n_chars = ends - starts
+        n_intervals = starts.size
+        max_chars = array.shape[-1]
+        from_indices, _ = RaggedView(
+            max_chars * np.arange(1, n_intervals + 1) - n_chars, n_chars
+        ).get_flat_indices()
+        to_indices, _ = RaggedView(starts, n_chars).get_flat_indices()
+        self._data[to_indices] = array.ravel()[from_indices]
+        
+        
+
 
 class OneLineBuffer(FileBuffer):
     n_lines_per_entry = 2

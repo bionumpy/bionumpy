@@ -1,5 +1,5 @@
 import logging
-from npstructures import VarLenArray
+from npstructures import VarLenArray, RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
@@ -115,8 +115,11 @@ class DelimitedBuffer(FileBuffer):
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
         return DigitEncoding.encode(digit_chars) @ powers
 
-    def _put_integers(self, integers, starts, ends):
-        
+    @staticmethod
+    def _move_ints_to_digit_array(ints, n_digits):
+        powers = np.uint8(10)**np.arange(n_digits)[::-1]
+        ret =  (ints[..., None]//powers) % 10
+        return ret + ord("0")
 
     def _validate(self):
         chunk = self._data
@@ -146,22 +149,28 @@ class BedBuffer(DelimitedBuffer):
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
+
     @classmethod
-    def from_data(self, data):
-        start_lens = np.log10(data.start).astype(int)
-        end_lens = np.log10(data.end).astype(int)
+    def from_data(cls, data):
+        start_lens = np.log10(data.start).astype(int)+1
+        end_lens = np.log10(data.end).astype(int)+1
         chromosome_lens = data.chromosome.shape[-1]
         line_lengths = chromosome_lens + 1 + start_lens + 1 + end_lens + 1
         line_ends = np.cumsum(line_lengths)
-        buf = np.empty(line_ends[-1])
+        buf = np.empty(line_ends[-1], dtype=np.uint8)
         lines = RaggedArray(buf, line_lengths)
-        lines[:, :chromosome_lens] = data.chromosome
-        buf[
-
+        lines[:, :chromosome_lens] = data.chromosome.ravel()
         lines[:, chromosome_lens] = ord("\t")
-        lines[:, chromosome_lens+1]
 
-                            
+        obj = cls(buf, line_ends-1)
+        obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.end, np.max(end_lens)),
+                                        line_ends-1-end_lens, line_ends-1)
+
+        obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.start, np.max(start_lens)),
+                                        line_ends-2-end_lens-start_lens, line_ends-2-end_lens)
+        buf[line_ends-(end_lens+2)] = ord("\t")
+        buf[line_ends-1] = ord("\n")
+        return buf
 
     get_data = get_intervals
 
