@@ -104,8 +104,6 @@ class FileBuffer:
         ).get_flat_indices()
         to_indices, _ = RaggedView(starts, n_chars).get_flat_indices()
         self._data[to_indices] = array.ravel()[from_indices]
-        
-        
 
 
 class OneLineBuffer(FileBuffer):

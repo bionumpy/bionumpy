@@ -58,7 +58,9 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:
-                yield (start_chrom, np.concatenate(overlay + group))
+                tmp = np.concatenate(overlay + group)
+                tmp.chromosome = Sequence.from_array(tmp.chromosome.array)
+                yield (start_chrom, tmp)
                 overlay = []
             else:
                 l = last_buffer[: chrom_changes[0]]
@@ -82,7 +84,6 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
             chunk = overlay[0]
             chunk.chromosome = Sequence.from_array(chunk.chromosome.array)
             yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
-
 
 #
 #         cur_data = []

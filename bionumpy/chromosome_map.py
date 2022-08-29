@@ -79,7 +79,7 @@ class ChromosomeMap:
                     for chromosome, args, kwargs in log(new_args)
                 )
             elif is_dict:
-                ret =  PureChromosomeDictProvider(
+                ret = PureChromosomeDictProvider(
                     (chromosome, func(*args, **kwargs))
                     for chromosome, args, kwargs in log(new_args)
                 )

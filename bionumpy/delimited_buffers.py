@@ -99,7 +99,6 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        # delimiters = self._delimiters.reshape(-1, self._n_cols)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
         if end is not None:
             return self._data[starts[..., np.newaxis] + np.arange(end-start)].reshape(-1, end-start)

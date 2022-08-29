@@ -30,13 +30,12 @@ def count_overlap(intervals_a, intervals_b):
 
 @ChromosomeMap()
 def intersect(intervals_a, intervals_b):
-
     all_intervals = np.concatenate([intervals_a, intervals_b])
     all_intervals = all_intervals[np.argsort(all_intervals.start, kind="mergesort")]
     ends = np.sort(all_intervals.end, kind="mergesort")
-    mask = ends[:-1]>all_intervals.start[1:]
+    mask = ends[:-1] > all_intervals.start[1:]
     result = all_intervals[1:][mask]
-    result.end=ends[:-1][mask]
+    result.end = ends[:-1][mask]
     return result
 
 # .sort(kind="mergesort", key="start")
