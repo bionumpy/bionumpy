@@ -1,10 +1,13 @@
+import logging
+
 from bionumpy.rollable import RollableFunction
-from bionumpy.sequences import as_sequence_array
+from bionumpy.sequences import as_sequence_array, Sequences
 import itertools
 import numpy as np
 import bionumpy as bnp
 import re
 from bionumpy.sequences import Sequence
+from npstructures import RaggedArray
 
 
 class StringMatcher(RollableFunction):
@@ -21,11 +24,52 @@ class StringMatcher(RollableFunction):
 
 
 class RegexMatcher(RollableFunction):
-    def __init__(self, matching_regex, encoding, allow_flexible_lengths: bool = False):
-        if allow_flexible_lengths:
-            self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
-        else:
-            self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
+    """
+    Matches regexes of various lengths across a RaggedArray of sequences by constructing a list of FixedLenRegexMatcher objects from the original
+    flexible length regex expression.
+
+    It overrides the rolling_window function from the superclass to invoke FixedLenRegexMatcher objects across different window sizes for matcher
+    objects.
+    """
+
+    def __init__(self, matching_regex, encoding):
+        self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
+
+    def __call__(self, sequence: Sequence):
+        raise NotImplementedError
+
+    @property
+    def window_size(self):
+        return [sub_matcher.window_size for sub_matcher in self._sub_matchers]
+
+    def rolling_window(self, _sequence: Sequences, window_size: int = None, mode="valid"):
+        if not isinstance(_sequence, np.ndarray):
+            if hasattr(self, "_encoding") and self._encoding is not None:
+                _sequence = as_sequence_array(_sequence, encoding=self._encoding)
+            else:
+                _sequence = RaggedArray(_sequence)
+
+        if mode == "valid":
+            logging.warning("Mode is set to 'valid' in rolling_window(), but RegexMatcher uses only mode 'same'. Switching to 'same'...")
+
+        shape, sequence = (_sequence.shape, _sequence.ravel())
+        out = np.zeros_like(_sequence, dtype=bool)
+
+        for index, sub_matcher in enumerate(self._sub_matchers):
+            windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides + sequence.strides,
+                                                      shape=sequence.shape + (sub_matcher.window_size,), writeable=False)
+            convoluted = sub_matcher(windows)
+            if isinstance(_sequence, RaggedArray):
+                out = np.logical_or(out, RaggedArray(convoluted, shape))
+            elif isinstance(_sequence, np.ndarray):
+                out = np.logical_or(out, np.lib.stride_tricks.as_strided(convoluted, shape))
+
+        return out
+
+
+class FixedLenRegexMatcher(RollableFunction):
+    def __init__(self, matching_regex, encoding):
+        self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
 
     @property
     def window_size(self):

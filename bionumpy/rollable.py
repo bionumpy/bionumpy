@@ -41,7 +41,7 @@ class RollableFunction:
         mode : ["valid", "same", "full"]
             shape of output
         """
-        
+
         if window_size is None:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
@@ -53,8 +53,9 @@ class RollableFunction:
         shape, sequence = (_sequence.shape, _sequence.ravel())
         if mode == "valid":
             windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
-        elif mode=="same":
-            windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides+sequence.strides, shape=sequence.shape+(window_size,), writeable=False)
+        elif mode == "same":
+            windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides + sequence.strides, shape=sequence.shape + (window_size,),
+                                                      writeable=False)
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
             out = RaggedArray(convoluted, shape)
