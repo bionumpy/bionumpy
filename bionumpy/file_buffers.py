@@ -77,7 +77,7 @@ class FileBuffer:
         """
         return NotImplemented
 
-    def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
+    def __move_intervals_to_2d_array(self, starts, ends, fill_value=0):
         n_intervals = starts.size
         n_chars = ends - starts
         from_indices, _ = RaggedView(starts, n_chars).get_flat_indices()
@@ -88,6 +88,27 @@ class FileBuffer:
         ).get_flat_indices()
         array[to_indices] = self._data[from_indices]
         return array.reshape((n_intervals, max_chars))
+
+    def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
+        max_chars = np.max(ends-starts)
+        view_starts = (ends-max_chars)
+        indices = view_starts[:, None]+np.arange(max_chars)
+        array = self._data[indices.ravel()]
+        zeroed, _ = RaggedView(np.arange(starts.size)*max_chars, max_chars-(ends-starts)).get_flat_indices()
+        print(starts, ends, zeroed)
+        array[zeroed] = fill_value
+        return array.reshape((-1, max_chars))
+        # n_intervals = starts.size
+        # n_chars = ends - starts
+        # from_indices, _ = RaggedView(starts, n_chars).get_flat_indices()
+        # max_chars = np.max(n_chars)
+        # array = np.full(n_intervals * max_chars, fill_value, dtype=np.uint8)
+        # to_indices, _ = RaggedView(
+        #     max_chars * np.arange(1, n_intervals + 1) - n_chars, n_chars
+        # ).get_flat_indices()
+        # array[to_indices] = self._data[from_indices]
+        # return array.reshape((n_intervals, max_chars))
+
 
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
         if lens is None:
