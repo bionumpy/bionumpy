@@ -12,19 +12,27 @@ class DelimitedBuffer(FileBuffer):
     DELIMITER = ord("\t")
     COMMENT = ord("#")
 
-    def __init__(self, data, new_lines):
+    def __init__(self, data, new_lines, delimiters=None):
         super().__init__(data, new_lines)
-        self._delimiters = np.concatenate(
-            ([-1], np.flatnonzero(self._data == self.DELIMITER), self._new_lines)
-        )
-        self._delimiters.sort(kind="mergesort")
+        if delimiters is None:
+            delimiters = np.concatenate(
+                ([-1], np.flatnonzero(self._data == self.DELIMITER), self._new_lines)
+            )
+            delimiters.sort(kind="mergesort")
+        self._delimiters = delimiters
 
     @classmethod
     def from_raw_buffer(cls, chunk):
-        new_lines = np.flatnonzero(chunk == NEWLINE)
-        if len(new_lines) == 0:
+        mask = chunk == NEWLINE
+        mask |= chunk == cls.DELIMITER
+        delimiters = np.flatnonzero(mask)
+        n_fields = next((i+1 for i, v in enumerate(delimiters) if chunk[v] == NEWLINE), None)
+        if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-
+            raise
+        new_lines = delimiters[(n_fields-1)::n_fields]
+        delimiters = np.concatenate(([-1], delimiters[:n_fields*len(new_lines)]))
+        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters)
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
     def get_integers(self, cols) -> np.ndarray:
@@ -117,7 +125,7 @@ class DelimitedBuffer(FileBuffer):
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
         powers = np.uint8(10)**np.arange(n_digits)[::-1]
-        ret =  (ints[..., None]//powers) % 10
+        ret = (ints[..., None]//powers) % 10
         return ret + ord("0")
 
     def _validate(self):
