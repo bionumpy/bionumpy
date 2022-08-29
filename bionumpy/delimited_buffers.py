@@ -115,6 +115,9 @@ class DelimitedBuffer(FileBuffer):
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
         return DigitEncoding.encode(digit_chars) @ powers
 
+    def _put_integers(self, integers, starts, ends):
+        
+
     def _validate(self):
         chunk = self._data
         delimiters = self._delimiters[1:]
@@ -142,6 +145,23 @@ class BedBuffer(DelimitedBuffer):
         chromosomes = VarLenArray(Sequence.from_array(self.get_text(0)))
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
+
+    @classmethod
+    def from_data(self, data):
+        start_lens = np.log10(data.start).astype(int)
+        end_lens = np.log10(data.end).astype(int)
+        chromosome_lens = data.chromosome.shape[-1]
+        line_lengths = chromosome_lens + 1 + start_lens + 1 + end_lens + 1
+        line_ends = np.cumsum(line_lengths)
+        buf = np.empty(line_ends[-1])
+        lines = RaggedArray(buf, line_lengths)
+        lines[:, :chromosome_lens] = data.chromosome
+        buf[
+
+        lines[:, chromosome_lens] = ord("\t")
+        lines[:, chromosome_lens+1]
+
+                            
 
     get_data = get_intervals
 
