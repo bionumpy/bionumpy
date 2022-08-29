@@ -17,3 +17,22 @@ def merge_intervals(intervals):
     new_interval = intervals[start_mask]
     new_interval.end = ends[end_mask]
     return new_interval
+
+
+@ChromosomeMap(reduction=sum)
+def count_overlap(intervals_a, intervals_b):
+    starts = np.concatenate([intervals_a.start, intervals_b.start])
+    ends = np.concatenate([intervals_a.end, intervals_b.end])
+    starts.sort(kind="mergesort")
+    ends.sort(kind="mergesort")
+    return np.sum(np.maximum(ends[:-1]-starts[1:], 0))
+
+
+@ChromosomeMap()
+def intersect(intervals_a, intervals_b):
+    starts = np.concatenate([intervals_a.start, intervals_b.start])
+    ends = np.concatenate([intervals_a.end, intervals_b.end])
+    starts.sort(kind="mergesort")
+    ends.sort(kind="mergesort")
+    return np.maximum(ends[:-1]-starts[1:], 0))
+
