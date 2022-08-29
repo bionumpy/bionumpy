@@ -34,5 +34,5 @@ def intersect(intervals_a, intervals_b):
     ends = np.concatenate([intervals_a.end, intervals_b.end])
     starts.sort(kind="mergesort")
     ends.sort(kind="mergesort")
-    return np.maximum(ends[:-1]-starts[1:], 0))
+    return np.maximum(ends[:-1]-starts[1:], 0)
 
