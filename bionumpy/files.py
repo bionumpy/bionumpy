@@ -6,7 +6,7 @@ from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
 from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
-from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider
+from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 
 
@@ -27,7 +27,7 @@ generic_buffers = ['.csv', '.tsv']
 
 wrappers = {
     "chromosome_stream": ChromosomeFileStreamProvider,
-    "dict": FullChromosomeDictProvider,
+    "dict": LazyChromosomeDictProvider,
     "stream": lambda x, y: x,
     "full": lambda x, y: np.concatenate(list(x))
 }

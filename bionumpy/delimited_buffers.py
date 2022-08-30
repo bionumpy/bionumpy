@@ -166,15 +166,15 @@ class BedBuffer(DelimitedBuffer):
         line_ends = np.cumsum(line_lengths)
         buf = np.empty(line_ends[-1], dtype=np.uint8)
         lines = RaggedArray(buf, line_lengths)
-        lines[:, :chromosome_lens] = data.chromosome.ravel()
-        lines[:, chromosome_lens] = ord("\t")
-
         obj = cls(buf, line_ends-1)
         obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.end, np.max(end_lens)),
                                         line_ends-1-end_lens, line_ends-1)
 
         obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.start, np.max(start_lens)),
                                         line_ends-2-end_lens-start_lens, line_ends-2-end_lens)
+        lines[:, :chromosome_lens] = data.chromosome.ravel()
+        lines[:, chromosome_lens] = ord("\t")
+
         buf[line_ends-(end_lens+2)] = ord("\t")
         buf[line_ends-1] = ord("\n")
         return buf

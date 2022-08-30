@@ -66,7 +66,6 @@ class ChromosomeMap:
             ]
             is_stream = len(stream_indices) + len(stream_keys) > 0
             is_dict = not is_stream and (len(dict_keys) + len(dict_indices) > 0)
-            print(is_stream, is_dict)
             if not (is_stream or is_dict):
                 return func(*args, **kwargs)
             assert len(stream_indices) + len(stream_keys) <= 1

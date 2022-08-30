@@ -142,20 +142,22 @@ class FullChromosomeDictProvider(ChromosomeDictProvider):
 
 
 class LazyChromosomeDictProvider(ChromosomeDictProvider):
-    def __init__(self, buffers):
-        self._stream = ChromosomeFileStreamProvider(buffers)
+    def __init__(self, buffers, default_value=None):
+        self._stream = iter(ChromosomeFileStreamProvider(buffers))
+        self._default_value = default_value
         self._back_log = {}
 
-    def _find_item(self, chromosome):
+    def _find_item(self, key):
         for chromosome, data in self._stream:
-            if chromosome != chromosome:
-                self._back_log[chromosome] = data
-            else:
+            if chromosome == key:
                 return data
+            else:
+                self._back_log[chromosome] = data
+        assert False
 
     def __getitem__(self, key):
         if key in self._back_log:
             ret = self._back_log[key]
             del self._back_log[key]
             return ret
-        return self._find_item
+        return self._find_item(key)
