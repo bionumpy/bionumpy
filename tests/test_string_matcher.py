@@ -1,7 +1,7 @@
 import re
 
-from npstructures import RaggedArray 
-from bionumpy.string_matcher import FixedLenRegexMatcher
+from npstructures import RaggedArray
+from bionumpy.string_matcher import RegexMatcher, FixedLenRegexMatcher
 import bionumpy as bnp
 
 
@@ -20,13 +20,24 @@ def test_fixedlen_regex_matching():
 
     re_matcher = re.compile(pattern)
 
-    re_matches = [[re_matcher.match(seq[offset:offset+pattern_len]) is not None
-                   for offset in range(len(seq)-pattern_len+1)]
+    re_matches = [[re_matcher.match(seq[offset:offset + pattern_len]) is not None
+                   for offset in range(len(seq) - pattern_len + 1)]
                   for seq in sequences]
 
     sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
     matcher = FixedLenRegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
     matches = matcher.rolling_window(sequence_array)
-    print(matches, re_matches)
-    assert matches == RaggedArray(re_matches) #TODO: switch to correct assertion..
+    assert matches == RaggedArray(re_matches)  # TODO: switch to correct assertion..
 
+
+def test_flexible_len_regex_matching():
+    sequences = ["ACGTTCG", "AATGAAAC"]
+    pattern = "AA.{,1}[CT]"
+
+    re_matches = [[False for _ in range(7)],
+                  [True, False, False, False, True, True, False, False]]
+
+    sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
+    matcher = RegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
+    matches = matcher.rolling_window(sequence_array)
+    assert matches == RaggedArray(re_matches)  # TODO: switch to correct assertion..
