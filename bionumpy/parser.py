@@ -1,5 +1,5 @@
 import numpy as np
-
+from .npdataclassstream import NpDataclassStream
 my_empty = np.empty
 
 import logging
@@ -110,6 +110,10 @@ class NpBufferedWriter:
             Data set containing entries
 
         """
+        if isinstance(data, NpDataclassStream):
+            for buf in data:
+                self.write(buf)
+            return 
         bytes_array = self._buffer_type.from_data(data)
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
         self._file_obj.flush()

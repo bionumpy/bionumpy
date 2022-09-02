@@ -8,7 +8,7 @@ from .datatypes import GFFEntry, SAMEntry
 from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
-
+from .npdataclassstream import NpDataclassStream
 
 buffer_types = {
     ".vcf": VCFBuffer,
@@ -46,7 +46,8 @@ def _get_buffered_file(
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
     buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
-    data = (buf.get_data() for buf in buffers)
+    
+    data = NpDataclassStream((buf.get_data() for buf in buffers), buffer_type=buffers._buffer_type)
     if "n_entries" in kwargs:
         data = chunk_lines(data, kwargs["n_entries"])
     if mode is None:
