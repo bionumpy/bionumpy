@@ -38,6 +38,7 @@ def test_custom_read():
 
     @npdataclass
     class SampleDC:
+        sequence_aa: str
         sequence: str
 
     for extension, delimiter in {"tsv": "\t", "csv": ","}.items():
@@ -47,6 +48,7 @@ def test_custom_read():
 
         data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter), has_header=True)
         assert np.array_equal(data.sequence.to_sequences(), np.array(["AACCTAGGC", "AACCTAGGC"]))
+        assert np.array_equal(data.sequence_aa.to_sequences(), np.array(["ATF", "ATF"]))
 
         os.remove(path)
 

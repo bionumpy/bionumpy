@@ -85,7 +85,8 @@ class NpBufferStream:
 
     def _remove_header(self):
         if self._has_header:
-            self._file_obj.readline()
+            header = self._file_obj.readline()
+            self._buffer_type.set_fields_from_header(header)
 
 
 class NpBufferedWriter:
