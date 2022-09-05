@@ -1,6 +1,7 @@
 from .file_buffers import FileBuffer
+from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
-from npstructures import RaggedArray
+from npstructures import RaggedArray, npdataclass
 import numpy as np
 
 
@@ -13,6 +14,9 @@ class BamBuffer(FileBuffer):
             print("#", starts[-1], line_size)
             starts.append(starts[-1]+line_size+4)
         return cls(chunk[:starts[-2]], starts[:-2])
+
+    def _get_int(self, offsets, n_bytes):
+        return self._new_lines[:, None] + offsets + np.arange(n_bytes)
 
     def get_data(self):
         print(self._new_lines)
@@ -28,7 +32,8 @@ class BamBuffer(FileBuffer):
         indices, shape = view.get_flat_indices()
         seq = RaggedArray(self._data[indices], shape)
         print(seq)
-        
+        dummy = []*len(pos)
+        return SAMEntry(dummy, pos, *([dummy]*9))
 
 class BAMReader:
     def handle_alignment(self):
@@ -43,7 +48,6 @@ class BAMReader:
         cigar = self._file.read(n_cigar_op)
         seq = self._file.read((l_seq+1)//2)
         print(block_size, ref_id, pos, l_read_name, mapq, read_name)
-
 
     def __init__(self, filename):
         if isinstance(filename, str):
