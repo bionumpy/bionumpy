@@ -1,4 +1,6 @@
+from .intervals import Interval
 from .file_buffers import FileBuffer
+from .cigar import count_reference_length
 from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, npdataclass
@@ -51,7 +53,8 @@ class BamBuffer(FileBuffer):
         n_cigar_bytes = n_cigar_op*4
         read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
         cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
-                                                      self._new_lines+36+l_read_name+n_cigar_bytes)
+                                                      self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
+        print(count_reference_length(RaggedArray(cigars._data.view(np.uint32), n_cigar_op)))
         sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
                                                          self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
         new_sequences = Sequences(((sequences.ravel()[:, None]) >> np.arange(2, dtype=np.uint8)).ravel() & np.uint8(15), n_seq_bytes*2, encoding=BamEncoding)
@@ -134,3 +137,7 @@ class BAMReader:
             print(block_size)
             self._file.read(block_size)
             
+def alignment_to_interval(alignment):
+    return Interval(alignment.chromosome,
+                    alignment.position,
+                    alignment.position+count_reference_length( aligment.cigar))
