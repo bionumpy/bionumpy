@@ -3,6 +3,22 @@ from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, npdataclass
 import numpy as np
+from .sequences import Sequences
+from .encodings import AlphabetEncoding
+
+
+BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
+
+
+@npdataclass
+class Dummy:
+    name: str
+    flag: int
+    position: int
+    mapq: int
+    cigar: str
+    sequence: str
+    quality: str
 
 
 class BamBuffer(FileBuffer):
@@ -13,27 +29,41 @@ class BamBuffer(FileBuffer):
             line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
             print("#", starts[-1], line_size)
             starts.append(starts[-1]+line_size+4)
-        return cls(chunk[:starts[-2]], starts[:-2])
+        return cls(chunk[:starts[-1]], starts[:-1])
 
-    def _get_int(self, offsets, n_bytes):
-        return self._new_lines[:, None] + offsets + np.arange(n_bytes)
+    def _get_ints(self, offsets, n_bytes, dtype):
+        tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
+        print(tmp, tmp.dtype, tmp.size)
+        ints = (tmp).view(dtype).ravel()
+        assert len(ints) == len(self._new_lines), (len(ints), self._new_lines)
+        return ints
 
     def get_data(self):
-        print(self._new_lines)
-        indices = self._new_lines[:, None]+8+np.arange(4)
-        pos = self._data[indices].view(np.int32)
+        pos = self._get_ints(8, 4, np.int32)
+        print("pos", pos)
         l_read_name = self._data[self._new_lines+12]
-        l_seq = self._data[self._new_lines[:, None]+20+np.arange(4)].view(np.int32).ravel()
-        n_cigar_op = self._data[self._new_lines[:, None]+16+np.arange(2)].view(np.uint16).ravel()
-        seq_starts = self._new_lines+36 + l_read_name + n_cigar_op
-        print(n_cigar_op.shape)
-        print(seq_starts, l_seq)
-        view = RaggedView(seq_starts, l_seq)
-        indices, shape = view.get_flat_indices()
-        seq = RaggedArray(self._data[indices], shape)
-        print(seq)
-        dummy = []*len(pos)
-        return SAMEntry(dummy, pos, *([dummy]*9))
+        mapq = self._data[self._new_lines+13]
+        l_seq = self._get_ints(20, 4, np.int32)
+        n_seq_bytes = (l_seq+1)//2
+        n_cigar_op = self._get_ints(16, 2, np.uint16)
+        print(n_cigar_op)
+        flag = self._get_ints(18, 1, np.uint8)
+        n_cigar_bytes = n_cigar_op*4
+        read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
+        cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
+                                                      self._new_lines+36+l_read_name+n_cigar_bytes)
+        sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
+                                                         self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
+        new_sequences = Sequences(((sequences.ravel()[:, None]) >> np.arange(2, dtype=np.uint8)).ravel() & np.uint8(15), n_seq_bytes*2, encoding=BamEncoding)
+
+# Sequences(
+# BamEncoding.decode(((sequences.ravel()[:, None]) >> np.arange(2, dtype=np.uint8)).ravel() & np.uint8(15)), n_seq_bytes*2)
+        print(">>>", repr(new_sequences._data))
+        print(">>>", str(new_sequences._data))
+        quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
+                                                     self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)+33
+        return Dummy(read_names, flag, pos, mapq, cigars, new_sequences, quals)
+        return SAMEntry(read_names, pos, )
 
 class BAMReader:
     def handle_alignment(self):
@@ -55,6 +85,7 @@ class BAMReader:
         else:
             self._file = filename
         self._info = self._handle_header()
+        print(self._info)
 
     def _read_int(self):
         return int.from_bytes(self._file.read(4), byteorder="little")
