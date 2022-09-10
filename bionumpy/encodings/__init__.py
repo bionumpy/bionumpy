@@ -58,3 +58,14 @@ class QualityEncoding(Encoding):
         res = quality + ord("!")
         res.encoding = BaseEncoding
         return res
+
+def set_backend(lib):
+    import sys
+
+    from ..cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
+    from ..cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
+    from ..cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
+    
+    sys.modules[__name__].AlphabetEncoding = CPAlphabetEncoding
+    sys.modules[__name__].ACTGEncoding = CPACTGEncoding
+    sys.modules[__name__].AminoAcidEncoding = CPAminoAcidEncoding

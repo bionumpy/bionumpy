@@ -6,6 +6,9 @@ from npstructures import RaggedArray
 class Sequence(np.ndarray):
     encoding = BaseEncoding
 
+    def __getitem__(self, index):
+        return super().__getitem__(index)
+
     @classmethod
     def from_string(cls, s):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))

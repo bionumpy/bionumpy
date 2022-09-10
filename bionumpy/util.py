@@ -42,7 +42,7 @@ def convolution(func):
 def rolling_window_function(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        print(sequence, window_size)
+        #print(sequence, window_size)
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = func(windows, window_size, *args, **kwargs)
         if isinstance(_sequence, RaggedArray):
