@@ -1,4 +1,5 @@
 import numpy as np
+import dataclasses
 from .chromosome_map import ChromosomeMap
 
 
@@ -37,6 +38,53 @@ def intersect(intervals_a, intervals_b):
     result = all_intervals[1:][mask]
     result.end = ends[:-1][mask]
     return result
+
+@ChromosomeMap()
+def extend(intervals, both=None, forward=None, reverse=None, left=None, right=None):
+    directed = (forward is not None) or (reverse is not None)
+    undirected = (left is not None) or (right is not None)
+    assert sum([both is not None, directed, undirected]) == 1
+    if both is not None:
+        return dataclasses.replace(intervals, 
+                                   start=intervals.start-both,
+                                   end=intervals.end+both)
+    if undirected:
+        starts = interval.start-left if left is not None else interval.start
+        ends = interval.end+right if right is not None else interval.end
+        dataclasses.replace(intervals, 
+                            start=starts,
+                            end=ends)
+    if directed:
+        if forward is None:
+            forward = 0
+        if reverse is None:
+            reverse = 0
+        return dataclasses.replace(
+            intervals,
+            start = np.where(interval.strand=="+",
+                             intervals.start-reverse,
+                             intervals.start-forward),
+            end = np.where(interval.strand=="+",
+                             intervals.end+forward,
+                             intervals.start+reverse)
+            )
+
+def pileup(intervals):
+    positions = np.concatenate((intervals.start,
+                                 intervals.end))
+    args = np.argsort(positions, kind="mergesort")
+    values = np.where(args >= len(intervals), -1, 1)
+    np.cumsum(values, out=values)
+    positions = positions[args]
+    mask = positions[1:] != positions[:-1]
+    print(positions, values, mask)
+    kept_positions = positions[:-1][mask]
+    values = values[:-1][mask]
+    return BedGraph(intervals.chromosome, 
+                    positions, 
+                    np.append(kept_positions[1:], positions[-1]),
+                    np
+                    
 
 # .sort(kind="mergesort", key="start")
 #     starts = np.concatenate([intervals_a.start, intervals_b.start])
