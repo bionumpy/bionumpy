@@ -31,4 +31,5 @@ def test_intersect(interval_a, interval_b):
 
 def test_pileup(interval_c):
     p = pileup(interval_c)
-    assert p == BedGraph(["chr1"]*3, [10, 28, 29], [28,29,36], [1, 0, 1])
+    print(p)
+    assert p == BedGraph([[ord(c) for c in "chr1"]]*3, [10, 28, 29], [28, 29, 36], [1, 0, 1])

@@ -1,5 +1,6 @@
 import numpy as np
 import dataclasses
+from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
 
 
@@ -69,21 +70,27 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
                              intervals.start+reverse)
             )
 
+
 def pileup(intervals):
+    chroms = np.concatenate([intervals.chromosome, intervals.chromosome])
     positions = np.concatenate((intervals.start,
-                                 intervals.end))
+                                intervals.end))
     args = np.argsort(positions, kind="mergesort")
     values = np.where(args >= len(intervals), -1, 1)
     np.cumsum(values, out=values)
     positions = positions[args]
-    mask = positions[1:] != positions[:-1]
-    print(positions, values, mask)
-    kept_positions = positions[:-1][mask]
-    values = values[:-1][mask]
-    return BedGraph(intervals.chromosome, 
-                    positions, 
-                    np.append(kept_positions[1:], positions[-1]),
-                    np
+    intervals = np.lib.stride_tricks.sliding_window_view(positions, 2)
+    mask = np.flatnonzero(intervals[:, 0] == intervals[:, 1])
+    print(intervals)
+    intervals = np.delete(intervals, mask, axis=0)
+    print(intervals)
+    values = np.delete(values, mask)
+    mask = np.flatnonzero(values[1:] == values[:-1])
+    values = np.delete(values, mask)
+    starts = np.delete(intervals[:, 0], mask+1)
+    ends = np.delete(intervals[:, 1], mask)
+    return BedGraph(chroms[:values.size-1],
+                    starts, ends, values[:-1])
                     
 
 # .sort(kind="mergesort", key="start")
