@@ -1,4 +1,4 @@
-from .intervals import Interval
+from .datatypes import Interval
 from .file_buffers import FileBuffer
 from .cigar import count_reference_length
 from .datatypes import SAMEntry
@@ -24,14 +24,18 @@ class Dummy:
 
 
 class BamBuffer(FileBuffer):
+    def __init__(self, data, header_data):
+        super().__init__(data)
+        self._header_data = header_data
+
     @classmethod
-    def from_raw_buffer(cls, chunk):
+    def from_raw_buffer(cls, chunk, header_data):
         starts = [0]
         while (starts[-1]+3) < chunk.size:
             line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
             print("#", starts[-1], line_size)
             starts.append(starts[-1]+line_size+4)
-        return cls(chunk[:starts[-1]], starts[:-1])
+        return cls(chunk[:starts[-1]], starts[:-1], header_data)
 
     def _get_ints(self, offsets, n_bytes, dtype):
         tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
