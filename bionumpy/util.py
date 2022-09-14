@@ -1,6 +1,7 @@
 import numpy as np
 import logging
 from npstructures import RaggedArray
+import dataclasses
 from .chromosome_map import ChromosomeMap
 
 logger = logging.getLogger(__name__)
@@ -70,3 +71,16 @@ def pprint(sequences):
 def plot(obj):
     if not hasattr(obj, "__plot__"):
         logger.warning(f"{obj} has no __plot__ method")
+
+
+def apply_to_npdataclass(attribute_name):
+    def decorator(func):
+        def new_func(np_dataclass, *args, **kwargs):
+            if not isinstance(np_dataclass, NpDataclass):
+                return func(np_dataclass)
+            
+            return dataclasses.replace(**{attribute_name: func(getattr(np_dataclass, attribute_name), *args, **kwargs)})
+        return new_func
+    return decorator
+
+
