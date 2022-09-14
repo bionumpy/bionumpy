@@ -25,7 +25,7 @@ class RollableFunction:
         """
         return NotImplemented
 
-    def rolling_window(self, _sequence: Sequences, window_size: int = None):
+    def rolling_window(self, _sequence: Sequences, window_size: int = None, mode="valid"):
         """Applies the function `self.__call__` to all subsequences in _sequence
 
         Uses sliding_window_view to apply `self.__call__` to all subsequences of length
@@ -38,8 +38,10 @@ class RollableFunction:
             Sequence or set of Sequences to apply the rolling window to
         window_size : int
             The size of the rolling window (should ideally be set by `self.window_size`)
+        mode : ["valid", "same", "full"]
+            shape of output
         """
-        
+
         if window_size is None:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
@@ -47,11 +49,20 @@ class RollableFunction:
                 _sequence = as_sequence_array(_sequence, encoding=self._encoding)
             else:
                 _sequence = RaggedArray(_sequence)
+
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
+        if mode == "valid":
+            windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
+        elif mode == "same":
+            windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides + sequence.strides, shape=sequence.shape + (window_size,),
+                                                      writeable=False)
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
             out = RaggedArray(convoluted, shape)
         elif isinstance(_sequence, np.ndarray):
             out = np.lib.stride_tricks.as_strided(convoluted, shape)
-        return out[..., : (-window_size + 1)]
+        if mode == "valid":
+            return out[..., : (-window_size + 1)]
+        elif mode == "same":
+            out[..., (-window_size + 1):] = 0
+            return out

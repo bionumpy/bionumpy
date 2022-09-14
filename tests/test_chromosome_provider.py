@@ -3,7 +3,7 @@ import numpy as np
 
 import pytest
 
-from bionumpy.chromosome_provider import ChromosomeFileStreamProvider
+from bionumpy.chromosome_provider import ChromosomeFileStreamProvider, LazyChromosomeDictProvider, FullChromosomeDictProvider
 from npstructures.npdataclasses import VarLenArray, npdataclass
 
 
@@ -53,7 +53,7 @@ def buffers():
 
 
 def test_chromosome_stream(buffers):
-    for val, true in zip(ChromosomeFileStreamProvider(buffers),
+    for val, true in zip(ChromosomeFileStreamProvider(iter(buffers)),
                          [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),
                           ("chr2", DummyClass(["chr2"], [3])),
                           ("chr3", DummyClass(["chr3"], [4])),
@@ -61,3 +61,14 @@ def test_chromosome_stream(buffers):
                           ("chr5", DummyClass(["\x00chr5"]*2, [6, 7])),
                           ("chr16", DummyClass(["chr16"], [8]))]):
         assert val == true
+
+
+def test_full_dict(buffers):
+    d = LazyChromosomeDictProvider((print(buf) or buf for buf in buffers))
+    for key, val in [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),
+                     ("chr2", DummyClass(["chr2"], [3])),
+                     ("chr3", DummyClass(["chr3"], [4])),
+                     ("chr4", DummyClass(["chr4"], [5])),
+                     ("chr5", DummyClass(["\x00chr5"]*2, [6, 7])),
+                     ("chr16", DummyClass(["chr16"], [8]))]:
+        assert d[key] == val

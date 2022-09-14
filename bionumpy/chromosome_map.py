@@ -66,7 +66,6 @@ class ChromosomeMap:
             ]
             is_stream = len(stream_indices) + len(stream_keys) > 0
             is_dict = not is_stream and (len(dict_keys) + len(dict_indices) > 0)
-
             if not (is_stream or is_dict):
                 return func(*args, **kwargs)
             assert len(stream_indices) + len(stream_keys) <= 1
@@ -74,25 +73,22 @@ class ChromosomeMap:
                 args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys
             )
             if is_stream:
-                return ChromosomeStreamProvider(
+                ret = ChromosomeStreamProvider(
                     (chromosome, func(*args, **kwargs))
                     for chromosome, args, kwargs in log(new_args)
                 )
-            # self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys)))
             elif is_dict:
-                return PureChromosomeDictProvider(
+                ret = PureChromosomeDictProvider(
                     (chromosome, func(*args, **kwargs))
                     for chromosome, args, kwargs in log(new_args)
                 )
-            # self.get_args(args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys))
-            assert False
-
-        if self._reduction is None:
-            return mapped
-        return lambda *args, **kwargs: self._reduction(
-            (m[1] for m in mapped(*args, **kwargs))
-        )
-
+            else:
+                assert False
+            if self._reduction is None:
+                return ret
+            return self._reduction(
+                (m[1] for m in ret))
+        return mapped
 
 def sorted_streams_juggler(streams):
     """TODO"""

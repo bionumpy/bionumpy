@@ -18,7 +18,11 @@ class FileBuffer:
         self.size = self._data.size
 
     @classmethod
-    def from_raw_buffer(cls, raw_buffer) -> "FileBuffer":
+    def read_header(cls, file_object):
+        pass
+
+    @classmethod
+    def from_raw_buffer(cls, raw_buffer, header_data=None) -> "FileBuffer":
         """Create a buffer with full entries
 
         A raw buffer can end with data that does not represent full entries.
@@ -78,16 +82,13 @@ class FileBuffer:
         return NotImplemented
 
     def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
-        n_intervals = starts.size
-        n_chars = ends - starts
-        from_indices, _ = RaggedView(starts, n_chars).get_flat_indices()
-        max_chars = np.max(n_chars)
-        array = np.full(n_intervals * max_chars, fill_value, dtype=np.uint8)
-        to_indices, _ = RaggedView(
-            max_chars * np.arange(1, n_intervals + 1) - n_chars, n_chars
-        ).get_flat_indices()
-        array[to_indices] = self._data[from_indices]
-        return array.reshape((n_intervals, max_chars))
+        max_chars = np.max(ends-starts)
+        view_starts = (ends-max_chars)
+        indices = view_starts[:, None]+np.arange(max_chars)
+        array = self._data[indices.ravel()]
+        zeroed, _ = RaggedView(np.arange(starts.size)*max_chars, max_chars-(ends-starts)).get_flat_indices()
+        array[zeroed] = fill_value
+        return array.reshape((-1, max_chars))
 
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
         if lens is None:
@@ -95,13 +96,20 @@ class FileBuffer:
         indices, shape = RaggedView(starts, lens).get_flat_indices()
         return Sequences(self._data[indices], shape)
 
+    def _move_2d_array_to_intervals(self, array, starts, ends):
+        n_chars = ends - starts
+        n_intervals = starts.size
+        max_chars = array.shape[-1]
+        to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
+        self._data[to_indices] = array[::-1]
+
 
 class OneLineBuffer(FileBuffer):
     n_lines_per_entry = 2
     _buffer_divisor = 32
 
     @classmethod
-    def from_raw_buffer(cls, chunk) -> "OneLineBuffer":
+    def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
         """Create a buffer with full entries
 
         Extract complete entries, i. e. a number of lines that is divisible by lines per entry
@@ -121,6 +129,7 @@ class OneLineBuffer(FileBuffer):
         8
 
         """
+        assert header_data is None
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer"

@@ -1,5 +1,6 @@
 import numpy as np
-my_empty =  np.empty
+from .npdataclassstream import NpDataclassStream
+my_empty = np.empty
 
 import logging
 
@@ -7,6 +8,7 @@ from npstructures import npdataclass
 
 logger = logging.getLogger(__name__)
 wrapper = lambda x: x
+
 
 def repr_bytes(n):
     if n < 10 ** 4:
@@ -24,11 +26,12 @@ class NpBufferStream:
     from file that corresponds to full entries.
     """
 
-    def __init__(self, file_obj, buffer_type, chunk_size=5000000):
+    def __init__(self, file_obj, buffer_type, chunk_size=5000000, has_header=False):
         self._file_obj = file_obj
         self._chunk_size = chunk_size
         self._is_finished = False
         self._buffer_type = buffer_type
+        self._has_header = has_header
         self._f_name = (
             self._file_obj.name
             if hasattr(self._file_obj, "name")
@@ -37,6 +40,7 @@ class NpBufferStream:
 
     def __iter__(self):
         self._remove_initial_comments()
+        header_data = self._buffer_type.read_header(self._file_obj)
         chunk = self.__get_buffer()
         total_bytes = 0
 
@@ -45,12 +49,12 @@ class NpBufferStream:
             logger.debug(
                 f"Read chunk of size {repr_bytes(chunk.size)} from {self._f_name}. (Total {repr_bytes(total_bytes)})"
             )
-            buff = self._buffer_type.from_raw_buffer(chunk)
+            buff = self._buffer_type.from_raw_buffer(chunk, header_data=header_data)
             self._file_obj.seek(buff.size - self._chunk_size, 1)
             yield wrapper(buff)
             chunk = self.__get_buffer()
         if chunk is not None and chunk.size:
-            yield self._buffer_type.from_raw_buffer(chunk)
+            yield self._buffer_type.from_raw_buffer(chunk, header_data=header_data)
 
     def __get_buffer(self):
         a, bytes_read = self.__read_raw_chunk()
@@ -60,7 +64,7 @@ class NpBufferStream:
 
         # Ensure that the last entry ends with newline. Makes logic easier later
         if self._is_finished and a[bytes_read - 1] != ord("\n"):
-            a[bytes_read] = ord("\n")
+            a = np.append(a, ord("\n"))
             bytes_read += 1
         return a[:bytes_read]
 
@@ -69,7 +73,7 @@ class NpBufferStream:
         return b, b.size
         # array = my_empty(self._chunk_size, dtype="uint8")
         # bytes_read = self._file_obj.readinto(array)
-        #return array, bytes_read
+        # return array, bytes_read
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
@@ -90,6 +94,9 @@ class NpBufferedWriter:
             else str(self._file_obj)
         )
 
+    def close(self):
+        self._file_obj.close()
+
     def write(self, data: npdataclass):
         """Write the provided data to file
 
@@ -99,12 +106,17 @@ class NpBufferedWriter:
             Data set containing entries
 
         """
+        if isinstance(data, NpDataclassStream):
+            for buf in data:
+                self.write(buf)
+            return 
         bytes_array = self._buffer_type.from_data(data)
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
         self._file_obj.flush()
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
+
 
 def chunk_lines(stream, n_lines):
     cur_buffers = []

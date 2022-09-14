@@ -1,5 +1,6 @@
+import itertools
 import logging
-from npstructures import VarLenArray
+from npstructures import VarLenArray, RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
@@ -12,20 +13,28 @@ class DelimitedBuffer(FileBuffer):
     DELIMITER = ord("\t")
     COMMENT = ord("#")
 
-    def __init__(self, data, new_lines):
+    def __init__(self, data, new_lines, delimiters=None, header_data=None):
         super().__init__(data, new_lines)
-        self._delimiters = np.concatenate(
-            ([-1], np.flatnonzero(self._data == self.DELIMITER), self._new_lines)
-        )
-        self._delimiters.sort(kind="mergesort")
+        if delimiters is None:
+            delimiters = np.concatenate(
+                ([-1], np.flatnonzero(self._data == self.DELIMITER), self._new_lines)
+            )
+            delimiters.sort(kind="mergesort")
+        self._delimiters = delimiters
+        self._header_data = header_data
 
     @classmethod
-    def from_raw_buffer(cls, chunk):
-        new_lines = np.flatnonzero(chunk == NEWLINE)
-        if len(new_lines) == 0:
+    def from_raw_buffer(cls, chunk, header_data=None):
+        mask = chunk == NEWLINE
+        mask |= chunk == cls.DELIMITER
+        delimiters = np.flatnonzero(mask)
+        n_fields = next((i+1 for i, v in enumerate(delimiters) if chunk[v] == NEWLINE), None)
+        if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-
-        return cls(chunk[: new_lines[-1] + 1], new_lines)
+            raise
+        new_lines = delimiters[(n_fields-1)::n_fields]
+        delimiters = np.concatenate(([-1], delimiters[:n_fields*len(new_lines)]))
+        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
     def get_integers(self, cols) -> np.ndarray:
         """Get integers from integer string
@@ -99,7 +108,6 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        # delimiters = self._delimiters.reshape(-1, self._n_cols)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
         if end is not None:
             return self._data[starts[..., np.newaxis] + np.arange(end-start)].reshape(-1, end-start)
@@ -114,6 +122,12 @@ class DelimitedBuffer(FileBuffer):
         n_digits = digit_chars.shape[-1]
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
         return DigitEncoding.encode(digit_chars) @ powers
+
+    @staticmethod
+    def _move_ints_to_digit_array(ints, n_digits):
+        powers = np.uint8(10)**np.arange(n_digits)[::-1]
+        ret = (ints[..., None]//powers) % 10
+        return ret + ord("0")
 
     def _validate(self):
         chunk = self._data
@@ -142,6 +156,29 @@ class BedBuffer(DelimitedBuffer):
         chromosomes = VarLenArray(Sequence.from_array(self.get_text(0)))
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
+
+
+    @classmethod
+    def from_data(cls, data):
+        start_lens = np.log10(data.start).astype(int)+1
+        end_lens = np.log10(data.end).astype(int)+1
+        chromosome_lens = data.chromosome.shape[-1]
+        line_lengths = chromosome_lens + 1 + start_lens + 1 + end_lens + 1
+        line_ends = np.cumsum(line_lengths)
+        buf = np.empty(line_ends[-1], dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        obj = cls(buf, line_ends-1)
+        obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.end, np.max(end_lens)),
+                                        line_ends-1-end_lens, line_ends-1)
+
+        obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.start, np.max(start_lens)),
+                                        line_ends-2-end_lens-start_lens, line_ends-2-end_lens)
+        lines[:, :chromosome_lens] = data.chromosome.ravel()
+        lines[:, chromosome_lens] = ord("\t")
+
+        buf[line_ends-(end_lens+2)] = ord("\t")
+        buf[line_ends-1] = ord("\n")
+        return buf
 
     get_data = get_intervals
 
@@ -218,15 +255,33 @@ class GfaSequenceBuffer(DelimitedBuffer):
     get_data = get_sequences
 
 
-def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
+def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False):
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = ord(delimiter)
         dataclass = _dataclass
+        fields = None
+        def __init__(self, data, new_lines, delimiters=None, header_data=None):
+            super().__init__(data, new_lines, delimiters, header_data)
+            self.set_fields_from_header(header_data)
+
+        @classmethod
+        def read_header(cls, file_object):
+            if not has_header:
+                return None
+            return file_object.readline().decode('ascii').strip().split(chr(cls.DELIMITER))
+
+        def set_fields_from_header(self, columns):
+            if not has_header:
+                return None
+            fields = dataclasses.fields(self.dataclass)
+            self.fields = [next(field for field in fields if field.name == col) for col in columns]
+            assert np.array_equal(columns, [field.name for field in self.fields])
 
         def get_data(self):
             self.validate_if_not()
-            columns = []
-            for col_number, field in enumerate(dataclasses.fields(self.dataclass)):
+            columns = {}
+            fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+            for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
                 elif field.type == str:
@@ -235,11 +290,11 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
                     col = self.get_integers(col_number)
                 else:
                     assert False, field
-                columns.append(col)
+                columns[field.name] = col
             n_entries = len(next(col for col in columns if col is not None))
-            columns = [c if c is not None else np.empty((n_entries, 0))
-                       for c in columns]
-            return self.dataclass(*columns)
+            columns = {c: value if c is not None else np.empty((n_entries, 0))
+                       for c, value in columns.items()}
+            return self.dataclass(**columns)
     DatatypeBuffer.__name__ = _dataclass.__name__+"Buffer"
     DatatypeBuffer.__qualname__ = _dataclass.__qualname__+"Buffer"
     return DatatypeBuffer
