@@ -30,6 +30,16 @@ class Interval:
     def __plot__(self, plt):
         return [plt.hist(self.end - self.start, name="size"), plt.hist("start")]
 
+@npdataclass
+class Bed6(Interval):
+    name: str
+    score: int
+    strand: str
+
+@npdataclass
+class StrandedInterval(Interval):
+    strand: int
+
 
 @npdataclass
 class Variant:
