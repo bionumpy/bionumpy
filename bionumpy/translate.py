@@ -4,6 +4,7 @@ from .encodings.alphabet_encoding import AlphabetEncoding
 from .encodings import BaseEncoding
 from .kmers import KmerEncoding
 from .sequences import as_sequence_array, Sequences
+from .util import apply_to_npdataclass
 import dataclasses
 
 class DNAToProtein:
@@ -42,7 +43,7 @@ class Translate(WindowFunction):
         kmer = KmerEncoding(self.window_size,  alphabet_encoding=self._encoding)(sequence)
         return self._table[kmer]
 
-
 @streamable
-def translate_dna_to_protein(sequence_entries):
-    return dataclasses.replace(sequence_entries, sequence=Translate().windowed(sequence_entries.sequence))
+@apply_to_npdataclass("sequence")
+def translate_dna_to_protein(sequence):
+    return Translate().windowed(sequence_entries.sequence)
