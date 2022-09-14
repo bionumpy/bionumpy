@@ -1,4 +1,4 @@
-
+import numpy as np
 
 class ThreeBitEncoding:
     reverse = np.array(

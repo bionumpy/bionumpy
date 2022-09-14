@@ -1,9 +1,10 @@
 import numpy as np
 from .base_encoding import BaseEncoding, Encoding
 from .alphabet_encoding import AlphabetEncoding, ACTGEncoding, AminoAcidEncoding
+from ._legacy_encodings import ACTGTwoBitEncoding
 
 __all__ = ["BaseEncoding", "Encoding",
-           "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]
+           "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding", "ACTGTwoBitEncoding"]
 
 
 class StrandEncoding(Encoding):

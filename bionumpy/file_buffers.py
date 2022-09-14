@@ -180,6 +180,7 @@ class TwoLineFastaBuffer(OneLineBuffer):
     HEADER = 62
     n_lines_per_entry = 2
     _encoding = BaseEncoding
+    dataclass = SequenceEntry
 
 
 class FastQBuffer(OneLineBuffer):
