@@ -46,9 +46,9 @@ def test_custom_read():
         with open(path, 'w') as file:
             file.writelines(f"sequence{delimiter}sequence_aa\nAACCTAGGC{delimiter}ATF\nAACCTAGGC{delimiter}ATF")
 
-        data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter), has_header=True)
-        assert np.array_equal(data.sequence.to_sequences(), np.array(["AACCTAGGC", "AACCTAGGC"]))
-        assert np.array_equal(data.sequence_aa.to_sequences(), np.array(["ATF", "ATF"]))
+        data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True))
+        assert data.sequence.to_sequences() == ["AACCTAGGC", "AACCTAGGC"]
+        assert data.sequence_aa.to_sequences() == ["ATF", "ATF"]
 
         os.remove(path)
 

@@ -18,7 +18,11 @@ class FileBuffer:
         self.size = self._data.size
 
     @classmethod
-    def from_raw_buffer(cls, raw_buffer) -> "FileBuffer":
+    def read_header(cls, file_object):
+        pass
+
+    @classmethod
+    def from_raw_buffer(cls, raw_buffer, header_data=None) -> "FileBuffer":
         """Create a buffer with full entries
 
         A raw buffer can end with data that does not represent full entries.
@@ -105,7 +109,7 @@ class OneLineBuffer(FileBuffer):
     _buffer_divisor = 32
 
     @classmethod
-    def from_raw_buffer(cls, chunk) -> "OneLineBuffer":
+    def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
         """Create a buffer with full entries
 
         Extract complete entries, i. e. a number of lines that is divisible by lines per entry
@@ -125,6 +129,7 @@ class OneLineBuffer(FileBuffer):
         8
 
         """
+        assert header_data is None
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer"

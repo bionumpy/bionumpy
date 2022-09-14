@@ -13,7 +13,7 @@ class DelimitedBuffer(FileBuffer):
     DELIMITER = ord("\t")
     COMMENT = ord("#")
 
-    def __init__(self, data, new_lines, delimiters=None):
+    def __init__(self, data, new_lines, delimiters=None, header_data=None):
         super().__init__(data, new_lines)
         if delimiters is None:
             delimiters = np.concatenate(
@@ -21,9 +21,10 @@ class DelimitedBuffer(FileBuffer):
             )
             delimiters.sort(kind="mergesort")
         self._delimiters = delimiters
+        self._header_data = header_data
 
     @classmethod
-    def from_raw_buffer(cls, chunk):
+    def from_raw_buffer(cls, chunk, header_data=None):
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
@@ -33,8 +34,7 @@ class DelimitedBuffer(FileBuffer):
             raise
         new_lines = delimiters[(n_fields-1)::n_fields]
         delimiters = np.concatenate(([-1], delimiters[:n_fields*len(new_lines)]))
-        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters)
-        return cls(chunk[: new_lines[-1] + 1], new_lines)
+        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
     def get_integers(self, cols) -> np.ndarray:
         """Get integers from integer string
@@ -255,25 +255,32 @@ class GfaSequenceBuffer(DelimitedBuffer):
     get_data = get_sequences
 
 
-def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
+def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False):
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = ord(delimiter)
         dataclass = _dataclass
         fields = None
+        def __init__(self, data, new_lines, delimiters=None, header_data=None):
+            super().__init__(data, new_lines, delimiters, header_data)
+            self.set_fields_from_header(header_data)
 
         @classmethod
-        def set_fields_from_header(cls, header):
-            cls.fields = []
+        def read_header(cls, file_object):
+            if not has_header:
+                return None
+            return file_object.readline().decode('ascii').strip().split(chr(cls.DELIMITER))
 
-            columns = header.decode('ascii').replace("\n", "").split(chr(cls.DELIMITER))
-            fields = dataclasses.fields(cls.dataclass)
-            cls.fields = list(itertools.chain.from_iterable([[field for field in fields if field.name == col] for col in columns]))
-            assert np.array_equal(columns, [field.name for field in cls.fields])
+        def set_fields_from_header(self, columns):
+            if not has_header:
+                return None
+            fields = dataclasses.fields(self.dataclass)
+            self.fields = [next(field for field in fields if field.name == col) for col in columns]
+            assert np.array_equal(columns, [field.name for field in self.fields])
 
         def get_data(self):
             self.validate_if_not()
             columns = {}
-            fields = self.__class__.fields if self.__class__.fields is not None else dataclasses.fields(self.dataclass)
+            fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
             for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None

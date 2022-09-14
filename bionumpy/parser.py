@@ -40,7 +40,7 @@ class NpBufferStream:
 
     def __iter__(self):
         self._remove_initial_comments()
-        self._remove_header()
+        header_data = self._buffer_type.read_header(self._file_obj)
         chunk = self.__get_buffer()
         total_bytes = 0
 
@@ -49,12 +49,12 @@ class NpBufferStream:
             logger.debug(
                 f"Read chunk of size {repr_bytes(chunk.size)} from {self._f_name}. (Total {repr_bytes(total_bytes)})"
             )
-            buff = self._buffer_type.from_raw_buffer(chunk)
+            buff = self._buffer_type.from_raw_buffer(chunk, header_data=header_data)
             self._file_obj.seek(buff.size - self._chunk_size, 1)
             yield wrapper(buff)
             chunk = self.__get_buffer()
         if chunk is not None and chunk.size:
-            yield self._buffer_type.from_raw_buffer(chunk)
+            yield self._buffer_type.from_raw_buffer(chunk, header_data=header_data)
 
     def __get_buffer(self):
         a, bytes_read = self.__read_raw_chunk()
@@ -82,11 +82,6 @@ class NpBufferStream:
             if line[0] != self._buffer_type.COMMENT:
                 self._file_obj.seek(-len(line), 1)
                 break
-
-    def _remove_header(self):
-        if self._has_header:
-            header = self._file_obj.readline()
-            self._buffer_type.set_fields_from_header(header)
 
 
 class NpBufferedWriter:
