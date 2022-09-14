@@ -1,3 +1,4 @@
+import itertools
 import logging
 from npstructures import VarLenArray, RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
@@ -258,11 +259,22 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = ord(delimiter)
         dataclass = _dataclass
+        fields = None
+
+        @classmethod
+        def set_fields_from_header(cls, header):
+            cls.fields = []
+
+            columns = header.decode('ascii').replace("\n", "").split(chr(cls.DELIMITER))
+            fields = dataclasses.fields(cls.dataclass)
+            cls.fields = list(itertools.chain.from_iterable([[field for field in fields if field.name == col] for col in columns]))
+            assert np.array_equal(columns, [field.name for field in cls.fields])
 
         def get_data(self):
             self.validate_if_not()
-            columns = []
-            for col_number, field in enumerate(dataclasses.fields(self.dataclass)):
+            columns = {}
+            fields = self.__class__.fields if self.__class__.fields is not None else dataclasses.fields(self.dataclass)
+            for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
                 elif field.type == str:
@@ -271,11 +283,11 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t"):
                     col = self.get_integers(col_number)
                 else:
                     assert False, field
-                columns.append(col)
+                columns[field.name] = col
             n_entries = len(next(col for col in columns if col is not None))
-            columns = [c if c is not None else np.empty((n_entries, 0))
-                       for c in columns]
-            return self.dataclass(*columns)
+            columns = {c: value if c is not None else np.empty((n_entries, 0))
+                       for c, value in columns.items()}
+            return self.dataclass(**columns)
     DatatypeBuffer.__name__ = _dataclass.__name__+"Buffer"
     DatatypeBuffer.__qualname__ = _dataclass.__qualname__+"Buffer"
     return DatatypeBuffer
