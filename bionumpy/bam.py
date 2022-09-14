@@ -9,7 +9,6 @@ import numpy as np
 from .sequences import Sequences, as_sequence_array, Sequence
 from .encodings import AlphabetEncoding, BaseEncoding
 
-
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
 
 
@@ -26,6 +25,7 @@ class Dummy:
 
 
 class BamBuffer(FileBuffer):
+<<<<<<< HEAD
     dataclass = Dummy
     def __init__(self, data, delimiters, header_data):
         super().__init__(data, delimiters)
@@ -94,6 +94,7 @@ class BamBuffer(FileBuffer):
         read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
         cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
                                                       self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
+
         cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
         sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
                                                          self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
