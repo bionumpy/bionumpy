@@ -81,9 +81,7 @@ def pileup(intervals):
     positions = positions[args]
     intervals = np.lib.stride_tricks.sliding_window_view(positions, 2)
     mask = np.flatnonzero(intervals[:, 0] == intervals[:, 1])
-    print(intervals)
     intervals = np.delete(intervals, mask, axis=0)
-    print(intervals)
     values = np.delete(values, mask)
     mask = np.flatnonzero(values[1:] == values[:-1])
     values = np.delete(values, mask)
@@ -91,14 +89,3 @@ def pileup(intervals):
     ends = np.delete(intervals[:, 1], mask)
     return BedGraph(chroms[:values.size-1],
                     starts, ends, values[:-1])
-                    
-
-# .sort(kind="mergesort", key="start")
-#     starts = np.concatenate([intervals_a.start, intervals_b.start])
-#     ends = np.concatenate([intervals_a.end, intervals_b.end])
-#     starts.sort(kind="mergesort")
-#     ends.sort(kind="mergesort")
-#     mask = ends[:-1] > starts[1:]
-#     return intervals_a.__class__(intervals_a.chromosome
-#     return np.maximum(, 0)
-# 
