@@ -56,6 +56,6 @@ class QualityEncoding(Encoding):
         return res
 
     def decode(quality):
-        res = quality + ord("!")
+        res = quality.astype(np.uint8) + ord("!")
         res.encoding = BaseEncoding
         return res
