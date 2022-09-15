@@ -62,30 +62,37 @@ class Sequences(RaggedArray):
         return RaggedArray(r._data, r.shape)
 
 
-def as_sequence_array(s, encoding=BaseEncoding):
+def create_sequence_array_from_already_encoded_data(data, encoding):
+    assert isinstance(data, (np.ndarray, RaggedArray))
+    return Seqeunces(data._data, data.shape, encoding=encoding)
+
+def as_encoded_sequence_array(s, encoding):
+    s = as_sequence_array(s)
+    if s.encoding != encoding:
+        assert s.encoding == BaseEncoding
+        if isinstance(s, Sequences):
+            return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
+        else:
+            e = encoding.encode(s)
+            s = e.view(Sequence)
+            s.encoding = encoding 
+            return s
+
+    return encoding.encode(s)
+
+def as_sequence_array(s):#:, encoding=BaseEncoding):
+    """
+    Return a sequence array representation of s
+    """
     if isinstance(s, (Sequences, Sequence)):
-        if s.encoding != encoding:
-            assert s.encoding == BaseEncoding
-            if isinstance(s, Sequences):
-                return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
-            else:
-                e = encoding.encode(s)
-                s = e.view(Sequence)
-                s.encoding = encoding
-                return s
         return s
     elif isinstance(s, np.ndarray):
-        s = encoding.encode(s)
-        s = s.view(Sequence)
-        s.encoding = encoding
-        return s
+        return s.view(Sequence)
     elif isinstance(s, RaggedArray):
-        data = encoding.encode(s)
-        return Sequences(data, s.shape, encoding=encoding)
+        return Sequences(s._data, s.shape)
     elif isinstance(s, str):
-        return encoding.encode(Sequence.from_string(s))
+        return Sequence.from_string(s)
     elif isinstance(s, list):
-        s = Sequences.from_strings(s)
-        return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
+        return Sequences.from_strings(s)
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
