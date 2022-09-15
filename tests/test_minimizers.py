@@ -21,7 +21,7 @@ def sequences():
 
 @pytest.fixture
 def window():
-    s = Sequence.from_array(np.array([0, 3, 1, 2]))
+    s = np.array([0, 3, 1, 2]).view(Sequence)
     s.encoding = ACTGEncoding
     return s
 

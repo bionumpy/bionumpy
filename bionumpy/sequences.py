@@ -19,21 +19,17 @@ class Sequence(np.ndarray):
     def __repr__(self):
         return f"Sequence({np.asarray(self)}, {self.encoding.__class__.__name__})"
 
-    @classmethod
-    def from_array(cls, a):
-        return cls(a.shape, a.dtype, a.data)
-
 
 class Sequences(RaggedArray):
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
-        self._data = Sequence.from_array(self._data)
+        self._data = self._data.view(Sequence)
         self._data.encoding = encoding
         self.encoding = encoding
 
     def ravel(self):
         d = super().ravel()
-        s = Sequence.from_array(d)
+        s = d.view(Sequence)
         s.encoding = self.encoding
         return s
 
@@ -73,13 +69,13 @@ def as_sequence_array(s, encoding=BaseEncoding):
                 return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
             else:
                 e = encoding.encode(s)
-                s = Sequence.from_array(e)
-                s.encoding=encoding
+                s = e.view(Sequence)
+                s.encoding = encoding
                 return s
         return s
     elif isinstance(s, np.ndarray):
         s = encoding.encode(s)
-        s = Sequence.from_array(s)
+        s = s.view(Sequence)
         s.encoding = encoding
         return s
     elif isinstance(s, RaggedArray):

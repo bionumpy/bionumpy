@@ -25,13 +25,11 @@ class KmerEncoding(RollableFunction):
         return sequence.dot(self._convolution)
 
     def inverse(self, kmer_hash: int) -> Sequence:
-        return Sequence.from_array(
-            (kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size)
+        return ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(Sequence)
 
     def sample_domain(self, n):
-        s = Sequence.from_array(np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
-            n, self._k
-        ))
+        s = (np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
+            n, self._k)).view(Sequence)
         s.encoding = self._encoding
         return s
 
