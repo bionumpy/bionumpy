@@ -25,7 +25,6 @@ class Dummy:
 
 
 class BamBuffer(FileBuffer):
-<<<<<<< HEAD
     dataclass = Dummy
     def __init__(self, data, delimiters, header_data):
         super().__init__(data, delimiters)
