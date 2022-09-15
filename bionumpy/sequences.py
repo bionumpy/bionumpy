@@ -51,7 +51,8 @@ class Sequences(RaggedArray):
         trail = " ..." if len(self) > 20 else ""
         return f"Sequences({seqs}{trail})"
 
-    __repr__ = __str__
+    def __repr__(self):
+        return f"Sequences({self._data}, self.shape, self.encoding)"
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         r = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
@@ -79,7 +80,8 @@ def as_sequence_array(s, encoding=BaseEncoding):
         s.encoding = encoding
         return s
     elif isinstance(s, RaggedArray):
-        return s
+        data = encoding.encode(s)
+        return Sequences(data, s.shape, encoding=encoding)
     elif isinstance(s, str):
         return encoding.encode(Sequence.from_string(s))
     elif isinstance(s, list):
