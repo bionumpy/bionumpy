@@ -10,16 +10,14 @@ class Sequence(np.ndarray):
     def from_string(cls, s):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
-    def __repr__(self):
+    def __str__(self):
         self = self.encoding.decode(self)
         if len(self.shape) == 1:
             return "Sequence(" + "".join(chr(n) for n in self[:20]) + ")"
         return "Sequence(" + str(np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]) + ")"
 
-    def __str__(self):
-        if len(self.shape) == 1:
-            return "".join(chr(n) for n in self.encoding.decode(self)[:10])
-        return self.__repr__()
+    def __repr__(self):
+        return f"Sequence({np.asarray(self)}, {self.encoding.__class__.__name__})"
 
     @classmethod
     def from_array(cls, a):
