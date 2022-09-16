@@ -8,6 +8,20 @@ NEWLINE = 10
 
 
 class FileBuffer:
+    """ Base class for file buffer classes. Different FileBuffer classes
+    should correspond to different file formats. 
+
+    A FileBuffer class can extract the text/bytes corresponding to complete
+    entries from a raw buffer (`from_raw_buffer`) and convert the bytes/text from
+    those entries into data in `@npdataclass` objects.
+
+    The `from_data` method should convert `@npdataclass` objects into text/bytes
+    that can be written to file. 
+
+    This base class provides some convenience methods to extract text form parts of
+    a buffer into meaningful data
+    """
+
     _buffer_divisor = 1
     COMMENT = 0
 

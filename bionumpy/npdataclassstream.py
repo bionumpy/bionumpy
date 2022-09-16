@@ -1,4 +1,14 @@
+import numpy as np
+
+
 class NpDataclassStream:
+    """
+    Class to hold a stream/generator of npdataclass objects.
+    Works with streamable/bnp_broadcast so that functions decorated
+    with those decorator will apply the function to each element in
+    a NpDataclassStream. To concatenate all the chunks in the generator
+    into one npdataclass, use `NpDataclassStream.join()`
+    """
     def __init__(self, stream, buffer_type):
         self._stream = stream
         self._opened = False
@@ -35,7 +45,21 @@ class NpDataclassStream:
     def element_iter(self):
         return (elem for elem in chunk for chunk in self)
 
+    def join(self):
+        return np.concatenate(list(self))
+
+
 def streamable(func):
+    """
+    Decorator for applying a function to all chunks of a 
+    NpDataclassStream.
+
+    If a NpDataclassStream is provided as an argument to the function,
+    the function will be applied to all elements of the stream. 
+    Arguments that are not instances of NpDataclassStream will be kept for
+    all the fucntion calls
+    """
+
     def _args_stream(args, i):
         args = list(args)
         for arg in args[i]:
