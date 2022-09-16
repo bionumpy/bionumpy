@@ -3,7 +3,7 @@ from .encodings import BaseEncoding
 from npstructures import RaggedArray
 
 
-class Sequence(np.ndarray):
+class EncodedArray(np.ndarray):
     encoding = BaseEncoding
 
     @classmethod
@@ -19,8 +19,18 @@ class Sequence(np.ndarray):
     def __repr__(self):
         return f"Sequence({np.asarray(self)}, {self.encoding.__class__.__name__})"
 
+    def __getitem__(self, key):
+        r = super().__getitem__(key)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
 
-class Sequences(RaggedArray):
+        return r
+
+class Sequence(EncodedArray):
+    pass
+
+class EncodedRaggedArray(RaggedArray):
+
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
         self._data = self._data.view(Sequence)
@@ -61,6 +71,26 @@ class Sequences(RaggedArray):
 
         return RaggedArray(r._data, r.shape)
 
+    def __array_function__(self, func, types, args, kwargs):
+        r = super().__array_function__(func, types, args, kwargs)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
+
+        return r
+
+    def __getitem__(self, key):
+        r = super().__getitem__(key)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
+
+        return r
+
+class Sequences(EncodedRaggedArray):
+    pass
+
+class NumericEncodedRaggedArray(EncodedRaggedArray):
+    pass
+    
 
 def create_sequence_array_from_already_encoded_data(data, encoding):
     assert isinstance(data, (np.ndarray, RaggedArray))
@@ -78,7 +108,7 @@ def as_encoded_sequence_array(s, encoding):
             s.encoding = encoding 
             return s
 
-    return encoding.encode(s)
+    return s
 
 def as_sequence_array(s):#:, encoding=BaseEncoding):
     """
