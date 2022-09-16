@@ -9,12 +9,13 @@ class MultiLineBuffer(FileBuffer):
 
 class MultiLineFastaBuffer(MultiLineBuffer):
     _new_entry_marker = ord(">")
-
+    dataclass = SequenceEntry
     def __init__(self, data, new_lines, new_entries):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
     
     def get_data(self):
+        self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
         line_ends = np.append(self._new_lines, self._data.size)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
@@ -24,13 +25,13 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         headers = data[new_entries, 1:]
         mask  = np.ones(len(data), dtype=bool)
         mask[new_entries] = False
-        print(headers)
-        print(n_lines_per_entry)
         sequence_lines = data[mask]
         seq_lens = sequence_lines.shape.ends[line_offsets[1:]-1]-sequence_lines.shape.starts[line_offsets[:-1]]
         sequences = Sequences(sequence_lines.ravel(), seq_lens)
-        print(sequences)
         return SequenceEntry(headers, sequences)
+
+    def _validate(self):
+        self._is_validated=True
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
