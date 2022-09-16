@@ -19,7 +19,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
     def get_data(self):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
-        line_ends = np.append(self._new_lines, self._data.size)
+        line_ends = np.append(self._new_lines, self._data.size-1)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
         new_entries = np.insert(self._new_entries+1, 0, 0)
         n_lines_per_entry = np.diff(np.append(new_entries, self._new_lines.size+1))-1
@@ -55,11 +55,12 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
-        assert header_data is None
-        assert chunk[0] == cls._new_entry_marker
-        new_lines = np.flatnonzero(chunk == NEWLINE)
+        assert header_data is None, header_data
+        assert chunk[0] == cls._new_entry_marker,chunk[:100]
+        new_lines = np.flatnonzero(chunk[:-1] == NEWLINE)
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
         entry_starts = new_lines[new_entries]+1
-        return cls(chunk[:entry_starts[-1]-1],
+        cut_chunk = chunk[:entry_starts[-1]]
+        return cls(cut_chunk,
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
