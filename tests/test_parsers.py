@@ -23,13 +23,14 @@ def test_buffer_read(buffer_name):
     assert list(data) == true_data
 
 
-@pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["fasta", "fastq", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
+    if buffer_name == "multiline_fasta":
+        true_buf = true_buf[:-1]
+        buf_type.n_characters_per_line = 6
     data = data[0].stack_with_ragged(data)
     buf = buf_type.from_data(data)
-    print(buf)
-    print(true_buf)
     assert np.all(true_buf == buf)
 
 

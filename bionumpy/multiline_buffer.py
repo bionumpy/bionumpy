@@ -1,3 +1,4 @@
+from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import SequenceEntry
 from .sequences import Sequences
@@ -9,6 +10,7 @@ class MultiLineBuffer(FileBuffer):
 
 class MultiLineFastaBuffer(MultiLineBuffer):
     _new_entry_marker = ord(">")
+    n_characters_per_line=80
     dataclass = SequenceEntry
     def __init__(self, data, new_lines, new_entries):
         super().__init__(data, new_lines)
@@ -34,26 +36,22 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         self._is_validated=True
 
     @classmethod
-    def from_data(cls, data):
-        name_lengths = entries.name.shape.lengths +2 
-        sequence_lengths = entries.sequence.shape.lengths + 1
+    def from_data(cls, entries):
+        name_lengths = entries.name.shape.lengths
+        sequence_lengths = entries.sequence.shape.lengths
         n_lines = (sequence_lengths-1) // (cls.n_characters_per_line) + 1
-        last_length = (sequence_lengths-1) % cls.n_characters_per_line + 1 + 1
-        line_lenghts = 
-
-        line_lengths = np.hstack(
-            (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
-        ).ravel()
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
-        lines = RaggedArray(buf, line_lengths)
-        step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = entries.name
-        lines[1::step, :-1] = entries.sequence
-
-        lines[0::step, 0] = ord(">")
-
-        lines[:, -1] = ord("\n")
-        return buf        
+        last_length = (sequence_lengths-1) % cls.n_characters_per_line + 1
+        line_lengths = np.full(np.sum(n_lines) + n_lines.size, cls.n_characters_per_line + 1, dtype=int)
+        entry_starts = np.insert(np.cumsum(n_lines+1), 0, 0)
+        line_lengths[entry_starts[:-1]] = name_lengths + 2
+        line_lengths[entry_starts[1:]-1] = last_length + 1
+        lines = RaggedArray(np.zeros(line_lengths.sum(), dtype=np.uint8), line_lengths)
+        lines[entry_starts[:-1],1:-1] = entries.name
+        lines[entry_starts[:-1], 0] = cls._new_entry_marker
+        idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
+        lines[idxs,:-1] = RaggedArray(entries.sequence.ravel(), line_lengths[idxs]-1)
+        lines[:, -1] = NEWLINE
+        return lines.ravel()
         
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
@@ -62,7 +60,6 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         new_lines = np.flatnonzero(chunk == NEWLINE)
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
         entry_starts = new_lines[new_entries]+1
-        print(new_lines, new_entries)
         return cls(chunk[:entry_starts[-1]-1],
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
