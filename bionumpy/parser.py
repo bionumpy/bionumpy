@@ -94,6 +94,13 @@ class NpBufferedWriter:
             else str(self._file_obj)
         )
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._file_obj:
+            self._file_obj.close()
+
     def close(self):
         self._file_obj.close()
 

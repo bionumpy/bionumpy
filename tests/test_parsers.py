@@ -33,6 +33,24 @@ def test_buffer_write(buffer_name):
     assert np.all(true_buf == buf)
 
 
+def test_buffered_writer_ctx_manager(fastq_buffer):
+
+    file_path = "./tmp.fq"
+
+    true_stream = bnp_open('example_data/reads.fq')
+
+    with bnp_open(file_path, mode='w') as f:
+        f.write(true_stream)
+
+    true_stream = bnp_open('example_data/reads.fq')
+
+    fq_stream = bnp_open(file_path)
+    for fq_item, true_item in zip(fq_stream, true_stream):
+        assert fq_item == true_item
+
+    os.remove(file_path)
+
+
 def test_custom_read():
     from npstructures import npdataclass
 
