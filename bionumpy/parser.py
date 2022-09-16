@@ -63,9 +63,13 @@ class NpBufferStream:
             return None
 
         # Ensure that the last entry ends with newline. Makes logic easier later
-        if self._is_finished and a[bytes_read - 1] != ord("\n"):
-            a = np.append(a, ord("\n"))
-            bytes_read += 1
+        if self._is_finished:
+            if a[bytes_read - 1] != ord("\n"):
+                a = np.append(a, ord("\n"))
+                bytes_read += 1
+            if hasattr(self._buffer_type, "_new_entry_marker"):
+                a = np.append(a, self._buffer_type._new_entry_marker)
+                bytes_read += 1
         return a[:bytes_read]
 
     def __read_raw_chunk(self):

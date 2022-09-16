@@ -3,6 +3,7 @@ import gzip
 import numpy as np
 
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .multiline_buffer import MultiLineFastaBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
 from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
@@ -13,8 +14,8 @@ from .npdataclassstream import NpDataclassStream
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
-    ".fasta": TwoLineFastaBuffer,
-    ".fa": TwoLineFastaBuffer,
+    ".fasta": MultiLineFastaBuffer,
+    ".fa": MultiLineFastaBuffer,
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
