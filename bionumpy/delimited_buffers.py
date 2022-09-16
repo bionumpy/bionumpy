@@ -256,10 +256,16 @@ class GfaSequenceBuffer(DelimitedBuffer):
 
 
 def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False):
+    """
+    Create a FileBuffer subclass that handles reding of text and integers from a
+    buffer in to an @npdataclas object
+    """
+
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = ord(delimiter)
         dataclass = _dataclass
         fields = None
+
         def __init__(self, data, new_lines, delimiters=None, header_data=None):
             super().__init__(data, new_lines, delimiters, header_data)
             self.set_fields_from_header(header_data)
