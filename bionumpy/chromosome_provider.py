@@ -7,19 +7,20 @@ logger = logging.getLogger(__name__)
 
 
 class ChromosomeProvider:
+    """Base class for objects that can provide data grouped by chromosomes, 
+    either by supplying a stream of `(chromosome_name, data)` tuples, or by
+    providing a getitem method so `obj[chromosome_name]` returns the data for the 
+    chromsome. 
+
+    This class works together with @ChromosomeMap/@bnp_broadcast so that a function
+    decorated with either of those will apply the function to the data for each chromosome
+    if a `ChromosomeProvider` instance is given as argument.
+    """
     _default_value = None
 
     @staticmethod
     def get_chrom_name(char_array):
         return "".join(chr(c) for c in char_array).replace("\x00", "")
-
-    @staticmethod
-    def _is_same_chromosome(chrom_1, chrom_2):
-        if chrom_1 is None:
-            return False
-        return FullBedFile.get_chrom_name(chrom_1) == FullBedFile.get_chrom_name(
-            chrom_2
-        )
 
     @staticmethod
     def _get_chromosome_changes(chromosomes):
@@ -30,6 +31,10 @@ class ChromosomeProvider:
 
 
 class ChromosomeStreamProvider(ChromosomeProvider):
+    """
+    Provides chromosome data as a stream of `(chromosome_name, data)` tuples. 
+    Just a wrapper around a stream to make it recognizable to @ChromosomeMap
+    """
     def __init__(self, stream):
         self._stream = stream
 
@@ -38,6 +43,10 @@ class ChromosomeStreamProvider(ChromosomeProvider):
 
 
 class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
+    """
+    Splits the data devided in file buffers into one chunk per chromsome. 
+    """
+
     def __init__(self, file_buffers, default_value=None):
         self._buffers = file_buffers
         self._default_value = default_value
@@ -112,6 +121,10 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
 
 
 class ChromosomeDictProvider(ChromosomeProvider):
+    """
+    Makes data for each chromosome accesible by item lookup
+    """
+
     def items(self):
         return self._d.items()
 

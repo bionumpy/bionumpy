@@ -1,13 +1,13 @@
 import numpy as np
 from .npdataclassstream import NpDataclassStream
-my_empty = np.empty
-
 import logging
-
 from npstructures import npdataclass
 
 logger = logging.getLogger(__name__)
-wrapper = lambda x: x
+
+
+def wrapper(x):
+    return x
 
 
 def repr_bytes(n):
@@ -89,6 +89,11 @@ class NpBufferStream:
 
 
 class NpBufferedWriter:
+    """ 
+    File writer that can write @npdataclass objects
+    to file
+    """
+
     def __init__(self, file_obj, buffer_type):
         self._file_obj = file_obj
         self._buffer_type = buffer_type
