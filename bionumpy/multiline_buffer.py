@@ -34,6 +34,28 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         self._is_validated=True
 
     @classmethod
+    def from_data(cls, data):
+        name_lengths = entries.name.shape.lengths +2 
+        sequence_lengths = entries.sequence.shape.lengths + 1
+        n_lines = (sequence_lengths-1) // (cls.n_characters_per_line) + 1
+        last_length = (sequence_lengths-1) % cls.n_characters_per_line + 1 + 1
+        line_lenghts = 
+
+        line_lengths = np.hstack(
+            (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
+        ).ravel()
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        step = cls.n_lines_per_entry
+        lines[0::step, 1:-1] = entries.name
+        lines[1::step, :-1] = entries.sequence
+
+        lines[0::step, 0] = ord(">")
+
+        lines[:, -1] = ord("\n")
+        return buf        
+        
+    @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
         assert header_data is None
         assert chunk[0] == cls._new_entry_marker
