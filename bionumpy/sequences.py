@@ -3,7 +3,7 @@ from .encodings import BaseEncoding
 from npstructures import RaggedArray
 
 
-class Sequence(np.ndarray):
+class EncodedArray(np.ndarray):
     encoding = BaseEncoding
 
     @classmethod
@@ -19,8 +19,18 @@ class Sequence(np.ndarray):
     def __repr__(self):
         return f"Sequence({np.asarray(self)}, {self.encoding.__class__.__name__})"
 
+    def __getitem__(self, key):
+        r = super().__getitem__(key)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
 
-class Sequences(RaggedArray):
+        return r
+
+class Sequence(EncodedArray):
+    pass
+
+class EncodedRaggedArray(RaggedArray):
+
     def __init__(self, data, shape=None, encoding=BaseEncoding):
         super().__init__(data, shape, dtype=np.uint8)
         self._data = self._data.view(Sequence)
@@ -56,36 +66,63 @@ class Sequences(RaggedArray):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         r = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
-        if ufunc not in (np.equal, np.not_equal):
+        if ufunc not in (np.equal, np.not_equal, np.less, np.less_equal, np.greater, np.greater_equal):
             return r
 
         return RaggedArray(r._data, r.shape)
 
+    def __array_function__(self, func, types, args, kwargs):
+        r = super().__array_function__(func, types, args, kwargs)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
 
-def as_sequence_array(s, encoding=BaseEncoding):
+        return r
+
+    def __getitem__(self, key):
+        r = super().__getitem__(key)
+        if isinstance(r, (Sequence, Sequences)):
+            r.encoding = self.encoding
+
+        return r
+
+class Sequences(EncodedRaggedArray):
+    pass
+
+class NumericEncodedRaggedArray(EncodedRaggedArray):
+    pass
+    
+
+def create_sequence_array_from_already_encoded_data(data, encoding):
+    assert isinstance(data, (np.ndarray, RaggedArray))
+    return Seqeunces(data._data, data.shape, encoding=encoding)
+
+def as_encoded_sequence_array(s, encoding):
+    s = as_sequence_array(s)
+    if s.encoding != encoding:
+        assert s.encoding == BaseEncoding
+        if isinstance(s, Sequences):
+            return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
+        else:
+            e = encoding.encode(s)
+            s = e.view(Sequence)
+            s.encoding = encoding 
+            return s
+
+    return s
+
+def as_sequence_array(s):#:, encoding=BaseEncoding):
+    """
+    Return a sequence array representation of s
+    """
     if isinstance(s, (Sequences, Sequence)):
-        if s.encoding != encoding:
-            assert s.encoding == BaseEncoding
-            if isinstance(s, Sequences):
-                return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
-            else:
-                e = encoding.encode(s)
-                s = e.view(Sequence)
-                s.encoding = encoding
-                return s
         return s
     elif isinstance(s, np.ndarray):
-        s = encoding.encode(s)
-        s = s.view(Sequence)
-        s.encoding = encoding
-        return s
+        return s.view(Sequence)
     elif isinstance(s, RaggedArray):
-        data = encoding.encode(s)
-        return Sequences(data, s.shape, encoding=encoding)
+        return Sequences(s._data, s.shape)
     elif isinstance(s, str):
-        return encoding.encode(Sequence.from_string(s))
+        return Sequence.from_string(s)
     elif isinstance(s, list):
-        s = Sequences.from_strings(s)
-        return Sequences(encoding.encode(s.ravel()), s.shape, encoding=encoding)
+        return Sequences.from_strings(s)
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")

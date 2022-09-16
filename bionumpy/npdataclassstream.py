@@ -32,6 +32,9 @@ class NpDataclassStream:
 {self._peek()}
 """
 
+    def element_iter(self):
+        return (elem for elem in chunk for chunk in self)
+
 def streamable(func):
     def _args_stream(args, i):
         args = list(args)

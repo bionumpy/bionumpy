@@ -1,7 +1,7 @@
 import logging
 
 from bionumpy.rollable import RollableFunction
-from bionumpy.sequences import as_sequence_array, Sequences
+from bionumpy.sequences import as_encoded_sequence_array, Sequences
 import itertools
 import numpy as np
 import bionumpy as bnp
@@ -138,6 +138,6 @@ def construct_wildcard_matcher(matching_regex: str, encoding):
 
     assert encoding in (bnp.encodings.ACTGEncoding,
                         bnp.encodings.AminoAcidEncoding), "NotImplemented: Support for other encodings awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
-    base_seq = as_sequence_array(matching_regex.replace('.', 'A'), encoding=encoding)
+    base_seq = as_encoded_sequence_array(matching_regex.replace('.', 'A'), encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)

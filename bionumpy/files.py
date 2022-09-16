@@ -19,6 +19,7 @@ buffer_types = {
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
     ".gff": get_bufferclass_for_datatype(GFFEntry),
+    ".gtf": get_bufferclass_for_datatype(GFFEntry),
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
     ".sam": get_bufferclass_for_datatype(SAMEntry)
 }
@@ -32,7 +33,7 @@ wrappers = {
     "full": lambda x, y: np.concatenate(list(x))
 }
 
-default_modes = {".vcf": "chromosome_stream", ".bed": "dict", "csv": "full"}
+default_modes = {".vcf": "chromosome_stream", ".bed": "dict", "csv": "full", "gtf": "full"}
 
 
 def _get_buffered_file(

@@ -3,7 +3,7 @@ from .npdataclassstream import streamable
 from .encodings.alphabet_encoding import AlphabetEncoding
 from .encodings import BaseEncoding
 from .kmers import KmerEncoding
-from .sequences import as_sequence_array, Sequences
+from .sequences import as_sequence_array, Sequences, as_encoded_sequence_array
 from .util import apply_to_npdataclass
 import dataclasses
 
@@ -19,7 +19,7 @@ class DNAToProtein:
 
 class WindowFunction:
     def windowed(self, sequences):
-        sequences = as_sequence_array(sequences, encoding=self._encoding)
+        sequences = as_encoded_sequence_array(sequences, encoding=self._encoding)
         assert np.all(sequences.shape.lengths % self.window_size == 0)
         tuples = sequences.ravel().reshape(-1, self.window_size)
         tuples.encoding = self._encoding
@@ -42,6 +42,7 @@ class Translate(WindowFunction):
         sequence.encoding = e
         kmer = KmerEncoding(self.window_size,  alphabet_encoding=self._encoding)(sequence)
         return self._table[kmer]
+
 
 @streamable
 @apply_to_npdataclass("sequence")
