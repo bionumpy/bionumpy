@@ -72,6 +72,14 @@ def test_custom_read():
         os.remove(path)
 
 
+def test_raises_error_for_unsupported_types():
+    with pytest.raises(RuntimeError):
+        bnp_open("tmp.airr")
+
+    with pytest.raises(RuntimeError):
+        bnp_open('tmp.csv')
+
+
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
     buf = TwoLineFastaBuffer.from_raw_buffer(twoline_fasta_buffer)
     seqs = buf.get_sequences()

@@ -42,19 +42,27 @@ def _get_buffered_file(
 ):
     open_func = gzip.open if is_gzip else open
     if buffer_type is None:
-        buffer_type = buffer_types[suffix]
+        buffer_type = _get_buffer_type(suffix)
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
     buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
-    
+
     data = NpDataclassStream((buf.get_data() for buf in buffers), buffer_type=buffers._buffer_type)
     if "n_entries" in kwargs:
         data = chunk_lines(data, kwargs["n_entries"])
     if mode is None:
         mode = default_modes.get(suffix, "stream")
     return wrappers[mode](data, buffer_type.dataclass)
+
+
+def _get_buffer_type(suffix):
+    if suffix in buffer_types:
+        return buffer_types[suffix]
+    else:
+        raise RuntimeError(f"File format {suffix} does not have a default buffer type. "
+                           f"Specify buffer_type argument using get_bufferclass_for_datatype function.")
 
 
 def bnp_open(filename, mode=None, **kwargs):
@@ -68,3 +76,6 @@ def bnp_open(filename, mode=None, **kwargs):
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)
+
+    raise RuntimeError(f"File format {suffix} is not supported in file {filename}. Supported file formats are "
+                       f"{str(list(buffer_types.keys()))[1:-1]}, {str(generic_buffers)[1:-1]}.")
