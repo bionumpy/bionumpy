@@ -24,7 +24,7 @@ def test_fixedlen_regex_matching():
                    for offset in range(len(seq) - pattern_len + 1)]
                   for seq in sequences]
 
-    sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
+    sequence_array = bnp.as_encoded_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
     matcher = FixedLenRegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
     matches = matcher.rolling_window(sequence_array)
     assert matches == RaggedArray(re_matches)  # TODO: switch to correct assertion..
@@ -37,7 +37,7 @@ def test_flexible_len_regex_matching():
     re_matches = [[False for _ in range(7)],
                   [True, False, False, False, True, True, False, False]]
 
-    sequence_array = bnp.as_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
+    sequence_array = bnp.as_encoded_sequence_array(sequences, encoding=bnp.encodings.ACTGEncoding)
     matcher = RegexMatcher(pattern, encoding=bnp.encodings.ACTGEncoding)
     matches = matcher.rolling_window(sequence_array)
     assert matches == RaggedArray(re_matches)  # TODO: switch to correct assertion..

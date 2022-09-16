@@ -1,5 +1,5 @@
 import numpy as np
-from .sequences import Sequence, Sequences, as_sequence_array
+from .sequences import Sequence, Sequences, as_encoded_sequence_array
 from npstructures import RaggedArray
 
 from abc import abstractmethod
@@ -46,7 +46,7 @@ class RollableFunction:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_sequence_array(_sequence, encoding=self._encoding)
+                _sequence = as_encoded_sequence_array(_sequence, encoding=self._encoding)
             else:
                 _sequence = RaggedArray(_sequence)
 

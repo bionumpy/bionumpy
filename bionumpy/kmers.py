@@ -1,7 +1,7 @@
 import numpy as np
 from .rollable import RollableFunction
 from .encodings import ACTGEncoding
-from .sequences import Sequence, as_sequence_array
+from .sequences import Sequence, as_encoded_sequence_array
 from npstructures.bitarray import BitArray
 from .util import convolution
 import logging
@@ -21,7 +21,7 @@ class KmerEncoding(RollableFunction):
 
     def __call__(self, sequence: Sequence) -> int:
         if self._encoding is not None:
-            sequence = as_sequence_array(sequence, encoding=self._encoding)
+            sequence = as_encoded_sequence_array(sequence, encoding=self._encoding)
         return sequence.dot(self._convolution)
 
     def inverse(self, kmer_hash: int) -> Sequence:
