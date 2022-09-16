@@ -10,6 +10,13 @@ import numpy as np
 
 
 class DelimitedBuffer(FileBuffer):
+    """Base class for file buffers for delimited files such as csv or tsv.
+    Each line should correspond to an entry, and each column to a variable.
+
+    Provides convenience methods for extracting and decoding integers from columns,
+    and text from columns into Sequences objects
+    """
+
     DELIMITER = ord("\t")
     COMMENT = ord("#")
 
