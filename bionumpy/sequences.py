@@ -66,7 +66,7 @@ class EncodedRaggedArray(RaggedArray):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         r = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
-        if ufunc not in (np.equal, np.not_equal):
+        if ufunc not in (np.equal, np.not_equal, np.less, np.less_equal, np.greater, np.greater_equal):
             return r
 
         return RaggedArray(r._data, r.shape)
