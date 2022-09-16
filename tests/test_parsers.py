@@ -16,7 +16,7 @@ def chunk_from_text(text):
     return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
 
 
-@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence"])
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
 def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
