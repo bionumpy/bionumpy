@@ -16,7 +16,7 @@ def chunk_from_text(text):
     return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
 
 
-@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence"])
 def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
@@ -27,7 +27,6 @@ def test_buffer_read(buffer_name):
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     if buffer_name == "multiline_fasta":
-        true_buf = true_buf[:-1]
         buf_type.n_characters_per_line = 6
     data = data[0].stack_with_ragged(data)
     buf = buf_type.from_data(data)

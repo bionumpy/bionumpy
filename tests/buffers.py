@@ -34,7 +34,7 @@ GCCTCC
 CCCCCC
 GGGCCC
 TTT
->"""
+"""
     , "bed": """\
 chr1\t1\t3\t.\t.\t-
 chr1\t40\t60\t.\t.\t+
