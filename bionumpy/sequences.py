@@ -26,6 +26,11 @@ class EncodedArray(np.ndarray):
 
         return r
 
+    def __array_wrap__(self, out_arr, context=None):
+        if out_arr.dtype == bool:
+            return np.asarray(out_arr, dtype=bool)
+        return out_arr
+
 
 class NumericEncodedArray(EncodedArray):
     pass
