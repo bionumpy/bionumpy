@@ -38,12 +38,12 @@ def test_buffered_writer_ctx_manager(fastq_buffer):
 
     file_path = "./tmp.fq"
 
-    true_stream = bnp_open('example_data/reads.fq')
+    true_stream = bnp_open('example_data/reads.fq').read_chunks()
 
     with bnp_open(file_path, mode='w') as f:
         f.write(true_stream)
 
-    true_stream = bnp_open('example_data/reads.fq')
+    true_stream = bnp_open('example_data/reads.fq').read_chunks()
 
     fq_stream = bnp_open(file_path)
     for fq_item, true_item in zip(fq_stream, true_stream):
@@ -65,7 +65,7 @@ def test_custom_read():
         with open(path, 'w') as file:
             file.writelines(f"sequence{delimiter}sequence_aa\nAACCTAGGC{delimiter}ATF\nAACCTAGGC{delimiter}ATF")
 
-        data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True))
+        data = bnp_open(path, buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True)).read()
         assert data.sequence.to_sequences() == ["AACCTAGGC", "AACCTAGGC"]
         assert data.sequence_aa.to_sequences() == ["ATF", "ATF"]
 

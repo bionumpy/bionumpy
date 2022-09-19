@@ -68,9 +68,9 @@ class NumpyFileReader:
     def read(self):
         self._remove_initial_comments()
         header_data = self._buffer_type.read_header(self._file_obj)
-        chunk = self._file_obj.read()
+        chunk = np.frombuffer(self._file_obj.read(),dtype=np.uint8)
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
-        return self._buffer_type.from_raw_buffer(chunk)
+        return self._buffer_type.from_raw_buffer(chunk, header_data=header_data)
 
     def read_chunks(self):
         self._remove_initial_comments()

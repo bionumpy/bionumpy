@@ -11,6 +11,26 @@ from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStrea
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
 
+
+class NpDataclassReader:
+    def __init__(self, numpyfilereader):
+        self._reader = numpyfilereader
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self._reader.close()
+
+    def read(self):
+        return self._reader.read().get_data()
+
+    def read_chunks(self):
+        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks()), buffer_type=self._reader._buffer_type)
+
+    def __iter__(self):
+        return self.read_chunks()
+
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
@@ -34,9 +54,6 @@ wrappers = {
     "full": lambda x, y: np.concatenate(list(x))
 }
 
-default_modes = {".vcf": "chromosome_stream", ".bed": "dict", "csv": "full", "gtf": "full"}
-
-
 def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
 ):
@@ -47,14 +64,8 @@ def _get_buffered_file(
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
-    buffers = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
-
-    data = NpDataclassStream((buf.get_data() for buf in buffers), buffer_type=buffers._buffer_type)
-    if "n_entries" in kwargs:
-        data = chunk_lines(data, kwargs["n_entries"])
-    if mode is None:
-        mode = default_modes.get(suffix, "stream")
-    return wrappers[mode](data, buffer_type.dataclass)
+    file_reader= NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    return NpDataclassReader(file_reader)
 
 
 def _get_buffer_type(suffix):
