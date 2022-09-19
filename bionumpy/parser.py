@@ -106,8 +106,9 @@ class NumpyFileReader:
             return None
 
         # Ensure that the last entry ends with newline. Makes logic easier later
-        a, bytes_read = self.__add_newline_to_end(a, bytes_read)
-        # if self._is_finished:
+        if self._is_finished:
+            a, bytes_read = self.__add_newline_to_end(a, bytes_read)
+        # 
         #     if a[bytes_read - 1] != ord("\n"):
         #         a = np.append(a, ord("\n"))
         #         bytes_read += 1
