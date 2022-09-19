@@ -6,7 +6,7 @@ from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
-from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
+from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
@@ -47,7 +47,7 @@ def _get_buffered_file(
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
-    buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
+    buffers = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
 
     data = NpDataclassStream((buf.get_data() for buf in buffers), buffer_type=buffers._buffer_type)
     if "n_entries" in kwargs:
