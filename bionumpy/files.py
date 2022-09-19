@@ -45,15 +45,6 @@ buffer_types = {
     ".sam": get_bufferclass_for_datatype(SAMEntry)
 }
 
-generic_buffers = ['.csv', '.tsv']
-
-wrappers = {
-    "chromosome_stream": ChromosomeFileStreamProvider,
-    "dict": LazyChromosomeDictProvider,
-    "stream": lambda x, y: x,
-    "full": lambda x, y: np.concatenate(list(x))
-}
-
 def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
 ):
@@ -64,7 +55,7 @@ def _get_buffered_file(
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
-    file_reader= NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
     return NpDataclassReader(file_reader)
 
 
@@ -73,7 +64,8 @@ def _get_buffer_type(suffix):
         return buffer_types[suffix]
     else:
         raise RuntimeError(f"File format {suffix} does not have a default buffer type. "
-                           f"Specify buffer_type argument using get_bufferclass_for_datatype function.")
+                           f"Specify buffer_type argument using get_bufferclass_for_datatype function or"
+                           f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
 def bnp_open(filename, mode=None, **kwargs):
@@ -82,11 +74,7 @@ def bnp_open(filename, mode=None, **kwargs):
     is_gzip = suffix == ".gz"
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    if suffix in buffer_types or suffix in generic_buffers:
-        return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)
-
-    raise RuntimeError(f"File format {suffix} is not supported in file {filename}. Supported file formats are "
-                       f"{str(list(buffer_types.keys()))[1:-1]}, {str(generic_buffers)[1:-1]}.")
+    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
