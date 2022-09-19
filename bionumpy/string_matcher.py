@@ -1,7 +1,7 @@
 import logging
 
 from bionumpy.rollable import RollableFunction
-from bionumpy.sequences import as_encoded_sequence_array, Sequences
+from bionumpy.sequences import as_encoded_sequence_array
 import itertools
 import numpy as np
 import bionumpy as bnp
@@ -42,7 +42,7 @@ class RegexMatcher(RollableFunction):
     def window_size(self):
         return [sub_matcher.window_size for sub_matcher in self._sub_matchers]
 
-    def rolling_window(self, _sequence: Sequences, window_size: int = None, mode="valid"):
+    def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
                 _sequence = as_sequence_array(_sequence, encoding=self._encoding)

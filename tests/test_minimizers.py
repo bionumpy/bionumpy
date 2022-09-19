@@ -1,7 +1,8 @@
 from bionumpy.minimizers import Minimizers
-from bionumpy.sequences import Sequences, Sequence
+from bionumpy.sequences import Sequence
 from bionumpy.kmers import KmerEncoding
 from bionumpy.encodings import ACTGEncoding
+from npstructures import RaggedArray
 import numpy as np
 import pytest
 
@@ -13,10 +14,10 @@ def sequence():
 
 @pytest.fixture
 def sequences():
-    return Sequences([[0, 3, 1, 2, 2, 1, 0],
-                      [0, 3, 1, 2, 2, 1],
-                      [0, 3, 1, 2, 2],
-                      [0, 3, 1, 2]], encoding=ACTGEncoding)
+    return RaggedArray([[0, 3, 1, 2, 2, 1, 0],
+                        [0, 3, 1, 2, 2, 1],
+                        [0, 3, 1, 2, 2],
+                        [0, 3, 1, 2]])
 
 
 @pytest.fixture

@@ -24,6 +24,6 @@ def test_buffer_read_chunks(buffer_name):
 
 
 def test_read_big_fastq():
-    io_obj = BytesIO(bytes(big_fastq_text*1000, encoding="utf8"))
+    io_obj = BytesIO(bytes(big_fastq_text*20, encoding="utf8"))
     for b in NpDataclassReader(NumpyFileReader(io_obj, combos["fastq"][2], chunk_size=1000)).read_chunks():
         print(b)

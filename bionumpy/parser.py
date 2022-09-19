@@ -2,7 +2,7 @@ import numpy as np
 from .npdataclassstream import NpDataclassStream
 import logging
 from npstructures import npdataclass
-
+from .sequences import EncodedArray
 logger = logging.getLogger(__name__)
 
 
@@ -118,7 +118,7 @@ class NumpyFileReader:
         return a[:bytes_read]
 
     def __read_raw_chunk(self):
-        b = np.frombuffer(self._file_obj.read(self._chunk_size), dtype="uint8")
+        b = np.frombuffer(self._file_obj.read(self._chunk_size), dtype="uint8").view(EncodedArray)
         return b, b.size
         # array = my_empty(self._chunk_size, dtype="uint8")
         # bytes_read = self._file_obj.readinto(array)

@@ -1,8 +1,8 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
+from .sequences import EncodedArray
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
-from .sequences import Sequences
 
 NEWLINE = 10
 
@@ -26,7 +26,7 @@ class FileBuffer:
     COMMENT = 0
 
     def __init__(self, data, new_lines):
-        self._data = np.asanyarray(data)
+        self._data = np.asanyarray(data).view(EncodedArray)
         self._new_lines = np.asanyarray(new_lines)
         self._is_validated = False
         self.size = self._data.size
@@ -108,7 +108,7 @@ class FileBuffer:
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return Sequences(self._data[indices], shape)
+        return RaggedArray(self._data[indices], shape)
 
     def _move_2d_array_to_intervals(self, array, starts, ends):
         n_chars = ends - starts
@@ -150,22 +150,22 @@ class OneLineBuffer(FileBuffer):
         new_lines = new_lines[: n_lines - (n_lines % cls.n_lines_per_entry)]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
-    def get_sequences(self) -> Sequences:
+    def get_sequences(self) -> RaggedArray:
         self.validate_if_not()
         sequence_starts = self._new_lines[:: self.n_lines_per_entry] + 1
         sequence_lens = self._new_lines[1 :: self.n_lines_per_entry] - sequence_starts
         indices, shape = RaggedView(sequence_starts, sequence_lens).get_flat_indices()
         m = indices.size
         d = m % self._buffer_divisor
-        seq = np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype)
+        seq = np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype).view(EncodedArray)
         seq[:m] = self._data[indices]
-        return Sequences(seq, shape)
+        return RaggedArray(seq, shape)
 
     def get_data(self):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
-        self.lines = Sequences(self._data, RaggedShape(lengths))
+        self.lines = RaggedArray(self._data, RaggedShape(lengths))
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
