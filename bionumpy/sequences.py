@@ -26,13 +26,18 @@ class EncodedArray(np.ndarray):
 
         return r
 
+
+class NumericEncodedArray(EncodedArray):
+    pass
+
+
 class Sequence(EncodedArray):
     pass
 
 class EncodedRaggedArray(RaggedArray):
 
     def __init__(self, data, shape=None, encoding=BaseEncoding):
-        super().__init__(data, shape, dtype=np.uint8)
+        super().__init__(data, shape)
         self._data = self._data.view(Sequence)
         self._data.encoding = encoding
         self.encoding = encoding
