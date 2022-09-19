@@ -2,7 +2,7 @@ import pytest
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
-
+from bionumpy.multiline_buffer import MultiLineFastaBuffer
 import numpy as np
 
 
@@ -20,12 +20,20 @@ CTTGTTGA
 CGG
 +
 ~~~
-"""
-    , "fasta": """\
+"""    , "fasta": """\
 >header
 CTTGTTGA
 >header2
 CGG
+"""
+    , "multiline_fasta":"""\
+>header
+CTTGCC
+GCCTCC
+>header2
+CCCCCC
+GGGCCC
+TTT
 """
     , "bed": """\
 chr1\t1\t3\t.\t.\t-
@@ -79,6 +87,9 @@ data = {
         "fasta": [
             SequenceEntry("header", "CTTGTTGA"),
             SequenceEntry("header2", "CGG")],
+        "multiline_fasta": [
+            SequenceEntry("header", "CTTGCCGCCTCC"),
+            SequenceEntry("header2", "CCCCCCGGGCCCTTT")],
         "gfa_sequence": [
             SequenceEntry("id1", "AACCTTGG"),
             SequenceEntry("id4", "ACTG")
@@ -91,7 +102,8 @@ buffer_type = {"bed": BedBuffer,
                "vcf": VCFBuffer,
                "fastq": FastQBuffer,
                "fasta": TwoLineFastaBuffer,
-               "gfa_sequence": GfaSequenceBuffer}
+               "gfa_sequence": GfaSequenceBuffer,
+               "multiline_fasta": MultiLineFastaBuffer}
 
 combos = {key: (buffers[key], data[key], buffer_type[key]) for key in buffer_type}
 

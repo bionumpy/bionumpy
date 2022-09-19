@@ -33,4 +33,7 @@ class AlphabetEncoding(Encoding):
 
 ACTGEncoding = AlphabetEncoding("ACTG")
 ACTGnEncoding = AlphabetEncoding("ACTGn")
+DNAEncoding = ACTGEncoding
+ACUGEncoding = AlphabetEncoding("ACUG")
+RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')

@@ -3,18 +3,39 @@ import gzip
 import numpy as np
 
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .multiline_buffer import MultiLineFastaBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
-from .parser import NpBufferStream, NpBufferedWriter, chunk_lines
+from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
 
+
+class NpDataclassReader:
+    def __init__(self, numpyfilereader):
+        self._reader = numpyfilereader
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self._reader.close()
+
+    def read(self):
+        return self._reader.read().get_data()
+
+    def read_chunks(self):
+        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks()), buffer_type=self._reader._buffer_type)
+
+    def __iter__(self):
+        return self.read_chunks()
+
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
-    ".fasta": TwoLineFastaBuffer,
-    ".fa": TwoLineFastaBuffer,
+    ".fasta": MultiLineFastaBuffer,
+    ".fa": MultiLineFastaBuffer,
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
@@ -24,36 +45,27 @@ buffer_types = {
     ".sam": get_bufferclass_for_datatype(SAMEntry)
 }
 
-generic_buffers = ['.csv', '.tsv']
-
-wrappers = {
-    "chromosome_stream": ChromosomeFileStreamProvider,
-    "dict": LazyChromosomeDictProvider,
-    "stream": lambda x, y: x,
-    "full": lambda x, y: np.concatenate(list(x))
-}
-
-default_modes = {".vcf": "chromosome_stream", ".bed": "dict", "csv": "full", "gtf": "full"}
-
-
 def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
 ):
     open_func = gzip.open if is_gzip else open
     if buffer_type is None:
-        buffer_type = buffer_types[suffix]
+        buffer_type = _get_buffer_type(suffix)
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
-    buffers = NpBufferStream(open_func(filename, "rb"), buffer_type, **kwargs2)
-    
-    data = NpDataclassStream((buf.get_data() for buf in buffers), buffer_type=buffers._buffer_type)
-    if "n_entries" in kwargs:
-        data = chunk_lines(data, kwargs["n_entries"])
-    if mode is None:
-        mode = default_modes.get(suffix, "stream")
-    return wrappers[mode](data, buffer_type.dataclass)
+    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    return NpDataclassReader(file_reader)
+
+
+def _get_buffer_type(suffix):
+    if suffix in buffer_types:
+        return buffer_types[suffix]
+    else:
+        raise RuntimeError(f"File format {suffix} does not have a default buffer type. "
+                           f"Specify buffer_type argument using get_bufferclass_for_datatype function or"
+                           f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
 def bnp_open(filename, mode=None, **kwargs):
@@ -62,8 +74,7 @@ def bnp_open(filename, mode=None, **kwargs):
     is_gzip = suffix == ".gz"
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    if suffix in buffer_types or suffix in generic_buffers:
-        return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)
+    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)

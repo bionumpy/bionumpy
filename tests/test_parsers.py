@@ -23,14 +23,32 @@ def test_buffer_read(buffer_name):
     assert list(data) == true_data
 
 
-@pytest.mark.parametrize("buffer_name", ["fasta", "fastq"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["fasta", "fastq", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
+    if buffer_name == "multiline_fasta":
+        buf_type.n_characters_per_line = 6
     data = data[0].stack_with_ragged(data)
     buf = buf_type.from_data(data)
-    print(buf)
-    print(true_buf)
     assert np.all(true_buf == buf)
+
+
+def test_buffered_writer_ctx_manager(fastq_buffer):
+
+    file_path = "./tmp.fq"
+
+    true_stream = bnp_open('example_data/reads.fq').read_chunks()
+
+    with bnp_open(file_path, mode='w') as f:
+        f.write(true_stream)
+
+    true_stream = bnp_open('example_data/reads.fq').read_chunks()
+
+    fq_stream = bnp_open(file_path)
+    for fq_item, true_item in zip(fq_stream, true_stream):
+        assert fq_item == true_item
+
+    os.remove(file_path)
 
 
 def test_custom_read():
@@ -46,11 +64,19 @@ def test_custom_read():
         with open(path, 'w') as file:
             file.writelines(f"sequence{delimiter}sequence_aa\nAACCTAGGC{delimiter}ATF\nAACCTAGGC{delimiter}ATF")
 
-        data = bnp_open(path, mode="full", buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True))
+        data = bnp_open(path, buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True)).read()
         assert data.sequence.to_sequences() == ["AACCTAGGC", "AACCTAGGC"]
         assert data.sequence_aa.to_sequences() == ["ATF", "ATF"]
 
         os.remove(path)
+
+
+def test_raises_error_for_unsupported_types():
+    with pytest.raises(RuntimeError):
+        bnp_open("tmp.airr")
+
+    with pytest.raises(RuntimeError):
+        bnp_open('tmp.csv')
 
 
 def test_twoline_fasta_buffer(twoline_fasta_buffer):

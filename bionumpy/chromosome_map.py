@@ -9,6 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 class ChromosomeMap:
+    """
+    Decorator that applies a the function to the data of each chromosome
+    if a ChromosomeProvider instance is given as an argument.
+
+    If no ChromosomeProvider instance is given as argument, the behaviour of the
+    function is unchanged
+    """
+
     def __init__(self, reduction=None):
         self._reduction = reduction
 
@@ -89,6 +97,7 @@ class ChromosomeMap:
             return self._reduction(
                 (m[1] for m in ret))
         return mapped
+
 
 def sorted_streams_juggler(streams):
     """TODO"""
