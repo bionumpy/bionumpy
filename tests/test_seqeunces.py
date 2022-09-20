@@ -12,4 +12,4 @@ def test_sequence_repr(sequence):
 
 
 def test_sequence_str(sequence):
-    assert str(sequence) == """Sequence(['AB' 'BC'])"""
+    assert str(sequence) == """['AB' 'BC']"""
