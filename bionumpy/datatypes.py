@@ -1,28 +1,28 @@
 import numpy as np
-from npstructures import npdataclass, SeqArray
+from .bnpdataclass import bnpdataclass
 
-@npdataclass
+@bnpdataclass
 class RawSeqeuence:
-    sequence: SeqArray
+    sequence: str
 
-@npdataclass
+@bnpdataclass
 class SequenceEntry:
-    name: SeqArray
-    sequence: SeqArray
+    name: str
+    sequence: str
 
 
-@npdataclass
+@bnpdataclass
 class SequenceEntryWithQuality:
-    name: SeqArray
-    sequence: SeqArray
-    quality: SeqArray
+    name: str
+    sequence: str
+    quality: str
 
 
-@npdataclass
+@bnpdataclass
 class Interval:
-    chromosome: SeqArray
-    start: np.ndarray
-    end: np.ndarray
+    chromosome: str
+    start: int
+    end: int
 
     def in_interval(self, position):
         return (self.start <= position) & (position < self.end)
@@ -31,12 +31,12 @@ class Interval:
         return [plt.hist(self.end - self.start, name="size"), plt.hist("start")]
 
 
-@npdataclass
+@bnpdataclass
 class Variant:
-    chromosome: SeqArray
-    position: np.ndarray
-    ref_seq: SeqArray
-    alt_seq: SeqArray
+    chromosome: str
+    position: int
+    ref_seq: str
+    alt_seq: str
 
     def is_snp(self):
         return np.logical_and(
@@ -57,9 +57,9 @@ class Variant:
         ]
 
 
-@npdataclass
+@bnpdataclass
 class VariantWithGenotypes(Variant):
-    genotypes: np.ndarray
+    genotypes: int
 
 
 class SNP(Variant):
@@ -86,7 +86,7 @@ class SortedIntervals:
         return cls(np.vstack([element.data for element in elements]))
 
 
-@npdataclass
+@bnpdataclass
 class GFFEntry:
     chromosome: str
     source: str
@@ -99,7 +99,7 @@ class GFFEntry:
     atributes: str
 
 
-@npdataclass
+@bnpdataclass
 class SAMEntry:
     name: str
     flag: int

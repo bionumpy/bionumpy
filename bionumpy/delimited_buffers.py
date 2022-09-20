@@ -1,6 +1,6 @@
 import itertools
 import logging
-from npstructures import VarLenArray, RaggedArray
+from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
@@ -160,7 +160,7 @@ class BedBuffer(DelimitedBuffer):
 
     def get_intervals(self):
         self.validate_if_not()
-        chromosomes = VarLenArray(self.get_text(0).view(Sequence))
+        chromosomes = self.get_text(0).view(Sequence)
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
@@ -214,7 +214,7 @@ class VCFBuffer(DelimitedBuffer):
 
         """
         self.validate_if_not()
-        chromosomes = VarLenArray(self.get_text(0).view(Sequence))
+        chromosomes = self.get_text(0).view(Sequence)
         position = self.get_integers(1).ravel() - 1
         from_seq = self.get_text(3, fixed_length=fixed_length)
         to_seq = self.get_text(4, fixed_length=fixed_length)

@@ -25,7 +25,7 @@ class ChromosomeProvider:
     @staticmethod
     def _get_chromosome_changes(chromosomes):
         return (
-            np.flatnonzero(np.any(chromosomes[1:].__neq__(chromosomes[:-1]), axis=-1))
+            np.flatnonzero(np.any(chromosomes[1:] != chromosomes[:-1], axis=-1))
             + 1
         )
 

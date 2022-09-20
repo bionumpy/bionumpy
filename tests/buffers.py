@@ -71,29 +71,29 @@ buffers = {key: chunk_from_text(val) for key, val in buffer_texts.items()}
 
 data = {
         "bed": [
-            Interval("chr1", 1, 3),
-            Interval("chr1", 40, 60),
-            Interval("chr2",  400, 600)],
+            Interval.single_entry("chr1", 1, 3),
+            Interval.single_entry("chr1", 40, 60),
+            Interval.single_entry("chr2",  400, 600)],
         "vcf2": [
-            SNP("chr1",	88361,	"A",	"G"),
-            SNP("chr1",	887559,	"A",	"CAA"),
-            SNP("chr2",	8877,	"AGG",	"C")],
+            SNP.single_entry("chr1",	88361,	"A",	"G"),
+            SNP.single_entry("chr1",	887559,	"A",	"CAA"),
+            SNP.single_entry("chr2",	8877,	"AGG",	"C")],
         "vcf": [
-            SNP("chr1",	88361,	"A",	"G"),
-            SNP("chr1",	887559,	"A",	"C"),
-            SNP("chr2",	8877,	"A",	"G")],
+            SNP.single_entry("chr1",	88361,	"A",	"G"),
+            SNP.single_entry("chr1",	887559,	"A",	"C"),
+            SNP.single_entry("chr2",	8877,	"A",	"G")],
         "fastq": [
-            SequenceEntryWithQuality("headerishere", "CTTGTTGA", [0 for _ in "CTTGTTGA"]),
-            SequenceEntryWithQuality("anotherheader", "CGG", [ord("~")-ord("!") for _ in "CGG"])],
+            SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", [0 for _ in "CTTGTTGA"]),
+            SequenceEntryWithQuality.single_entry("anotherheader", "CGG", [ord("~")-ord("!") for _ in "CGG"])],
         "fasta": [
-            SequenceEntry("header", "CTTGTTGA"),
-            SequenceEntry("header2", "CGG")],
+            SequenceEntry.single_entry("header", "CTTGTTGA"),
+            SequenceEntry.single_entry("header2", "CGG")],
         "multiline_fasta": [
-            SequenceEntry("header", "CTTGCCGCCTCC"),
-            SequenceEntry("header2", "CCCCCCGGGCCCTTT")],
+            SequenceEntry.single_entry("header", "CTTGCCGCCTCC"),
+            SequenceEntry.single_entry("header2", "CCCCCCGGGCCCTTT")],
         "gfa_sequence": [
-            SequenceEntry("id1", "AACCTTGG"),
-            SequenceEntry("id4", "ACTG")
+            SequenceEntry.single_entry("id1", "AACCTTGG"),
+            SequenceEntry.single_entry("id4", "ACTG")
         ]
 }
 
