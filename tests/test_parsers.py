@@ -33,17 +33,17 @@ def test_buffer_write(buffer_name):
     assert np.all(true_buf == buf)
 
 
-def test_buffered_writer_ctx_manager(fastq_buffer):
+@pytest.mark.parametrize("file", ["example_data/reads.fq", "example_data/big.fq.gz"])
+@pytest.mark.parametrize("chunk_size", [100, 5000000])
+def test_buffered_writer_ctx_manager(file, chunk_size):
 
     file_path = "./tmp.fq"
-
     true_stream = bnp_open('example_data/reads.fq').read_chunks()
 
     with bnp_open(file_path, mode='w') as f:
         f.write(true_stream)
 
     true_stream = bnp_open('example_data/reads.fq').read_chunks()
-
     fq_stream = bnp_open(file_path)
     for fq_item, true_item in zip(fq_stream, true_stream):
         assert fq_item == true_item
