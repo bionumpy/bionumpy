@@ -2,6 +2,7 @@ import os
 from itertools import chain
 import pytest
 import numpy as np
+from npstructures.testing import assert_npdataclass_equal 
 from bionumpy.sequences import from_sequence_array
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, Variant
@@ -21,7 +22,8 @@ def chunk_from_text(text):
 def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
-    assert list(data) == true_data
+    for line, true_line in zip(data, true_data):
+        assert_npdataclass_equal(line, true_line)
 
 
 @pytest.mark.parametrize("buffer_name", ["fasta", "fastq", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])

@@ -1,6 +1,6 @@
 import itertools
 import logging
-from npstructures import RaggedArray
+from npstructures import RaggedArray, RaggedView
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence
@@ -160,7 +160,7 @@ class BedBuffer(DelimitedBuffer):
 
     def get_intervals(self):
         self.validate_if_not()
-        chromosomes = self.get_text(0).view(Sequence)
+        chromosomes = self.get_text(0)
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
@@ -169,7 +169,7 @@ class BedBuffer(DelimitedBuffer):
     def from_data(cls, data):
         start_lens = np.log10(data.start).astype(int)+1
         end_lens = np.log10(data.end).astype(int)+1
-        chromosome_lens = data.chromosome.shape[-1]
+        chromosome_lens = data.chromosome.shape.lengths
         line_lengths = chromosome_lens + 1 + start_lens + 1 + end_lens + 1
         line_ends = np.cumsum(line_lengths)
         buf = np.empty(line_ends[-1], dtype=np.uint8)
@@ -180,8 +180,12 @@ class BedBuffer(DelimitedBuffer):
 
         obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(data.start, np.max(start_lens)),
                                         line_ends-2-end_lens-start_lens, line_ends-2-end_lens)
-        lines[:, :chromosome_lens] = data.chromosome.ravel()
-        lines[:, chromosome_lens] = ord("\t")
+
+        indices, _ = RaggedView(lines.shape.starts, chromosome_lens).get_flat_indices()
+        buf[indices] = data.chromosome.ravel()
+        # lines[:, :chromosome_lens] = data.chromosome.ravel()
+        buf[lines.shape.starts+chromosome_lens] = ord("\t")
+        # lines[:, chromosome_lens] = ord("\t")
 
         buf[line_ends-(end_lens+2)] = ord("\t")
         buf[line_ends-1] = ord("\n")

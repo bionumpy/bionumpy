@@ -24,12 +24,6 @@ class Interval:
     start: int
     end: int
 
-    def in_interval(self, position):
-        return (self.start <= position) & (position < self.end)
-
-    def __plot__(self, plt):
-        return [plt.hist(self.end - self.start, name="size"), plt.hist("start")]
-
 
 @bnpdataclass
 class Variant:

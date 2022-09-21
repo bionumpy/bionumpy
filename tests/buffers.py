@@ -83,8 +83,8 @@ data = {
             SNP.single_entry("chr1",	887559,	"A",	"C"),
             SNP.single_entry("chr2",	8877,	"A",	"G")],
         "fastq": [
-            SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", [0 for _ in "CTTGTTGA"]),
-            SequenceEntryWithQuality.single_entry("anotherheader", "CGG", [ord("~")-ord("!") for _ in "CGG"])],
+            SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", "".join("" for _ in "CTTGTTGA")),
+            SequenceEntryWithQuality.single_entry("anotherheader", "CGG", "".join("~" for _ in "CGG"))],
         "fasta": [
             SequenceEntry.single_entry("header", "CTTGTTGA"),
             SequenceEntry.single_entry("header2", "CGG")],
