@@ -4,13 +4,15 @@ import numpy as np
 import pytest
 
 from bionumpy.chromosome_provider import ChromosomeFileStreamProvider, LazyChromosomeDictProvider, FullChromosomeDictProvider
-from npstructures.npdataclasses import VarLenArray, npdataclass
+from npstructures.npdataclasses import npdataclass
+from bionumpy.bnpdataclass import bnpdataclass
+from npstructures.testing import assert_npdataclass_equal
 
 
-@npdataclass
+@bnpdataclass
 class DummyClass:
-    chromosome: VarLenArray
-    data: np.ndarray
+    chromosome: str
+    data: int
 
     def __post_init__(self):
         if isinstance(self.chromosome, (str, list)):# VarLenArray):
@@ -51,7 +53,6 @@ def buffers():
             DummyClass(["chr3", "chr4", "chr5"], [4, 5, 6]),
             DummyClass(["\x00chr5", "chr16"], [7, 8])]
 
-
 def test_chromosome_stream(buffers):
     for val, true in zip(ChromosomeFileStreamProvider(iter(buffers)),
                          [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),
@@ -60,7 +61,7 @@ def test_chromosome_stream(buffers):
                           ("chr4", DummyClass(["chr4"], [5])),
                           ("chr5", DummyClass(["\x00chr5"]*2, [6, 7])),
                           ("chr16", DummyClass(["chr16"], [8]))]):
-        assert val == true
+        assert assert_npdataclass_equal(val, true)
 
 
 def test_full_dict(buffers):
