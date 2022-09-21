@@ -5,13 +5,13 @@ __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
 from .files import bnp_open as open
-from .sequences import Sequence, Sequences, as_sequence_array, as_encoded_sequence_array
+from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
 from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from . import parser
 import npstructures as nps
-__all__ = ["Sequence", "Sequences", "as_sequence_array", "as_encoded_sequence_array",
+__all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix"]
 
 

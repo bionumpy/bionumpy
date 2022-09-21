@@ -1,9 +1,10 @@
 import numpy as np
+from npstructures import RaggedArray
 from .npdataclassstream import streamable
 from .encodings.alphabet_encoding import AlphabetEncoding
 from .encodings import BaseEncoding
 from .kmers import KmerEncoding
-from .sequences import as_sequence_array, Sequences, as_encoded_sequence_array
+from .sequences import as_sequence_array, as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
 from .util import apply_to_npdataclass
 import dataclasses
 
@@ -24,7 +25,8 @@ class WindowFunction:
         tuples = sequences.ravel().reshape(-1, self.window_size)
         tuples.encoding = self._encoding
         new_data = self(tuples)
-        return Sequences(new_data, sequences.shape.lengths // self.window_size, encoding=self._table.to_encoding)
+        return RaggedArray(create_sequence_array_from_already_encoded_data(new_data, self._table.to_encoding),
+                           sequences.shape.lengths // self.window_size)
 
 
 class Translate(WindowFunction):

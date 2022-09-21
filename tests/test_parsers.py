@@ -2,6 +2,7 @@ import os
 from itertools import chain
 import pytest
 import numpy as np
+from bionumpy.sequences import from_sequence_array
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, Variant
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
@@ -65,8 +66,8 @@ def test_custom_read():
             file.writelines(f"sequence{delimiter}sequence_aa\nAACCTAGGC{delimiter}ATF\nAACCTAGGC{delimiter}ATF")
 
         data = bnp_open(path, buffer_type=get_bufferclass_for_datatype(SampleDC, delimiter=delimiter, has_header=True)).read()
-        assert data.sequence.to_sequences() == ["AACCTAGGC", "AACCTAGGC"]
-        assert data.sequence_aa.to_sequences() == ["ATF", "ATF"]
+        assert [s.to_string() for s in data.sequence] == ["AACCTAGGC", "AACCTAGGC"]
+        assert [s.to_string() for s in data.sequence_aa] == ["ATF", "ATF"]
 
         os.remove(path)
 
@@ -82,13 +83,13 @@ def test_raises_error_for_unsupported_types():
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
     buf = TwoLineFastaBuffer.from_raw_buffer(twoline_fasta_buffer)
     seqs = buf.get_sequences()
-    assert seqs.to_sequences() == ["CTTGTTGA", "CGG"]
+    assert from_sequence_array(seqs) == ["CTTGTTGA", "CGG"]
 
 
 def test_fastq_buffer(fastq_buffer):
     buf = FastQBuffer.from_raw_buffer(fastq_buffer)
     seqs = buf.get_sequences()
-    assert seqs.to_sequences() == ["CTTGTTGA", "CGG"]
+    assert from_sequence_array(seqs) == ["CTTGTTGA", "CGG"]
 
 
 def test_gfa_sequence_buffer(gfa_sequence_buffer):

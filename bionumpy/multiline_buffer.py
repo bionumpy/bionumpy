@@ -1,7 +1,6 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
 from .datatypes import SequenceEntry
-from .sequences import Sequences
 import numpy as np
 
 class MultiLineBuffer(FileBuffer):
@@ -29,7 +28,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         mask[new_entries] = False
         sequence_lines = data[mask]
         seq_lens = sequence_lines.shape.ends[line_offsets[1:]-1]-sequence_lines.shape.starts[line_offsets[:-1]]
-        sequences = Sequences(sequence_lines.ravel(), seq_lens)
+        sequences = RaggedArray(sequence_lines.ravel(), seq_lens)
         return SequenceEntry(headers, sequences)
 
     def _validate(self):

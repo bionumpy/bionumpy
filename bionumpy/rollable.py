@@ -1,5 +1,5 @@
 import numpy as np
-from .sequences import Sequence, Sequences, as_encoded_sequence_array
+from .sequences import Sequence, as_encoded_sequence_array
 from npstructures import RaggedArray
 
 from abc import abstractmethod
@@ -25,7 +25,7 @@ class RollableFunction:
         """
         return NotImplemented
 
-    def rolling_window(self, _sequence: Sequences, window_size: int = None, mode="valid"):
+    def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
         """Applies the function `self.__call__` to all subsequences in _sequence
 
         Uses sliding_window_view to apply `self.__call__` to all subsequences of length
@@ -34,8 +34,8 @@ class RollableFunction:
 
         Parameters
         ----------
-        _sequence : Sequences
-            Sequence or set of Sequences to apply the rolling window to
+        _sequence : RaggedArray
+            Sequence or set of RaggedArray to apply the rolling window to
         window_size : int
             The size of the rolling window (should ideally be set by `self.window_size`)
         mode : ["valid", "same", "full"]

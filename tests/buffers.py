@@ -3,11 +3,12 @@ from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 from bionumpy.multiline_buffer import MultiLineFastaBuffer
+from bionumpy.sequences import EncodedArray
 import numpy as np
 
 
 def chunk_from_text(text):
-    return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8)
+    return np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8).view(EncodedArray)
 
 
 buffer_texts = {
@@ -176,3 +177,22 @@ S\tid1\tAACCTTGG\t.\t.
 S\tid4\tACTG\t*\t*
 """
     return chunk_from_text(t)
+
+big_fastq_text = """\
+@2fa9ee19-5c51-4281-abdd-eac8663f9b49 runid=f53ee40429765e7817081d4bcdee6c1199c2f91d sampleid=18S_amplicon read=109831 ch=33 start_time=2019-09-12T12:05:03Z
+CGGTAGCCAGCTGCGTTCAGTATGGAAGATTTGATTTGTTTAGCGATCGCCATACTACCGTGACAAGAAAGTTGTCAGTCTTTGTGACTTGCCTGTCGCTCTATCTTCCAGACTCCTTGGTCCGTGTTCAATCCCGGTAGTAGCGACGGGCGGTGTATGTATTATCAGCGCAACAGAAACAAAGACACC
++
++&&-&%$%%$$$#)33&0$&%$''*''%$#%$%#+-5/---*&&%$%&())(&$#&,'))5769*+..*&(+28./#&1228956:7674';:;80.8>;91;>?B=%.**==?(/'($$$$*'&'**%&/));807;3A=;88>=?9498++0%"%%%%'#&5/($0.$2%&0'))*'%**&)(.%&&
+@1f9ca490-2f25-484a-8972-d60922b41f6f runid=f53ee40429765e7817081d4bcdee6c1199c2f91d sampleid=18S_amplicon read=106343 ch=28 start_time=2019-09-12T12:05:07Z
+GATGCATACTTCGTTCGATTTCGTTTCAACTGGACAACCTACCGTGACAAAGAAAGTTGTCGATGCTTTGTGACTTGCTGTCCTCTATCTTCAGACTCCTTGGTCCATTTCAAGACCAAACAATCAGTAGTAGCGACGGGCGGTGTGGCAATATCGCTTTCAACGAAACACAAAGAAT
++
+&%&%''&'+,005<./'%*-)%(#$'$#$%&&'('$$..74483=.0412$*/,)9/194/+('%%(+1+'')+,-&,>;%%.*@@D>>?)3%%296070717%%16;<'<236800%(,734(0$7769879@;?8)09:+/4'1+**7<<4.4,%%(.)##%&'(&&%*++'&#%$
+@06936a64-6c08-40e9-8a10-0fbc74812c89 runid=f53ee40429765e7817081d4bcdee6c1199c2f91d sampleid=18S_amplicon read=83531 ch=23 start_time=2019-09-12T12:03:50Z
+GTTTTGTCGCTGCGTTCAGTTTATGGGTGCGGGTGTTATGATGCTTCGCTTTACGTGACAAGAAAGTTAGTAGATTGTCTTTATGTTTCTGTGGTGCTGATATTGCCACACCGCCCGATAGCTCTACCGATTGAAACACGGACCAAGGAATCGGAAATGTAGGCGAGCAGGCCGTCCTGAACACCCATTAACTTTCTTGTC
++
+$&'((&%$$$.$2/=-*#'.2'&&##$$#$#&&(&+-%'(%&#"###""$$%#)%,+)+&'(,&%*((%%&%$%'+),,+,,&%$')1+*$.&+6*+(*%(&'*(''&%*+,*)('%#$$$%,$&&'&)))12)*&/*,364$%$%))$'')#%%&%$#$%$$#('$(%$%$%%$$*$&$%)''%%$$&'&$)+2++,)&%
+@d6a555a1-d8dd-4e55-936f-ade7c78d9d38 runid=f53ee40429765e7817081d4bcdee6c1199c2f91d sampleid=18S_amplicon read=112978 ch=97 start_time=2019-09-12T12:03:49Z
+CGTATGCTTTGAGATTCATTCAGGAGGCGGGTATTTGCTCGATCATACCATACGTGGCAAGAAAGTTGTCAGTGTCTTTGTGTTTCTCTGTGGTGCGCGATATTGCCACGCCCGTCGCTACACCGATTGAAACACGGACCGAAGTCTGAAGATAGAGCGACGAGCGAAGTCACAAAGGAACTAGAGCAACTTTTTATC
++
+#$%%%%''(($$%$*-&%$%)%*'%(+($)(%$,.)##$&$$#$$&('(%&%%%%#$$%(&*('('+18/(6?65510+))'--*&&$$$,*+;/+%%&&''13&%&%(133<;9=/.2*$*657,0*&(237'85;A1/$$%'7:;;:<2:..%$)0,*.)(1)1&&1+-$$,-&(-&&####%%98:AHFEB4(%,
+"""
