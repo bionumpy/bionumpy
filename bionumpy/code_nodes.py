@@ -9,27 +9,41 @@ class Mockup:
         return LeafNode(self._stream, name)
 
 
-class ComputationNode:
+class ComputationNode(np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, origin_stream, func, args, kwargs=None):
-        self._origing_stream = origin_stream
+        self._origin_stream = origin_stream
         self._func = func
         self._args = args
         self._kwargs = kwargs
 
-    def __add__(self, other):
+    def ___add__(self, other):
         return ComputationNode(self._origin_stream, np.add, (self, other))
 
     def __array_ufunc__(self, ufunc, method,  *args, **kwargs):
         assert method == "__call__"
-        self.__class__(origin_stram, ufunc, args, kwargs)
+        return UfuncNode(self._origin_stream, ufunc, args, kwargs)
+
+    def __array_function__(self, func, types, args, kwargs):
+        return ArrayFuncNode(self._origin_stream, func, args, kwargs)
+
+    def _replace_args(self, chunk):
+        return [arg._do_calc(chunk) if isinstance(arg, ComputationNode) else arg for arg in self._args]
 
     def _do_calc(self, chunk):
         print(self._args)
         return self._func(*[arg._do_calc(chunk) if isinstance(arg, ComputationNode) else arg for arg in self._args])
 
     def __iter__(self):
-        for chunk in self._origing_stream:
+        for chunk in self._origin_stream:
             yield self._do_calc(chunk)
+
+
+class UfuncNode(ComputationNode):
+    pass
+
+
+class ArrayFuncNode(ComputationNode):
+    pass 
 
 class LeafNode(ComputationNode):
     def __init__(self, origin_stream, attribute_name):
