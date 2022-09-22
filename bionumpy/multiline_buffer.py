@@ -1,5 +1,6 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
+from .sequences import EncodedArray
 from .datatypes import SequenceEntry
 import numpy as np
 
@@ -44,7 +45,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         entry_starts = np.insert(np.cumsum(n_lines+1), 0, 0)
         line_lengths[entry_starts[:-1]] = name_lengths + 2
         line_lengths[entry_starts[1:]-1] = last_length + 1
-        lines = RaggedArray(np.zeros(line_lengths.sum(), dtype=np.uint8), line_lengths)
+        lines = RaggedArray(np.zeros(line_lengths.sum(), dtype=np.uint8).view(EncodedArray), line_lengths)
         lines[entry_starts[:-1],1:-1] = entries.name
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
