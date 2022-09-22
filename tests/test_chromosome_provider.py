@@ -53,6 +53,7 @@ def buffers():
             DummyClass(["chr3", "chr4", "chr5"], [4, 5, 6]),
             DummyClass(["\x00chr5", "chr16"], [7, 8])]
 
+@pytest.mark.skip("Needs refactor")
 def test_chromosome_stream(buffers):
     for val, true in zip(ChromosomeFileStreamProvider(iter(buffers)),
                          [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),
@@ -64,6 +65,7 @@ def test_chromosome_stream(buffers):
         assert assert_npdataclass_equal(val, true)
 
 
+@pytest.mark.skip("Needs refactor")
 def test_full_dict(buffers):
     d = LazyChromosomeDictProvider((print(buf) or buf for buf in buffers))
     for key, val in [("chr1", DummyClass(["chr1"]*3, [0, 1, 2])),

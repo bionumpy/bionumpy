@@ -1,4 +1,6 @@
 import numpy as np
+from .encodings import QualityEncoding
+from .sequences import Quality
 from .bnpdataclass import bnpdataclass
 
 @bnpdataclass
@@ -15,7 +17,7 @@ class SequenceEntry:
 class SequenceEntryWithQuality:
     name: str
     sequence: str
-    quality: str
+    quality: Quality
 
 
 @bnpdataclass

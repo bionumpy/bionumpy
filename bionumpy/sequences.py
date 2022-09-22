@@ -10,6 +10,10 @@ class EncodedArray(np.ndarray):
     
     encoding = BaseEncoding
 
+
+    def decode(self):
+        return self.encoding.decode(self)
+
     @classmethod
     def from_string(cls, s: str) -> "EncodedArray":
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
@@ -34,6 +38,12 @@ class EncodedArray(np.ndarray):
 
         return r
 
+    def __array_function__(self, func, types, args, kwargs):
+        if func == np.concatenate:
+            return np.concatenate([np.asarray(e) for e in args[0]]).view(self.__class__)
+        return super().__array_function__(func, types, args, kwargs)
+
+
     def __array_wrap__(self, out_arr, context=None):
         if out_arr.dtype == bool:
             return np.asarray(out_arr, dtype=bool)
@@ -44,20 +54,41 @@ class EncodedArray(np.ndarray):
             other = np.asanyarray(other)
         else:
             other = as_encoded_sequence_array(other, self.encoding)
-        print(self, other, np.asarray(self) == np.asarray(other))
         return np.asarray(self) == np.asarray(other)
 
+
+class ASCIIText(EncodedArray):
+    @classmethod
+    def encode(cls, byte_array):
+        return byte_array
+
+    def decode(self):
+        return self
+
+
+class Quality(EncodedArray):
+    encoding = None
+    def __str__(self):
+        return "".join(chr(c) for c in self.decode())
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({repr(np.asarray(self))})"
+
+    @classmethod
+    def encode(cls, byte_array):
+        return (byte_array-ord("!")).view(cls)
+
+    def decode(self):
+        return (self+ord("!")).view(ASCIIText)
+
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-#         print("HHHHHHHHHHHHEEEEEEEEEEEERRRRRRRRRRREEEEEEEEEEE")
 #         inputs = [np.asarray(as_encoded_sequence_array(i, self.encoding)) if isinstance(i, (str, list)) else np.asarray(i)
 #                   for i in inputs]
-#         print(inputs)
 #         ret = getattr(ufunc, method)(*inputs, **kwargs)
 #         ret = ret.view(self.__class__)
 #         ret.encoding = self.encoding
 #         return ret
 # 
-#         print(super())
 #         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
 #         print(ret)
 #         return ret
@@ -77,12 +108,25 @@ def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: 
     return Seqeunces(data._data, data.shape, encoding=encoding)
 
 def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
-    print(s)
+    print("<<<<<<<<<<<<<<", s, type(s))
     s = as_sequence_array(s)
 
     if isinstance(s, RaggedArray):
+        print("!!!!!!!!!!!!!!!!!!!!!", repr(s._data))
         return s.__class__(as_encoded_sequence_array(s.ravel(), encoding), s.shape)
+    print("AS ENCODED SEQUNCE ARRAY", s.encoding, encoding)
+    print(repr(s))
+    if isinstance(encoding, type) and issubclass(encoding, EncodedArray):
+        if isinstance(s, encoding):
+            return s
+        else:
+            ret =  encoding.encode(s)
+            print("+++", repr(ret))
+            return ret
+                  
+
     if s.encoding != encoding:
+        print(s.encoding, encoding)
         e = encoding.encode(s)
         s = e.view(Sequence)
         s.encoding = encoding 
@@ -94,18 +138,27 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     """
     Return a sequence array representation of s
     """
-    if isinstance(s, (EncodedArray)):
+    print("??", repr(s), type(s))
+    if isinstance(s, EncodedArray):
         return s
     elif isinstance(s, np.ndarray):
         return s.view(EncodedArray)
     elif isinstance(s, RaggedArray):
-        return RaggedArray(s._data.view(EncodedArray), s.shape)
+        return RaggedArray(as_sequence_array(s._data), s.shape)
     elif isinstance(s, str):
+        print(s, Sequence.from_string(s))
         return Sequence.from_string(s)
     elif isinstance(s, list):
         return RaggedArray(as_sequence_array("".join(s)), [len(ss) for ss in s])
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
+
+def to_ascii(sequence_array):
+    if isinstance(sequence_array, EncodedArray):
+        return sequence_array.decode()
+    elif isinstance(sequence_array, RaggedArray):
+        return sequence_array.__class__(to_ascii(sequence_array.ravel()), sequence_array.shape)
+                                        
 
 def from_sequence_array(s) -> str:
     if isinstance(s, Sequence):

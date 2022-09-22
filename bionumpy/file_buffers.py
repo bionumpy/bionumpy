@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray
+from .sequences import EncodedArray, to_ascii
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -177,7 +177,7 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
@@ -214,9 +214,7 @@ class FastQBuffer(OneLineBuffer):
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = QualityEncoding.encode(
-            self.lines[3 :: self.n_lines_per_entry, :-1]
-        )
+        quality = self.lines[3 :: self.n_lines_per_entry, :-1]
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
 
     @classmethod
@@ -238,13 +236,14 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = ord("+")
-        lines[3::step, :-1] = QualityEncoding.decode(entries.quality)
+        print(repr(entries.quality))
+        lines[3::step, :-1] = to_ascii(entries.quality)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = ord("\n")
 

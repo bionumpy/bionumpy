@@ -10,6 +10,7 @@ def test_kmer_encoding():
     encoded = encoding(kmers)
     # assert np.testing.assert_ encoding.in_range(encoded)
     decoded = encoding.inverse(encoded)
+    print(kmers, decoded)
     np.testing.assert_equal(kmers, decoded)
 
 

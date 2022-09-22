@@ -50,9 +50,13 @@ class PhasedGenotypeEncoding:
 
 
 class QualityEncoding(Encoding):
+
     def encode(byte_array):
+        assert np.all(byte_array >= ord("!")), repr(byte_array)
+        print(">>>>", repr(byte_array))
         res = byte_array - ord("!")
         res.encoding = QualityEncoding
+        print(">>>>", repr(res), res.encoding)
         return res
 
     def decode(quality):
