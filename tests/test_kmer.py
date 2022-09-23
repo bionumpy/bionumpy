@@ -5,7 +5,7 @@ from bionumpy.encodings import ACTGEncoding
 
 
 def test_kmer_encoding():
-    encoding = KmerEncoding(3, alphabet_size=4)
+    encoding = KmerEncoding(3, ACTGEncoding)
     kmers = encoding.sample_domain(100)
     encoded = encoding(kmers)
     # assert np.testing.assert_ encoding.in_range(encoded)
@@ -16,7 +16,7 @@ def test_kmer_encoding():
 
 def test_rolling_hash():
     lengths = np.arange(3, 10)
-    encoding = KmerEncoding(3, alphabet_size=4)
+    encoding = KmerEncoding(3, ACTGEncoding)
     kmers = np.arange(lengths.sum()) % 4
     ragged = RaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)

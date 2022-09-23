@@ -2,17 +2,11 @@ import numpy as np
 from .encodings.base_encoding import BaseEncoding, Encoding
 from npstructures import RaggedArray
 
-
 class EncodedArray(np.ndarray):
     """ 
     Class for data that could be written as characters, but is represented numpy arrays
     """
-    @classmethod
-    def encode(cls, byte_array):
-        return byte_array
-
-    def decode(self):
-        return self
+    encoding=BaseEncoding
 
     @classmethod
     def from_string(cls, s: str) -> "EncodedArray":
@@ -22,16 +16,31 @@ class EncodedArray(np.ndarray):
         return "".join(chr(n) for n in self)
 
     def __str__(self) -> str:
-        text = self.decode()
+        text = self.encoding.decode(self)
         if len(self.shape) == 1:
             return '"' + "".join(chr(n) for n in text[:20]) + '"'
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
         return str(a)
 
     def __array_function__(self, func, types, args, kwargs):
+        if func==np.append:
+            print(func, types, args, kwargs)
+        if not all(issubclass(t, self.__class__) for t in types):
+            return NotImplemented
         if func == np.concatenate:
-            return np.concatenate([np.asarray(e) for e in args[0]]).view(self.__class__)
+            return func([np.asarray(e) for e in args[0]]).view(self.__class__)
+        elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view):
+            return func(np.asarray(args[0]), *args[1:], **kwargs).view(self.__class__)
+        
+        return NotImplemented
         return super().__array_function__(func, types, args, kwargs)
+
+    def ___array_finalize__(self, obj):
+        if self.dtype == bool:
+            return self
+        if isinstance(self, obj.__class__):
+            return self
+        return self.view(self.__class__)
 
     def __array_wrap__(self, out_arr, context=None):
         if out_arr.dtype == bool:
@@ -41,16 +50,27 @@ class EncodedArray(np.ndarray):
     def __eq__(self, other):
         if isinstance(other, int):
             other = np.asanyarray(other)
-        else:
-            other = as_encoded_sequence_array(other, self.encoding)
+        elif isinstance(other, (str, list)):
+            other = as_encoded_sequence_array(other, self.__class__)
         return np.asarray(self) == np.asarray(other)
 
 
 class ASCIIText(EncodedArray):
     pass
 
+class QualityEncoding:
+    @classmethod
+    def encode(cls, byte_array):
+        return (byte_array-ord("!")).view(Quality)
+
+    @classmethod
+    def decode(cls, obj):
+        return (obj+ord("!")).view(ASCIIText)
+
+
 class Quality(EncodedArray):
-    encoding = None
+    encoding = QualityEncoding
+
     def __str__(self):
         return "".join(chr(c) for c in self.decode())
 
@@ -60,6 +80,10 @@ class Quality(EncodedArray):
 
     def decode(self):
         return (self+ord("!")).view(ASCIIText)
+
+
+
+
 
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 #         inputs = [np.asarray(as_encoded_sequence_array(i, self.encoding)) if isinstance(i, (str, list)) else np.asarray(i)
@@ -95,7 +119,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
         if isinstance(s, encoding):
             return s
         else:
-            ret =  encoding.encode(s)
+            ret =  encoding.encoding.encode(s)
             return ret
                   
 
@@ -126,7 +150,7 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
 
 def to_ascii(sequence_array):
     if isinstance(sequence_array, EncodedArray):
-        return sequence_array.decode()
+        return sequence_array.encoding.decode(sequence_array)
     elif isinstance(sequence_array, RaggedArray):
         return sequence_array.__class__(to_ascii(sequence_array.ravel()), sequence_array.shape)
                                         
