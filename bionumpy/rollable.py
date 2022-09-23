@@ -41,13 +41,12 @@ class RollableFunction:
         mode : ["valid", "same", "full"]
             shape of output
         """
-
         if window_size is None:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
                 _sequence = as_encoded_sequence_array(_sequence, encoding=self._encoding)
-            else:
+            elif not isinstance(_sequence, RaggedArray):
                 _sequence = RaggedArray(_sequence)
 
         shape, sequence = (_sequence.shape, _sequence.ravel())

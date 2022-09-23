@@ -32,9 +32,19 @@ class AlphabetEncoding(Encoding):
         return np.all(self._alphabet == other._alphabet)
 
 
+def get_alphabet_array_class(alphabet):
+    class AlphabetArray(EncodedArray):
+        encoding = AlphabetEncoding(alphabet)
+
+    AlphabetArray.__name__ = alphabet.upper()+"Array"
+    AlphabetArray.__qualname__ = alphabet.upper()+"Array"
+    return AlphabetArray
+
+
 ACTGEncoding = AlphabetEncoding("ACTG")
 ACTGnEncoding = AlphabetEncoding("ACTGn")
 DNAEncoding = ACTGEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
+ACTGArray = get_alphabet_array_class("ACTG")

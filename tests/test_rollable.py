@@ -22,12 +22,11 @@ class Func(RollableFunction):
 
 
 def test_rollable_same(sequences):
-    result = Func().rolling_window(sequences, mode="same") 
+    result = Func().rolling_window(sequences, mode="same")
     ra = RaggedArray([[False, False, True, False],
                       [False, True, False],
                       [False, False]])
     assert np.all(result == ra)
-                                                                                
 
 
 def test_rollable_valid(sequences):
