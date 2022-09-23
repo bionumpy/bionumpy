@@ -34,8 +34,11 @@ def two_step(a, b, c):
 
 def complicated(a, b, c):
     d = a+b
+    print(str(d))
     e = b * c
+    print(str(e))
     f = c-a > 0
+    print(str(f))
     return np.where(f, np.exp(d+e+f), 1000)
 
 
@@ -48,3 +51,10 @@ def test_equal(whole_data, stream, func):
     temp = func(a, b, stream.c)
     ours = np.concatenate(consume(temp))
     assert np.all(true == ours)
+
+
+def test_print(stream):
+    a = stream.a
+    b = stream.b
+    complicated(a, b, stream.c)
+    assert False
