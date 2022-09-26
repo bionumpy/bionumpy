@@ -57,4 +57,3 @@ def test_print(stream):
     a = stream.a
     b = stream.b
     complicated(a, b, stream.c)
-    assert False
