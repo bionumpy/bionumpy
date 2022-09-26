@@ -26,7 +26,6 @@ def get_gc_content(reads):
     sequences = reads.sequence
     mask = (sequences == ord("G")) | (sequences == ord("C"))
     return np.mean(mask, axis=-1)
-#   np.sum(mask, axis=-1) / sequences.shape.lengths
 
 
 def plot_gc_content(reads):
@@ -37,8 +36,7 @@ def plot_gc_content(reads):
 
 @streamable()
 def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
-    matrix = reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
-    return matrix
+    return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
 
 
 def plot_averege_quality_scores_per_base(reads):

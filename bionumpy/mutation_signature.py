@@ -63,7 +63,7 @@ class MutationSignatureEncoding:
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
-    assert np.all(reference[snps.position] == snps.ref_seq)
+    assert np.all(reference[snps.position] == snps.ref_seq), (str(reference[snps.position]), str(snps.ref_seq), np.sum(reference[snps.position] != snps.ref_seq), len(snps.position), str(snps.ref_seq[reference[snps.position] != snps.ref_seq]), str(reference[snps.position][reference[snps.position] != snps.ref_seq]))
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
     forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T"))

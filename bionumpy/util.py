@@ -3,6 +3,7 @@ import logging
 from npstructures import RaggedArray
 import dataclasses
 from .chromosome_map import ChromosomeMap
+from .npdataclassstream import streamable
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,13 @@ def filter_on_intervals(entry, sorted_intervals):
         mask = (entry.position >= starts[idx]) & (entry.position < ends[idx])
     return entry[mask]
 
+@streamable
+def is_snp(variant):
+    return np.logical_and(
+        variant.ref_seq.shape.lengths == 1, variant.alt_seq.shape.lengths == 1
+        )
 
-@ChromosomeMap()
+@streamable()
 def get_snps(variants):
     snps = variants[variants.is_snp()]
     snps.ref_seq = snps.ref_seq.ravel()
@@ -81,5 +87,3 @@ def apply_to_npdataclass(attribute_name):
             return dataclasses.replace(**{attribute_name: func(getattr(np_dataclass, attribute_name), *args, **kwargs)})
         return new_func
     return decorator
-
-

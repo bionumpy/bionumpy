@@ -5,6 +5,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+class GroupedData:
+    pass
+
+class GroupedStream:
+    def __init__(self, stream):
+        self._stream = stream
+
+    def __iter__(self):
+        return iter(self._stream)
+
+class GroupedDict:
+    pass
 
 class ChromosomeProvider:
     """Base class for objects that can provide data grouped by chromosomes, 
@@ -124,6 +136,12 @@ class ChromosomeDictProvider(ChromosomeProvider):
     """
     Makes data for each chromosome accesible by item lookup
     """
+
+    def items(self):
+        return self._d.items()
+
+    def values(self):
+        return self._d.values()
 
     def items(self):
         return self._d.items()
