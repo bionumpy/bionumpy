@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray, to_ascii
+from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -242,8 +242,7 @@ class FastQBuffer(OneLineBuffer):
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = ord("+")
-        print(repr(entries.quality))
-        lines[3::step, :-1] = to_ascii(entries.quality)
+        lines[3::step, :-1] = to_ascii(entries.quality, QualityEncoding)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = ord("\n")
 

@@ -17,7 +17,7 @@ class SequenceEntry:
 class SequenceEntryWithQuality:
     name: str
     sequence: str
-    quality: Quality
+    quality: QualityEncoding
 
 
 @bnpdataclass
