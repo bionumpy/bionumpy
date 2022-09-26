@@ -25,8 +25,11 @@ class NpDataclassReader:
     def read(self):
         return self._reader.read().get_data()
 
-    def read_chunks(self):
-        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks()), buffer_type=self._reader._buffer_type)
+    def read_chunk(self, chunk_size=5000000):
+        return self._reader.read_chunk(chunk_size).get_data()
+
+    def read_chunks(self, chunk_size=5000000):
+        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)), buffer_type=self._reader._buffer_type)
 
     def __iter__(self):
         return self.read_chunks()
@@ -54,7 +57,7 @@ def _get_buffered_file(
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
-    kwargs2 = {key: val for key, val in kwargs.items() if key in ["chunk_size", "has_header"]}
+    kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
     return NpDataclassReader(file_reader)
 
