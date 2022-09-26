@@ -20,4 +20,8 @@ class ASCIIEncoding(Encoding):
         return encoded
 
 
+class NumericEncoding(Encoding):
+    pass
+
+
 BaseEncoding = ASCIIEncoding()
