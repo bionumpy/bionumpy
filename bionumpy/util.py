@@ -6,7 +6,6 @@ from .chromosome_map import ChromosomeMap
 
 logger = logging.getLogger(__name__)
 
-
 @ChromosomeMap()
 def filter_on_intervals(entry, sorted_intervals):
     if len(sorted_intervals) == 0:
