@@ -8,7 +8,7 @@ def get_changes(array):
     if isinstance(array, RaggedArray):
         return get_ragged_changes(array)
     array = array.reshape(len(array), -1)
-    return np.flatnonzero(np.all(array[1:]!=array[-1], axis=-1))
+    return np.flatnonzero(np.all(array[1:]!=array[-1], axis=-1))+1
 
 def get_ragged_changes(ragged_array):
     lengths = ragged_array.shape.lengths
@@ -29,32 +29,19 @@ def join_groupbys(grouped_generator):
         (key, np.concatenate([g[1] for g in groups]))
         for key, groups in double_grouped)
 
-    # for key, groups in 
-    #     groups = list(groups)
-    #     if len(groups) == 1:
-    #         yield key, groups[0][1]
-    #     else:
-    #         yield key, np.concatenate([g[1] for g  in groups])
-
 def key_func(x):
     if hasattr(x, "to_string"):
-        return x.to_string()     
+        return x.to_string()
     return str(x)
 
 @streamable(join_groupbys)
 def groupby(data, column=None, key=key_func):
     if column is not None:
-        ragged_array=getattr(data, column)
+        keys = getattr(data, column)
     else:
-        ragged_array=data
-    changes = get_changes(ragged_array)
+        keys = data
+    changes = get_changes(keys)
     changes = np.append(np.insert(changes, 0, 0), len(data))
-    return GroupedStream((key(ragged_array[start]), data[start:end])
+    assert np.all(np.diff(changes)>0), changes
+    return GroupedStream((key(keys[start]), data[start:end])
                          for start, end in zip(changes[:-1], changes[1:]))
-
-    # start = 0
-    # for change in changes:
-    #     yield (str(ragged_array[start]), data[start:change])
-    #     start = change
-    # yield (str(ragged_array[start]), data[start:len(data)])
-

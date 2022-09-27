@@ -12,5 +12,4 @@ class Minimizers(RollableFunction):
 
     def __call__(self, sequence):
         kmer_hashes = self._kmer_encoding.rolling_window(sequence)
-        print(kmer_hashes)
         return kmer_hashes.min(axis=-1)

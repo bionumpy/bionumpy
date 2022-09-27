@@ -1,6 +1,6 @@
 import numpy as np
 from .encodings import ACTGEncoding
-from .sequences import as_sequence_array
+from .sequences import as_encoded_sequence_array, as_sequence_array
 from .dna import complement
 from .chromosome_map import ChromosomeMap
 import logging
@@ -42,7 +42,7 @@ class MutationSignatureEncoding:
         self._encoding = encoding
 
     def encode(self, kmer, snp):
-        kmer = as_sequence_array(kmer, self._encoding)
+        kmer = as_encoded_sequence_array(kmer, self._encoding)
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
         kmer_hashes = np.dot(kmer, self.h)
         snp_hashes = SNPEncoding.encode(snp)
@@ -63,8 +63,7 @@ class MutationSignatureEncoding:
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
-    print(snps)
-    # assert np.all(reference[snps.position] == snps.ref_seq), str(snps[reference[snps.position] != snps.ref_seq])
+    assert np.all(reference[snps.position] == snps.ref_seq), str(snps[reference[snps.position] != snps.ref_seq])
     # (str(reference[snps.position]), str(snps.ref_seq), np.sum(reference[snps.position] != snps.ref_seq), len(snps.position), str(snps.ref_seq[reference[snps.position] != snps.ref_seq]), str(reference[snps.position][reference[snps.position] != snps.ref_seq]))
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]

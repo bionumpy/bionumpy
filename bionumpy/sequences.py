@@ -18,6 +18,8 @@ class EncodedArray(np.ndarray):
 
     def __str__(self) -> str:
         text = self.encoding.decode(self)
+        if len(self.shape) == 0:
+            return chr(int(self))
         if len(self.shape) == 1:
             return '"' + "".join(chr(n) for n in text[:20]) + '"'
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
@@ -35,10 +37,10 @@ class EncodedArray(np.ndarray):
         return (self.__view_scalar(elem) for elem in super().__iter__())
 
     def __array_function__(self, func, types, args, kwargs):
-        if func==np.append:
-            print(func, types, args, kwargs)
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
+        if func == np.bincount:
+            return np.bincount(np.asarray(args[0]), *args[1:], **kwargs)
         if func == np.concatenate:
             return func([np.asarray(e) for e in args[0]]).view(self.__class__)
         elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view):

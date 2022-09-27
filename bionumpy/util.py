@@ -25,7 +25,6 @@ def is_snp(variant):
 
 @streamable()
 def get_snps(variants):
-    print(variants)
     snps = variants[is_snp(variants)]
     snps.ref_seq = snps.ref_seq.ravel()
     snps.alt_seq = snps.alt_seq.ravel()
@@ -48,7 +47,6 @@ def convolution(func):
 def rolling_window_function(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        print(sequence, window_size)
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = func(windows, window_size, *args, **kwargs)
         if isinstance(_sequence, RaggedArray):
