@@ -6,7 +6,7 @@ In many cases, we want to take a simple function mapping a sequence to some scal
 * Use a position weight matrix to compute a score for a sequence
 * Find all occurances of a substring in a sequence set
 
-bioNumpy provides this functionality throught the `RollableFunction` class. All you have to to is subclass the `RollableFunction` class, and write a broadcastable version of the sequence function as the `__call__` method. A call to the `rolling_window` method will then apply the function to all the subsequences of length `window_size` in the sequence set. `window_size` can either be set as `self.window_size` or passed as argument to the `rolling_window` method.
+BioNumPy provides this functionality throught the `RollableFunction` class. All you have to to is subclass the `RollableFunction` class, and write a broadcastable version of the sequence function as the `__call__` method. A call to the `rolling_window` method will then apply the function to all the subsequences of length `window_size` in the sequence set. `window_size` can either be set as `self.window_size` or passed as argument to the `rolling_window` method.
 
 For instance, if we want to check for instances of "CGGT" in a set of sequences, we can use the following::
 

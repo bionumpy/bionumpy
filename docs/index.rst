@@ -1,19 +1,30 @@
-Welcome to bionumpy's documentation!
+BioNumPy
 ======================================
 
+Getting started
+---------------
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :glob:
 
    readme
    installation
-   usage
-   modules
-   contributing
-   history
+   source/*
 
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+BioNumPy concepts
+---------------
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   source/*
+
+
+Tutorials
+----------
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   tutorials/*
+

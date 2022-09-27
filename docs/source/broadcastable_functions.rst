@@ -1,7 +1,7 @@
 Broadcastable Functions
 =======================
 
-A key element of using bioNumpy efficiently is being able to write broadcastable functions on sequences. This will let numpy and bioNumpy handle the buisnis of applying the function to large sets of sequences. Below is a short description of how normal broadcasting works in numpy, and how this can be utilized to make broadcastable sequence functions.
+A key element of using BioNumPy efficiently is being able to write broadcastable functions on sequences. This will let numpy and BioNumPy handle the buisnis of applying the function to large sets of sequences. Below is a short description of how normal broadcasting works in numpy, and how this can be utilized to make broadcastable sequence functions.
 
 Elementwise broadcasting in numpy
 ---------------------------------
