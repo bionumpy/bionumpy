@@ -24,8 +24,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install Sphinx==3.5.4
-          pip install furo==2021.4.11b34
-          pip install myst_parser==0.13.7
+          pip install numpy
         
       - name: make html & commit the changes
         run: |
