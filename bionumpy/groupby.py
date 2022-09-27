@@ -36,8 +36,13 @@ def join_groupbys(grouped_generator):
     #     else:
     #         yield key, np.concatenate([g[1] for g  in groups])
 
+def key_func(x):
+    if hasattr(x, "to_string"):
+        return x.to_string()     
+    return str(x)
+
 @streamable(join_groupbys)
-def groupby(data, column=None, key=lambda x: x.to_string()):
+def groupby(data, column=None, key=key_func):
     if column is not None:
         ragged_array=getattr(data, column)
     else:

@@ -18,15 +18,15 @@ def filter_on_intervals(entry, sorted_intervals):
         mask = (entry.position >= starts[idx]) & (entry.position < ends[idx])
     return entry[mask]
 
-@streamable
+@streamable()
 def is_snp(variant):
-    return np.logical_and(
-        variant.ref_seq.shape.lengths == 1, variant.alt_seq.shape.lengths == 1
-        )
+    return (variant.ref_seq.shape.lengths == 1) & (variant.alt_seq.shape.lengths == 1)
+
 
 @streamable()
 def get_snps(variants):
-    snps = variants[variants.is_snp()]
+    print(variants)
+    snps = variants[is_snp(variants)]
     snps.ref_seq = snps.ref_seq.ravel()
     snps.alt_seq = snps.alt_seq.ravel()
     return snps

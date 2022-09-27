@@ -1,4 +1,5 @@
 import numpy as np
+from numbers import Number
 from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
 from npstructures import RaggedArray
 
@@ -21,6 +22,17 @@ class EncodedArray(np.ndarray):
             return '"' + "".join(chr(n) for n in text[:20]) + '"'
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
         return str(a)
+
+    def __view_scalar(self, elem):
+        if isinstance(elem, Number):
+            elem = np.array(elem)
+        return elem.view(self.__class__)
+
+    def __getitem__(self, idx):
+        return self.__view_scalar(super().__getitem__(idx))
+
+    def __iter__(self):
+        return (self.__view_scalar(elem) for elem in super().__iter__())
 
     def __array_function__(self, func, types, args, kwargs):
         if func==np.append:
