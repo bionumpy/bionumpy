@@ -93,12 +93,12 @@ Sequences
 
 Encodings
 ~~~~~~~~~
-The main point of bioNumpy is to leverage the computational power of numpy for biological data. A key element to this is to represent different types of biological data as numbers (in numpy arrays). The basic mechanism for doing this is by Encoding classes that can encode data types into numbers, and decode them back in to the data type. A driving idea in bionumpy is to make this happen automatically under the hood, so that a user can choose to ignore the inner workings and (in most cases) relate to sequence data sets in the same way as one would with standard numerical numpy data structures.
+The main point of bioNumpy is to leverage the computational power of numpy for biological data. A key element to this is to represent different types of biological data as numbers (in numpy arrays). The basic mechanism for doing this is by Encoding classes that can encode data types into numbers, and decode them back in to the data type. A driving idea in BioNumPy is to make this happen automatically under the hood, so that a user can choose to ignore the inner workings and (in most cases) relate to sequence data sets in the same way as one would with standard numerical numpy data structures.
 
 
 Summarization
 ~~~~~~~~~~~~~
-A key application is to extract features from sequence data sets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weight Matrix scores (sequence->float). bioNumpy provides functionality to apply such functions to rolling windows across large sequence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
+A key application is to extract features from sequence data sets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weight Matrix scores (sequence->float). BioNumPy provides functionality to apply such functions to rolling windows across large sequence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
 
 
     class PositionWeightMatrix(RollableFunction):

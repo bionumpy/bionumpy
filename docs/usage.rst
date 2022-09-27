@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use bionumpy in a project::
+To use BioNumPy in a project::
 
     import bionumpy
