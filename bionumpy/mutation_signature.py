@@ -64,7 +64,6 @@ class MutationSignatureEncoding:
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
     assert np.all(reference[snps.position] == snps.ref_seq), str(snps[reference[snps.position] != snps.ref_seq])
-    # (str(reference[snps.position]), str(snps.ref_seq), np.sum(reference[snps.position] != snps.ref_seq), len(snps.position), str(snps.ref_seq[reference[snps.position] != snps.ref_seq]), str(reference[snps.position][reference[snps.position] != snps.ref_seq]))
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
     forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T"))
@@ -74,12 +73,6 @@ def get_kmers(snps, reference, flank):
     signature_encoding = MutationSignatureEncoding(flank * 2 + 1)
     all_hashes = signature_encoding.encode(kmers, snps)
     n_hashes = 4 ** (flank * 2) * 6
-
-    # counter = EncodedCounter(signature_encoding)
-    # if not hash(snps, "genotypes"):
-    #     counter.count(all_hashes)
-    # else:
-    #     counter.count(all_hashes, weights=snps.genotypes.T > 0)
 
     if not hasattr(snps, "genotypes"):
         counts = np.bincount(all_hashes, minlength=n_hashes)

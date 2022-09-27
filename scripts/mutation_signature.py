@@ -41,12 +41,11 @@ def new_main(vcf_filename, fasta_filename, flank=1):
     reference = bnp.open(fasta_filename)
     counts = get_kmers(snps, reference, flank)
     print(counts)
+
+
 if __name__ == "__main__":
     import sys
     vcf_filename, fasta_filename, flank = sys.argv[1:4]
     do_matrix = len(sys.argv) > 4 and int(sys.argv[4]) == 1
     bed_filename = None if len(sys.argv) <= 5 else sys.argv[5]
     new_main(vcf_filename, fasta_filename)
-    
-    # simple_main(vcf_filename, fasta_filename, int(flank),
-    #do_matrix, bed_filename)
