@@ -25,7 +25,7 @@ class DigitEncoding(Encoding):
 
     @classmethod
     def encode(cls, bytes_array):
-        return bytes_array - cls.MIN_CODE
+        return np.asarray(bytes_array) - cls.MIN_CODE
 
     @classmethod
     def decode(cls, digits):

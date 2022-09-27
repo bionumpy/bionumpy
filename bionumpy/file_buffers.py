@@ -207,9 +207,8 @@ class TwoLineFastaBuffer(OneLineBuffer):
 
 
 class FastQBuffer(OneLineBuffer):
-    HEADER = 64
+    HEADER = ord("@")
     n_lines_per_entry = 4
-    _encoding = BaseEncoding
     dataclass = SequenceEntryWithQuality
 
     def get_data(self):

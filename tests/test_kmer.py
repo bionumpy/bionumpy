@@ -11,7 +11,7 @@ def test_kmer_encoding():
     # assert np.testing.assert_ encoding.in_range(encoded)
     decoded = encoding.inverse(encoded)
     print(kmers, decoded)
-    np.testing.assert_equal(kmers, decoded)
+    np.testing.assert_equal(np.asarray(kmers), np.asarray(decoded))
 
 
 def test_rolling_hash():

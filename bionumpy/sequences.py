@@ -36,6 +36,12 @@ class EncodedArray(np.ndarray):
     def __iter__(self):
         return (self.__view_scalar(elem) for elem in super().__iter__())
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method == "__call__" and ufunc in (np.equal, np.not_equal):
+            print(inputs)
+            return ufunc(*(np.asarray(as_encoded_sequence_array(a, self.__class__)) for a in inputs))
+        return super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+
     def __array_function__(self, func, types, args, kwargs):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
