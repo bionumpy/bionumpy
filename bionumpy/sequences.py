@@ -21,7 +21,7 @@ class EncodedArray(np.ndarray):
         if len(self.shape) == 0:
             return chr(int(self))
         if len(self.shape) == 1:
-            return '"' + "".join(chr(n) for n in text[:20]) + '"'
+            return "".join(chr(n) for n in text[:20])
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
         return str(a)
 
