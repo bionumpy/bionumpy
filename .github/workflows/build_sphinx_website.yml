@@ -30,6 +30,7 @@ jobs:
         
       - name: make html & commit the changes
         run: |
+          git pull origin docs
           sphinx-build -b html ./docs_source ./docs
           git config user.name "knutrand"
           git add ./docs
