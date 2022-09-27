@@ -26,6 +26,7 @@ jobs:
           pip install Sphinx==3.5.4
           pip install numpy
           pip install npstructures
+          pip install sphinx_rtd_theme
         
       - name: make html & commit the changes
         run: |
