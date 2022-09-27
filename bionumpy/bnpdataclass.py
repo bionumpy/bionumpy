@@ -13,8 +13,10 @@ def bnpdataclass(base_class):
                 val = np.asanyarray(pre_val)
             elif field.type == str:
                 val = as_sequence_array(pre_val)
-            elif issubclass(field.type, EncodedArray):
+            elif (isinstance(field.type, type) and issubclass(field.type, (EncodedArray, Encoding))) or isinstance(field.type, Encoding):
                 val = as_encoded_sequence_array(pre_val, field.type)
+            else:
+                assert False
             setattr(obj, field.name, val)
 
     new_class = npdataclass(base_class)

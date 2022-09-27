@@ -5,7 +5,8 @@ from bionumpy.mutation_signature import (
     get_kmers, MutationSignatureEncoding)
 from bionumpy.util import get_snps, filter_on_intervals
 from bionumpy.intervals import sort_intervals, merge_intervals
-
+from bionumpy.groupby import groupby
+from bionumpy.chromosome_map import GroupedStream
 import logging
 logging.basicConfig(level="INFO")
 
@@ -32,10 +33,19 @@ def simple_main(vcf_filename, fasta_filename, flank, do_matrix=False, bed_filena
     print_file(counts, flank)
 
 
+def new_main(vcf_filename, fasta_filename, flank=1):
+    variants = bnp.open(vcf_filename).read_chunks()
+    snps = get_snps(variants)
+    snps = groupby(snps, "chromosome")
+    snps = GroupedStream(("chr"+key, group) for key, group in snps)
+    reference = bnp.open(fasta_filename)
+    counts = get_kmers(snps, reference, flank)
+    print(counts)
+
+
 if __name__ == "__main__":
     import sys
     vcf_filename, fasta_filename, flank = sys.argv[1:4]
     do_matrix = len(sys.argv) > 4 and int(sys.argv[4]) == 1
     bed_filename = None if len(sys.argv) <= 5 else sys.argv[5]
-    simple_main(vcf_filename, fasta_filename, int(flank),
-                do_matrix, bed_filename)
+    new_main(vcf_filename, fasta_filename)

@@ -10,9 +10,10 @@ from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from . import parser
+from .npdataclassstream import mean, bincount, histogram
 import npstructures as nps
 __all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
-           "KmerEncoding", "Minimizers", "PositionWeightMatrix"]
+           "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean", "bincount"]
 
 
 def set_backend(cp):

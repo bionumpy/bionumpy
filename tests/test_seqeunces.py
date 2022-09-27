@@ -16,3 +16,14 @@ def test_sequence_str(sequence):
 def test_concat_sequenc(sequence):
     cat = np.concatenate([sequence, sequence])
     assert isinstance(cat, Sequence)
+
+
+def test_iter(sequence):
+    for elem in sequence.ravel():
+        assert isinstance(elem, Sequence), (elem, type(elem), elem.view(Sequence))
+
+
+def test_getitem(sequence):
+    sequence = sequence.ravel()
+    for i in range(len(sequence)):
+        assert isinstance(sequence[i], Sequence)

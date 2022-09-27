@@ -1,9 +1,10 @@
 import numpy as np
 from traceback import extract_stack, format_list
 
-class Mockup:
-    def __init__(self, stream):
+class NpDataclassStream:
+    def __init__(self, stream, dataclass=None):
         self._stream = stream
+        self._dataclass = dataclass
         self.start_buffer = next(self._stream)
 
     def __getattr__(self, name):
@@ -12,6 +13,9 @@ class Mockup:
     def __iter__(self):
         yield self.start_buffer
         yield from self._stream
+
+    def __str__(self):
+        return "NpDataclass stream with first buffer:\n" + str(self.start_buffer)
 
 
 class ComputationNode(np.lib.mixins.NDArrayOperatorsMixin):
@@ -23,7 +27,7 @@ class ComputationNode(np.lib.mixins.NDArrayOperatorsMixin):
         self._buffer = self._do_calc(self._origin_stream.start_buffer)
 
     def __str__(self):
-        return "Stream with first buffer:\n" + str(self._buffer)
+        return "Array stream with first buffer:\n" + str(self._buffer)
 
     def ___add__(self, other):
         return ComputationNode(self._origin_stream, np.add, (self, other))
@@ -35,7 +39,10 @@ class ComputationNode(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_function__(self, func, types, args, kwargs):
         stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
-        return ArrayFuncNode(self._origin_stream, func, args, kwargs, stack_trace=stack_trace)
+        cls = ArrayFuncNode
+        if func in reduction_lookup:
+            cls = ReductionNode
+        return cls(self._origin_stream, func, args, kwargs, stack_trace=stack_trace)
 
     def _replace_args(self, chunk):
         return [arg._do_calc(chunk) if isinstance(arg, ComputationNode) else arg for arg in self._args]
@@ -47,12 +54,29 @@ class ComputationNode(np.lib.mixins.NDArrayOperatorsMixin):
         for chunk in self._origin_stream:
             yield self._do_calc(chunk)
 
+def bincount_reduce(bincount_a, bincount_b):
+    if bincount_a.size >= bincount_b.size:
+        bincount_a[:bincount_b.size] += bincount_b
+        return bincount_a
+    bincount_b[:bincount_a.size] += bincount_a
+    return bincount_b
+
+def mean_reduce(mean_a, mean_b):
+    pass
+
+reduction_lookup = {
+    np.bincount: bincount_reduce,
+    np.mean: mean_reduce}
+
 
 class UfuncNode(ComputationNode):
     pass
 
 
 class ArrayFuncNode(ComputationNode):
+    pass
+
+class ReductionNode(ComputationNode):
     pass
 
 

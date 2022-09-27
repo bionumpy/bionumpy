@@ -2,6 +2,9 @@ from .chromosome_provider import (
     ChromosomeDictProvider,
     ChromosomeStreamProvider,
     PureChromosomeDictProvider,
+    GroupedDict,
+    GroupedStream,
+    GroupedData
 )
 import logging
 
@@ -57,20 +60,20 @@ class ChromosomeMap:
 
         def mapped(*args, **kwargs):
             stream_indices = [
-                i for i, a in enumerate(args) if isinstance(a, ChromosomeStreamProvider)
+                i for i, a in enumerate(args) if isinstance(a, GroupedStream)
             ]
             dict_indices = [
-                i for i, a in enumerate(args) if isinstance(a, ChromosomeDictProvider)
+                i for i, a in enumerate(args) if isinstance(a, GroupedDict)
             ]
             stream_keys = [
                 key
                 for key, val in kwargs.items()
-                if isinstance(val, ChromosomeStreamProvider)
+                if isinstance(val, GroupedStream)
             ]
             dict_keys = [
                 key
                 for key, val in kwargs.items()
-                if isinstance(val, ChromosomeDictProvider)
+                if isinstance(val, GroupedDict)
             ]
             is_stream = len(stream_indices) + len(stream_keys) > 0
             is_dict = not is_stream and (len(dict_keys) + len(dict_indices) > 0)
@@ -81,7 +84,7 @@ class ChromosomeMap:
                 args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys
             )
             if is_stream:
-                ret = ChromosomeStreamProvider(
+                ret = GroupedStream(
                     (chromosome, func(*args, **kwargs))
                     for chromosome, args, kwargs in log(new_args)
                 )

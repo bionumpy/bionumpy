@@ -110,14 +110,14 @@ class NumpyFileReader:
         return a[:bytes_read]
 
     def __read_raw_chunk(self, chunk_size):
-        b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8").view(EncodedArray)
-        return b, b.size
+        b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
+        assert not np.any(b & np.uint8(128)), "Unicde byte detected, not currently supported"
+        return b.view(EncodedArray), b.size
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
             return
         for line in self._file_obj:
-            print(line)
             if line[0] != self._buffer_type.COMMENT:
                 self._file_obj.seek(-len(line), 1)
                 break

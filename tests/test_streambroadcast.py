@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from npstructures import npdataclass
-from bionumpy.code_nodes import ComputationNode, LeafNode, consume, Mockup
+from bionumpy.code_nodes import ComputationNode, LeafNode, consume, NpDataclassStream
 
 
 @npdataclass
@@ -21,7 +21,7 @@ def whole_data():
 
 @pytest.fixture
 def stream():
-    return Mockup((c for c in (all_data[:2], all_data[2:4], all_data[4:])))
+    return NpDataclassStream((c for c in (all_data[:2], all_data[2:4], all_data[4:])))
 
 
 def add(a, b, c):

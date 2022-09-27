@@ -4,44 +4,43 @@ used tools FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 """
 
 import numpy as np
+
 import bionumpy as bnp
 from bionumpy.npdataclassstream import streamable
 import matplotlib.pyplot as plt
 
 
-@streamable
+# @streamable
 def get_base_quality_histogram(reads):
-    return np.bincount(reads.quality.ravel(), minlength=60)
+    return bnp.bincount(reads.quality.ravel(), minlength=60)
 
 
 def plot_base_qualities(reads):
-    qualities = sum(get_base_quality_histogram(reads))
+    qualities = get_base_quality_histogram(reads)
     plt.plot(qualities)
     plt.show()
 
 
-@streamable
+@streamable()
 def get_gc_content(reads):
     sequences = reads.sequence
     mask = (sequences == ord("G")) | (sequences == ord("C"))
-    return np.sum(mask, axis=-1) / sequences.shape.lengths
+    return np.mean(mask, axis=-1)
 
 
 def plot_gc_content(reads):
-    gc_content = np.concatenate(list(get_gc_content(reads)))
-    plt.hist(gc_content, bins=50)
+    histogram, _ = bnp.histogram(get_gc_content(reads), bins=50, range=(0, 1))
+    plt.plot(histogram)
     plt.show()
 
 
-@streamable
+@streamable()
 def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
-    # get a padded matrix (not all reads are the same length)
-    matrix = reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
-    return matrix
+    return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
 
 
 def plot_averege_quality_scores_per_base(reads):
-    scores = np.mean(np.concatenate(list(get_quality_scores_as_matrix(reads)), axis=0), axis=0)
+    scores = bnp.mean(get_quality_scores_as_matrix(reads), axis=0)
     plt.plot(scores)
     plt.show()
 
@@ -54,3 +53,5 @@ def test():
 
     assert True
 
+
+test()

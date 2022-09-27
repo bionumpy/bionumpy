@@ -218,7 +218,7 @@ class VCFBuffer(DelimitedBuffer):
 
         """
         self.validate_if_not()
-        chromosomes = self.get_text(0).view(Sequence)
+        chromosomes = self.get_text(0, fixed_length=False)
         position = self.get_integers(1).ravel() - 1
         from_seq = self.get_text(3, fixed_length=fixed_length)
         to_seq = self.get_text(4, fixed_length=fixed_length)

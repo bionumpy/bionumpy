@@ -17,7 +17,7 @@ class SequenceEntry:
 class SequenceEntryWithQuality:
     name: str
     sequence: str
-    quality: Quality
+    quality: QualityEncoding
 
 
 @bnpdataclass
@@ -33,24 +33,6 @@ class Variant:
     position: int
     ref_seq: str
     alt_seq: str
-
-    def is_snp(self):
-        return np.logical_and(
-            self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1
-        )
-
-    def __plot__(self, plt):
-        return [
-            plt.hist("position"),
-            plt.bar(
-                {
-                    "snp": self.is_snp().sum(),
-                    "ins": self.is_insertion().sum(),
-                    "del": self.is_deletion().sum(),
-                }
-            ),
-            plt.count_matrix(),
-        ]
 
 
 @bnpdataclass
