@@ -101,8 +101,8 @@ data = {
         SequenceEntry.single_entry("id1", "AACCTTGG"),
         SequenceEntry.single_entry("id4", "ACTG")],
     "sam": [
-        SAMEntry("SRR1524970.144283", 16, "test_ref", 1705, 255, "25M",	"*", 0, 0, "TGCTGATGAAGCAGAACAACTTTAA", "]YG[^baaaa^W`ab]]````aaba"),
-        SAMEntry("SRR1524970.316478", 16, "test_ref", 1705, 255, "24M", "*", 0, 0, "TGCTGATGAAGCAGAACAACTTTA", 	"`\X_`aaaaaY]``b_aa_aaaaa")]
+        SAMEntry.single_entry("SRR1524970.144283", 16, "test_ref", 1705, 255, "25M",	"*", 0, 0, "TGCTGATGAAGCAGAACAACTTTAA", "]YG[^baaaa^W`ab]]````aaba"),
+        SAMEntry.single_entry("SRR1524970.316478", 16, "test_ref", 1705, 255, "24M", "*", 0, 0, "TGCTGATGAAGCAGAACAACTTTA", 	"`\X_`aaaaaY]``b_aa_aaaaa")]
 }
 
 

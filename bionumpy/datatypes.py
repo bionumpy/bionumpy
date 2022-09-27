@@ -1,11 +1,12 @@
 import numpy as np
 from .encodings import QualityEncoding
-from .sequences import Quality
 from .bnpdataclass import bnpdataclass
+
 
 @bnpdataclass
 class RawSeqeuence:
     sequence: str
+
 
 @bnpdataclass
 class SequenceEntry:
@@ -26,13 +27,15 @@ class Interval:
     start: int
     end: int
 
-@npdataclass
+
+@bnpdataclass
 class Bed6(Interval):
     name: str
     score: int
     strand: str
 
-@npdataclass
+
+@bnpdataclass
 class StrandedInterval(Interval):
     strand: int
 

@@ -6,7 +6,7 @@ from .datatypes import SAMEntry, StrandedInterval
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, npdataclass
 import numpy as np
-from .sequences import Sequences, as_sequence_array, Sequence
+from .sequences import as_sequence_array, Sequence
 from .encodings import AlphabetEncoding, BaseEncoding
 
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
@@ -97,7 +97,7 @@ class BamBuffer(FileBuffer):
         cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
         sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
                                                          self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
-        new_sequences = Sequences(((sequences.ravel()[:, None]) >> np.arange(2, dtype=np.uint8)).ravel() & np.uint8(15), n_seq_bytes*2, encoding=BamEncoding)
+        new_sequences = RaggedArray(((sequences.ravel()[:, None]) >> np.arange(2, dtype=np.uint8)).ravel() & np.uint8(15), n_seq_bytes*2, encoding=BamEncoding)
 
         quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                                                      self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)+33

@@ -59,19 +59,14 @@ class NumpyFileReader:
     def __exit__(self):
         self._file_obj.close()
 
-
     def __iter__(self):
         self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self):
-        self._file_obj.close()
-
     def read(self):
+        self._remove_initial_comments()
+        self._header_data = self._buffer_type.read_header(self._file_obj)
         chunk = np.frombuffer(self._file_obj.read(),dtype=np.uint8)
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
@@ -87,6 +82,9 @@ class NumpyFileReader:
             return wrapper(buff)
 
     def read_chunks(self, chunk_size=5000000):
+        self._remove_initial_comments()
+        self._header_data = self._buffer_type.read_header(self._file_obj)
+        self._total_bytes_read = 0
         while not self._is_finished:
             yield self.read_chunk(chunk_size)
 
@@ -119,7 +117,7 @@ class NumpyFileReader:
 
     def __read_raw_chunk(self, chunk_size):
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
-        assert not np.any(b & np.uint8(128)), "Unicde byte detected, not currently supported"
+        assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
         return b.view(EncodedArray), b.size
 
     def _remove_initial_comments(self):
