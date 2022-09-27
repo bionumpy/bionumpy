@@ -38,5 +38,4 @@ jobs:
       - name: push changes to gh-pages to show automatically
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.DEPLOY_TOKEN }}
           branch: docs
