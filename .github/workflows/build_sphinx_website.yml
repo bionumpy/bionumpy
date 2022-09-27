@@ -30,9 +30,9 @@ jobs:
         
       - name: make html & commit the changes
         run: |
-          sphinx-build -b html ./docs ./docs_html
-          git config user.name "pavlovicmilena"
-          git add ./docs_html
+          sphinx-build -b html ./docs_source ./docs
+          git config user.name "knutrand"
+          git add ./docs
           git commit -m 'update docs'
           
       - name: push changes to gh-pages to show automatically
