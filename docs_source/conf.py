@@ -155,4 +155,4 @@ texinfo_documents = [
 
 # autodoc
 
-autodoc_mock_imports = ["npstructures", "numpy"]
+autodoc_mock_imports = ["numpy", "npstructures"]
