@@ -104,10 +104,12 @@ class FileBuffer:
         array[zeroed] = fill_value
         return array.reshape((-1, max_chars))
 
-    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
+    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
+        if as_sequence:
+            return EncodedArray(self._data[indices], shape)
         return RaggedArray(self._data[indices], shape)
 
     def _move_2d_array_to_intervals(self, array, starts, ends):

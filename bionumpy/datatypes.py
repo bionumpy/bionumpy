@@ -26,6 +26,16 @@ class Interval:
     start: int
     end: int
 
+@npdataclass
+class Bed6(Interval):
+    name: str
+    score: int
+    strand: str
+
+@npdataclass
+class StrandedInterval(Interval):
+    strand: int
+
 
 @bnpdataclass
 class Variant:

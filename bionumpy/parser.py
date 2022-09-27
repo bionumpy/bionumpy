@@ -53,6 +53,14 @@ class NumpyFileReader:
             else str(self._file_obj)
         )
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self._file_obj.close()
+
+
+    def __iter__(self):
         self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
