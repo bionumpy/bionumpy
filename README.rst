@@ -20,7 +20,7 @@ Library for working with biological sequence data as numpy arrays.
 
 
 * Free software: MIT license
-* Documentation: https://knutrand.github.io/bionumpy.
+* Documentation: https://uio-bmi.github.io/bionumpy/.
 
 
 Features
