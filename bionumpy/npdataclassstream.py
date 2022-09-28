@@ -97,7 +97,7 @@ class streamable:
             stream_args = [i for i, arg in enumerate(args) if isinstance(arg, BnpStream)]
             if len(stream_args) == 0:
                 return func(*args, **kwargs)
-            
+
             args_stream = self._args_stream(args, stream_args)
 
             stream = (func(*new_args, **kwargs) for new_args in args_stream)
@@ -106,8 +106,8 @@ class streamable:
             else:
                 return self._reduction(stream)
             StreamClass = args[stream_args[0]].__class__
-            return StreamClass((func(*new_args, **kwargs) for new_args in args_stream), 
-                               dataclass =args[stream_args[0]].dataclass)
+            return StreamClass((func(*new_args, **kwargs) for new_args in args_stream),
+                               dataclass=args[stream_args[0]].dataclass)
 
         return new_func
 
@@ -119,14 +119,18 @@ def bincount_reduce(bincount_a, bincount_b):
     bincount_b[:bincount_a.size] += bincount_a
     return bincount_b
 
-bincount  = streamable(lambda x: reduce(bincount_reduce, x))(np.bincount)
+
+bincount = streamable(lambda x: reduce(bincount_reduce, x))(np.bincount)
+
 
 def histogram_reduce(histograms):
     hist, edge = next(histograms)
     hist = sum((h[0] for h in histograms))+hist
     return hist, edge
 
+
 histogram = streamable(histogram_reduce)(np.histogram)
+
 
 @streamable(sum)
 def sum_and_n(array, axis=None):
@@ -136,9 +140,11 @@ def sum_and_n(array, axis=None):
         n = len(array)
     return np.append(np.sum(array, axis=axis), n)
 
+
 @streamable()
 def _rowmean(array, axis=None):
     return np.mean(array, axis=axis)
+
 
 def mean(array, axis=None):
     if (axis is not None) and axis != 0:

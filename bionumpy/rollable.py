@@ -51,7 +51,7 @@ class RollableFunction:
 
         shape, sequence = (_sequence.shape, _sequence.ravel())
         if mode == "valid":
-            windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
+            windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size, subok=True)
         elif mode == "same":
             windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides + sequence.strides, shape=sequence.shape + (window_size,),
                                                       writeable=False)

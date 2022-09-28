@@ -113,23 +113,14 @@ class Sequences(RaggedArray):
             return ret
         return RaggedArray(ret._data, ret.shape)
 
-#     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-#         inputs = [np.asarray(as_encoded_sequence_array(i, self.encoding)) if isinstance(i, (str, list)) else np.asarray(i)
-#                   for i in inputs]
-#         ret = getattr(ufunc, method)(*inputs, **kwargs)
-#         ret = ret.view(self.__class__)
-#         ret.encoding = self.encoding
-#         return ret
-# 
-#         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
-#         return ret
-
 
 class NumericEncodedArray(EncodedArray):
     pass
 
+
 class Sequence(EncodedArray):
     pass
+
 
 def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: Encoding) -> EncodedArray:
     if isinstance(data, np.ndarray):
@@ -137,6 +128,7 @@ def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: 
 
     assert isinstance(data, (np.ndarray, RaggedArray))
     return Sequences(data._data, data.shape, encoding=encoding)
+
 
 def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
     if isinstance(data, (str, list)):
@@ -147,6 +139,7 @@ def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
         assert data.encoding == BaseEncoding
         return encoding.encode(data)
     return np.asanyarray(data)
+
 
 def isinstanceorsubclass(obj, types):
     return (isinstance(obj, type) and issubclass(obj, types)) or isinstance(obj, types)
@@ -163,7 +156,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
             return s
         else:
             ret = encoding.encoding.encode(s)
-            return ret
+            return ret.view(encoding)
 
     if s.encoding != encoding:
         e = encoding.encode(s)
@@ -201,7 +194,7 @@ def to_ascii(sequence_array, encoding=None):
         return encoding.decode(sequence_array)
     elif isinstance(sequence_array, RaggedArray):
         return sequence_array.__class__(to_ascii(sequence_array.ravel(), encoding), sequence_array.shape)
-                                        
+
 
 def from_sequence_array(s) -> str:
     if isinstance(s, Sequence):
