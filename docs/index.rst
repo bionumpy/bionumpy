@@ -20,6 +20,7 @@ BioNumPy concepts
    source/working_with_big_data.rst
    source/encoding.rst
    source/sequences.rst
+   source/broadcastable_functions.rst
    source/rollable_functions.rst
    source/summarization.rst
 
@@ -27,8 +28,17 @@ BioNumPy concepts
 Tutorials
 ----------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 0
    :glob:
+   :titlesonly:
 
    tutorials/*
+
+Other
+-------
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   contributing
 

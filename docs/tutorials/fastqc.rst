@@ -23,8 +23,10 @@ The first step is to read our data as chunks:
 Note that we now only have a generator object that will give us chunks when we start iterating over it. No data has been read yet.
 
 
+===========
 GC-content
------------
+===========
+
 We want to get the GC-content (as a ratio between 0 and 1) within each sequence in a fastq file, and plot a histogram of these numbers.
 
 For each chunk we read from the file, we get the sequences as a RaggedArray where each row is a sequence. Creating a boolean mask of where we have G or C is then as simple as:
@@ -40,7 +42,7 @@ Getting the GC-content for each read can now be done by taking the mean across t
 If we want to do this across all all sequence chunks, we can create a function that does what we want on one chunk and add the streamable decorator:
 
 
-    >>> @streamable
+    >>> @streamable()
     >>> def get_gc_content(reads):
     >>>     sequences = reads.sequence
     >>>     mask = (sequences == ord("G")) | (sequences == ord("C"))
@@ -59,16 +61,18 @@ There is some "magic" happening here that might be useful to understand:
 * After this code has run, we have iterated over all the chunks in the file, and we need to open the file again and read chunks again if we want to anything else with the file
 
 
+============================
 Histogram of base qualities
-------------------------------
+============================
 If we want to plot a histogram of all the base qualities in all reads, we can use the builtin `bnp.bincount` function. This function does a numpy bincount on each chunk and combines the results.
 
     >>> base_quality_bincount = bnp.bincount(reads.quality.ravel(), minlength=60)
     >>> plt.plot(base_quality_bincount)
     >>> plt.show()
 
+==============================
 Average base quality per base
---------------------------------
+==============================
 In the GC content histogram example, we saw that we can take the mean the rows (axis=-1). If we instead want to find the average base quality for each position in the reads, we can take the mean across the columns (axis=0). Since the reads may have different lengths, we create a padded matrix filled with zeroes. Note that this means that the average base quality is "wrong" after the minimum read length.
 
     >>> @streamable()
@@ -81,3 +85,4 @@ In the GC content histogram example, we saw that we can take the mean the rows (
     >>> plt.show()
 
 Remember to change the limit_at_n_bases depending on your minimum read length (or how much of the reads you want to plot).
+
