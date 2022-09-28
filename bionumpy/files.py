@@ -1,7 +1,7 @@
 from pathlib import PurePath
 import gzip
 import numpy as np
-
+import dataclasses
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
@@ -27,7 +27,13 @@ class NpDataclassReader:
         return self._reader.read().get_data()
 
     def read_chunk(self, chunk_size=5000000):
-        return self._reader.read_chunk(chunk_size).get_data()
+        chunk = self._reader.read_chunk(chunk_size)
+        if chunk is None:
+            # return an empty dataclass
+            dataclass = self._reader._buffer_type.dataclass
+            return dataclass(*[[] for field in dataclasses.fields(dataclass)])
+
+        return chunk.get_data()
 
     def read_chunks(self, chunk_size=5000000):
         return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)),
