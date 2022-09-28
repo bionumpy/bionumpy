@@ -13,7 +13,8 @@ from . import parser
 from .npdataclassstream import mean, bincount, histogram, streamable
 import npstructures as nps
 __all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
-           "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean", "bincount", "streamable"]
+           "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
+           "bincount", "streamable", "histogram"]
 
 
 def set_backend(cp):
