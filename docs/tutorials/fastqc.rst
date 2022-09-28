@@ -48,7 +48,7 @@ If we want to do this across all all sequence chunks, we can create a function t
     >>>     mask = (sequences == ord("G")) | (sequences == ord("C"))
     >>>     return np.mean(mask, axis=-1)
 
-We want to create a histogram of the gc-content values from all chunks. We could call get_gc_content on each chunk, add the results to a list and create a historgram from the final list, but BioNumPy also provides a utility function for creating a histogram from the results from multiple chunks:
+We want to create a histogram of the gc-content values from all chunks. We could call get_gc_content on each chunk, add the results to a list and create a histogram from the final list, but BioNumPy also provides a utility function for creating a histogram from the results from multiple chunks:
 
     >>> histogram, _ = bnp.histogram(get_gc_content(reads), bins=50, range=(0, 1))
     >>> plt.plot(histogram)
