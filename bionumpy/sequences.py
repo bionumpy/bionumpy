@@ -22,7 +22,7 @@ class EncodedArray(np.ndarray):
         if len(self.shape) == 0:
             return chr(int(self))
         if len(self.shape) == 1:
-            return "".join(chr(n) for n in text[:20])
+            return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
         return str(a)
 
@@ -78,6 +78,7 @@ class EncodedArray(np.ndarray):
 class ASCIIText(EncodedArray):
     pass
 
+
 class QualityEncoding:
     @classmethod
     def encode(cls, byte_array):
@@ -102,8 +103,15 @@ class Quality(EncodedArray):
         return (self+ord("!")).view(ASCIIText)
 
 
-
-
+class Sequences(RaggedArray):
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        assert isinstance(self._data, EncodedArray), self._data
+        inputs = [as_encoded_sequence_array(i, self._data.__class__) for i in inputs]
+        kwargs = {key: as_encoded_sequence_array(val, self._data.__class__) for key, val in kwargs.items()}
+        ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        if isinstance(ret._data, EncodedArray):
+            return ret
+        return RaggedArray(ret._data, ret.shape)
 
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 #         inputs = [np.asarray(as_encoded_sequence_array(i, self.encoding)) if isinstance(i, (str, list)) else np.asarray(i)
@@ -154,17 +162,17 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
         if isinstance(s, encoding):
             return s
         else:
-            ret =  encoding.encoding.encode(s)
+            ret = encoding.encoding.encode(s)
             return ret
-                  
 
     if s.encoding != encoding:
         e = encoding.encode(s)
         s = e.view(Sequence)
-        s.encoding = encoding 
+        s.encoding = encoding
         return s
 
     return s
+
 
 def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     """
@@ -175,13 +183,14 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     elif isinstance(s, np.ndarray):
         return s.view(EncodedArray)
     elif isinstance(s, RaggedArray):
-        return RaggedArray(as_sequence_array(s._data), s.shape)
+        return Sequences(as_sequence_array(s._data), s.shape)
     elif isinstance(s, str):
         return Sequence.from_string(s)
     elif isinstance(s, list):
-        return RaggedArray(as_sequence_array("".join(s)), [len(ss) for ss in s])
+        return Sequences(as_sequence_array("".join(s)), [len(ss) for ss in s])
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
+
 
 def to_ascii(sequence_array, encoding=None):
     if isinstance(sequence_array, EncodedArray):
