@@ -27,6 +27,9 @@ class AlphabetEncoding(Encoding):
     def alphabet_size(self):
         return self._alphabet.size
 
+    def get_alphabet(self):
+        return [chr(c) for c in self._alphabet]
+
     def __eq__(self, other):
         if not isinstance(other, AlphabetEncoding):
             return False

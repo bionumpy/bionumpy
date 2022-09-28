@@ -42,6 +42,7 @@ class NpDataclassReader:
     def __iter__(self):
         return self.read_chunks()
 
+
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
@@ -53,9 +54,10 @@ buffer_types = {
     ".gff": get_bufferclass_for_datatype(GFFEntry),
     ".gtf": get_bufferclass_for_datatype(GFFEntry),
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
-    ".sam": get_bufferclass_for_datatype(SAMEntry),
+    ".sam": get_bufferclass_for_datatype(SAMEntry, comment="@"),
     ".bam": BamBuffer
 }
+
 
 def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs

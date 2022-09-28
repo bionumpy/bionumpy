@@ -118,4 +118,3 @@ class BamEntry:
     cigar_length: CigarEncoding
     sequence: BamArray
     quality: QualityEncoding
-
