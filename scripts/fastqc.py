@@ -24,7 +24,7 @@ def plot_base_qualities(reads):
 @streamable()
 def get_gc_content(reads):
     sequences = reads.sequence
-    mask = (sequences == ord("G")) | (sequences == ord("C"))
+    mask = (sequences == "G") | (sequences == "C")
     return np.mean(mask, axis=-1)
 
 
