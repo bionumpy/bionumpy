@@ -2,7 +2,6 @@
 BioNumPy
 ========
 
-
 .. image:: https://img.shields.io/pypi/v/bionumpy.svg
         :target: https://pypi.python.org/pypi/bionumpy
 
@@ -83,50 +82,6 @@ Another example would be to read in a vcf-file::
 
 
 Again, `bnp.open` recognizes that this is a vcf file, and again it chooses an appropriate format to output it in.
-
-Sequences
-~~~~~~~~~
-`bnp.Sequences` objects are numpy arrays structured in a way that allows them to hold many sequences of unequal lenght. Under the hood they are `npstructures.RaggedArray` objects that hold byte-arrays, with an encoding that specifies which characters each byte represents. Most of the time, it is not necessary to think about these inner workings, but one can think of them as lists of strings (with the possibility of performing numpy functions on them). The most common way to get `Sequences` objects is to read a file, but they can also be created from lists of strings using the `bnp.as_sequence_array` function::
-
-    >>> bnp.as_sequence_array(["acgttgta", "gcttca", "gttattc"])
-    Sequences(acgttgta, gcttca, gttattc)
-
-
-
-kmers
-~~~~~
-Another example of this concept is the kmer hashing class::
-
-    class KmerEncoding(RollableFunction):
-    
-        def __init__(self, k, alphabet_size=4):
-            self.window_size = k
-            self._k = k
-            self._alphabet_size = alphabet_size
-            self._convolution = self._alphabet_size ** np.arange(self._k)
-    
-        def __call__(self, sequence: Sequence) -> np.ndarray:
-            return sequence.dot(self._convolution)
-
-Here, the `__call__` function specifies how to hash a kmer into a single number. Calling its `rolling_window` method will hash all the kmers in a sequence set.
-
-    >>> bnp.KmerEncoding(3).rolling_window(sequences)
-    RaggedArray([[52, 45, 43, 58, 46, 11], [39, 41, 26, 6], [43, 10, 34, 40, 26]])
-
-To count all the 3-mers in the 'reads.fq' sequences we can do as follows:
-
-    >>> fastq_entries_stream = bnp.open("example_data/reads.fq")
-    >>> counts = np.zeros(4**3, dtype=int)
-    >>> kmer_encoding = bnp.KmerEncoding(3)
-    >>> for fastq_entries in fastq_entries_stream:
-    ...     kmer_hashes = kmer_encoding.rolling_window(fastq_entries.sequence)
-    ...     counts += np.bincount(kmer_hashes.ravel(), minlength=4**3)
-    ... 
-    >>> counts
-    array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
-           0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0])
-
 
 
 Credits
