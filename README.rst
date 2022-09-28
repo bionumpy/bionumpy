@@ -59,7 +59,7 @@ The main function for file input and output is the `bnp.open` function, which by
     >>> import bionumpy as bnp
     >>> 
     >>> file = bnp.open("example_data/reads.fq")
-    >>> for fastq_entries in file.get_chunks():
+    >>> for fastq_entries in file.read_chunks():
     ...     print(fastq_entries)
     ... 
     SequenceEntryWithQuality(name=Sequences(headerishere, anotherheader), sequence=Sequences(CTTGTTGA, CGG), quality=Sequences(!!!!!!!!, ~~~))
@@ -67,7 +67,7 @@ The main function for file input and output is the `bnp.open` function, which by
 A couple of things to note:
 
 * the `bnp.open` function understands that the `.fq` suffix means it's a fastq file and reads it as such.
-* the method `get_chunk()` on the File object will return chunks from the file (in this particular case, the file is so small that we only get one chunk).
+* the method `read_chunks()` on the File object will return chunks from the file (in this particular case, the file is so small that we only get one chunk).
 * the data from each chunk is delivered as an `npdataclass` where there is one array-like object for each field. This means that if we only care about the acutal DNA-sequences, we can operate on that on it's own.
 * in the above example, we could get the sequences as an NumPy-like object (a RaggedArray) like this: `fastq_entries.sequence`)
 

@@ -4,11 +4,11 @@ Working with big data
 ----------------------
 Before following this guide we assume you have read how to read a big file under Method3 in :ref:`reading_files`.
 
-The recommended way of working with big data sets (bigger than what you can fit in memory) in BioNumPy is to use the `get_chunks()` method when reading your data.
+The recommended way of working with big data sets (bigger than what you can fit in memory) in BioNumPy is to use the `read_chunks()` method when reading your data.
 
-    >>> data = open("filename").get_chunks()
+    >>> data = open("filename").read_chunks()
 
-`data` is now an iterable, and when iterating over data, BioNumPy will for every iteration read a new chunk from the file, meaning that at most one chunk is kept in memory. It is possible to specify the chunk size (in bytes) to get_chunks, e.g. `get_chunks(chunk_size=10000000)`
+`data` is now an iterable, and when iterating over data, BioNumPy will for every iteration read a new chunk from the file, meaning that at most one chunk is kept in memory. It is possible to specify the chunk size (in bytes) to read_chunks, e.g. `read_chunks(chunk_size=10000000)`
 
 One way of working with chunks is thus to create a for-loop iterating over the chunks. However, BioNumPy makes it possible to write code as if you only had a single chunk, and can handle the tecnhicalities of making your code work on multiple chunks.
 

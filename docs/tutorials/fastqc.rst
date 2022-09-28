@@ -56,7 +56,7 @@ We want to create a histogram of the gc-content values from all chunks. We could
 
 There is some "magic" happening here that might be useful to understand:
 
-* the @streamable decorator lets us call the get_gc_content on multiple chunks (the result from get_chunks). All it does is to provide an iterable over the results from calling get_gc_content on each chunk.
+* the @streamable decorator lets us call the get_gc_content on multiple chunks (the result from read_chunks). All it does is to provide an iterable over the results from calling get_gc_content on each chunk.
 * the `bnp.histogram` function can take such an iterable and combines the results
 * After this code has run, we have iterated over all the chunks in the file, and we need to open the file again and read chunks again if we want to anything else with the file
 
