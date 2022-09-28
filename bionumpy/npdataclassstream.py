@@ -10,9 +10,10 @@ class BnpStream:
 
     def __iter__(self):
         return self
-    
+
     def __next__(self):
         return next(self._stream)
+
 
 class ArrayStream(BnpStream):
     def __init__(self, stream, first_buffer=None):
@@ -77,6 +78,7 @@ class NpDataclassStream(BnpStream):
 
     def join(self):
         return np.concatenate(list(self))
+
 
 class streamable:
     def __init__(self, reduction=None):
@@ -151,4 +153,3 @@ def mean(array, axis=None):
         return _rowmean(array, axis)
     t = sum_and_n(array, axis=axis)
     return t[:-1]/t[-1]
-
