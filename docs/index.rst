@@ -18,6 +18,7 @@ BioNumPy concepts
 
    source/reading_files.rst
    source/working_with_big_data.rst
+   source/supported_file_formats.rst
    source/encoding.rst
    source/sequences.rst
    source/broadcastable_functions.rst
