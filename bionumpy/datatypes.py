@@ -1,11 +1,14 @@
 import numpy as np
 from .encodings import QualityEncoding
-from .sequences import Quality
+from .encodings.base_encoding import CigarEncoding
+from .encodings.alphabet_encoding import CigarOpArray, BamArray
 from .bnpdataclass import bnpdataclass
+
 
 @bnpdataclass
 class RawSeqeuence:
     sequence: str
+
 
 @bnpdataclass
 class SequenceEntry:
@@ -25,6 +28,18 @@ class Interval:
     chromosome: str
     start: int
     end: int
+
+
+@bnpdataclass
+class Bed6(Interval):
+    name: str
+    score: int
+    strand: str
+
+
+@bnpdataclass
+class StrandedInterval(Interval):
+    strand: int
 
 
 @bnpdataclass
@@ -90,3 +105,17 @@ class SAMEntry:
     length: int
     sequence: str
     quality: str
+
+
+@bnpdataclass
+class BamEntry:
+    chromosome: str
+    name: str
+    flag: int
+    position: int
+    mapq: int
+    cigar_op: CigarOpArray
+    cigar_length: CigarEncoding
+    sequence: BamArray
+    quality: QualityEncoding
+

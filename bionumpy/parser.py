@@ -52,10 +52,10 @@ class NumpyFileReader:
             if hasattr(self._file_obj, "name")
             else str(self._file_obj)
         )
-
         self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
+
 
     def __enter__(self):
         return self
@@ -63,8 +63,13 @@ class NumpyFileReader:
     def __exit__(self):
         self._file_obj.close()
 
+    def __iter__(self):
+        return self.read_chunks()
+
     def read(self):
-        chunk = np.frombuffer(self._file_obj.read(),dtype=np.uint8)
+        # self._remove_initial_comments()
+        # self._header_data = self._buffer_type.read_header(self._file_obj)
+        chunk = np.frombuffer(self._file_obj.read(), dtype=np.uint8)
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
 
@@ -79,15 +84,17 @@ class NumpyFileReader:
             return wrapper(buff)
 
     def read_chunks(self, chunk_size=5000000):
+        #self._remove_initial_comments()
+        #self._header_data = self._buffer_type.read_header(self._file_obj)
         while not self._is_finished:
             yield self.read_chunk(chunk_size)
 
     def __add_newline_to_end(self, chunk, bytes_read):
-        if chunk[bytes_read - 1] != ord("\n"):
-            chunk = np.append(chunk, ord("\n"))
+        if chunk[bytes_read - 1] != "\n":
+            chunk = np.append(chunk, np.uint8(ord("\n")))
             bytes_read += 1
         if hasattr(self._buffer_type, "_new_entry_marker"):
-            chunk = np.append(chunk, self._buffer_type._new_entry_marker)
+            chunk = np.append(chunk, np.uint8(self._buffer_type._new_entry_marker))
             bytes_read += 1
         return chunk, bytes_read
 
@@ -111,7 +118,7 @@ class NumpyFileReader:
 
     def __read_raw_chunk(self, chunk_size):
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
-        assert not np.any(b & np.uint8(128)), "Unicde byte detected, not currently supported"
+        # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
         return b.view(EncodedArray), b.size
 
     def _remove_initial_comments(self):

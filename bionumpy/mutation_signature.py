@@ -18,6 +18,10 @@ class SNPEncoding:
     lookup[ord("G")][[ord(c) for c in "TCA"]] = np.arange(3)
     lookup[ord("T")][[ord(c) for c in "ACG"]] = 3 + np.arange(3)
     lookup[ord("A")][[ord(c) for c in "TGC"]] = 3 + np.arange(3)
+    lookup[ord("c")][[ord(c) for c in "agt"]] = np.arange(3)
+    lookup[ord("g")][[ord(c) for c in "tca"]] = np.arange(3)
+    lookup[ord("t")][[ord(c) for c in "acg"]] = 3 + np.arange(3)
+    lookup[ord("a")][[ord(c) for c in "tgc"]] = 3 + np.arange(3)
 
     text = np.array([f"C>{c}" for c in "AGT"] + [f"T->{c}" for c in "ACG"])
 
@@ -63,10 +67,10 @@ class MutationSignatureEncoding:
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
-    assert np.all(reference[snps.position] == snps.ref_seq), str(snps[reference[snps.position] != snps.ref_seq])
+    assert np.all(ACTGEncoding.encode(reference[snps.position]) == ACTGEncoding.encode(snps.ref_seq)), (str(snps[reference[snps.position] != snps.ref_seq]), str(reference))
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
-    forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T"))
+    forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T")) | (snps.ref_seq == ord("c")) | (snps.ref_seq == ord("t"))
     kmers = np.where(
         forward_mask[:, None], kmers, complement(kmers[:, ::-1])
     )

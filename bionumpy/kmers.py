@@ -20,7 +20,7 @@ class KmerEncoding(RollableFunction):
 
     def __call__(self, sequence: Sequence) -> int:
         sequence = as_encoded_sequence_array(sequence, encoding=self._encoding)
-        return sequence.dot(self._convolution)
+        return np.asarray(sequence).dot(self._convolution)
 
     def inverse(self, kmer_hash: int) -> Sequence:
         s =  ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(Sequence)

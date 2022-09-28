@@ -3,6 +3,7 @@ from numbers import Number
 from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
 from npstructures import RaggedArray
 
+
 class EncodedArray(np.ndarray):
     """ 
     Class for data that could be written as characters, but is represented numpy arrays
@@ -21,7 +22,7 @@ class EncodedArray(np.ndarray):
         if len(self.shape) == 0:
             return chr(int(self))
         if len(self.shape) == 1:
-            return '"' + "".join(chr(n) for n in text[:20]) + '"'
+            return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
         a = np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]
         return str(a)
 
@@ -35,6 +36,11 @@ class EncodedArray(np.ndarray):
 
     def __iter__(self):
         return (self.__view_scalar(elem) for elem in super().__iter__())
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method == "__call__" and ufunc in (np.equal, np.not_equal):
+            return ufunc(*(np.asarray(as_encoded_sequence_array(a, self.__class__)) for a in inputs))
+        return super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         if not all(issubclass(t, self.__class__) for t in types):
@@ -72,6 +78,7 @@ class EncodedArray(np.ndarray):
 class ASCIIText(EncodedArray):
     pass
 
+
 class QualityEncoding:
     @classmethod
     def encode(cls, byte_array):
@@ -96,8 +103,15 @@ class Quality(EncodedArray):
         return (self+ord("!")).view(ASCIIText)
 
 
-
-
+class Sequences(RaggedArray):
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        assert isinstance(self._data, EncodedArray), self._data
+        inputs = [as_encoded_sequence_array(i, self._data.__class__) for i in inputs]
+        kwargs = {key: as_encoded_sequence_array(val, self._data.__class__) for key, val in kwargs.items()}
+        ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        if isinstance(ret._data, EncodedArray):
+            return ret
+        return RaggedArray(ret._data, ret.shape)
 
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 #         inputs = [np.asarray(as_encoded_sequence_array(i, self.encoding)) if isinstance(i, (str, list)) else np.asarray(i)
@@ -122,7 +136,7 @@ def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: 
         return data.view(EncodedArray)
 
     assert isinstance(data, (np.ndarray, RaggedArray))
-    return Seqeunces(data._data, data.shape, encoding=encoding)
+    return Sequences(data._data, data.shape, encoding=encoding)
 
 def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
     if isinstance(data, (str, list)):
@@ -137,6 +151,7 @@ def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
 def isinstanceorsubclass(obj, types):
     return (isinstance(obj, type) and issubclass(obj, types)) or isinstance(obj, types)
 
+
 def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
     if isinstanceorsubclass(encoding, NumericEncoding):
         return as_numeric_encoded_array(s, encoding)
@@ -147,17 +162,17 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
         if isinstance(s, encoding):
             return s
         else:
-            ret =  encoding.encoding.encode(s)
+            ret = encoding.encoding.encode(s)
             return ret
-                  
 
     if s.encoding != encoding:
         e = encoding.encode(s)
         s = e.view(Sequence)
-        s.encoding = encoding 
+        s.encoding = encoding
         return s
 
     return s
+
 
 def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     """
@@ -168,13 +183,14 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     elif isinstance(s, np.ndarray):
         return s.view(EncodedArray)
     elif isinstance(s, RaggedArray):
-        return RaggedArray(as_sequence_array(s._data), s.shape)
+        return Sequences(as_sequence_array(s._data), s.shape)
     elif isinstance(s, str):
         return Sequence.from_string(s)
     elif isinstance(s, list):
-        return RaggedArray(as_sequence_array("".join(s)), [len(ss) for ss in s])
+        return Sequences(as_sequence_array("".join(s)), [len(ss) for ss in s])
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
+
 
 def to_ascii(sequence_array, encoding=None):
     if isinstance(sequence_array, EncodedArray):

@@ -104,7 +104,7 @@ class FileBuffer:
         array[zeroed] = fill_value
         return array.reshape((-1, max_chars))
 
-    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
+    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
@@ -207,9 +207,8 @@ class TwoLineFastaBuffer(OneLineBuffer):
 
 
 class FastQBuffer(OneLineBuffer):
-    HEADER = 64
+    HEADER = ord("@")
     n_lines_per_entry = 4
-    _encoding = BaseEncoding
     dataclass = SequenceEntryWithQuality
 
     def get_data(self):

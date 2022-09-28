@@ -5,6 +5,8 @@ from scipy.stats import poisson
 import bionumpy as bnp
 import numpy as np
 
+# Extend the intervals to be size 150. Starts should
+
 
 def extend_to_size(intervals, fragment_length):
     is_forward = intervals.strand=="+"

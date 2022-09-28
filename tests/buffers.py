@@ -1,6 +1,6 @@
 import pytest
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 from bionumpy.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.sequences import EncodedArray
@@ -64,37 +64,45 @@ CHROMOSOME_I	Allele	substitution	10017380	10017380	.	+.	aachange=A to T;conseque
 CHROMOSOME_I	Allele	substitution	10573196	10573196	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=5.05579;public_name=vc56;substitution=G/A;variation=WBVar00275020
 CHROMOSOME_I	Allele	substitution	13447169	13447169	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=20.7564;public_name=ar197;strain=GS3412;substitution=G/A;variation=WBVar00000227
 CHROMOSOME_I	Allele	substitution	13721389	13721389	.	+.	aachange=A to V;consequence=Missense;interpolated_map_position=21.6433;public_name=mg334;substitution=G/A;variation=WBVar00088937
+""",
+    "sam": """\
+@HD	VN:1.0	SO:unsorted
+@SQ	SN:test_ref	LN:17637
+SRR1524970.144283	16	test_ref	1706	255	25M	*	0	0	TGCTGATGAAGCAGAACAACTTTAA	]YG[^baaaa^W`ab]]````aaba	AS:i:0	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:25	YT:Z:UU
+SRR1524970.316478	16	test_ref	1706	255	24M	*	0	0	TGCTGATGAAGCAGAACAACTTTA	`\X_`aaaaaY]``b_aa_aaaaa	AS:i:0	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:24	YT:Z:UU
 """
 }
 
 buffers = {key: chunk_from_text(val) for key, val in buffer_texts.items()}
 
 data = {
-        "bed": [
-            Interval.single_entry("chr1", 1, 3),
-            Interval.single_entry("chr1", 40, 60),
-            Interval.single_entry("chr2",  400, 600)],
-        "vcf2": [
-            SNP.single_entry("chr1",	88361,	"A",	"G"),
-            SNP.single_entry("chr1",	887559,	"A",	"CAA"),
-            SNP.single_entry("chr2",	8877,	"AGG",	"C")],
-        "vcf": [
-            SNP.single_entry("chr1",	88361,	"A",	"G"),
-            SNP.single_entry("chr1",	887559,	"A",	"C"),
-            SNP.single_entry("chr2",	8877,	"A",	"G")],
-        "fastq": [
-            SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", "".join("!" for _ in "CTTGTTGA")),
-            SequenceEntryWithQuality.single_entry("anotherheader", "CGG", "".join("~" for _ in "CGG"))],
-        "fasta": [
-            SequenceEntry.single_entry("header", "CTTGTTGA"),
-            SequenceEntry.single_entry("header2", "CGG")],
-        "multiline_fasta": [
-            SequenceEntry.single_entry("header", "CTTGCCGCCTCC"),
-            SequenceEntry.single_entry("header2", "CCCCCCGGGCCCTTT")],
-        "gfa_sequence": [
-            SequenceEntry.single_entry("id1", "AACCTTGG"),
-            SequenceEntry.single_entry("id4", "ACTG")
-        ]
+    "bed": [
+        Interval.single_entry("chr1", 1, 3),
+        Interval.single_entry("chr1", 40, 60),
+        Interval.single_entry("chr2",  400, 600)],
+    "vcf2": [
+        SNP.single_entry("chr1",	88361,	"A",	"G"),
+        SNP.single_entry("chr1",	887559,	"A",	"CAA"),
+        SNP.single_entry("chr2",	8877,	"AGG",	"C")],
+    "vcf": [
+        SNP.single_entry("chr1",	88361,	"A",	"G"),
+        SNP.single_entry("chr1",	887559,	"A",	"C"),
+        SNP.single_entry("chr2",	8877,	"A",	"G")],
+    "fastq": [
+        SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", "".join("!" for _ in "CTTGTTGA")),
+        SequenceEntryWithQuality.single_entry("anotherheader", "CGG", "".join("~" for _ in "CGG"))],
+    "fasta": [
+        SequenceEntry.single_entry("header", "CTTGTTGA"),
+        SequenceEntry.single_entry("header2", "CGG")],
+    "multiline_fasta": [
+        SequenceEntry.single_entry("header", "CTTGCCGCCTCC"),
+        SequenceEntry.single_entry("header2", "CCCCCCGGGCCCTTT")],
+    "gfa_sequence": [
+        SequenceEntry.single_entry("id1", "AACCTTGG"),
+        SequenceEntry.single_entry("id4", "ACTG")],
+    "sam": [
+        SAMEntry.single_entry("SRR1524970.144283", 16, "test_ref", 1705, 255, "25M",	"*", 0, 0, "TGCTGATGAAGCAGAACAACTTTAA", "]YG[^baaaa^W`ab]]````aaba"),
+        SAMEntry.single_entry("SRR1524970.316478", 16, "test_ref", 1705, 255, "24M", "*", 0, 0, "TGCTGATGAAGCAGAACAACTTTA", 	"`\X_`aaaaaY]``b_aa_aaaaa")]
 }
 
 

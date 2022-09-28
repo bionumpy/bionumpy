@@ -229,6 +229,38 @@ class VCFBuffer(DelimitedBuffer):
 
     get_data = get_variants
 
+    @classmethod
+    def from_data(cls, data):
+        position = data.position+1
+        position_lens = np.log10(position).astype(int)+1
+        chromosome_lens = data.chromosome.shape.lengths
+
+        ref_lens = 1 # data.ref_seq.shape[-1]
+        alt_lens = 1 # data.alt_seq.shape[-1]
+        line_lengths = chromosome_lens + 1 + position_lens + 1 + 2 + ref_lens + 1 + alt_lens + 1
+        line_ends = np.cumsum(line_lengths)
+        buf = np.empty(line_ends[-1], dtype=np.uint8)
+        lines = RaggedArray(buf, line_lengths)
+        obj = cls(buf, line_ends-1)
+        obj._move_2d_array_to_intervals(cls._move_ints_to_digit_array(position, np.max(position_lens)),
+                                        line_ends-3-ref_lens-alt_lens-2-position_lens, line_ends-3-ref_lens-alt_lens-2)
+
+        indices, _ = RaggedView(lines.shape.starts, chromosome_lens).get_flat_indices()
+        buf[indices] = data.chromosome.ravel()
+
+        ref_indices = lines.shape.starts+chromosome_lens+1+position_lens+2+1
+        alt_indices = lines.shape.starts+chromosome_lens+1+position_lens+2+1+ref_lens+1
+        buf[ref_indices] = data.ref_seq.ravel()
+        buf[alt_indices] = data.alt_seq.ravel()
+        buf[lines.shape.starts+chromosome_lens] = ord("\t")
+        buf[lines.shape.starts+chromosome_lens+1+position_lens] = ord("\t")
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+1] = ord(".")
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+2] = ord("\t")
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+2+1+ref_lens] = ord("\t")
+        # buf[line_ends-(end_lens+2)] = ord("\t")
+        buf[line_ends-1] = ord("\n")
+        return buf
+
 
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VariantWithGenotypes

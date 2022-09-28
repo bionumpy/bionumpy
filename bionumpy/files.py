@@ -4,6 +4,7 @@ import numpy as np
 
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
+from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
 from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
@@ -46,7 +47,8 @@ buffer_types = {
     ".gff": get_bufferclass_for_datatype(GFFEntry),
     ".gtf": get_bufferclass_for_datatype(GFFEntry),
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
-    ".sam": get_bufferclass_for_datatype(SAMEntry)
+    ".sam": get_bufferclass_for_datatype(SAMEntry),
+    ".bam": BamBuffer
 }
 
 def _get_buffered_file(
@@ -75,7 +77,7 @@ def _get_buffer_type(suffix):
 def bnp_open(filename, mode=None, **kwargs):
     path = PurePath(filename)
     suffix = path.suffixes[-1]
-    is_gzip = suffix == ".gz"
+    is_gzip = suffix in (".gz", ".bam")
     if suffix == ".gz":
         suffix = path.suffixes[-2]
     if suffix == ".fai":
