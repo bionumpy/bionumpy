@@ -11,6 +11,7 @@ from bionumpy.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
 from bionumpy.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
+import bionumpy as bnp
 
 np.seterr(all='raise')
 
@@ -137,3 +138,11 @@ def test_line_chunker(vcf_buffer2):
             Variant.single_entry("chr2", 8877, "AGG", "C")]
     for line, t in zip(lines, true):
         assert_npdataclass_equal(line, t)
+
+
+def test_read_chunk_after_read_chunks_returns_empty_dataclass():
+    file = bnp.open("example_data/reads.fq")
+    chunks = list(file.read_chunks())
+    new_chunk = file.read_chunk()
+    assert isinstance(new_chunk, type(chunks[0]))
+

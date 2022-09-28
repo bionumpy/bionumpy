@@ -75,6 +75,9 @@ class NumpyFileReader:
 
     def read_chunk(self, chunk_size=5000000):
         chunk = self.__get_buffer(chunk_size)
+        if chunk is None:
+            return None
+
         self._total_bytes_read += chunk.size
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
         if not self._is_finished:
