@@ -6,6 +6,7 @@ import pytest
 from bionumpy.bam import BamBuffer, alignment_to_interval
 
 
+@pytest.mark.skip
 def test_read():
     filename = "/home/knut/Sources/bionumpy/example_data/test.bam"
     f = bnp.open(filename)

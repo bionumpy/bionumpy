@@ -7,9 +7,8 @@ Getting started
    :maxdepth: 1
    :glob:
 
-   readme
+   What is BioNumPy? <readme>
    installation
-   source/*
 
 BioNumPy concepts
 ------------------
@@ -17,7 +16,12 @@ BioNumPy concepts
    :maxdepth: 2
    :glob:
 
-   source/*
+   source/reading_files.rst
+   source/working_with_big_data.rst
+   source/encoding.rst
+   source/sequences.rst
+   source/rollable_functions.rst
+   source/summarization.rst
 
 
 Tutorials

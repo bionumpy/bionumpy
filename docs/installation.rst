@@ -1,12 +1,9 @@
 .. highlight:: shell
 
-============
-Installation
-============
+=================================
+Installation and getting started
+=================================
 
-
-Stable release
---------------
 
 To install BioNumPy, run this command in your terminal:
 
@@ -14,38 +11,21 @@ To install BioNumPy, run this command in your terminal:
 
     $ pip install bionumpy
 
-This is the preferred method to install BioNumPy, as it will always install the most recent stable release.
-
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
 
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
+====================================
+Your first BioNumPy program
+====================================
 
-From sources
-------------
+Assuming you have a file with som biological data, the following will read a chunk from the file and print a description of the content:
 
-The sources for BioNumPy can be downloaded from the `Github repo`_.
+    >>> import bionumpy as bnp
+    >>> file = bnp.open("example_data/reads.fq")
+    >>> chunk = file.read_chunk()
+    >>> print(chunk)
 
-You can either clone the public repository:
-
-.. code-block:: console
-
-    $ git clone git://github.com/knutdrand/bionumpy
-
-Or download the `tarball`_:
-
-.. code-block:: console
-
-    $ curl -OJL https://github.com/knutdrand/bionumpy/tarball/master
-
-Once you have a copy of the source, you can install it with:
-
-.. code-block:: console
-
-    $ python setup.py install
-
-
-.. _Github repo: https://github.com/knutdrand/bionumpy
-.. _tarball: https://github.com/knutdrand/bionumpy/tarball/master
+If the above works, you are now ready to read more about :ref:`reading-files`.
