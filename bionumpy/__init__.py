@@ -18,6 +18,8 @@ from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .multiline_buffer import MultiLineFastaBuffer
+from .encodings.alphabet_encoding import DNAEncoding, RNAENcoding, AminoAcidEncoding
+
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 Bed6Buffer = get_bufferclass_for_datatype(Bed6)
@@ -28,7 +30,7 @@ __all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
-           "count_encoded"]
+           "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 
 
 def set_backend(cp):

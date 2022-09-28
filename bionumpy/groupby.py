@@ -4,11 +4,13 @@ import numpy as np
 from .npdataclassstream import streamable
 from .chromosome_provider import GroupedStream
 
+
 def get_changes(array):
     if isinstance(array, RaggedArray):
         return get_ragged_changes(array)
     array = array.reshape(len(array), -1)
     return np.flatnonzero(np.all(array[1:]!=array[-1], axis=-1))+1
+
 
 def get_ragged_changes(ragged_array):
     lengths = ragged_array.shape.lengths
@@ -22,17 +24,20 @@ def get_ragged_changes(ragged_array):
     eq = np.any(eq, axis=-1)
     changes |= eq
     return np.flatnonzero(changes)+1
-    
+
+
 def join_groupbys(grouped_generator):
     double_grouped = itertools.groupby(itertools.chain.from_iterable(grouped_generator), lambda x: x[0])
     return GroupedStream(
         (key, np.concatenate([g[1] for g in groups]))
         for key, groups in double_grouped)
 
+
 def key_func(x):
     if hasattr(x, "to_string"):
         return x.to_string()
     return str(x)
+
 
 @streamable(join_groupbys)
 def groupby(data, column=None, key=key_func):
