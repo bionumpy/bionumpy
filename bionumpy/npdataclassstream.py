@@ -106,8 +106,8 @@ class streamable:
             else:
                 return self._reduction(stream)
             StreamClass = args[stream_args[0]].__class__
-            return StreamClass((func(*new_args, **kwargs) for new_args in args_stream), 
-                               dataclass =args[stream_args[0]].dataclass)
+            return StreamClass((func(*new_args, **kwargs) for new_args in args_stream),
+                               dataclass=args[stream_args[0]].dataclass)
 
         return new_func
 

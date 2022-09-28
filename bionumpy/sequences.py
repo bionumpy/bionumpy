@@ -163,7 +163,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
             return s
         else:
             ret = encoding.encoding.encode(s)
-            return ret
+            return ret.view(encoding)
 
     if s.encoding != encoding:
         e = encoding.encode(s)
