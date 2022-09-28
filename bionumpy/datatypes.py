@@ -1,5 +1,7 @@
 import numpy as np
 from .encodings import QualityEncoding
+from .encodings.base_encoding import CigarEncoding
+from .encodings.alphabet_encoding import CigarOpArray, BamArray
 from .bnpdataclass import bnpdataclass
 
 
@@ -103,3 +105,17 @@ class SAMEntry:
     length: int
     sequence: str
     quality: str
+
+
+@bnpdataclass
+class BamEntry:
+    chromosome: str
+    name: str
+    flag: int
+    position: int
+    mapq: int
+    cigar_op: CigarOpArray
+    cigar_length: CigarEncoding
+    sequence: BamArray
+    quality: QualityEncoding
+

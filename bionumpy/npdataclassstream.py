@@ -138,7 +138,6 @@ def sum_and_n(array, axis=None):
 
 @streamable()
 def _rowmean(array, axis=None):
-    print(array)
     return np.mean(array, axis=axis)
 
 def mean(array, axis=None):

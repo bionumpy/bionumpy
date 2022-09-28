@@ -3,6 +3,7 @@ from numbers import Number
 from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
 from npstructures import RaggedArray
 
+
 class EncodedArray(np.ndarray):
     """ 
     Class for data that could be written as characters, but is represented numpy arrays
@@ -38,7 +39,6 @@ class EncodedArray(np.ndarray):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         if method == "__call__" and ufunc in (np.equal, np.not_equal):
-            print(inputs)
             return ufunc(*(np.asarray(as_encoded_sequence_array(a, self.__class__)) for a in inputs))
         return super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
 
@@ -128,7 +128,7 @@ def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: 
         return data.view(EncodedArray)
 
     assert isinstance(data, (np.ndarray, RaggedArray))
-    return Seqeunces(data._data, data.shape, encoding=encoding)
+    return Sequences(data._data, data.shape, encoding=encoding)
 
 def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
     if isinstance(data, (str, list)):
@@ -142,6 +142,7 @@ def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
 
 def isinstanceorsubclass(obj, types):
     return (isinstance(obj, type) and issubclass(obj, types)) or isinstance(obj, types)
+
 
 def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
     if isinstanceorsubclass(encoding, NumericEncoding):
