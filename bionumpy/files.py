@@ -48,7 +48,7 @@ buffer_types = {
     ".gff": get_bufferclass_for_datatype(GFFEntry),
     ".gtf": get_bufferclass_for_datatype(GFFEntry),
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
-    ".sam": get_bufferclass_for_datatype(SAMEntry),
+    ".sam": get_bufferclass_for_datatype(SAMEntry, comment="@"),
     ".bam": BamBuffer
 }
 
