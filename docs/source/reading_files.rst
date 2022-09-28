@@ -12,12 +12,12 @@ If you are working with data sets that are small enough to fit into memory, you 
     >>> data = open("filename").read()
     >>> print(data)
 
-In the above example, `data` will be an NpDataClass object with various fields, depending on the file type. For instance, if you read a fastq file, you will be able to access the sequences (`data.sequence`) and the bsae qualities (`data.quality`).
+In the above example, `data` will be an NpDataClass object with various fields, depending on the file type. For instance, if you read a fastq file, you will be able to access the sequences (`data.sequence`) and the base qualities (`data.quality`).
 
 
 Method 2: Reading a single chunk from a large file
 ===================================================
-If you have a large file, and don't want to read all of it, you can read a chunk. This can be useful if you only want to get to know your data or perform an analysis on a small subset of your data:
+If you have a large file, and don't want to read all of it, you can read a single chunk. This can be useful if you only want to get to know your data or perform an analysis on a small subset of your data:
 
     >>> file = open("reads.fastq")
     >>> chunk = file.read_chunk(chunk_size=10000000)
@@ -25,9 +25,9 @@ If you have a large file, and don't want to read all of it, you can read a chunk
 Here `chunk_size` is the number of bytes to read. If the file is small enough, you may get the whole file by setting chunk size to a big number, but if you want to make sure you read the whole file as one single cunk you should choose method 1 instead.
 
 
-Method 3: Reading whole file as chunks
-========================================
-This is the preferred way you should use for all large files (typically fasta files, fastq files and bam files). The idea is to read the whole file as chunks that are iterated over. This way, only one single chunk will be kept in memory at the time.
+Method 3: Reading whole file as a stream of chunks
+====================================================
+This is the preferred way you should use for all large files (typically fasta files, fastq files and bam files). The idea is to read the whole file as chunks that can be iterated over. This way, only one single chunk will be kept in memory at the time.
 
     >>> file = bnp.open("file.fastq")
     >>> for chunk in file.read_chunks():
