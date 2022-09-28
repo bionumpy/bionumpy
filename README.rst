@@ -9,10 +9,6 @@ BioNumPy
         :target: https://github.com/knutdrand/bionumpy/actions/
         :alt: Build and test status
 
-.. image:: https://readthedocs.org/projects/bionumpy/badge/?version=latest
-        :target: https://bionumpy.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
 Documentation: `https://uio-bmi.github.io/bionumpy/ <https://uio-bmi.github.io/bionumpy/>`_
 
 
