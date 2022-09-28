@@ -93,7 +93,8 @@ class BamBuffer(FileBuffer):
                                                          self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
         sequences = (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)).view(BamArray)
         new_sequences = RaggedArray(sequences, n_seq_bytes*2)
-
+        view = RaggedView(new_sequences.shape.starts, l_seq)
+        new_sequences = new_sequences[view]
         quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                                                      self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
