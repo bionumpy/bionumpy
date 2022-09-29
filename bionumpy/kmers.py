@@ -14,8 +14,7 @@ class KmerEncoding(RollableFunction):
         self.window_size = k
         self._k = k
         self._encoding = alphabet_encoding
-        alphabet_size = alphabet_encoding.alphabet_size
-        self._alphabet_size = alphabet_size
+        self._alphabet_size = alphabet_encoding.encoding.alphabet_size
         self._convolution = self._alphabet_size ** np.arange(self._k)
 
     def __call__(self, sequence: Sequence) -> int:
@@ -23,15 +22,12 @@ class KmerEncoding(RollableFunction):
         return np.asarray(sequence).dot(self._convolution)
 
     def inverse(self, kmer_hash: int) -> Sequence:
-        s =  ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(Sequence)
-        s.encoding=self._encoding
-        return s
+        return ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(self._encoding)
+        # s.encoding=self._encoding
 
     def sample_domain(self, n):
-        s = (np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
-            n, self._k)).view(Sequence)
-        s.encoding = self._encoding
-        return s
+        return (np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(
+            n, self._k)).view(self._encoding)
 
 
 @convolution

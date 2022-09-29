@@ -201,3 +201,4 @@ def from_sequence_array(s) -> str:
         return s.to_string()
     elif isinstance(s, RaggedArray):
         return [k.to_string() for k in s]
+
