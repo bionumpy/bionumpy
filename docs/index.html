@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to bionumpy’s documentation! &mdash; bionumpy  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>BioNumPy &mdash; bionumpy  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -33,13 +33,30 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">What is BioNumPy?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
+</ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="readme.html">BioNumPy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/reading_files.html">Reading files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/working_with_big_data.html">Working with big data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/supported_file_formats.html">Currently supported file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/broadcastable_functions.html">Broadcastable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/rollable_functions.html">Rollable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/summarization.html">Summarization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/bam_handling.html">BAM Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/fastq_filtering.html">FASTQ filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/fastqc.html">Simple quality checking of fastq files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
 </ul>
 
         </div>
@@ -56,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Welcome to bionumpy’s documentation!</li>
+      <li>BioNumPy</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -66,47 +83,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="welcome-to-bionumpy-s-documentation">
-<h1>Welcome to bionumpy’s documentation!<a class="headerlink" href="#welcome-to-bionumpy-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="bionumpy">
+<h1>BioNumPy<a class="headerlink" href="#bionumpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="readme.html">BioNumPy</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="readme.html#what-is-bionumpy">What is BioNumPy?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="readme.html#why-bionumpy">Why BioNumPy?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="readme.html#getting-started">Getting started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="readme.html#features">Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="readme.html#credits">Credits</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#stable-release">Stable release</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#from-sources">From sources</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing.html#deploying">Deploying</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="history.html">History</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="history.html#id1">0.1.0 (2021-12-17)</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">What is BioNumPy?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+<div class="section" id="bionumpy-concepts">
+<h2>BioNumPy concepts<a class="headerlink" href="#bionumpy-concepts" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="source/reading_files.html">Reading files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/reading_files.html#method-1-reading-all-your-data-at-once">Method 1: Reading all your data at once</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/reading_files.html#method-2-reading-a-single-chunk-from-a-large-file">Method 2: Reading a single chunk from a large file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/reading_files.html#method-3-reading-whole-file-as-a-stream-of-chunks">Method 3: Reading whole file as a stream of chunks</a></li>
 </ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/working_with_big_data.html">Working with big data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/supported_file_formats.html">Currently supported file formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/supported_file_formats.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/broadcastable_functions.html">Broadcastable Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/broadcastable_functions.html#elementwise-broadcasting-in-numpy">Elementwise broadcasting in numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/broadcastable_functions.html#vectorwise-broadcasting">Vectorwise broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="source/broadcastable_functions.html#sequence-broadcasting">Sequence broadcasting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/rollable_functions.html">Rollable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/summarization.html">Summarization</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="tutorials">
+<h2>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/bam_handling.html">BAM Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/fastq_filtering.html">FASTQ filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/fastqc.html">Simple quality checking of fastq files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="other">
+<h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+</div>
+</div>
 </div>
 
 
