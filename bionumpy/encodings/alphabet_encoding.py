@@ -6,8 +6,9 @@ from ..sequences import EncodedArray
 class AlphabetEncoding(Encoding):
     def __init__(self, alphabet: str):
         alphabet = [c.lower() for c in alphabet]
-        self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8).view(EncodedArray)
-        upper_alphabet = self._alphabet + ord("A")-ord("a")
+        self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8)
+        upper_alphabet = (self._alphabet + ord("A")-ord("a")).view(EncodedArray)
+        self._alphabet = self._alphabet.view(EncodedArray)
         self._lookup = np.zeros(256, dtype=np.uint8).view(EncodedArray)
         self._lookup[self._alphabet] = np.arange(len(alphabet))
         self._lookup[upper_alphabet] = np.arange(len(alphabet))
@@ -26,10 +27,22 @@ class AlphabetEncoding(Encoding):
     def alphabet_size(self):
         return self._alphabet.size
 
+    def get_alphabet(self):
+        return [chr(c) for c in self._alphabet]
+
     def __eq__(self, other):
         if not isinstance(other, AlphabetEncoding):
             return False
         return np.all(self._alphabet == other._alphabet)
+
+
+def get_alphabet_array_class(alphabet):
+    class AlphabetArray(EncodedArray):
+        encoding = AlphabetEncoding(alphabet)
+
+    AlphabetArray.__name__ = alphabet.upper()+"Array"
+    AlphabetArray.__qualname__ = alphabet.upper()+"Array"
+    return AlphabetArray
 
 
 ACTGEncoding = AlphabetEncoding("ACTG")
@@ -38,3 +51,6 @@ DNAEncoding = ACTGEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
+ACTGArray = get_alphabet_array_class("ACTG")
+BamArray = get_alphabet_array_class("=ACMGRSVTWYHKDBN")
+CigarOpArray = get_alphabet_array_class("MIDNSHP=X")

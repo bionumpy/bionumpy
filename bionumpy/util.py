@@ -3,9 +3,9 @@ import logging
 from npstructures import RaggedArray
 import dataclasses
 from .chromosome_map import ChromosomeMap
+from .npdataclassstream import streamable
 
 logger = logging.getLogger(__name__)
-
 
 @ChromosomeMap()
 def filter_on_intervals(entry, sorted_intervals):
@@ -18,10 +18,14 @@ def filter_on_intervals(entry, sorted_intervals):
         mask = (entry.position >= starts[idx]) & (entry.position < ends[idx])
     return entry[mask]
 
+@streamable()
+def is_snp(variant):
+    return (variant.ref_seq.shape.lengths == 1) & (variant.alt_seq.shape.lengths == 1)
 
-@ChromosomeMap()
+
+@streamable()
 def get_snps(variants):
-    snps = variants[variants.is_snp()]
+    snps = variants[is_snp(variants)]
     snps.ref_seq = snps.ref_seq.ravel()
     snps.alt_seq = snps.alt_seq.ravel()
     return snps
@@ -43,7 +47,6 @@ def convolution(func):
 def rolling_window_function(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        print(sequence, window_size)
         windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size)
         convoluted = func(windows, window_size, *args, **kwargs)
         if isinstance(_sequence, RaggedArray):
@@ -82,5 +85,3 @@ def apply_to_npdataclass(attribute_name):
             return dataclasses.replace(**{attribute_name: func(getattr(np_dataclass, attribute_name), *args, **kwargs)})
         return new_func
     return decorator
-
-

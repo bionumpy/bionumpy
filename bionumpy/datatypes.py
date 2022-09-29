@@ -1,65 +1,58 @@
 import numpy as np
-from npstructures import npdataclass, SeqArray
+from .encodings import QualityEncoding
+from .encodings.base_encoding import CigarEncoding
+from .encodings.alphabet_encoding import CigarOpArray, BamArray
+from .bnpdataclass import bnpdataclass
 
-@npdataclass
+
+@bnpdataclass
 class RawSeqeuence:
-    sequence: SeqArray
+    sequence: str
 
-@npdataclass
+
+@bnpdataclass
 class SequenceEntry:
-    name: SeqArray
-    sequence: SeqArray
+    name: str
+    sequence: str
 
 
-@npdataclass
+@bnpdataclass
 class SequenceEntryWithQuality:
-    name: SeqArray
-    sequence: SeqArray
-    quality: SeqArray
+    name: str
+    sequence: str
+    quality: QualityEncoding
 
 
-@npdataclass
+@bnpdataclass
 class Interval:
-    chromosome: SeqArray
-    start: np.ndarray
-    end: np.ndarray
-
-    def in_interval(self, position):
-        return (self.start <= position) & (position < self.end)
-
-    def __plot__(self, plt):
-        return [plt.hist(self.end - self.start, name="size"), plt.hist("start")]
+    chromosome: str
+    start: int
+    end: int
 
 
-@npdataclass
+@bnpdataclass
+class Bed6(Interval):
+    name: str
+    score: int
+    strand: str
+
+
+@bnpdataclass
+class StrandedInterval(Interval):
+    strand: int
+
+
+@bnpdataclass
 class Variant:
-    chromosome: SeqArray
-    position: np.ndarray
-    ref_seq: SeqArray
-    alt_seq: SeqArray
-
-    def is_snp(self):
-        return np.logical_and(
-            self.ref_seq.shape.lengths == 1, self.alt_seq.shape.lengths == 1
-        )
-
-    def __plot__(self, plt):
-        return [
-            plt.hist("position"),
-            plt.bar(
-                {
-                    "snp": self.is_snp().sum(),
-                    "ins": self.is_insertion().sum(),
-                    "del": self.is_deletion().sum(),
-                }
-            ),
-            plt.count_matrix(),
-        ]
+    chromosome: str
+    position: int
+    ref_seq: str
+    alt_seq: str
 
 
-@npdataclass
+@bnpdataclass
 class VariantWithGenotypes(Variant):
-    genotypes: np.ndarray
+    genotypes: int
 
 
 class SNP(Variant):
@@ -86,7 +79,7 @@ class SortedIntervals:
         return cls(np.vstack([element.data for element in elements]))
 
 
-@npdataclass
+@bnpdataclass
 class GFFEntry:
     chromosome: str
     source: str
@@ -99,7 +92,7 @@ class GFFEntry:
     atributes: str
 
 
-@npdataclass
+@bnpdataclass
 class SAMEntry:
     name: str
     flag: int
@@ -112,3 +105,16 @@ class SAMEntry:
     length: int
     sequence: str
     quality: str
+
+
+@bnpdataclass
+class BamEntry:
+    chromosome: str
+    name: str
+    flag: int
+    position: int
+    mapq: int
+    cigar_op: CigarOpArray
+    cigar_length: CigarEncoding
+    sequence: BamArray
+    quality: QualityEncoding

@@ -2,6 +2,7 @@ import os
 from itertools import chain
 import pytest
 import numpy as np
+from npstructures.testing import assert_npdataclass_equal 
 from bionumpy.sequences import from_sequence_array
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, Variant
@@ -9,6 +10,8 @@ from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, 
 from bionumpy.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
 from bionumpy.parser import chunk_lines
+from bionumpy.bnpdataclass import bnpdataclass
+import bionumpy as bnp
 
 np.seterr(all='raise')
 
@@ -21,7 +24,8 @@ def chunk_from_text(text):
 def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
-    assert list(data) == true_data
+    for line, true_line in zip(data, true_data):
+        assert_npdataclass_equal(line, true_line)
 
 
 @pytest.mark.parametrize("buffer_name", ["fasta", "fastq", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
@@ -29,8 +33,11 @@ def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     if buffer_name == "multiline_fasta":
         buf_type.n_characters_per_line = 6
-    data = data[0].stack_with_ragged(data)
+    print(data)
+    data = buf_type.dataclass.stack_with_ragged(data)
     buf = buf_type.from_data(data)
+    print(buf.to_string())
+    print(true_buf.to_string())
     assert np.all(true_buf == buf)
 
 
@@ -55,7 +62,7 @@ def test_buffered_writer_ctx_manager(file, chunk_size):
 def test_custom_read():
     from npstructures import npdataclass
 
-    @npdataclass
+    @bnpdataclass
     class SampleDC:
         sequence_aa: str
         sequence: str
@@ -96,23 +103,13 @@ def test_gfa_sequence_buffer(gfa_sequence_buffer):
     buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
     entries = list(buf.get_sequences())
     true = [
-        SequenceEntry("id1", "AACCTTGG"),
-        SequenceEntry("id4", "ACTG")
+        SequenceEntry.single_entry("id1", "AACCTTGG"),
+        SequenceEntry.single_entry("id4", "ACTG")
     ]
-    print("NAM")
-    print(entries[0].name)
-    assert entries == true
+    for entry, t in zip(entries, true):
+        assert_npdataclass_equal(entry, t)
 
-
-def test_bed_buffer(bed_buffer):
-    buf = BedBuffer.from_raw_buffer(bed_buffer)
-    intervals = list(buf.get_intervals())
-    assert intervals == [
-        Interval("chr1", 1, 3),
-        Interval("chr1", 40, 60),
-        Interval("chr2", 400, 600)]
-
-
+@pytest.mark.skip("Replaced")
 def test_vcf_buffer(vcf_buffer):
     buf = VCFBuffer.from_raw_buffer(vcf_buffer)
     snps = list(buf.get_snps())
@@ -123,7 +120,7 @@ def test_vcf_buffer(vcf_buffer):
     print(snps)
     assert snps == true
 
-
+@pytest.mark.skip("Replaced")
 def test_vcf_buffer2(vcf_buffer2):
     buf = VCFBuffer.from_raw_buffer(vcf_buffer2)
     variants = buf.get_variants()
@@ -136,9 +133,16 @@ def test_vcf_buffer2(vcf_buffer2):
 
 def test_line_chunker(vcf_buffer2):
     lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
-    true = [Variant("chr1", 88361, "A", "G"),
-            Variant("chr1", 887559, "A", "CAA"),
-            Variant("chr2", 8877, "AGG", "C")]
-    print(VCFBuffer.from_raw_buffer(vcf_buffer2).get_data())
+    true = [Variant.single_entry("chr1", 88361, "A", "G"),
+            Variant.single_entry("chr1", 887559, "A", "CAA"),
+            Variant.single_entry("chr2", 8877, "AGG", "C")]
     for line, t in zip(lines, true):
-        assert line == t
+        assert_npdataclass_equal(line, t)
+
+
+def test_read_chunk_after_read_chunks_returns_empty_dataclass():
+    file = bnp.open("example_data/reads.fq")
+    chunks = list(file.read_chunks())
+    new_chunk = file.read_chunk()
+    assert isinstance(new_chunk, type(chunks[0]))
+

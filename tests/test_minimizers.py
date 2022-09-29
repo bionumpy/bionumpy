@@ -1,7 +1,7 @@
 from bionumpy.minimizers import Minimizers
 from bionumpy.sequences import Sequence
 from bionumpy.kmers import KmerEncoding
-from bionumpy.encodings import ACTGEncoding
+from bionumpy.encodings.alphabet_encoding import ACTGEncoding, ACTGArray
 from npstructures import RaggedArray
 import numpy as np
 import pytest
@@ -9,27 +9,27 @@ import pytest
 
 @pytest.fixture
 def sequence():
-    return np.array([0, 3, 1, 2, 2, 1, 0])
+    return np.array([0, 3, 1, 2, 2, 1, 0]).view(ACTGArray)
 
 
 @pytest.fixture
 def sequences():
-    return RaggedArray([[0, 3, 1, 2, 2, 1, 0],
-                        [0, 3, 1, 2, 2, 1],
-                        [0, 3, 1, 2, 2],
-                        [0, 3, 1, 2]])
+    r = RaggedArray([[0, 3, 1, 2, 2, 1, 0],
+                     [0, 3, 1, 2, 2, 1],
+                     [0, 3, 1, 2, 2],
+                     [0, 3, 1, 2]])
+    r._data = r._data.view(ACTGArray)
+    return r
 
 
 @pytest.fixture
 def window():
-    s = np.array([0, 3, 1, 2]).view(Sequence)
-    s.encoding = ACTGEncoding
-    return s
+    return np.array([0, 3, 1, 2]).view(ACTGArray)
 
 
 @pytest.fixture
 def encoding():
-    return Minimizers(3, KmerEncoding(2, alphabet_size=4))
+    return Minimizers(3, KmerEncoding(2, ACTGArray.encoding))
 
 
 def test_window(window, encoding):

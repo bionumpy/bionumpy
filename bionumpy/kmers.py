@@ -10,22 +10,22 @@ logger = logging.getLogger(__name__)
 
 class KmerEncoding(RollableFunction):
 
-    def __init__(self, k, alphabet_encoding=None, alphabet_size=None):
+    def __init__(self, k, alphabet_encoding):
         self.window_size = k
         self._k = k
         self._encoding = alphabet_encoding
-        if alphabet_encoding is not None:
-            alphabet_size = alphabet_encoding.alphabet_size
+        alphabet_size = alphabet_encoding.alphabet_size
         self._alphabet_size = alphabet_size
         self._convolution = self._alphabet_size ** np.arange(self._k)
 
     def __call__(self, sequence: Sequence) -> int:
-        if self._encoding is not None:
-            sequence = as_encoded_sequence_array(sequence, encoding=self._encoding)
-        return sequence.dot(self._convolution)
+        sequence = as_encoded_sequence_array(sequence, encoding=self._encoding)
+        return np.asarray(sequence).dot(self._convolution)
 
     def inverse(self, kmer_hash: int) -> Sequence:
-        return ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(Sequence)
+        s =  ((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size).view(Sequence)
+        s.encoding=self._encoding
+        return s
 
     def sample_domain(self, n):
         s = (np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(

@@ -1,6 +1,6 @@
 import numpy as np
 from .encodings import ACTGEncoding
-from .sequences import as_sequence_array
+from .sequences import as_encoded_sequence_array, as_sequence_array
 from .dna import complement
 from .chromosome_map import ChromosomeMap
 import logging
@@ -18,6 +18,10 @@ class SNPEncoding:
     lookup[ord("G")][[ord(c) for c in "TCA"]] = np.arange(3)
     lookup[ord("T")][[ord(c) for c in "ACG"]] = 3 + np.arange(3)
     lookup[ord("A")][[ord(c) for c in "TGC"]] = 3 + np.arange(3)
+    lookup[ord("c")][[ord(c) for c in "agt"]] = np.arange(3)
+    lookup[ord("g")][[ord(c) for c in "tca"]] = np.arange(3)
+    lookup[ord("t")][[ord(c) for c in "acg"]] = 3 + np.arange(3)
+    lookup[ord("a")][[ord(c) for c in "tgc"]] = 3 + np.arange(3)
 
     text = np.array([f"C>{c}" for c in "AGT"] + [f"T->{c}" for c in "ACG"])
 
@@ -42,7 +46,7 @@ class MutationSignatureEncoding:
         self._encoding = encoding
 
     def encode(self, kmer, snp):
-        kmer = as_sequence_array(kmer, self._encoding)
+        kmer = as_encoded_sequence_array(kmer, self._encoding)
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
         kmer_hashes = np.dot(kmer, self.h)
         snp_hashes = SNPEncoding.encode(snp)
@@ -63,22 +67,16 @@ class MutationSignatureEncoding:
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
-    assert np.all(reference[snps.position] == snps.ref_seq)
+    assert np.all(ACTGEncoding.encode(reference[snps.position]) == ACTGEncoding.encode(snps.ref_seq)), (str(snps[reference[snps.position] != snps.ref_seq]), str(reference))
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
-    forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T"))
+    forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T")) | (snps.ref_seq == ord("c")) | (snps.ref_seq == ord("t"))
     kmers = np.where(
         forward_mask[:, None], kmers, complement(kmers[:, ::-1])
     )
     signature_encoding = MutationSignatureEncoding(flank * 2 + 1)
     all_hashes = signature_encoding.encode(kmers, snps)
     n_hashes = 4 ** (flank * 2) * 6
-
-    # counter = EncodedCounter(signature_encoding)
-    # if not hash(snps, "genotypes"):
-    #     counter.count(all_hashes)
-    # else:
-    #     counter.count(all_hashes, weights=snps.genotypes.T > 0)
 
     if not hasattr(snps, "genotypes"):
         counts = np.bincount(all_hashes, minlength=n_hashes)
