@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Summarization &mdash; bionumpy  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="BAM Handling" href="../tutorials/bam_handling.html" />
+    <link rel="prev" title="Rollable Functions" href="rollable_functions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> bionumpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">What is BioNumPy?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="reading_files.html">Reading files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_big_data.html">Working with big data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html">Currently supported file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broadcastable_functions.html">Broadcastable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rollable_functions.html">Rollable Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Summarization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/bam_handling.html">BAM Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastq_filtering.html">FASTQ filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastqc.html">Simple quality checking of fastq files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">bionumpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Summarization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/summarization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="summarization">
+<h1>Summarization<a class="headerlink" href="#summarization" title="Permalink to this headline">¶</a></h1>
+<p>A key application of BioNumPy is to extract features from sequence data sets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer-&gt;hash-value), minimizers(window-&gt;hash-value), string/motif-matching (sequence-&gt;bool), Position Weight Matrix scores (sequence-&gt;float). BioNumPy provides functionality to apply such functions to rolling windows across large sequence sets, through the <cite>RollableFunction</cite> class. By specifying a broadcastable function in the <cite>__call__</cite> method, the <cite>rolling_window</cite> method will apply the function to all windows in a sequence set. Take the <cite>PositionWeightMatrix</cite> class for instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PositionWeightMatrix</span><span class="p">(</span><span class="n">RollableFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">ACTGEncoding</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="o">=</span> <span class="n">ACTGEncoding</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="n">as_sequence_array</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matrix</span><span class="p">[</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indices</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">scores</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It’s <cite>__call__</cite> method specifies how to calculate the score of a sequence. Calling it’s rolling_window function will calculate the scores for all windows in a data set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sequences</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">as_sequence_array</span><span class="p">([</span><span class="s2">&quot;acgttgta&quot;</span><span class="p">,</span> <span class="s2">&quot;gcttca&quot;</span><span class="p">,</span> <span class="s2">&quot;gttattc&quot;</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="n">bnp</span><span class="o">.</span><span class="n">encodings</span><span class="o">.</span><span class="n">ACTGEncoding</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+<span class="gp">... </span>                 <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pwm</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">position_weight_matrix</span><span class="o">.</span><span class="n">PositionWeightMatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pwm</span><span class="p">(</span><span class="s2">&quot;ac&quot;</span><span class="p">)</span>
+<span class="go">-3.506557897319982</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pwm</span><span class="p">([</span><span class="s2">&quot;ac&quot;</span><span class="p">,</span> <span class="s2">&quot;cg&quot;</span><span class="p">])</span>
+<span class="go">array([-3.5065579 , -2.52572864])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pwm</span><span class="o">.</span><span class="n">rolling_window</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span>
+<span class="go">RaggedArray([[-3.506557897319982, -2.525728644308255, -3.506557897319982, -3.2188758248682006, -1.83258146374831, -3.506557897319982, -2.525728644308255], [-2.4079456086518722, -3.9120230054281455, -3.2188758248682006, -2.120263536200091, -3.2188758248682006], [-3.506557897319982, -3.2188758248682006, -2.525728644308255, -4.605170185988091, -3.2188758248682006, -2.120263536200091]])</span>
+</pre></div>
+</div>
+<p>Further processing can be done with numpy functions, for instance finding the max score for each sequence in the set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pwm</span><span class="o">.</span><span class="n">rolling_window</span><span class="p">(</span><span class="n">sequences</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([-1.83258146, -2.12026354, -2.12026354])</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rollable_functions.html" class="btn btn-neutral float-left" title="Rollable Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorials/bam_handling.html" class="btn btn-neutral float-right" title="BAM Handling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Knut Rand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
