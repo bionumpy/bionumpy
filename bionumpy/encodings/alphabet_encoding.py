@@ -52,5 +52,8 @@ ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
 ACTGArray = get_alphabet_array_class("ACTG")
+DNAArray = ACTGArray
+RNAArray = get_alphabet_array_class("ACUG")
+AminoAcidArray = get_alphabet_array_class('ACDEFGHIKLMNPQRSTVWY')
 BamArray = get_alphabet_array_class("=ACMGRSVTWYHKDBN")
 CigarOpArray = get_alphabet_array_class("MIDNSHP=X")

@@ -10,7 +10,7 @@ We start by importing all we need:
 
     >>> import numpy as np
     >>> import bionumpy as bnp
-    >>> from bionumpy.npdataclassstream import streamable
+    >>> from bionumpy import streamable
     >>> import matplotlib.pyplot as plt
 
 
@@ -18,7 +18,7 @@ We will be using the `big.fq.gz` file in the example_data folder, but feel free 
 
 The first step is to read our data as chunks:
 
-    >>> reads = bnp.open("example_data/big.fq.gz").read_chunks(chunk_size=1000000)
+    >>> reads = bnp.open("example_data/big.fq.gz").read_chunks()
 
 Note that we now only have a generator object that will give us chunks when we start iterating over it. No data has been read yet.
 
@@ -45,7 +45,7 @@ If we want to do this across all all sequence chunks, we can create a function t
     >>> @streamable()
     >>> def get_gc_content(reads):
     >>>     sequences = reads.sequence
-    >>>     mask = (sequences == ord("G")) | (sequences == ord("C"))
+    >>>     mask = (sequences == "G") | (sequences == "C")
     >>>     return np.mean(mask, axis=-1)
 
 We want to create a histogram of the gc-content values from all chunks. We could call get_gc_content on each chunk, add the results to a list and create a histogram from the final list, but BioNumPy also provides a utility function for creating a histogram from the results from multiple chunks:

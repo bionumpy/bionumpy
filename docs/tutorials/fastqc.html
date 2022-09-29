@@ -91,13 +91,13 @@
 <p>We start by importing all we need:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">bionumpy</span> <span class="k">as</span> <span class="nn">bnp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bionumpy.npdataclassstream</span> <span class="k">import</span> <span class="n">streamable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bionumpy</span> <span class="k">import</span> <span class="n">streamable</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 <p>We will be using the <cite>big.fq.gz</cite> file in the example_data folder, but feel free to use any fastq file you like.</p>
 <p>The first step is to read our data as chunks:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reads</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;example_data/big.fq.gz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_chunks</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000000</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reads</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;example_data/big.fq.gz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_chunks</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Note that we now only have a generator object that will give us chunks when we start iterating over it. No data has been read yet.</p>
@@ -117,7 +117,7 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@streamable</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">get_gc_content</span><span class="p">(</span><span class="n">reads</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">sequences</span> <span class="o">=</span> <span class="n">reads</span><span class="o">.</span><span class="n">sequence</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sequences</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;G&quot;</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">sequences</span> <span class="o">==</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sequences</span> <span class="o">==</span> <span class="s2">&quot;G&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">sequences</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
