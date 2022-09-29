@@ -1,5 +1,6 @@
 import numpy as np
-from .base_encoding import BaseEncoding, Encoding
+from ..sequences import create_sequence_array_from_already_encoded_data
+from .base_encoding import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import AlphabetEncoding, ACTGEncoding, AminoAcidEncoding
 from ._legacy_encodings import ACTGTwoBitEncoding
 
@@ -24,7 +25,7 @@ class DigitEncoding(Encoding):
 
     @classmethod
     def encode(cls, bytes_array):
-        return bytes_array - cls.MIN_CODE
+        return np.asarray(bytes_array) - cls.MIN_CODE
 
     @classmethod
     def decode(cls, digits):
@@ -49,13 +50,18 @@ class PhasedGenotypeEncoding:
         ).astype(np.int8)
 
 
-class QualityEncoding(Encoding):
+class QualityEncoding(NumericEncoding):
+
     def encode(byte_array):
+        byte_array = np.asarray(byte_array)
+        assert np.all((byte_array >= ord("!")) & (byte_array < ord("!")+94)), repr(byte_array)
         res = byte_array - ord("!")
-        res.encoding = QualityEncoding
         return res
 
     def decode(quality):
+        assert np.all(quality < 94)
         res = quality.astype(np.uint8) + ord("!")
+        return create_sequence_array_from_already_encoded_data(
+            res, BaseEncoding)
         res.encoding = BaseEncoding
         return res

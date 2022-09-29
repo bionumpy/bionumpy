@@ -1,9 +1,10 @@
 from pathlib import PurePath
 import gzip
 import numpy as np
-
+import dataclasses
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
+from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry
 from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
@@ -26,13 +27,21 @@ class NpDataclassReader:
         return self._reader.read().get_data()
 
     def read_chunk(self, chunk_size=5000000):
-        return self._reader.read_chunk(chunk_size).get_data()
+        chunk = self._reader.read_chunk(chunk_size)
+        if chunk is None:
+            # return an empty dataclass
+            dataclass = self._reader._buffer_type.dataclass
+            return dataclass(*[[] for field in dataclasses.fields(dataclass)])
+
+        return chunk.get_data()
 
     def read_chunks(self, chunk_size=5000000):
-        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)), buffer_type=self._reader._buffer_type)
+        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)),
+                                 dataclass=self._reader._buffer_type.dataclass)
 
     def __iter__(self):
         return self.read_chunks()
+
 
 buffer_types = {
     ".vcf": VCFBuffer,
@@ -45,8 +54,10 @@ buffer_types = {
     ".gff": get_bufferclass_for_datatype(GFFEntry),
     ".gtf": get_bufferclass_for_datatype(GFFEntry),
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
-    ".sam": get_bufferclass_for_datatype(SAMEntry)
+    ".sam": get_bufferclass_for_datatype(SAMEntry, comment="@"),
+    ".bam": BamBuffer
 }
+
 
 def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
@@ -74,7 +85,7 @@ def _get_buffer_type(suffix):
 def bnp_open(filename, mode=None, **kwargs):
     path = PurePath(filename)
     suffix = path.suffixes[-1]
-    is_gzip = suffix == ".gz"
+    is_gzip = suffix in (".gz", ".bam")
     if suffix == ".gz":
         suffix = path.suffixes[-2]
     if suffix == ".fai":

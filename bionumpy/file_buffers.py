@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray
+from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -104,7 +104,7 @@ class FileBuffer:
         array[zeroed] = fill_value
         return array.reshape((-1, max_chars))
 
-    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None):
+    def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
@@ -177,7 +177,7 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
@@ -207,16 +207,13 @@ class TwoLineFastaBuffer(OneLineBuffer):
 
 
 class FastQBuffer(OneLineBuffer):
-    HEADER = 64
+    HEADER = ord("@")
     n_lines_per_entry = 4
-    _encoding = BaseEncoding
     dataclass = SequenceEntryWithQuality
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = QualityEncoding.encode(
-            self.lines[3 :: self.n_lines_per_entry, :-1]
-        )
+        quality = self.lines[3 :: self.n_lines_per_entry, :-1]
         return SequenceEntryWithQuality(seq_entry.name, seq_entry.sequence, quality)
 
     @classmethod
@@ -238,13 +235,13 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = ord("+")
-        lines[3::step, :-1] = QualityEncoding.decode(entries.quality)
+        lines[3::step, :-1] = to_ascii(entries.quality, QualityEncoding)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = ord("\n")
 

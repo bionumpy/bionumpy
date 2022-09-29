@@ -24,8 +24,6 @@ def test_count_overlap(interval_a, interval_b):
 def test_intersect(interval_a, interval_b):
     true = Interval(["chr1"]*3, [10, 22, 30], [15, 28, 35])
     result = intersect(interval_a, interval_b)
-    print(result)
-    print(true)
     assert true == result
 
 
