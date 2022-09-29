@@ -1,0 +1,5 @@
+chr1	knownGene	transcript	17369	17436	.	-	.	gene_id "ENST00000619216.1"; transcript_id "ENST00000619216.1"; 
+chr1	knownGene	exon	17369	17436	.	-	.	gene_id "ENST00000619216.1"; transcript_id "ENST00000619216.1"; exon_number "1"; exon_id "ENST00000619216.1.1";
+chr1	knownGene	transcript	29554	31097	.	+	.	gene_id "ENST00000473358.1"; transcript_id "ENST00000473358.1"; 
+chr1	knownGene	exon	29554	30039	.	+	.	gene_id "ENST00000473358.1"; transcript_id "ENST00000473358.1"; exon_number "1"; exon_id "ENST00000473358.1.1";
+chr1	knownGene	exon	30564	30667	.	+	.	gene_id "ENST00000473358.1"; transcript_id "ENST00000473358.1"; exon_number "2"; exon_id "ENST00000473358.1.2";
