@@ -86,7 +86,7 @@ class GFFEntry:
     feature_type: str
     start: int
     end: int
-    score: None
+    score: str
     strand: str
     phase: int
     atributes: str

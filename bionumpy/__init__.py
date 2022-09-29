@@ -18,7 +18,8 @@ from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .multiline_buffer import MultiLineFastaBuffer
-from .encodings.alphabet_encoding import DNAEncoding, RNAENcoding, AminoAcidEncoding
+from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding,
+                                          DNAArray, RNAArray, AminoAcidArray)
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
