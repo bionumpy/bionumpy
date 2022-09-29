@@ -146,3 +146,8 @@ def test_read_chunk_after_read_chunks_returns_empty_dataclass():
     new_chunk = file.read_chunk()
     assert isinstance(new_chunk, type(chunks[0]))
 
+
+def test_read_gtf():
+    file = bnp.open("example_data/small.gtf")
+    chunk = file.read_chunk()
+    assert True

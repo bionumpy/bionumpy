@@ -16,7 +16,7 @@ def bnpdataclass(base_class):
             elif (isinstance(field.type, type) and issubclass(field.type, (EncodedArray, Encoding))) or isinstance(field.type, Encoding):
                 val = as_encoded_sequence_array(pre_val, field.type)
             else:
-                assert False
+                assert False, field.type
             setattr(obj, field.name, val)
 
     new_class = npdataclass(base_class)
