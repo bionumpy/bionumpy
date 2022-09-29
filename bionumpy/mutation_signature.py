@@ -37,6 +37,7 @@ class SNPEncoding:
     def decode(cls, encoded):
         pass
 
+
 class MutationSignatureEncoding:
     def __init__(self, k, encoding=ACTGEncoding):
         self.k = k
