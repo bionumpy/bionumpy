@@ -2,7 +2,7 @@ from .npdataclassstream import streamable
 from .datatypes import Interval, Bed6, BamEntry
 from .file_buffers import FileBuffer
 from .cigar import count_reference_length, split_cigar, CigarOpArray
-from .datatypes import SAMEntry, StrandedInterval
+from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, npdataclass
 import numpy as np

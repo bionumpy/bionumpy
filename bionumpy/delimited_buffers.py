@@ -283,30 +283,6 @@ class _VCFBuffer(DelimitedBuffer):
         return buf
 
 
-class VCFMatrixBuffer(_VCFBuffer):
-    dataclass = VariantWithGenotypes
-    genotype_encoding = GenotypeEncoding
-
-    def get_entries(self, fixed_length=False):
-        self.validate_if_not()
-        variants = self.get_variants(fixed_length)
-        genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
-        n_samples = self._n_cols - 9
-        genotypes = self.genotype_encoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
-        return VariantWithGenotypes(
-            variants.chromosome,
-            variants.position,
-            variants.ref_seq,
-            variants.alt_seq,
-            genotypes,
-        )
-
-    get_data = get_entries
-
-
-class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
-    genotype_encoding = PhasedGenotypeEncoding
-
 
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
@@ -379,3 +355,27 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
 BedBuffer = get_bufferclass_for_datatype(Interval)
 VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
 
+
+class VCFMatrixBuffer(_VCFBuffer):
+    dataclass = VariantWithGenotypes
+    genotype_encoding = GenotypeEncoding
+
+    def get_entries(self, fixed_length=False):
+        self.validate_if_not()
+        variants = self.get_variants(fixed_length)
+        genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
+        n_samples = self._n_cols - 9
+        genotypes = self.genotype_encoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
+        return VariantWithGenotypes(
+            variants.chromosome,
+            variants.position,
+            variants.ref_seq,
+            variants.alt_seq,
+            genotypes,
+        )
+
+    get_data = get_entries
+
+
+class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
+    genotype_encoding = PhasedGenotypeEncoding

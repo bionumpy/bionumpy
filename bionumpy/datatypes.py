@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 from .encodings import QualityEncoding
 from .encodings.base_encoding import CigarEncoding
 from .encodings.alphabet_encoding import CigarOpArray, BamArray
@@ -36,10 +37,17 @@ class Bed6(Interval):
     score: int
     strand: str
 
-
 @bnpdataclass
-class StrandedInterval(Interval):
-    strand: int
+class Bed12(Interval):
+    name: str
+    score: int
+    strand: str
+    thick_start: int
+    thick_end: int
+    item_rgb: str
+    block_count: int
+    block_sizes: List[int]
+    block_starts: List[int]
 
 
 @bnpdataclass
