@@ -160,7 +160,7 @@ class BedBuffer(DelimitedBuffer):
 
     def get_intervals(self):
         self.validate_if_not()
-        chromosomes = self.get_text(0)
+        chromosomes = self.get_text(0, fixed_length=False)
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
