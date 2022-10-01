@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array
+from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array, ASCIIText
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -26,7 +26,7 @@ class FileBuffer:
     COMMENT = 0
 
     def __init__(self, data, new_lines):
-        self._data = np.asanyarray(data).view(EncodedArray)
+        self._data = np.asanyarray(data).view(ASCIIText)
         self._new_lines = np.asanyarray(new_lines)
         self._is_validated = False
         self.size = self._data.size
@@ -157,7 +157,7 @@ class OneLineBuffer(FileBuffer):
         indices, shape = RaggedView(sequence_starts, sequence_lens).get_flat_indices()
         m = indices.size
         d = m % self._buffer_divisor
-        seq = np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype).view(EncodedArray)
+        seq = np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype).view(ASCIIText)
         seq[:m] = self._data[indices]
         return RaggedArray(seq, shape)
 
@@ -177,15 +177,15 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(ASCIIText)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
 
-        lines[0::step, 0] = ord(">")
+        lines[0::step, 0] = ">"
 
-        lines[:, -1] = ord("\n")
+        lines[:, -1] = "\n"
         return buf
 
     def _validate(self):
@@ -207,7 +207,7 @@ class TwoLineFastaBuffer(OneLineBuffer):
 
 
 class FastQBuffer(OneLineBuffer):
-    HEADER = ord("@")
+    HEADER = "@"
     n_lines_per_entry = 4
     dataclass = SequenceEntryWithQuality
 
@@ -235,14 +235,14 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(EncodedArray)
+        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(ASCIIText)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
-        lines[2::step, 0] = ord("+")
+        lines[2::step, 0] = "+"
         lines[3::step, :-1] = to_ascii(entries.quality, QualityEncoding)
         lines[0::step, 0] = cls.HEADER
-        lines[:, -1] = ord("\n")
+        lines[:, -1] = "\n"
 
         return buf

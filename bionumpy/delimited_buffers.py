@@ -2,8 +2,9 @@ import itertools
 import logging
 from npstructures import RaggedArray, RaggedView
 from .file_buffers import FileBuffer, NEWLINE
+from .strops import ints_to_strings
 from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
-from .sequences import Sequence
+from .sequences import Sequence, Sequences, ASCIIText
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 import numpy as np
@@ -124,7 +125,7 @@ class DelimitedBuffer(FileBuffer):
 
     def _extract_integers(self, integer_starts, integer_ends):
         digit_chars = self._move_intervals_to_2d_array(
-            integer_starts, integer_ends, DigitEncoding.MIN_CODE
+            integer_starts, integer_ends, "0" # DigitEncoding.MIN_CODE
         )
         n_digits = digit_chars.shape[-1]
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
@@ -154,6 +155,25 @@ class DelimitedBuffer(FileBuffer):
         assert np.all(chunk[delimiters[:, -1]] == NEWLINE)
         self._validated = True
 
+    @classmethod
+    def from_data(cls, data):
+        funcs = {int: ints_to_strings,
+                 str: lambda x: x}
+        columns = [funcs[field.type](getattr(data, field.name))
+                   for field in dataclasses.fields(data)]
+        for column in columns:
+            print(column)
+        lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
+                                  for column in columns], axis=-1).ravel()
+        lines = Sequences(np.empty(lengths.sum(), dtype=np.uint8).view(ASCIIText),
+                          lengths)
+        n_columns = len(columns)
+        for i, column in enumerate(columns):
+            lines[i::n_columns, :-1] = column
+        lines[:, -1] = "\t"
+        lines[(n_columns-1)::n_columns, -1] = "\n"
+        return lines.ravel()
+
 
 class BedBuffer(DelimitedBuffer):
     dataclass = Interval
@@ -164,9 +184,8 @@ class BedBuffer(DelimitedBuffer):
         positions = self.get_integers(cols=[1, 2])
         return Interval(chromosomes, positions[..., 0], positions[..., 1])
 
-
     @classmethod
-    def from_data(cls, data):
+    def _from_data(cls, data):
         start_lens = np.log10(data.start).astype(int)+1
         end_lens = np.log10(data.end).astype(int)+1
         chromosome_lens = data.chromosome.shape.lengths

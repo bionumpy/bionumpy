@@ -97,7 +97,7 @@ class NumpyFileReader:
             chunk = np.append(chunk, np.uint8(ord("\n")))
             bytes_read += 1
         if hasattr(self._buffer_type, "_new_entry_marker"):
-            chunk = np.append(chunk, np.uint8(self._buffer_type._new_entry_marker))
+            chunk = np.append(chunk, np.uint8(ord(self._buffer_type._new_entry_marker)))
             bytes_read += 1
         return chunk, bytes_read
 

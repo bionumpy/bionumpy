@@ -1,5 +1,5 @@
 import numpy as np
-from ..sequences import create_sequence_array_from_already_encoded_data
+from ..sequences import create_sequence_array_from_already_encoded_data, ASCIIText
 from .base_encoding import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import AlphabetEncoding, ACTGEncoding, AminoAcidEncoding
 from ._legacy_encodings import ACTGTwoBitEncoding
@@ -61,7 +61,5 @@ class QualityEncoding(NumericEncoding):
     def decode(quality):
         assert np.all(quality < 94)
         res = quality.astype(np.uint8) + ord("!")
-        return create_sequence_array_from_already_encoded_data(
-            res, BaseEncoding)
-        res.encoding = BaseEncoding
-        return res
+        return create_sequence_array_from_already_encoded_data(res, ASCIIText)
+

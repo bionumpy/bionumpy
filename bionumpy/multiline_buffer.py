@@ -1,17 +1,19 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
-from .sequences import EncodedArray
+from .sequences import EncodedArray, ASCIIText
 from .datatypes import SequenceEntry
 import numpy as np
+
 
 class MultiLineBuffer(FileBuffer):
     pass
 
 
 class MultiLineFastaBuffer(MultiLineBuffer):
-    _new_entry_marker = ord(">")
-    n_characters_per_line=80
+    _new_entry_marker = ">"
+    n_characters_per_line = 80
     dataclass = SequenceEntry
+
     def __init__(self, data, new_lines, new_entries):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
@@ -50,14 +52,15 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
         lines[idxs,:-1] = RaggedArray(entries.sequence.ravel(), line_lengths[idxs]-1)
-        lines[:, -1] = NEWLINE
+        lines[:, -1] = "\n"
         return lines.ravel()
         
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
         assert header_data is None, header_data
-        assert chunk[0] == cls._new_entry_marker,chunk[:100]
-        new_lines = np.flatnonzero(chunk[:-1] == NEWLINE)
+        chunk = chunk.view(ASCIIText)
+        assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
+        new_lines = np.flatnonzero(chunk[:-1] == "\n")
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
         entry_starts = new_lines[new_entries]+1
         cut_chunk = chunk[:entry_starts[-1]]
