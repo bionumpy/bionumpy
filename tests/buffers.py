@@ -39,7 +39,7 @@ TTT
     , "bed": """\
 chr1\t1\t3\t.\t.\t-
 chr1\t40\t60\t.\t.\t+
-chr2\t400\t600\t.\t.\t+
+chr20\t400\t600\t.\t.\t+
 """
     , "vcf": """\
 chr1	88362	rs4970378	A	G
@@ -79,7 +79,7 @@ data = {
     "bed": [
         Interval.single_entry("chr1", 1, 3),
         Interval.single_entry("chr1", 40, 60),
-        Interval.single_entry("chr2",  400, 600)],
+        Interval.single_entry("chr20",  400, 600)],
     "vcf2": [
         SNP.single_entry("chr1",	88361,	"A",	"G"),
         SNP.single_entry("chr1",	887559,	"A",	"CAA"),
