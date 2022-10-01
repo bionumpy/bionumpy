@@ -7,6 +7,7 @@ from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
 from .sequences import Sequence, Sequences, ASCIIText
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
+from .encodings.alphabet_encoding import DigitArray
 import numpy as np
 
 
@@ -18,8 +19,8 @@ class DelimitedBuffer(FileBuffer):
     and text from columns into Sequences objects
     """
 
-    DELIMITER = ord("\t")
-    COMMENT = ord("#")
+    DELIMITER = "\t"
+    COMMENT = "#"
 
     def __init__(self, data, new_lines, delimiters=None, header_data=None):
         super().__init__(data, new_lines)
@@ -33,10 +34,11 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
+        chunk = chunk.view(ASCIIText)
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
-        n_fields = next((i+1 for i, v in enumerate(delimiters) if chunk[v] == NEWLINE), None)
+        n_fields = next((i+1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
         if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise
@@ -135,7 +137,7 @@ class DelimitedBuffer(FileBuffer):
     def _move_ints_to_digit_array(ints, n_digits):
         powers = np.uint8(10)**np.arange(n_digits)[::-1]
         ret = (ints[..., None]//powers) % 10
-        return ret + ord("0")
+        return ret.view(DigitArray)
 
     def _validate(self):
         chunk = self._data
@@ -271,13 +273,13 @@ class VCFBuffer(DelimitedBuffer):
         alt_indices = lines.shape.starts+chromosome_lens+1+position_lens+2+1+ref_lens+1
         buf[ref_indices] = data.ref_seq.ravel()
         buf[alt_indices] = data.alt_seq.ravel()
-        buf[lines.shape.starts+chromosome_lens] = ord("\t")
-        buf[lines.shape.starts+chromosome_lens+1+position_lens] = ord("\t")
-        buf[lines.shape.starts+chromosome_lens+1+position_lens+1] = ord(".")
-        buf[lines.shape.starts+chromosome_lens+1+position_lens+2] = ord("\t")
-        buf[lines.shape.starts+chromosome_lens+1+position_lens+2+1+ref_lens] = ord("\t")
+        buf[lines.shape.starts+chromosome_lens] = "\t"
+        buf[lines.shape.starts+chromosome_lens+1+position_lens] = "\t"
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+1] = "."
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+2] = "\t"
+        buf[lines.shape.starts+chromosome_lens+1+position_lens+2+1+ref_lens] = "\t"
         # buf[line_ends-(end_lens+2)] = ord("\t")
-        buf[line_ends-1] = ord("\n")
+        buf[line_ends-1] = "\n"
         return buf
 
 
@@ -324,8 +326,8 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
     """
 
     class DatatypeBuffer(DelimitedBuffer):
-        DELIMITER = ord(delimiter)
-        COMMENT = ord(comment)
+        DELIMITER = delimiter
+        COMMENT = comment
         dataclass = _dataclass
         fields = None
 
@@ -337,7 +339,10 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
         def read_header(cls, file_object):
             if not has_header:
                 return None
-            return file_object.readline().decode('ascii').strip().split(chr(cls.DELIMITER))
+            delimiter = cls.DELIMITER
+            if not isinstance(delimiter, str):
+                delimiter = chr(delimiter)
+            return file_object.readline().decode('ascii').strip().split(delimiter)
 
         def set_fields_from_header(self, columns):
             if not has_header:
