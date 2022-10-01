@@ -127,8 +127,11 @@ class NumpyFileReader:
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
             return
+        comment = self._buffer_type.COMMENT
+        if isinstance(comment, str):
+            comment = ord(comment)
         for line in self._file_obj:
-            if line[0] != self._buffer_type.COMMENT:
+            if line[0] != comment:
                 self._file_obj.seek(-len(line), 1)
                 break
 

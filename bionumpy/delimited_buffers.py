@@ -1,8 +1,9 @@
 import logging
 from npstructures import RaggedArray, RaggedView
+from typing import List
 from .file_buffers import FileBuffer, NEWLINE
-from .strops import ints_to_strings
-from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry, VCFEntry
+from .strops import ints_to_strings, split, str_to_int
+from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry, VCFEntry, Bed12
 from .sequences import Sequence, Sequences, ASCIIText
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
@@ -154,7 +155,7 @@ class DelimitedBuffer(FileBuffer):
             delimiters.size % n_delimiters_per_line == 0
         ), f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})"
         delimiters = delimiters.reshape(-1, n_delimiters_per_line)
-        assert np.all(chunk[delimiters[:, -1]] == NEWLINE)
+        assert np.all(chunk[delimiters[:, -1]] == NEWLINE), chunk
         self._validated = True
 
     @classmethod
@@ -176,6 +177,14 @@ class DelimitedBuffer(FileBuffer):
         lines[(n_columns-1)::n_columns, -1] = "\n"
         return lines.ravel()
 
+    def get_split_ints(self, col, sep=","):
+        self.validate_if_not()
+        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
+        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + 1
+        text = self._move_intervals_to_ragged_array(starts, ends)
+        text[:, -1] = ","
+        int_strings = split(text.ravel()[:-1], sep=sep)
+        return str_to_int(int_strings)
 
 class _BedBuffer(DelimitedBuffer):
     dataclass = Interval
@@ -340,6 +349,8 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
                     col = self.get_integers(col_number).ravel()
                 elif field.type == -1:
                     col = self.get_integers(col_number).ravel()-1
+                elif field.type == List[int]:
+                    col = self.get_split_ints(col_number)
                 else:
                     assert False, field
                 columns[field.name] = col
@@ -353,6 +364,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
 
 
 BedBuffer = get_bufferclass_for_datatype(Interval)
+Bed12Buffer = get_bufferclass_for_datatype(Bed12)
 VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
 
 

@@ -1,5 +1,7 @@
 import dataclasses
+from typing import List
 from npstructures.npdataclasses import npdataclass
+from npstructures import RaggedArray
 import numpy as np
 from .sequences import as_sequence_array, as_encoded_sequence_array, EncodedArray
 from .encodings import Encoding
@@ -15,6 +17,8 @@ def bnpdataclass(base_class):
                 val = as_sequence_array(pre_val)
             elif (isinstance(field.type, type) and issubclass(field.type, (EncodedArray, Encoding))) or isinstance(field.type, Encoding):
                 val = as_encoded_sequence_array(pre_val, field.type)
+            elif field.type == List[int]:
+                val = RaggedArray(pre_val) if not isinstance(pre_val, RaggedArray) else pre_val
             else:
                 assert False
             setattr(obj, field.name, val)

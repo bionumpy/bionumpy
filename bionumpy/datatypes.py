@@ -37,11 +37,9 @@ class Bed6(Interval):
     score: int
     strand: str
 
+
 @bnpdataclass
-class Bed12(Interval):
-    name: str
-    score: int
-    strand: str
+class Bed12(Bed6):
     thick_start: int
     thick_end: int
     item_rgb: str
