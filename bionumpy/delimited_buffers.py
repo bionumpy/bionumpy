@@ -1,13 +1,13 @@
-import itertools
 import logging
 from npstructures import RaggedArray, RaggedView
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings
-from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry
+from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry, VCFEntry
 from .sequences import Sequence, Sequences, ASCIIText
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 from .encodings.alphabet_encoding import DigitArray
+
 import numpy as np
 
 
@@ -177,7 +177,7 @@ class DelimitedBuffer(FileBuffer):
         return lines.ravel()
 
 
-class BedBuffer(DelimitedBuffer):
+class _BedBuffer(DelimitedBuffer):
     dataclass = Interval
 
     def get_intervals(self):
@@ -215,7 +215,7 @@ class BedBuffer(DelimitedBuffer):
     get_data = get_intervals
 
 
-class VCFBuffer(DelimitedBuffer):
+class _VCFBuffer(DelimitedBuffer):
     dataclass = Variant
 
     def get_variants(self, fixed_length=False) -> Variant:
@@ -283,7 +283,7 @@ class VCFBuffer(DelimitedBuffer):
         return buf
 
 
-class VCFMatrixBuffer(VCFBuffer):
+class VCFMatrixBuffer(_VCFBuffer):
     dataclass = VariantWithGenotypes
     genotype_encoding = GenotypeEncoding
 
@@ -361,7 +361,9 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
                 elif field.type == str:
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
-                    col = self.get_integers(col_number)
+                    col = self.get_integers(col_number).ravel()
+                elif field.type == -1:
+                    col = self.get_integers(col_number).ravel()-1
                 else:
                     assert False, field
                 columns[field.name] = col
@@ -372,3 +374,8 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
     DatatypeBuffer.__name__ = _dataclass.__name__+"Buffer"
     DatatypeBuffer.__qualname__ = _dataclass.__qualname__+"Buffer"
     return DatatypeBuffer
+
+
+BedBuffer = get_bufferclass_for_datatype(Interval)
+VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
+

@@ -9,7 +9,7 @@ def bnpdataclass(base_class):
     def _implicit_format_conversion(cls, obj):
         for field in dataclasses.fields(obj):
             pre_val = getattr(obj, field.name)
-            if field.type in (int, float):
+            if field.type in (int, float, -1):
                 val = np.asanyarray(pre_val)
             elif field.type == str:
                 val = as_sequence_array(pre_val)

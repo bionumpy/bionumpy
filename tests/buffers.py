@@ -1,6 +1,6 @@
 import pytest
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer
 from bionumpy.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.sequences import EncodedArray
@@ -81,13 +81,13 @@ data = {
         Interval.single_entry("chr1", 40, 60),
         Interval.single_entry("chr20",  400, 600)],
     "vcf2": [
-        SNP.single_entry("chr1",	88361,	"A",	"G"),
-        SNP.single_entry("chr1",	887559,	"A",	"CAA"),
-        SNP.single_entry("chr2",	8877,	"AGG",	"C")],
+        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G"),
+        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"CAA"),
+        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"AGG",	"C")],
     "vcf": [
-        SNP.single_entry("chr1",	88361,	"A",	"G"),
-        SNP.single_entry("chr1",	887559,	"A",	"C"),
-        SNP.single_entry("chr2",	8877,	"A",	"G")],
+        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G"),
+        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"C"),
+        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"A",	"G")],
     "fastq": [
         SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", "".join("!" for _ in "CTTGTTGA")),
         SequenceEntryWithQuality.single_entry("anotherheader", "CGG", "".join("~" for _ in "CGG"))],

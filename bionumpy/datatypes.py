@@ -51,6 +51,18 @@ class Variant:
 
 
 @bnpdataclass
+class VCFEntry:
+    chromsome: str
+    position: int(-1)
+    id: str
+    ref_seq: str
+    alt_seq: str
+    # quality: int
+    # filter: str
+    # info: str
+
+
+@bnpdataclass
 class VariantWithGenotypes(Variant):
     genotypes: int
 
