@@ -3,6 +3,7 @@ from .bnpdataclass import bnpdataclass
 from .strops import str_equal, split
 from . import streamable
 
+
 @bnpdataclass
 class GFFGeneEntry(GFFEntry):
     gene_id: str
