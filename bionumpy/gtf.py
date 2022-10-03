@@ -42,6 +42,7 @@ def get_transcripts(gtf_entries):
     attributes = get_attributes(genes, ["transcript_id", "gene_id"])
     return GFFTranscriptEntry(*genes.shallow_tuple(), **attributes)
 
+
 def get_exons(gtf_entries):
     genes = gtf_entries[str_equal(gtf_entries.feature_type, "exon")]
     attributes = get_attributes(genes, ["transcript_id", "gene_id", "exon_id"])
