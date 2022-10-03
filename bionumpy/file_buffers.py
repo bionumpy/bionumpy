@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array, ASCIIText
+from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array, ASCIIText, Sequences
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -108,7 +108,7 @@ class FileBuffer:
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return RaggedArray(self._data[indices], shape)
+        return Sequences(self._data[indices], shape)
 
     def _move_2d_array_to_intervals(self, array, starts, ends):
         n_chars = ends - starts
