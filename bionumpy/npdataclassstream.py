@@ -1,6 +1,8 @@
 import numpy as np
 from functools import reduce
 import dataclasses
+import logging
+logger = logging.getLogger("streamable")
 
 
 class BnpStream:
@@ -95,13 +97,20 @@ class streamable:
             yield new_args
 
     def __call__(self, func):
+
+        def log(sequence):
+            for i, args in enumerate(sequence):
+                logger.info(f"Running {func.__name__} on chunk {i}")
+                yield args
+
         def new_func(*args, **kwargs):
+
             stream_args = [i for i, arg in enumerate(args) if isinstance(arg, BnpStream)]
             if len(stream_args) == 0:
                 return func(*args, **kwargs)
 
-            args_stream = self._args_stream(args, stream_args)
-
+            args_stream = log(self._args_stream(args, stream_args))
+            
             stream = (func(*new_args, **kwargs) for new_args in args_stream)
             if self._reduction is None:
                 return BnpStream(stream)
