@@ -30,12 +30,36 @@ def get_pileup(intervals, size):
     values[0] = 0
     np.cumsum(values, out=values)
     positions = positions[args]
-    intervals = np.lib.stride_tricks.sliding_window_view(positions, 2)
-    mask = np.flatnonzero(intervals[:, 0] == intervals[:, 1])
-    intervals = np.delete(intervals, mask, axis=0)
+    mask = np.flatnonzero(positions[1:] == positions[:-1])
+    positions = np.delete(positions, mask)
     values = np.delete(values, mask)
-    mask = np.flatnonzero(values[1:] == values[:-1])
+    assert positions[-1] == size, (positions[-10:], size)
+    return RunLengthArray(positions, values[:-1])
+
+
+def memory_efficient_pileup(intervals, size):
+    end_positions = np.sort(intervals.end, kind="mergesort")
+    corresponding_start = np.searchsorted(intervals.start, end_positions)
+
+
+    positions = np.concatenate(([0], intervals.start,
+                                intervals.end, [size]))
+    args = np.argsort(positions, kind="mergesort")
+    values = np.where(args >= (len(intervals)+1), -1, 1)
+    values[0] = 0
+    np.cumsum(values, out=values)
+    positions = positions[args]
+    mask = np.flatnonzero(positions[1:] == positions[:-1])
+    positions = np.delete(positions, mask)
     values = np.delete(values, mask)
-    starts = np.delete(intervals[:, 0], mask+1)
-    ends = np.delete(intervals[:, 1], mask)
-    return RunLengthArray(np.append(starts, ends[-1]), values[:-1])
+
+    #intervals = np.lib.stride_tricks.sliding_window_view(positions, 2)
+    #mask = np.flatnonzero(intervals[:, 0] == intervals[:, 1])
+    # intervals = np.delete(intervals, mask, axis=0)
+    # values = np.delete(values, mask)
+    #mask = np.flatnonzero(values[1:] == values[:-1])
+    #values = np.delete(values, mask)
+    #starts = np.delete(intervals[:, 0], mask+1)
+    #ends = np.delete(intervals[:, 1], mask)
+    assert positions[-1] == size, (positions[-10:], size)
+    return RunLengthArray(positions, values[:-1])

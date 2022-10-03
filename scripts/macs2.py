@@ -4,10 +4,14 @@ from bionumpy.groupby import groupby
 from bionumpy.intervals import sort_intervals
 from bionumpy.bedgraph import value_hist, get_pileup
 from scipy.stats import poisson
+from scipy.special import pdtrc
+from bionumpy.parser import chunk_lines
 import matplotlib.pyplot as plt
 import bionumpy as bnp
 import numpy as np
+import logging
 
+logging.basicConfig(level=logging.INFO)
 # Extend the intervals to be size 150. Starts should
 
 
@@ -25,9 +29,10 @@ def extend_to_size(intervals, fragment_length, size):
 
 
 def get_fragment_pileup(reads, fragment_length, size):
+    logging.info("Getting fragment pileup")
     fragments = extend_to_size(reads, fragment_length, size)
     print(fragments)
-    fragments = fragments[np.argsort(fragments.start)]
+    fragments = fragments[np.argsort(fragments.start, kind="mergesort")]
     return get_pileup(fragments, size)
 
 
@@ -38,25 +43,30 @@ def get_control_pileup(reads, window_sizes, n_reads, size):
         start = np.maximum(mid_points-window_size//2, 0)
         end = np.maximum(mid_points+window_size//2, size)
         windows = dataclasses.replace(reads, start=start, end=end)
-        pileup = np.maximum(pileup, get_pileup(windows, size)/window_size)
+        pileup = np.maximum(get_pileup(windows, size)/window_size, pileup)
     return pileup
 
 
-def call_peaks(treatment_filename, control_filename, fragment_length):
-    reads = bnp.open(treatment_filename).read_chunks()
-    fragment_pileup = get_fragment_pileup(reads, fragment_length)
-    hist = value_hist(fragment_pileup)
+def logsf(count, mu):
+    return np.log(pdtrc(count, mu))
 
 
-all_reads = bnp.open("/home/knut/Data/ENCFF296OGN.bam").read_chunks()
-grouped = groupby(all_reads, "chromosome")
-chrom, reads = next(iter(grouped))
-# chrom, reads = next(all_reads)
+def get_p_values(intervals, fragment_length, chrom_size):
+    intervals.strand = intervals.strand.ravel()
+    fragment_pileup = get_fragment_pileup(intervals, fragment_length, chrom_size)
+    plt.plot(fragment_pileup.starts, fragment_pileup.values)
+    plt.show()
+    control = fragment_length*get_control_pileup(intervals, [1000, 10000], len(intervals), chrom_size)
+    plt.plot(control.starts, control.values); plt.show()
+    logging.info("Getting sf values")
+    p_values = logsf(fragment_pileup, control)
+    plt.plot(p_values.starts, p_values.values); plt.show()
+
+
+reads = bnp.open("/home/knut/Data/ENCFF296OGN.bam").read_chunks()
 intervals = alignment_to_interval(reads)
-intervals.strand = intervals.strand.ravel()
-print(intervals)
-fragment_pileup = get_fragment_pileup(intervals, 300, 15072421)
-plt.plot(fragment_pileup.starts, fragment_pileup.values)
-plt.show()
-control = get_control_pileup(intervals, [1000, 10000], len(intervals), 15072421)
-plt.plot(control.starts, control.values);plt.show()
+first_chunk = next(chunk_lines(iter(intervals), 1000000))
+#grouped = groupby(intervals, "chromosome")
+#chrom, first_chunk = next(iter(grouped))
+chrom_size = 248956422
+get_p_values(first_chunk, 300, chrom_size)
