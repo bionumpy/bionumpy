@@ -11,6 +11,7 @@ from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
+# from .gzip import gzip
 
 
 class NpDataclassReader:
@@ -70,6 +71,8 @@ def _get_buffered_file(
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    if is_gzip:
+        file_reader.set_prepend_mode()
     return NpDataclassReader(file_reader)
 
 

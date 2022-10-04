@@ -55,7 +55,8 @@ class NumpyFileReader:
         self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
-
+        self._do_prepend = False
+        self._prepend = []
 
     def __enter__(self):
         return self
@@ -65,6 +66,9 @@ class NumpyFileReader:
 
     def __iter__(self):
         return self.read_chunks()
+
+    def set_prepend_mode(self):
+        self._do_prepend = True
 
     def read(self):
         # self._remove_initial_comments()
@@ -77,12 +81,17 @@ class NumpyFileReader:
         chunk = self.__get_buffer(chunk_size)
         if chunk is None:
             return None
+        if len(self._prepend):
+            chunk = np.concatenate((self._prepend, chunk))
+            self._prepend = []
 
         self._total_bytes_read += chunk.size
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
         if not self._is_finished:
-            self._file_obj.seek(buff.size - chunk_size, 1)
-
+            if not self._do_prepend:
+                self._file_obj.seek(buff.size - chunk.size, 1)
+            else:
+                self._prepend = chunk[buff.size:]
         if chunk is not None and chunk.size:
             return wrapper(buff)
 

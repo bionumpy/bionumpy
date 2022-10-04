@@ -1,3 +1,4 @@
+from itertools import accumulate, repeat, takewhile
 from .npdataclassstream import streamable
 from .datatypes import Interval, Bed6, BamEntry
 from .file_buffers import FileBuffer
@@ -55,15 +56,32 @@ class BamBuffer(FileBuffer):
             info.append((name, sequence_length))
         return info
 
-    @classmethod
-    def from_raw_buffer(cls, chunk, header_data):
-        chunk = np.asarray(chunk)
+    @staticmethod
+    def _find_starts(chunk):
+        new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
+        _starts = accumulate(repeat(None), new_start, initial=0)
+        starts = list(takewhile(lambda start: start <= chunk.size, _starts))
+        return starts
+
         starts = [0]
         while (starts[-1]+3) < chunk.size-1:
-            line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
+            # line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
+            line_size = int.from_bytes(chunk[starts[-1]:starts[-1]+4], byteorder="little")
             starts.append(starts[-1]+line_size+4)
         if starts[-1] > chunk.size:
             starts.pop()
+        return starts
+
+    @classmethod
+    def from_raw_buffer(cls, chunk, header_data):
+        chunk = np.asarray(chunk)
+        starts = cls._find_starts(chunk)
+        # starts = [0]
+        # while (starts[-1]+3) < chunk.size-1:
+        #     line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
+        #     starts.append(starts[-1]+line_size+4)
+        # if starts[-1] > chunk.size:
+        #     starts.pop()
         return cls(chunk[:starts[-1]], starts[:-1], header_data)
 
     def _get_ints(self, offsets, n_bytes, dtype):
