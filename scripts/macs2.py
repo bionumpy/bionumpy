@@ -1,5 +1,5 @@
 import dataclasses
-from bionumpy.bam import alignment_to_interval
+from bionumpy.bam import alignment_to_interval, BamIntervalBuffer
 from bionumpy.groupby import groupby
 from bionumpy.intervals import sort_intervals
 from bionumpy.bedgraph import value_hist, get_pileup
@@ -62,10 +62,10 @@ def get_p_values(intervals, fragment_length, chrom_size):
 
 
 #intervals = bnp.open("/home/knut/Data/ENCFF296OGN.bed", buffer_type=Bed6Buffer).read_chunks()
-reads = bnp.open("/home/knut/Data/ENCFF296OGN.bam").read_chunks(chunk_size=524288)
-intervals = alignment_to_interval(reads)
-first_chunk = next(chunk_lines(iter(intervals), 10000000))
-#grouped = groupby(intervals, "chromosome")
-#chrom, first_chunk = next(iter(grouped))
+intervals = bnp.open("/home/knut/Data/ENCFF296OGN.bam", buffer_type=BamIntervalBuffer).read_chunks(chunk_size=524288*32)
+# intervals = alignment_to_interval(reads)
+# first_chunk = next(chunk_lines(iter(intervals), 10000000))
+grouped = groupby(intervals, "chromosome")
+chrom, first_chunk = next(iter(grouped))
 chrom_size = 248956422
 get_p_values(first_chunk, 300, chrom_size)
