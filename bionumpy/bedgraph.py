@@ -38,7 +38,13 @@ def get_pileup(intervals, size):
 
 
 def memory_efficient_pileup(intervals, size):
-    end_positions = np.sort(intervals.end, kind="mergesort")
+    intervals.end.sort(kind="mergesort")
+    intervals.start.sort(kind="mergesort")
+    end_idxs_in_start = np.searchsorted(intervals.start, intervals.end[:-1], side="right")-1
+    start_idxs_in_end = np.searchsorted(intervals.end, intervals.start[1:], side="right")-1
+    indices = np.arange(len(intervals))
+    end_values = end_idxs_in_start-indices
+    start_values = start_idxs_in_end-indices
     corresponding_start = np.searchsorted(intervals.start, end_positions)
 
 
