@@ -11,6 +11,7 @@ from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
+# from .gzip import gzip
 
 
 class NpDataclassReader:
@@ -70,6 +71,8 @@ def _get_buffered_file(
 
     kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    if is_gzip:
+        file_reader.set_prepend_mode()
     return NpDataclassReader(file_reader)
 
 
@@ -92,3 +95,18 @@ def bnp_open(filename, mode=None, **kwargs):
         assert mode not in ("w", "write", "wb")
         return IndexedFasta(filename[:-4], **kwargs)
     return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
+
+
+def count_entries(filename, buffer_type=None):
+    path = PurePath(filename)
+    suffix = path.suffixes[-1]
+    is_gzip = suffix in (".gz", ".bam")
+    if suffix == ".gz":
+        suffix = path.suffixes[-2]
+    open_func = gzip.open if is_gzip else open
+    if buffer_type is None:
+        buffer_type = _get_buffer_type(suffix)
+
+    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type)
+    chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks())
+    return sum(chunk_counts)

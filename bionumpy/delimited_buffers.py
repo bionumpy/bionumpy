@@ -3,7 +3,8 @@ from npstructures import RaggedArray, RaggedView
 from typing import List
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int
-from .datatypes import Interval, Variant, VariantWithGenotypes, SequenceEntry, VCFEntry, Bed12
+from .datatypes import (Interval, Variant, VariantWithGenotypes,
+                        SequenceEntry, VCFEntry, Bed12, Bed6)
 from .sequences import Sequence, Sequences, ASCIIText
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
@@ -188,6 +189,10 @@ class DelimitedBuffer(FileBuffer):
         int_strings = split(text.ravel()[:-1], sep=sep)
         return str_to_int(int_strings)
 
+    def count_entries(self):
+        return len(self._new_lines)
+
+
 class _BedBuffer(DelimitedBuffer):
     dataclass = Interval
 
@@ -367,6 +372,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
 
 BedBuffer = get_bufferclass_for_datatype(Interval)
 Bed12Buffer = get_bufferclass_for_datatype(Bed12)
+Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
 
 

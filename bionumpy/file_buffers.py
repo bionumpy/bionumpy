@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import EncodedArray, to_ascii, as_encoded_sequence_array, ASCIIText, Sequences
+from .sequences import to_ascii, ASCIIText
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
@@ -169,6 +169,9 @@ class OneLineBuffer(FileBuffer):
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
+
+    def count_entries(self):
+        return len(self._new_lines)//self.n_lines_per_entry
 
     @classmethod
     def from_data(cls, entries):
