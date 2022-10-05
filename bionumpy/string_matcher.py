@@ -13,7 +13,7 @@ from npstructures import RaggedArray
 class StringMatcher(RollableFunction):
     def __init__(self, matching_sequence, encoding):
         self._encoding = encoding
-        self._matching_sequence_array = as_sequence_array(matching_sequence, encoding=encoding)
+        self._matching_sequence_array = as_encoded_sequence_array(matching_sequence, encoding=encoding)
 
     @property
     def window_size(self):
@@ -45,7 +45,7 @@ class RegexMatcher(RollableFunction):
     def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_sequence_array(_sequence, encoding=self._encoding)
+                _sequence = as_encoded_sequence_array(_sequence, encoding=self._encoding)
             else:
                 _sequence = RaggedArray(_sequence)
 
