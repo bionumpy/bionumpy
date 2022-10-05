@@ -1,13 +1,16 @@
 import re
 
 from npstructures import RaggedArray
-from bionumpy.string_matcher import RegexMatcher, FixedLenRegexMatcher
+from bionumpy.string_matcher import RegexMatcher, FixedLenRegexMatcher, StringMatcher
 import bionumpy as bnp
 
 
 def test_plain_string_matching():
     # Would probably reuse code for checking matches, but have different given, and different matcher class
-    pass
+    matcher = StringMatcher('V1-1', encoding=bnp.encodings.BaseEncoding)
+    seq_array = bnp.as_encoded_sequence_array(['V1-1', 'V2-1', 'V1-1*2'], encoding=bnp.encodings.BaseEncoding)
+    matches = matcher.rolling_window(seq_array)
+    assert matches == RaggedArray([[True], [False], [True, False, False]])
 
 
 def test_fixedlen_regex_matching():
