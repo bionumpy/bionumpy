@@ -16,6 +16,11 @@ logging.basicConfig(level=logging.INFO)
 # Extend the intervals to be size 150. Starts should
 
 
+@dataclasses.dataclass
+class Params:
+    fragment_length: int = 150
+    p_value_cufoff: float = 0.001
+
 def extend_to_size(intervals, fragment_length, size):
     is_forward = intervals.strand == "+"
     start = np.where(is_forward, intervals.start, np.maximum(intervals.end-fragment_length, 0))
@@ -34,18 +39,14 @@ def get_fragment_pileup(reads, fragment_length, size):
     return get_pileup(fragments, size)
 
 
-def get_control_pileup(reads, window_sizes, n_reads, size):
+def get_control_pileup(reads, size, window_sizes, read_rate):
     mid_points = (reads.start+reads.end)//2
-    pileup = n_reads/size
+    pileup = read_rate
     for window_size in window_sizes:
         start = np.maximum(mid_points-window_size//2, 0)
         end = np.minimum(mid_points+window_size//2, size)
         windows = dataclasses.replace(reads, start=start, end=end)
-        new_pileup= get_pileup(windows, size)
-        print(np.mean(np.diff(new_pileup.values)))
-        print(new_pileup.values[-1])
-        pileup = np.maximum(new_pileup, pileup/window_size)
-        print(np.mean(np.diff(pileup.values)))
+        pileup = np.maximum(pileup, get_pileup(windows, size)/window_size)
     return pileup
 
 
@@ -53,12 +54,34 @@ def logsf(count, mu):
     return np.log(pdtrc(count, mu))
 
 
-def get_p_values(intervals, fragment_length, chrom_size):
+@ChromosomeMap()
+def get_p_values(intervals, chrom_size, fragment_length, read_rate):
     intervals.strand = intervals.strand.ravel()
     fragment_pileup = get_fragment_pileup(intervals, fragment_length, chrom_size)
-    control = fragment_length*get_control_pileup(intervals, [1000, 10000], len(intervals), chrom_size)
+    control = fragment_length*get_control_pileup(intervals, chrom_size, [1000, 10000], read_rate)
     p_values = logsf(fragment_pileup, control)
-    # plt.plot(p_values.starts, p_values.values); plt.show()
+    return p_values
+
+
+@ChromosomeMap()
+def call_peaks(p_values, p_value_cufoff, fragment_length, max_gap=30):
+    peaks = p_values < np.log(p_value_cufoff)
+    peaks = Interval(peaks.start[, peaks.end
+    peaks = merge_intervals(peaks, distance=max_gap)
+
+    
+
+def main(filename, genome_file, fragment_length=150, p_value_cufoff=0.001):
+    n_reads = bnp.count_entries(filename)
+    genome = open(genome_file)
+    genome_size = genome.size.sum()
+    read_rate = n_reads/genome_size
+    intervals = bnp.open(filename, buffer_type=BamIntervalBuffer).read_chunks()
+    grouped_intervals = groupby(intervals, "chromosome")
+    p_values = get_p_values(grouped_intervals, genome_size,
+                            fragment_length, read_rate)
+
+                            
 
 
 #intervals = bnp.open("/home/knut/Data/ENCFF296OGN.bed", buffer_type=Bed6Buffer).read_chunks()

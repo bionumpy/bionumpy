@@ -5,6 +5,7 @@ __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
 from .files import bnp_open as open
+from .files import count_entries
 from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
 from .kmers import KmerEncoding
 from .minimizers import Minimizers
@@ -27,7 +28,7 @@ Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
 __all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
-           "bincount", "streamable", "histogram",
+           "bincount", "streamable", "histogram", "count_entries",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",

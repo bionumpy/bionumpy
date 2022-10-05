@@ -102,6 +102,9 @@ class BamBuffer(FileBuffer):
                                                      self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
 
+    def count_entries(self):
+        return len(self._new_lines)
+
 
 class BamIntervalBuffer(BamBuffer):
     dataclass = Bed6
