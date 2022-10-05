@@ -1,7 +1,7 @@
 import numpy as np
 from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
-from .sequences import to_ascii, ASCIIText
+from .sequences import to_ascii, ASCIIText, Sequences
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
 NEWLINE = 10
