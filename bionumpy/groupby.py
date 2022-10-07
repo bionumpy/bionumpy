@@ -45,6 +45,10 @@ def groupby(data, column=None, key=key_func):
         keys = getattr(data, column)
     else:
         keys = data
+    if np.all(keys[-1] == keys[0]):
+        return GroupedStream((key(keys[start]), data[start:])
+                             for start in [0])
+
     changes = get_changes(keys)
     changes = np.append(np.insert(changes, 0, 0), len(data))
     assert np.all(np.diff(changes)>0), changes
