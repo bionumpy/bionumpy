@@ -136,3 +136,9 @@ class BamEntry:
     cigar_length: CigarEncoding
     sequence: BamArray
     quality: QualityEncoding
+
+
+@bnpdataclass
+class ChromosomeSize:
+    name: str
+    size: int

@@ -2,6 +2,13 @@ import numpy as np
 import dataclasses
 from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
+from .bnpdataclass import bnpdataclass
+
+
+@bnpdataclass
+class RawInterval:
+    start: int
+    end: int
 
 
 @ChromosomeMap()
