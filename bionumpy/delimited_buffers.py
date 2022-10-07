@@ -69,7 +69,7 @@ class DelimitedBuffer(FileBuffer):
         integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
         return integers.reshape(-1, cols.size)
 
-    def get_text(self, col, fixed_length=True):
+    def get_text(self, col, fixed_length=True, keep_sep=False):
         """Extract text from a column
 
         Extract strings from the specified column into either a 2d
@@ -90,6 +90,8 @@ class DelimitedBuffer(FileBuffer):
         self.validate_if_not()
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+        if keep_sep:
+            ends+=1
         if fixed_length:
             return self._move_intervals_to_2d_array(starts, ends)
         else:

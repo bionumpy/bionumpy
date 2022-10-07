@@ -1,4 +1,5 @@
 from npstructures import RaggedView, RaggedArray
+import dataclasses
 import itertools
 import numpy as np
 from .npdataclassstream import streamable
@@ -42,6 +43,7 @@ def key_func(x):
 @streamable(join_groupbys)
 def groupby(data, column=None, key=key_func):
     if column is not None:
+        assert hasattr(data, column), (data.__class__, dataclasses.fields(data), column)
         keys = getattr(data, column)
     else:
         keys = data
