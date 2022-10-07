@@ -32,6 +32,7 @@ class KmerEncoding(RollableFunction):
 
 @convolution
 def fast_hash(sequence, k, encoding=None):
+    sequence = as_encoded_sequence_array(sequence, ACTGEncoding)
     if encoding:
         sequence = encoding.encode(sequence)
 
