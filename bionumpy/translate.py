@@ -2,8 +2,9 @@ import numpy as np
 from npstructures import RaggedArray
 from .npdataclassstream import streamable
 from .encodings.alphabet_encoding import AlphabetEncoding, get_alphabet_array_class
-from .sequences import EncodedArray
+from .sequences import EncodedArray, ASCIIText
 from .encodings import BaseEncoding
+from .encodings.alphabet_encoding import AminoAcidArray
 from .kmers import KmerEncoding
 from .sequences import as_sequence_array, as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
 from .util import apply_to_npdataclass
@@ -13,7 +14,7 @@ import dataclasses
 class DNAToProtein:
     amino_acids = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
     from_encoding = get_alphabet_array_class("TCAG") # AlphabetEncoding("TCAG")
-    to_encoding = EncodedArray
+    to_encoding = ASCIIText
     _lookup = np.array([ord(c) for c in amino_acids], dtype=np.uint8)
 
     def __getitem__(self, key):

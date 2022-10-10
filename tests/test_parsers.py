@@ -5,10 +5,10 @@ import numpy as np
 from npstructures.testing import assert_npdataclass_equal 
 from bionumpy.sequences import from_sequence_array
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import Interval, SNP, SequenceEntry, Variant
+from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
 from bionumpy.files import bnp_open
-from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos
+from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
 from bionumpy.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
 import bionumpy as bnp
@@ -133,9 +133,7 @@ def test_vcf_buffer2(vcf_buffer2):
 
 def test_line_chunker(vcf_buffer2):
     lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
-    true = [Variant.single_entry("chr1", 88361, "A", "G"),
-            Variant.single_entry("chr1", 887559, "A", "CAA"),
-            Variant.single_entry("chr2", 8877, "AGG", "C")]
+    true = data["vcf2"]
     for line, t in zip(lines, true):
         assert_npdataclass_equal(line, t)
 
