@@ -20,6 +20,7 @@ class Sequence(np.ndarray):
         return "Sequence(" + str(np.array(["".join(chr(n) for n in seq[:20]) for seq in self.reshape(-1, self.shape[-1])]).reshape(self.shape[:-1])[:20]) + ")"
 
     def __str__(self):
+        return super().__str__() # TODO: remove this
         if len(self.shape) == 1:
             return "".join(chr(n) for n in self.encoding.decode(self)[:10])
         return self.__repr__()
