@@ -3,6 +3,7 @@ from .encodings import ACTGEncoding
 from .sequences import as_encoded_sequence_array, as_sequence_array
 from .dna import complement
 from .chromosome_map import ChromosomeMap
+from . import DNAArray 
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,15 +14,11 @@ def get_kmer_indexes(position, flank=2):
 
 
 class SNPEncoding:
-    lookup = np.zeros((256, 256), dtype=np.uint8)
-    lookup[ord("C")][[ord(c) for c in "AGT"]] = np.arange(3)
-    lookup[ord("G")][[ord(c) for c in "TCA"]] = np.arange(3)
-    lookup[ord("T")][[ord(c) for c in "ACG"]] = 3 + np.arange(3)
-    lookup[ord("A")][[ord(c) for c in "TGC"]] = 3 + np.arange(3)
-    lookup[ord("c")][[ord(c) for c in "agt"]] = np.arange(3)
-    lookup[ord("g")][[ord(c) for c in "tca"]] = np.arange(3)
-    lookup[ord("t")][[ord(c) for c in "acg"]] = 3 + np.arange(3)
-    lookup[ord("a")][[ord(c) for c in "tgc"]] = 3 + np.arange(3)
+    lookup = np.zeros((4, 4), dtype=np.uint8)
+    lookup[int(as_encoded_sequence_array("C", DNAArray).ravel())][as_encoded_sequence_array("AGT", DNAArray)] = np.arange(3)
+    lookup[int(as_encoded_sequence_array("G", DNAArray).ravel())][as_encoded_sequence_array("TCA", DNAArray)] = np.arange(3)
+    lookup[int(as_encoded_sequence_array("T", DNAArray).ravel())][as_encoded_sequence_array("ACG", DNAArray)] = 3 + np.arange(3)
+    lookup[int(as_encoded_sequence_array("A", DNAArray).ravel())][as_encoded_sequence_array("TGC", DNAArray)] = 3 + np.arange(3)
 
     text = np.array([f"C>{c}" for c in "AGT"] + [f"T->{c}" for c in "ACG"])
 
@@ -37,8 +34,9 @@ class SNPEncoding:
     def decode(cls, encoded):
         pass
 
+
 class MutationSignatureEncoding:
-    def __init__(self, k, encoding=ACTGEncoding):
+    def __init__(self, k, encoding=DNAArray):
         self.k = k
         self.h = 4 ** np.arange(k)
         self.h[k // 2 + 1 :] = self.h[k // 2 : -1]
@@ -48,6 +46,7 @@ class MutationSignatureEncoding:
     def encode(self, kmer, snp):
         kmer = as_encoded_sequence_array(kmer, self._encoding)
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
+        kmer = np.asarray(kmer)
         kmer_hashes = np.dot(kmer, self.h)
         snp_hashes = SNPEncoding.encode(snp)
         return kmer_hashes + 4 ** (self.k - 1) * snp_hashes
@@ -67,13 +66,15 @@ class MutationSignatureEncoding:
 
 @ChromosomeMap(reduction=sum)
 def get_kmers(snps, reference, flank):
-    assert np.all(ACTGEncoding.encode(reference[snps.position]) == ACTGEncoding.encode(snps.ref_seq)), (str(snps[reference[snps.position] != snps.ref_seq]), str(reference))
+    reference = as_encoded_sequence_array(reference, DNAArray)
+    snps.ref_seq = as_encoded_sequence_array(snps.ref_seq, DNAArray)
+    snps.alt_seq = as_encoded_sequence_array(snps.alt_seq, DNAArray)
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
-    forward_mask = (snps.ref_seq == ord("C")) | (snps.ref_seq == ord("T")) | (snps.ref_seq == ord("c")) | (snps.ref_seq == ord("t"))
+    forward_mask = (snps.ref_seq == "C") | (snps.ref_seq == "T")
     kmers = np.where(
         forward_mask[:, None], kmers, complement(kmers[:, ::-1])
-    )
+    ).view(DNAArray)
     signature_encoding = MutationSignatureEncoding(flank * 2 + 1)
     all_hashes = signature_encoding.encode(kmers, snps)
     n_hashes = 4 ** (flank * 2) * 6

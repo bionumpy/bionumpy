@@ -2,6 +2,13 @@ import numpy as np
 import dataclasses
 from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
+from .bnpdataclass import bnpdataclass
+
+
+@bnpdataclass
+class RawInterval:
+    start: int
+    end: int
 
 
 @ChromosomeMap()
@@ -11,13 +18,17 @@ def sort_intervals(intervals):
 
 
 @ChromosomeMap()
-def merge_intervals(intervals):
+def merge_intervals(intervals, distance=0):
     ends = np.maximum.accumulate(intervals.end)
+    if distance > 0:
+        ends += distance
     valid_start_mask = intervals.start[1:] > intervals[:-1].end
     start_mask = np.concatenate(([True], valid_start_mask))
     end_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
     new_interval.end = ends[end_mask]
+    if distance > 0:
+        new_interval.end -= distance
     return new_interval
 
 

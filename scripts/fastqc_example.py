@@ -17,9 +17,7 @@ def get_base_quality_histogram(reads):
 
 def plot_base_qualities(reads):
     qualities = get_base_quality_histogram(reads)
-    plt.plot(qualities)
-    plt.show()
-
+    return qualities
 
 @streamable()
 def get_gc_content(reads):
@@ -30,8 +28,7 @@ def get_gc_content(reads):
 
 def plot_gc_content(reads):
     histogram, _ = bnp.histogram(get_gc_content(reads), bins=50, range=(0, 1))
-    plt.plot(histogram)
-    plt.show()
+    return histogram
 
 
 @streamable()
@@ -41,17 +38,20 @@ def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
 
 def plot_averege_quality_scores_per_base(reads):
     scores = bnp.mean(get_quality_scores_as_matrix(reads), axis=0)
-    plt.plot(scores)
-    plt.show()
+    return scores
 
 
-def test():
+def test(do_plot=False):
     examples = [plot_base_qualities, plot_gc_content, plot_averege_quality_scores_per_base]
     for example in examples:
         reads = bnp.open("example_data/big.fq.gz").read_chunks(chunk_size=1000000)
-        example(reads)
+        result = example(reads)
+        if do_plot:
+            plt.plot(result)
+            plt.show()
 
     assert True
 
 
-test()
+if __name__ == "__main__":
+    test(do_plot=True)

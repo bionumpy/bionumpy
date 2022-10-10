@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rollable Functions &mdash; bionumpy  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Summarization" href="summarization.html" />
+    <link rel="prev" title="Broadcastable Functions" href="broadcastable_functions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> bionumpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">What is BioNumPy?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="reading_files.html">Reading files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_big_data.html">Working with big data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html">Currently supported file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broadcastable_functions.html">Broadcastable Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Rollable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="summarization.html">Summarization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/bam_handling.html">BAM Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastq_filtering.html">FASTQ filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastqc.html">Simple quality checking of fastq files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">bionumpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Rollable Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/rollable_functions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="rollable-functions">
+<h1>Rollable Functions<a class="headerlink" href="#rollable-functions" title="Permalink to this headline">¶</a></h1>
+<p>In many cases, we want to take a simple function mapping a sequence to some scalar, and map it to all subsequences of a given length in a set of sequences. Examples of this is:
+* Hashing kmers
+* Use a position weight matrix to compute a score for a sequence
+* Find all occurances of a substring in a sequence set</p>
+<p>bioNumpy provides this functionality throught the <cite>RollableFunction</cite> class. All you have to to is subclass the <cite>RollableFunction</cite> class, and write a broadcastable version of the sequence function as the <cite>__call__</cite> method. A call to the <cite>rolling_window</cite> method will then apply the function to all the subsequences of length <cite>window_size</cite> in the sequence set. <cite>window_size</cite> can either be set as <cite>self.window_size</cite> or passed as argument to the <cite>rolling_window</cite> method.</p>
+<p>For instance, if we want to check for instances of “CGGT” in a set of sequences, we can use the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bionumpy.rollable</span> <span class="k">import</span> <span class="n">RollableFunction</span>
+<span class="kn">from</span> <span class="nn">bionumpy.sequences</span> <span class="k">import</span> <span class="n">as_sequence_array</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">StringMatcher</span><span class="p">(</span><span class="n">RollableFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matching_sequence</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_matching_sequence</span> <span class="o">=</span> <span class="n">as_sequence_array</span><span class="p">(</span><span class="n">matching_sequence</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">sequence</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matching_sequence</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <cite>__call__</cite> function here just checks that all the letters in the sequence are equal to the corresponding letters in the matching sequence. Specifying <cite>axis=-1</cite> for the all function makes the function broadcastable:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span> <span class="o">=</span> <span class="n">StringMatcher</span><span class="p">(</span><span class="s2">&quot;CGGT&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span><span class="p">(</span><span class="s2">&quot;CGGT&quot;</span><span class="p">)</span>
+<span class="go">Sequence(True)</span>
+</pre></div>
+</div>
+<p>Giving a sequence of different length to the <cite>__call__</cite> function returns <cite>False</cite>, since the sequneces are then not equal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span><span class="p">(</span><span class="s2">&quot;CGGTA&quot;</span><span class="p">)</span>
+<span class="go">&lt;stdin&gt;:7: DeprecationWarning: elementwise comparison failed; this will raise an error in the future.</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>However we can use the <cite>rolling_window</cite> method to match every subsequence of length 4 to “CGGT”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span><span class="o">.</span><span class="n">rolling_window</span><span class="p">(</span><span class="s2">&quot;CGGTA&quot;</span><span class="p">)</span>
+<span class="go">array([ True, False])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span><span class="o">.</span><span class="n">rolling_window</span><span class="p">([</span><span class="s2">&quot;CGGTA&quot;</span><span class="p">,</span> <span class="s2">&quot;ACGGTG&quot;</span><span class="p">])</span>
+<span class="go">RaggedArray([[True, False], [False, True, False]])</span>
+</pre></div>
+</div>
+<p>For examples of rollable function implementations see:
+* <cite>Minimizers</cite>
+* <cite>KmerEncoding</cite>
+* <cite>PositionWeightMatrix</cite></p>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="broadcastable_functions.html" class="btn btn-neutral float-left" title="Broadcastable Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="summarization.html" class="btn btn-neutral float-right" title="Summarization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Knut Rand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -5,8 +5,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class GroupedData:
     pass
+
 
 class GroupedStream:
     def __init__(self, stream):
@@ -15,8 +17,10 @@ class GroupedStream:
     def __iter__(self):
         return iter(self._stream)
 
-class GroupedDict:
+
+class GroupedDict(dict):
     pass
+
 
 class ChromosomeProvider:
     """Base class for objects that can provide data grouped by chromosomes, 

@@ -1,8 +1,9 @@
+from itertools import accumulate, repeat, takewhile
 from .npdataclassstream import streamable
 from .datatypes import Interval, Bed6, BamEntry
 from .file_buffers import FileBuffer
 from .cigar import count_reference_length, split_cigar, CigarOpArray
-from .datatypes import SAMEntry, StrandedInterval
+from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, npdataclass
 import numpy as np
@@ -55,15 +56,18 @@ class BamBuffer(FileBuffer):
             info.append((name, sequence_length))
         return info
 
+    @staticmethod
+    def _find_starts(chunk):
+        chunk = bytes(chunk)
+        new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
+        _starts = accumulate(repeat(None), new_start, initial=0)
+        starts = list(takewhile(lambda start: start <= len(chunk), _starts))
+        return starts
+
     @classmethod
     def from_raw_buffer(cls, chunk, header_data):
         chunk = np.asarray(chunk)
-        starts = [0]
-        while (starts[-1]+3) < chunk.size-1:
-            line_size = (chunk[starts[-1]:starts[-1]+4]).view(np.int32)[0]
-            starts.append(starts[-1]+line_size+4)
-        if starts[-1] > chunk.size:
-            starts.pop()
+        starts = cls._find_starts(chunk)
         return cls(chunk[:starts[-1]], starts[:-1], header_data)
 
     def _get_ints(self, offsets, n_bytes, dtype):
@@ -98,7 +102,41 @@ class BamBuffer(FileBuffer):
         quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                                                      self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
-            
+
+    def count_entries(self):
+        return len(self._new_lines)
+
+
+class BamIntervalBuffer(BamBuffer):
+    dataclass = Bed6
+
+    def get_data(self):
+        ref_id = self._get_ints(4, 4, np.int32)
+        pos = self._get_ints(8, 4, np.int32)
+        chromosome = self._chromosome_names[ref_id]
+        l_read_name = self._data[self._new_lines+12]
+        mapq = self._data[self._new_lines+13]
+        n_cigar_op = self._get_ints(16, 2, np.uint16)
+        flag = self._get_ints(18, 1, np.uint8)
+        n_cigar_bytes = n_cigar_op*4
+        read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
+        cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
+                                                      self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
+
+        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
+        cigar_cymbol, cigar_length = split_cigar(cigars)
+
+        strand = flag & np.uint16(16)
+        strand = np.where(strand, ord("-"), ord("+"))[:, None].view(Sequence)
+        strand.encoding = BaseEncoding
+        length = count_reference_length(cigar_cymbol, cigar_length)
+        return Bed6(chromosome,
+                    pos,
+                    pos+length,
+                    read_names,
+                    mapq,
+                    strand)
+
 
 @streamable()
 def alignment_to_interval(alignment):

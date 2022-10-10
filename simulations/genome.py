@@ -28,7 +28,7 @@ def simulate_snps(bases, chrom_name, rate=0.05):
 def simulate_intervals(chrom_name, chrom_size):
     diffs = np.random.randint(1, 30, size=chrom_size//30)
     positions = np.cumsum(diffs)
-    positions = positions[positions<chrom_size]
+    positions = positions[positions < chrom_size]
     if len(positions) % 2 == 1:
         positions = positions[:-1]
     positions = positions.reshape(-1, 2)
