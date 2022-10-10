@@ -4,10 +4,8 @@ used tools FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 """
 
 import numpy as np
-
 import bionumpy as bnp
 from bionumpy.npdataclassstream import streamable
-import matplotlib.pyplot as plt
 
 
 # @streamable
@@ -47,6 +45,7 @@ def test(do_plot=False):
         reads = bnp.open("example_data/big.fq.gz").read_chunks(chunk_size=1000000)
         result = example(reads)
         if do_plot:
+            import matplotlib.pyplot as plt
             plt.plot(result)
             plt.show()
 
