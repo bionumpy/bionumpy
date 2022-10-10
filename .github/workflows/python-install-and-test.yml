@@ -37,4 +37,4 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-	pytest scripts/*_example.py
+        pytest scripts/*_example.py
