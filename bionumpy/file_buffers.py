@@ -148,6 +148,7 @@ class OneLineBuffer(FileBuffer):
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer. Try increasing chunk_size."
         new_lines = new_lines[: n_lines - (n_lines % cls.n_lines_per_entry)]
+        chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
     def get_sequences(self) -> RaggedArray:
@@ -167,6 +168,7 @@ class OneLineBuffer(FileBuffer):
         lengths = np.diff(starts)
         self.lines = RaggedArray(self._data, RaggedShape(lengths))
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
+        #sequences = None
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
