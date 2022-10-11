@@ -2,13 +2,14 @@ import os
 from pathlib import Path
 
 import numpy as np
-from npstructures import npdataclass, RaggedArray
-
+from npstructures import RaggedArray
+from npstructures.testing import assert_raggedarray_equal
 import bionumpy.encodings
 from bionumpy import AminoAcidArray, DNAArray
 from bionumpy.files import bnp_open
 from bionumpy.delimited_buffers import get_bufferclass_for_datatype
 from bionumpy.string_matcher import RegexMatcher
+from bionumpy.bnpdataclass import bnpdataclass
 
 
 def test_csv_import_and_regex_matching():
@@ -16,12 +17,13 @@ def test_csv_import_and_regex_matching():
     seqs_path = Path("seqs.tsv")
 
     with open(seqs_path, 'w') as file:
-        file.write("""sequence_aa	sequence	v_call	j_call
+        file.write("""\
+#sequence_aa	sequence	v_call	j_call
 AAACCC	A	V1-1	J2
 EEAAF	CCA	V2	J3-2
 """)
 
-    @npdataclass
+    @bnpdataclass
     class SeqAsTSV:
         sequence_aa: AminoAcidArray
         sequence: DNAArray
@@ -29,13 +31,13 @@ EEAAF	CCA	V2	J3-2
         j_call: str
 
     sequences = bnp_open(str(seqs_path), buffer_type=get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t'), has_header=True).read()
+    print(sequences)
+    assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
-    assert isinstance(sequences.sequence_aa, RaggedArray)
-
-    matcher = RegexMatcher('AA', encoding=bionumpy.encodings.AminoAcidEncoding)
+    matcher = RegexMatcher('AA', encoding=AminoAcidArray)
     matches = matcher.rolling_window(sequences.sequence_aa, mode='same')
 
-    assert np.array_equal(matches, [[True, True, False, False, False, False], [False, False, True, False, False]])
+    assert_raggedarray_equal(matches, [[True, True, False, False, False, False], [False, False, True, False, False]])
 
     if seqs_path.is_file():
         os.remove(seqs_path)
