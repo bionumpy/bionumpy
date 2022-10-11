@@ -17,6 +17,12 @@ logging.basicConfig(level=logging.INFO)
 # Extend the intervals to be size 150. Starts should
 
 
+def passthrogh_write(writer, stream):
+    for elem in stream:
+        writer.write(elem)
+        yield elem
+
+
 @dataclasses.dataclass
 class Params:
     fragment_length: int = 150
@@ -64,7 +70,7 @@ def logsf(count, mu):
 def get_p_values(intervals, chrom_size, fragment_length, read_rate):
     intervals.strand = intervals.strand.ravel()
     fragment_pileup = get_fragment_pileup(intervals, fragment_length, chrom_size)
-    control = fragment_length*get_control_pileup(intervals, chrom_size, [1000, 10000], read_rate)
+    control = fragment_length*get_control_pileup(intervals, chrom_size, [10000], read_rate)
     p_values = logsf(fragment_pileup, control)
     return p_values
 
@@ -89,6 +95,7 @@ def macs2(intervals, chrom_size, fragment_length, read_rate, p_value_cutoff, min
 def main(filename, genome_file, fragment_length=150, p_value_cutoff=0.001):
     genome = bnp.open(genome_file).read()
     genome_size = genome.size.sum()
+    genome_size = 2700000000
     chrom_sizes = GroupedDict((str(name), size) for name, size in zip(genome.name, genome.size))
     intervals = bnp.open(filename, buffer_type=BamIntervalBuffer).read_chunks()
     grouped_intervals = groupby(intervals, "chromosome")
@@ -101,6 +108,7 @@ with bnp.open("/home/knut/Data/peaks.bed", "w") as outfile:
     for chrom, data in main("/home/knut/Data/ENCFF296OGN.bam", "/home/knut/Data/hg38.chrom.sizes"):
         if len(data):
             outfile.write(data)
+
 
 #intervals = bnp.open("/home/knut/Data/ENCFF296OGN.bed", buffer_type=Bed6Buffer).read_chunks()
 

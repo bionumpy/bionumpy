@@ -2,6 +2,7 @@ from functools import reduce
 import numpy as np
 from npstructures import npdataclass
 from npstructures.runlengtharray import RunLengthArray
+from .sequences import as_encoded_sequence_array
 
 
 def sum_largest(stream):
@@ -20,6 +21,19 @@ class BedGraph:
     start: int
     end: int
     value: int
+
+
+def repeat_seqeunce(sequence, n):
+    assert len(sequence.shape)==1
+    stride = sequence.strides[-1]
+    return np.lib.stride_tricks.as_strided(sequence, shape=(n, len(sequence)),
+                                           strides=(0, stride), subok=True)
+
+
+def from_pileup(chromosome, pileup):
+    chromosome = as_encoded_sequence_array(chromosome, pileup)
+    L = len(pileup.starts)
+    return BedGraph(repeat_seqeunce(chromosome, L), pileup.starts, pileup.ends, pileup.values)
 
 
 def get_pileup(intervals, size):

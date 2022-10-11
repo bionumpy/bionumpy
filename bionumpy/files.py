@@ -2,6 +2,7 @@ from pathlib import PurePath
 import gzip
 import numpy as np
 import dataclasses
+from .bedgraph import BedGraph
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
@@ -60,7 +61,8 @@ buffer_types = {
     ".gff3": get_bufferclass_for_datatype(GFFEntry),
     ".sam": get_bufferclass_for_datatype(SAMEntry, comment="@"),
     ".bam": BamBuffer,
-    ".sizes": get_bufferclass_for_datatype(ChromosomeSize)
+    ".sizes": get_bufferclass_for_datatype(ChromosomeSize),
+    ".bdg": get_bufferclass_for_datatype(BedGraph)
 }
 
 
