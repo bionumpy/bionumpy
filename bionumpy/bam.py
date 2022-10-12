@@ -1,4 +1,4 @@
-from itertools import accumulate, repeat, takewhile
+from itertools import accumulate, repeat, takewhile, chain
 from .npdataclassstream import streamable
 from .datatypes import Interval, Bed6, BamEntry
 from .file_buffers import FileBuffer
@@ -60,7 +60,7 @@ class BamBuffer(FileBuffer):
     def _find_starts(chunk):
         chunk = bytes(chunk)
         new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
-        _starts = accumulate(repeat(None), new_start, initial=0)
+        _starts = chain([0], accumulate(repeat(0), new_start))
         starts = list(takewhile(lambda start: start <= len(chunk), _starts))
         return starts
 
