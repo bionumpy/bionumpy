@@ -12,6 +12,7 @@ from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer,
 from bionumpy.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
 import bionumpy as bnp
+import glob
 
 np.seterr(all='raise')
 
@@ -148,4 +149,22 @@ def test_read_chunk_after_read_chunks_returns_empty_dataclass():
 def test_read_gtf():
     file = bnp.open("example_data/small.gtf")
     chunk = file.read_chunk()
+    assert True
+
+
+@pytest.mark.parametrize("file_name", glob.glob("example_data/*"))
+def test_read_example_data(file_name):
+    if file_name.endswith(".sam"):
+        return
+
+    if file_name.endswith(".fa.fai"):
+        return
+
+    if file_name.endswith(".jaspar"):
+        return
+
+    file = bnp.open(file_name)
+    for chunk in file.read_chunks():
+        continue
+
     assert True
