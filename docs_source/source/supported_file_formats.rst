@@ -3,16 +3,47 @@ Currently supported file formats
 
 This is a list of  currently supported file formats in BioNumPy. Reading files with any of these extensions with `bnp.open` will make BioNumPy automatically detect the file type and read the data into an appropriate data structure (which will be a dataclass-like object with fields).
 
-* vcf
-* bed
-* fasta / fa
-* fastq / fq
-* gfa (limited support only)
-* gff
-* gtf
-* gff3
-* sam
-* bam
+
+^^^^
+vcf
+^^^^
+
+^^^
+bed
+^^^
+
+^^^^^^^^^^^
+fasta / fa
+^^^^^^^^^^^
+
+^^^^^
+bed
+^^^^^
+
+^^^^^^^^^^^^^^^
+fasta / fa
+^^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^^
+gfa (limited support only)
+^^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^^
+gff
+^^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^^
+gtf
+^^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^^
+gff3
+^^^^^^^^^^^^^^^
+
+^^^^^^^^^^^^^^^
+sam / bam
+^^^^^^^^^^^^^^^
+
 
 =========
 Example
