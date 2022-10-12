@@ -1,20 +1,18 @@
 BioNumPy
 ======================================
 
-Getting started
----------------
 .. toctree::
    :maxdepth: 1
    :glob:
+   :caption: Getting started
 
    What is BioNumPy? <readme>
    installation
 
-BioNumPy concepts
-------------------
 .. toctree::
    :maxdepth: 2
    :glob:
+   :caption: BioNumPy Concepts
 
    source/reading_files.rst
    source/working_with_big_data.rst
@@ -25,20 +23,18 @@ BioNumPy concepts
    source/summarization.rst
 
 
-Tutorials
-----------
 .. toctree::
    :maxdepth: 0
    :glob:
    :titlesonly:
+   :caption: Tutorials
 
    tutorials/*
 
-Other
--------
 .. toctree::
    :glob:
    :maxdepth: 1
+   :caption: Other
 
    contributing
 
