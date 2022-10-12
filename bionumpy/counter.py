@@ -26,6 +26,12 @@ class EncodedCounts:
             o_counts = other.counts
         return dataclasses.replace(self, counts=self.counts+o_counts)
         
+    @classmethod
+    def concatenate(cls, counts):
+        alphabet = counts[0].alphabet
+        assert all(count.alphabet==alphabet for count in counts)
+        return cls(alphabet, np.array([count.counts for count in counts], dtype="int"))
+
 
 def count_encoded(values, weights=None):
     if hasattr(values.encoding, "get_alphabet"):

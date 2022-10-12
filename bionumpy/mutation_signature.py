@@ -3,7 +3,7 @@ from .encodings import ACTGEncoding
 from .sequences import as_encoded_sequence_array, as_sequence_array, EncodedArray
 from .dna import complement, reverse_compliment
 from .chromosome_map import ChromosomeMap
-from .counter import count_encoded
+from .counter import count_encoded, EncodedCounts
 from . import DNAArray 
 import logging
 
@@ -93,6 +93,9 @@ def count_mutation_types(snps, reference, flank=1):
     
     if not hasattr(snps, "genotypes"):
         return count_encoded(all_hashes)
+    return EncodedCounts.concatenate([count_encoded(all_hashes, weights=genotype>0)
+                                      for genotype in snps.genotypes.T])
+
     return np.array(
         [
             np.bincount(
