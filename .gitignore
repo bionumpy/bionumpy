@@ -1,3 +1,7 @@
+npstructures/
+main.py
+testreads20m.fa
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
