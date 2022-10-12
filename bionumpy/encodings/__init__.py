@@ -63,3 +63,14 @@ class QualityEncoding(NumericEncoding):
         res = quality.astype(np.uint8) + ord("!")
         return create_sequence_array_from_already_encoded_data(res, ASCIIText)
 
+
+def set_backend(lib):
+    import sys
+
+    from ..cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
+    from ..cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
+    from ..cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
+    
+    sys.modules[__name__].AlphabetEncoding = CPAlphabetEncoding
+    sys.modules[__name__].ACTGEncoding = CPACTGEncoding
+    sys.modules[__name__].AminoAcidEncoding = CPAminoAcidEncoding
