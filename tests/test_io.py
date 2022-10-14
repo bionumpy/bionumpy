@@ -13,6 +13,7 @@ def test_buffer_read(buffer_name):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
+        print("#####", line, true_line)
         assert_npdataclass_equal(line, true_line)
 
 

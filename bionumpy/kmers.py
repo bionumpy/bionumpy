@@ -1,6 +1,6 @@
 import numpy as np
 from .rollable import RollableFunction
-from .encodings import ACTGEncoding
+from .encodings import DNAEncoding
 from .encoded_array import EncodedArray, as_encoded_array
 from npstructures.bitarray import BitArray
 from .util import convolution
@@ -31,7 +31,7 @@ class KmerEncoding(RollableFunction):
 
 @convolution
 def fast_hash(sequence, k, encoding=None):
-    sequence = as_encoded_array(sequence, ACTGEncoding)
+    sequence = as_encoded_array(sequence, DNAEncoding)
     if encoding:
         sequence = encoding.encode(sequence)
 

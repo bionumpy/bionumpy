@@ -1,7 +1,7 @@
 import numpy as np
 from .rollable import RollableFunction
 from .encoded_array import as_encoded_array, EncodedArray
-from .encodings import ACTGEncoding
+from .encodings import DNAEncoding
 
 
 class PositionWeightMatrix(RollableFunction):

@@ -1,19 +1,15 @@
 import numpy as np
 from npstructures import RaggedArray
 from .npdataclassstream import streamable
-from .encodings.alphabet_encoding import AlphabetEncoding, get_alphabet_array_class
-from .encoded_array import EncodedArray
-from .encodings import BaseEncoding
-from .encodings.alphabet_encoding import AminoAcidArray
+from .encodings import BaseEncoding, AlphabetEncoding
 from .kmers import KmerEncoding
-from .encoded_array import as_encoded_array, as_encoded_array
+from .encoded_array import as_encoded_array, EncodedArray
 from .util import apply_to_npdataclass
-import dataclasses
 
 
 class DNAToProtein:
     amino_acids = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
-    from_encoding = get_alphabet_array_class("TCAG") # AlphabetEncoding("TCAG")
+    from_encoding = AlphabetEncoding("TCAG") # AlphabetEncoding("TCAG")
     to_encoding = BaseEncoding
     _lookup = np.array([ord(c) for c in amino_acids], dtype=np.uint8)
 

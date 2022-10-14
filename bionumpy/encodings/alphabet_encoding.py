@@ -1,6 +1,5 @@
 import numpy as np
 from .base_encoding import Encoding
-from ..encoded_array import EncodedArray
 
 
 class AlphabetEncoding(Encoding):
@@ -12,7 +11,6 @@ class AlphabetEncoding(Encoding):
         self._lookup = np.zeros(256, dtype=np.uint8)
         self._lookup[self._alphabet] = np.arange(len(alphabet))
         self._lookup[lower_alphabet] = np.arange(len(alphabet))
-        # self._lookup.encoding = self
         self._mask = np.zeros(256, dtype=bool)
         self._mask[self._alphabet] = True
         self._mask[lower_alphabet] = True
@@ -30,19 +28,13 @@ class AlphabetEncoding(Encoding):
     def get_alphabet(self):
         return [chr(c) for c in self._alphabet]
 
+    def __str__(self):
+        return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
+
     def __eq__(self, other):
         if not isinstance(other, AlphabetEncoding):
             return False
         return np.all(self._alphabet == other._alphabet)
-
-
-def get_alphabet_array_class(alphabet):
-    class AlphabetArray(EncodedArray):
-        encoding = AlphabetEncoding(alphabet)
-
-    AlphabetArray.__name__ = alphabet.upper()+"Array"
-    AlphabetArray.__qualname__ = alphabet.upper()+"Array"
-    return AlphabetArray
 
 
 ACTGEncoding = AlphabetEncoding("ACTG")
@@ -52,10 +44,5 @@ DNAEncoding = ACTGEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
-ACTGArray = get_alphabet_array_class("ACTG")
-DNAArray = ACTGArray
-RNAArray = get_alphabet_array_class("ACUG")
-AminoAcidArray = get_alphabet_array_class('ACDEFGHIKLMNPQRSTVWY')
-BamArray = get_alphabet_array_class("=ACMGRSVTWYHKDBN")
-CigarOpArray = get_alphabet_array_class("MIDNSHP=X")
-DigitArray = get_alphabet_array_class("0123456789")
+BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
+CigarOpEncoding = AlphabetEncoding("MIDNSHP=X")

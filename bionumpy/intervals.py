@@ -84,6 +84,8 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
 
 def pileup(intervals):
     chroms = np.concatenate([intervals.chromosome, intervals.chromosome])
+    print(chroms)
+
     positions = np.concatenate((intervals.start,
                                 intervals.end))
     args = np.argsort(positions, kind="mergesort")
@@ -98,5 +100,7 @@ def pileup(intervals):
     values = np.delete(values, mask)
     starts = np.delete(intervals[:, 0], mask+1)
     ends = np.delete(intervals[:, 1], mask)
+    print(chroms[:values.size-1])
+    print(repr(chroms[:values.size-1]))
     return BedGraph(chroms[:values.size-1],
                     starts, ends, values[:-1])

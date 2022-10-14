@@ -41,6 +41,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     def raw(self):
         return self.data
 
+    def to_string(self):
+        return "".join([chr(c) for c in self.encoding.decode(self.data)])
+
+    def reshape(self, *args, **kwargs):
+        return self.__class__(self.data.reshape(*args, **kwargs), self.encoding)
+
     @property
     def size(self):
         return self.data.size
@@ -74,7 +80,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         if method == "__call__" and ufunc in (np.equal, np.not_equal):
-            return ufunc(*(as_encoded_array(a, self.encoding).data for a in inputs))
+            return ufunc(*(as_encoded_array(a, self.encoding).raw() for a in inputs))
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):
@@ -105,12 +111,14 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
-    assert isinstance(s, EncodedArray), (s, repr(s))
+    assert isinstance(s, EncodedArray), (s, repr(s), type(s))
     if s.encoding == target_encoding:
         return s
     elif s.encoding == BaseEncoding:
         return EncodedArray(target_encoding.encode(s.data), target_encoding)
-    assert False, (s.encoding, target_encoding)
+    elif target_encoding == BaseEncoding:
+        return EncodedArray(s.encoding.decode(s.data), BaseEncoding)
+    assert False, (str(s.encoding), str(target_encoding))
 
 
 def from_encoded_array(encoded_array: EncodedArray) -> str:

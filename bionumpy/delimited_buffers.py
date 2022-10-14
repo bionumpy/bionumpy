@@ -8,7 +8,6 @@ from .datatypes import (Interval, Variant, VCFGenotypeEntry,
 from .encoded_array import EncodedArray, EncodedRaggedArray
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
-from .encodings.alphabet_encoding import DigitArray
 
 import numpy as np
 
@@ -36,7 +35,8 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
-        chunk = chunk.view(ASCIIText)
+        print(type(chunk))
+        chunk = EncodedArray(chunk)
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
@@ -163,11 +163,14 @@ class DelimitedBuffer(FileBuffer):
     def _move_ints_to_digit_array(ints, n_digits):
         powers = np.uint8(10)**np.arange(n_digits)[::-1]
         ret = (ints[..., None]//powers) % 10
-        return ret.view(DigitArray)
+        return EncodedArray(ret, DigitEncoding)
 
     def _validate(self):
         chunk = self._data
         delimiters = self._delimiters[1:]
+        print("##", NEWLINE, type(NEWLINE))
+        print(chunk)
+        print("---", type(chunk), type(chunk[0]))
         n_delimiters_per_line = (
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
@@ -193,8 +196,8 @@ class DelimitedBuffer(FileBuffer):
             print(column)
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
                                   for column in columns], axis=-1).ravel()
-        lines = EncodedRaggedArray(np.empty(lengths.sum(), dtype=np.uint8).view(ASCIIText),
-                          lengths)
+        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
+                                   lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):
             lines[i::n_columns, :-1] = column

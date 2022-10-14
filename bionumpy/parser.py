@@ -131,7 +131,7 @@ class NumpyFileReader:
     def __read_raw_chunk(self, chunk_size):
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
-        return b.view(EncodedArray), b.size
+        return b, b.size
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
