@@ -1,5 +1,5 @@
 import pytest
-from bionumpy.sequences import EncodedArray
+from bionumpy.encoded_array import EncodedArray
 import numpy as np
 
 @pytest.fixture

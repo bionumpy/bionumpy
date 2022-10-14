@@ -45,7 +45,7 @@ class RollableFunction:
             window_size = self.window_size
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_encoded_array(_sequence, encoding=self._encoding)
+                _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
             elif not isinstance(_sequence, RaggedArray):
                 _sequence = RaggedArray(_sequence)
 

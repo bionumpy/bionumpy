@@ -85,8 +85,16 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
+    assert isinstance(s, EncodedArray), s
     if s.encoding == target_encoding:
         return s
     elif s.encoding == BaseEncoding:
         return EncodedArray(target_encoding.encode(s.data), target_encoding)
     assert False, (s.encoding, target_encoding)
+
+
+def from_encoded_array(encoded_array: EncodedArray) -> str:
+    if isinstance(encoded_array, EncodedRaggedArray):
+        return [from_encoded_array(row) for row in encoded_array]
+    else:
+        return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array.data))

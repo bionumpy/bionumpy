@@ -1,12 +1,11 @@
 from bionumpy.kmers import KmerEncoding
 import numpy as np
 from npstructures import RaggedArray, RaggedShape
-from bionumpy.encodings import ACTGEncoding
-from bionumpy import DNAArray
+from bionumpy import DNAEncoding, EncodedRaggedArray, EncodedArray
 
 
 def test_kmer_encoding():
-    encoding = KmerEncoding(3, DNAArray)
+    encoding = KmerEncoding(3, DNAEncoding)
     kmers = encoding.sample_domain(100)
     encoded = encoding(kmers)
     # assert np.testing.assert_ encoding.in_range(encoded)
@@ -17,9 +16,9 @@ def test_kmer_encoding():
 
 def test_rolling_hash():
     lengths = np.arange(3, 10)
-    encoding = KmerEncoding(3, DNAArray)
-    kmers = np.arange(lengths.sum()) % 4
-    ragged = RaggedArray(kmers, lengths)
+    encoding = KmerEncoding(3, DNAEncoding)
+    kmers = EncodedArray(np.arange(lengths.sum()) % 4, DNAEncoding)
+    ragged = EncodedRaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)
     assert encoded.shape == RaggedShape(lengths-3+1)
 

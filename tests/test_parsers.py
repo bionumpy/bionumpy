@@ -3,7 +3,6 @@ from itertools import chain
 import pytest
 import numpy as np
 from npstructures.testing import assert_npdataclass_equal 
-from bionumpy.sequences import from_sequence_array
 from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
 from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
@@ -11,6 +10,7 @@ from bionumpy.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
 from bionumpy.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encoded_array import from_encoded_array
 import bionumpy as bnp
 import glob
 
@@ -91,13 +91,13 @@ def test_raises_error_for_unsupported_types():
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
     buf = TwoLineFastaBuffer.from_raw_buffer(twoline_fasta_buffer)
     seqs = buf.get_sequences()
-    assert from_sequence_array(seqs) == ["CTTGTTGA", "CGG"]
+    assert from_encoded_array(seqs) == ["CTTGTTGA", "CGG"]
 
 
 def test_fastq_buffer(fastq_buffer):
     buf = FastQBuffer.from_raw_buffer(fastq_buffer)
     seqs = buf.get_sequences()
-    assert from_sequence_array(seqs) == ["CTTGTTGA", "CGG"]
+    assert from_encoded_array(seqs) == ["CTTGTTGA", "CGG"]
 
 
 def test_gfa_sequence_buffer(gfa_sequence_buffer):

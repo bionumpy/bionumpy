@@ -1,12 +1,10 @@
 import logging
 
 from bionumpy.rollable import RollableFunction
-from bionumpy.encoded_array import as_encoded_array
+from bionumpy.encoded_array import as_encoded_array, EncodedArray
 import itertools
 import numpy as np
-import bionumpy as bnp
 import re
-from bionumpy.sequences import EncodedArray
 from npstructures import RaggedArray
 
 

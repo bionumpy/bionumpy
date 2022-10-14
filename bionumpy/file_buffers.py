@@ -3,7 +3,7 @@ from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
 from .encodings import BaseEncoding, QualityEncoding
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 
-NEWLINE = 10
+NEWLINE = "\n"
 
 
 class FileBuffer:
