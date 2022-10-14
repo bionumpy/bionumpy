@@ -1,6 +1,6 @@
 import numpy as np
 from itertools import groupby
-from .sequences import EncodedArray
+from .encoded_array import EncodedArray
 import logging
 
 logger = logging.getLogger(__name__)

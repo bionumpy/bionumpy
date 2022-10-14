@@ -2,7 +2,7 @@ import numpy as np
 from .npdataclassstream import NpDataclassStream
 import logging
 from npstructures import npdataclass
-from .sequences import EncodedArray
+from .encoded_array import EncodedArray
 logger = logging.getLogger(__name__)
 
 

@@ -1,6 +1,6 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer, NEWLINE
-from .sequences import EncodedArray, ASCIIText
+from .encoded_array import EncodedArray
 from .datatypes import SequenceEntry
 import numpy as np
 

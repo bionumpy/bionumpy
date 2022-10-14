@@ -5,7 +5,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int, str_to_float
 from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
-from .sequences import EncodedArray, Sequences, ASCIIText, EncodedArray
+from .encoded_array import EncodedArray, EncodedRaggedArray
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 from .encodings.alphabet_encoding import DigitArray
@@ -193,7 +193,7 @@ class DelimitedBuffer(FileBuffer):
             print(column)
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
                                   for column in columns], axis=-1).ravel()
-        lines = Sequences(np.empty(lengths.sum(), dtype=np.uint8).view(ASCIIText),
+        lines = EncodedRaggedArray(np.empty(lengths.sum(), dtype=np.uint8).view(ASCIIText),
                           lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):

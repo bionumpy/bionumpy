@@ -1,6 +1,6 @@
 from .chromosome_provider import ChromosomeDictProvider, GroupedDict
 from .encodings import BaseEncoding
-from .sequences import as_encoded_array
+from .encoded_array import as_encoded_array
 import numpy as np
 
 

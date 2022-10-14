@@ -1,5 +1,5 @@
 from .encodings.alphabet_encoding import CigarOpArray
-from .sequences import as_encoded_sequence_array
+from .encoded_array import as_encoded_array
 from npstructures import RaggedArray
 import numpy as np
 
@@ -14,7 +14,7 @@ def split_cigar(cigars):
 
 
 def count_reference_length(symbol, lengths):
-    consuming = as_encoded_sequence_array("MDN=X", CigarOpArray)
+    consuming = as_encoded_array("MDN=X", CigarOpArray)
     mask = (symbol == consuming[0])
     for consuming_symbol in consuming[1:]:
         mask = mask | (symbol == consuming_symbol)

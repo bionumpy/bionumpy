@@ -1,7 +1,7 @@
 import logging
 
 from bionumpy.rollable import RollableFunction
-from bionumpy.sequences import as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
+from bionumpy.encoded_array import as_encoded_array
 import itertools
 import numpy as np
 import bionumpy as bnp
@@ -13,7 +13,7 @@ from npstructures import RaggedArray
 class StringMatcher(RollableFunction):
     def __init__(self, matching_sequence, encoding):
         self._encoding = encoding
-        self._matching_sequence_array = as_encoded_sequence_array(matching_sequence, encoding=encoding)
+        self._matching_sequence_array = as_encoded_array(matching_sequence, encoding=encoding)
 
     @property
     def window_size(self):
@@ -45,7 +45,7 @@ class RegexMatcher(RollableFunction):
     def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
         if not isinstance(_sequence, np.ndarray):
             if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_encoded_sequence_array(_sequence, encoding=self._encoding)
+                _sequence = as_encoded_array(_sequence, encoding=self._encoding)
             else:
                 _sequence = RaggedArray(_sequence)
 
@@ -139,6 +139,6 @@ def construct_wildcard_matcher(matching_regex: str, encoding):
     #assert encoding in (bnp.encodings.alphabet_encoding.ACTGArray,
     #                     bnp.encodings.alphabet_encoding.AminoAcidArray), f"NotImplemented: Support for other encodings {encoding} awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
     replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") else chr(encoding.decode(0))
-    base_seq = as_encoded_sequence_array(matching_regex.replace('.', str(replacement)), encoding=encoding)
+    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)), encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)
