@@ -3,7 +3,7 @@ from bionumpy.sequences import EncodedArray, as_encoded_sequence_array, Sequence
 
 def _get_complement_lookup(alphabet_encoding):
     alphabet = alphabet_encoding.get_alphabet()
-    complements = {"a": "t", "g": "c", "c": "g", "t": "a"}
+    complements = {"A": "T", "G": "C", "C": "G", "T": "A"}
     new_alphabet = "".join(complements[c] for c in alphabet)
     return as_encoded_sequence_array(new_alphabet, alphabet_encoding)
 

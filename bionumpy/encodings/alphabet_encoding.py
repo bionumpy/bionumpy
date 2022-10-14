@@ -5,17 +5,17 @@ from ..sequences import ASCIIText, EncodedArray
 
 class AlphabetEncoding(Encoding):
     def __init__(self, alphabet: str):
-        alphabet = [c.lower() for c in alphabet]
+        alphabet = [c.upper() for c in alphabet]
         self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8)
-        upper_alphabet = (self._alphabet + ord("A")-ord("a")).view(ASCIIText)
+        lower_alphabet = (self._alphabet + ord("a")-ord("A")).view(ASCIIText)
         self._alphabet = self._alphabet.view(ASCIIText)
         self._lookup = np.zeros(256, dtype=np.uint8)
         self._lookup[self._alphabet] = np.arange(len(alphabet))
-        self._lookup[upper_alphabet] = np.arange(len(alphabet))
+        self._lookup[lower_alphabet] = np.arange(len(alphabet))
         # self._lookup.encoding = self
         self._mask = np.zeros(256, dtype=bool)
         self._mask[self._alphabet] = True
-        self._mask[upper_alphabet] = True
+        self._mask[lower_alphabet] = True
 
     def encode(self, byte_array):
         return self._lookup[byte_array]
