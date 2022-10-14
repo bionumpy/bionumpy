@@ -2,7 +2,7 @@ import logging
 from npstructures import RaggedArray, RaggedView
 from typing import List
 from .file_buffers import FileBuffer, NEWLINE
-from .strops import ints_to_strings, split, str_to_int
+from .strops import ints_to_strings, split, str_to_int, str_to_float
 from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
 from .sequences import Sequence, Sequences, ASCIIText, EncodedArray
@@ -68,6 +68,27 @@ class DelimitedBuffer(FileBuffer):
         integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
         integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
         return integers.reshape(-1, cols.size)
+
+    def get_floats(self, cols) -> np.ndarray:
+        """Get floats from integer string
+
+        Extract floats from the specified columns
+
+        Parameters
+        ----------
+        cols : list
+            list of columns containing integers
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
+        cols = np.asanyarray(cols)
+        float_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
+        float_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        floats = str_to_float(ragged_slice(self._data, float_starts, float_ends))
+        return floats.reshape(-1, cols.size)
 
     def get_text(self, col, fixed_length=True, keep_sep=False):
         """Extract text from a column
@@ -354,6 +375,8 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
                     col = self.get_integers(col_number).ravel()
+                elif field.type == float:
+                    col = self.get_floats(col_number).ravel()
                 elif field.type == -1:
                     col = self.get_integers(col_number).ravel()-1
                 elif field.type == List[int]:
