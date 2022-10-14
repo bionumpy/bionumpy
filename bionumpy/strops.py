@@ -30,6 +30,27 @@ def str_to_int(number_text):
     return (number_digits*powers).sum(axis=-1)
 
 
+def _decimal_str_to_float(number_text):
+    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    flat = number_text._data
+    dots = np.flatnonzero(flat == ".")
+    flat[dots] = "0"
+    number_text = as_encoded_sequence_array(number_text, DigitArray)
+    powers = 10**_build_power_array(number_text.shape, dots=dots)
+    number_digits = RaggedArray(np.asarray(number_text.ravel()),
+                                number_text.shape)
+    base_numbers = (number_digits*powers).sum(axis=-1)
+    _, col_indices =  number_text.shape.unravel_multi_index(dots)
+    powers = (10**(number_text.shape.lengths-col_indices-1))
+    return base_numbers / powers
+
+def _scientific_str_to_float(number_text):
+    pass
+
+def str_to_float(number_text):
+    return _decimal_str_to_float(number_text)
+    pass
+
 def ints_to_strings(number):
     number = np.asanyarray(number)
     lengths = np.log10(number).astype(int)+1
