@@ -1,7 +1,7 @@
 import numpy as np
 from numbers import Number
-from .encodings.base_encoding import (BaseEncoding, Encoding,
-                                      NumericEncoding, ASCIIEncoding)
+from .base_encoding import (BaseEncoding, Encoding,
+                            NumericEncoding)
 from npstructures import RaggedArray
 
 
