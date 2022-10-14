@@ -137,7 +137,7 @@ def construct_wildcard_matcher(matching_regex: str, encoding):
     mask = np.array([symbol == '.' for symbol in matching_regex])
 
     assert encoding in (bnp.encodings.alphabet_encoding.ACTGArray,
-                        bnp.encodings.alphabet_encoding.AminoAcidArray), "NotImplemented: Support for other encodings awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
+                        bnp.encodings.alphabet_encoding.AminoAcidArray), f"NotImplemented: Support for other encodings {encoding} awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
     base_seq = as_encoded_sequence_array(matching_regex.replace('.', 'A'), encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)

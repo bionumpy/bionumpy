@@ -18,7 +18,7 @@ def test_csv_import_and_regex_matching():
 
     with open(seqs_path, 'w') as file:
         file.write("""\
-#sequence_aa	sequence	v_call	j_call
+sequence_aa	sequence	v_call	j_call
 AAACCC	A	V1-1	J2
 EEAAF	CCA	V2	J3-2
 """)
@@ -30,7 +30,8 @@ EEAAF	CCA	V2	J3-2
         v_call: str
         j_call: str
 
-    sequences = bnp_open(str(seqs_path), buffer_type=get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t'), has_header=True).read()
+    buffer_class = get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t', has_header=True)
+    sequences = bnp_open(str(seqs_path), buffer_type=buffer_class, ).read()
     print(sequences)
     assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
