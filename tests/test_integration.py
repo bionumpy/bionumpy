@@ -32,13 +32,13 @@ EEAAF	CCA	V2	J3-2
 
     buffer_class = get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t', has_header=True)
     sequences = bnp_open(str(seqs_path), buffer_type=buffer_class, ).read()
-    print(sequences)
     assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
     matcher = RegexMatcher('AA', encoding=AminoAcidArray)
     matches = matcher.rolling_window(sequences.sequence_aa, mode='same')
 
-    assert_raggedarray_equal(matches, [[True, True, False, False, False, False], [False, False, True, False, False]])
-
+    assert_raggedarray_equal(matches, [[True, True, False, False, False, False],
+                                       [False, False, True, False, False]])
+    
     if seqs_path.is_file():
         os.remove(seqs_path)
