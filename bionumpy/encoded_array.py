@@ -56,6 +56,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.shape
 
     @property
+    def strides(self):
+        return self.data.strides
+
+    @property
     def dtype(self):
         return self.data.dtype
 
@@ -91,6 +95,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if func == np.concatenate:
             return self.__class__(func([e.data for e in args[0]]), self.encoding)
         elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
+            print(func, args[0], args[1:], kwargs, flush=True)
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
         
         return NotImplemented
@@ -98,6 +103,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def ravel(self):
         return self.__class__(self.data.ravel(), self.encoding)
+
+    def as_strided(self, *args, **kwargs):
+        return self.__class__(np.lib.stride_tricks.as_strided(self.data, *args, **kwargs), self.encoding)
 
 
 def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArray:
@@ -111,7 +119,7 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
-    assert isinstance(s, EncodedArray), (s, repr(s), type(s))
+    assert isinstance(s, EncodedArray) # , (s, repr(s), type(s))
     if s.encoding == target_encoding:
         return s
     elif s.encoding == BaseEncoding:

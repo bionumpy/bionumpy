@@ -2,10 +2,17 @@ import numpy as np
 import logging
 from npstructures import RaggedArray
 import dataclasses
+from .encoded_array import EncodedArray
 from .chromosome_map import ChromosomeMap
 from .npdataclassstream import streamable
 
 logger = logging.getLogger(__name__)
+
+def as_strided(arr, *args, **kwargs):
+    if isinstance(arr, EncodedArray):
+        return arr.as_strided(*args, **kwargs)
+    return np.lib.stride_tricks.as_strided(arr, *args, **kwargs)
+    
 
 @ChromosomeMap()
 def filter_on_intervals(entry, sorted_intervals):
