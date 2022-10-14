@@ -10,6 +10,19 @@ class EncodedRaggedArray(RaggedArray):
     def encoding(self):
         return self._data.encoding
 
+    def raw(self):
+        return RaggedArray(self._data.raw(), self.shape)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        assert isinstance(self._data, EncodedArray), self._data
+        inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
+        kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
+        print(ufunc, inputs, kwargs)
+        ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        if isinstance(ret._data, EncodedArray):
+            return ret
+        return RaggedArray(ret._data, ret.shape)
+
 
 class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     """ 
@@ -25,9 +38,16 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __len__(self):
         return len(self.data)
 
+    def raw(self):
+        return self.data
+
     @property
     def size(self):
         return self.data.size
+
+    @property
+    def shape(self):
+        return self.data.shape
 
     @property
     def dtype(self):
@@ -47,7 +67,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __setitem__(self, idx, value):
         value = as_encoded_array(value, self.encoding)
-        super().__setitem__(idx, value)
+        self.data.__setitem__(idx, value.data)
 
     def __iter__(self):
         return (self.__class__(element, self.encoding) for element in self.data)
@@ -64,7 +84,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return np.bincount(args[0].data, *args[1:], **kwargs)
         if func == np.concatenate:
             return self.__class__(func([e.data for e in args[0]]), self.encoding)
-        elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view):
+        elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
         
         return NotImplemented
@@ -85,7 +105,7 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
-    assert isinstance(s, EncodedArray), s
+    assert isinstance(s, EncodedArray), (s, repr(s))
     if s.encoding == target_encoding:
         return s
     elif s.encoding == BaseEncoding:

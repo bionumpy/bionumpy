@@ -47,6 +47,7 @@ def get_alphabet_array_class(alphabet):
 
 ACTGEncoding = AlphabetEncoding("ACTG")
 ACTGnEncoding = AlphabetEncoding("ACTGn")
+DigitEncoding = AlphabetEncoding("0123456789")
 DNAEncoding = ACTGEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
