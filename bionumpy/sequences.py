@@ -16,6 +16,7 @@ class EncodedArray(np.ndarray):
 
     @classmethod
     def from_string(cls, s: str) -> "EncodedArray":
+        return np.array([ord(c) for c in s], dtype=np.uint8).view(cls)
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
     def to_string(self) -> str:
@@ -161,6 +162,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
     s = as_sequence_array(s)
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_sequence_array(s.ravel(), encoding), s.shape)
+          
     if isinstance(encoding, type) and issubclass(encoding, EncodedArray):
         if isinstance(s, encoding):
             return s
@@ -174,7 +176,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
 
     if s.encoding != encoding:
         e = encoding.encode(s)
-        s = e.view(Sequence)
+        s = e.view(ASCIIText)
         s.encoding = encoding
         return s
 
@@ -192,7 +194,7 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     elif isinstance(s, RaggedArray):
         return Sequences(as_sequence_array(s._data), s.shape)
     elif isinstance(s, str):
-        return Sequence.from_string(s)
+        return ASCIIText.from_string(s)
     elif isinstance(s, list):
         return Sequences(as_sequence_array("".join(s)), [len(ss) for ss in s])
     else:
