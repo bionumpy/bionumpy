@@ -21,6 +21,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         self.encoding = encoding
         self.data = np.asarray(data)
 
+    def __len__(self):
+        return len(self.data)
+
     @property
     def size(self):
         return self.data.size
@@ -35,7 +38,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return chr(int(self.data))
         if len(self.data.shape) == 1:
             return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
-        a = np.array([str(seq) for seq in self.data.reshape(-1, self.data.shape[-1])]).reshape(self.data.shape[:-1])[:20]
+        a = np.array([str(self.__class__(seq, self.encoding)) for seq in self.data.reshape(-1, self.data.shape[-1])]).reshape(self.data.shape[:-1])[:20]
         return str(a)
 
     def __getitem__(self, idx):
@@ -57,14 +60,18 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         if func == np.bincount:
-            return np.bincount(np.asarray(args[0]), *args[1:], **kwargs)
+            return np.bincount(args[0].data, *args[1:], **kwargs)
         if func == np.concatenate:
-            return func([np.asarray(e) for e in args[0]]).view(self.__class__)
+            return self.__class__(func([e.data for e in args[0]]), self.encoding)
         elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view):
-            return func(np.asarray(args[0]), *args[1:], **kwargs).view(self.__class__)
+            return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
         
         return NotImplemented
         return super().__array_function__(func, types, args, kwargs)
+
+    def ravel(self):
+        return self.__class__(self.data.ravel(), self.encoding)
+
 
 def as_encoded_array(s, target_encoding: Encoding) -> EncodedArray:
     if isinstance(s, str):
