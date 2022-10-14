@@ -16,9 +16,18 @@ def decimal_floats():
 
 
 @pytest.fixture()
+def scientific_floats():
+    return ["10.e2", "1.32e3", "1.1e-2", "-1.2e12"]
+
+
+@pytest.fixture()
 def decimal_strings():
     return ["1.2", "2.11", "3.123"]
 
+
+@pytest.fixture()
+def floats():
+    return ["2.", ".2e1", "-1.2", "2.11", "3.123", "10.e2", "1.32", "1.1e-2", "-1.2e12", "-2", "100", "100e10"]
 
 @pytest.fixture()
 def strings():
@@ -40,8 +49,12 @@ def test_str_to_int(ints, strings):
         assert i == s
 
 
-def test_str_to_float(decimal_floats, decimal_strings):
-    np.testing.assert_array_equal(decimal_floats, str_to_float(decimal_strings))
+def test_str_to_float(floats):
+    np.testing.assert_array_almost_equal([float(c) for c in floats], str_to_float(floats))
+
+
+def test_scientific_str_to_float(scientific_floats):
+    np.testing.assert_array_almost_equal([float(c) for c in scientific_floats], str_to_float(scientific_floats))
     # for i, s in zip(decimal_floats, str_to_float(decimal_strings)):
     #    assert i == s
     

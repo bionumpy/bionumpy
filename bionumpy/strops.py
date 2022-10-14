@@ -2,6 +2,7 @@ from bionumpy.sequences import Sequence, Sequences, as_encoded_sequence_array, A
 from npstructures import RaggedArray, RaggedShape
 from bionumpy.encodings.alphabet_encoding import DigitArray
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
+from npstructures.raggedarray.raggedslice import ragged_slice
 import numpy as np
 
 
@@ -11,50 +12,72 @@ def int_to_str(number):
     digits = number // 10**np.arange(L)[::-1] % 10
     return digits.view(DigitArray)
 
-
-
 def _build_power_array(shape, dots=None):
     total_lengths = shape.ends[-1]
     lengths = shape.lengths
     index_array = np.full(total_lengths, -1, dtype=int)
-    offset = 0 
+    offset_0, offset_rest =(0, 0)
     if dots is not None:
-        index_array[dots] = 0
-        offset = 1
-    index_array[np.cumsum(lengths)[:-1]] = lengths[1:]-1-offset
-    index_array[0] = lengths[0]-1-offset
+        index_array[shape.ravel_multi_index(dots)] = 0
+        offset = np.zeros(len(lengths), dtype=int)
+        offset[dots[0]] = 1
+        offset_0, offset_rest = (offset[0], offset[1:])
+    index_array[np.cumsum(lengths)[:-1]] += lengths[1:]-offset_rest
+    index_array[0] += lengths[0]-offset_0
     np.cumsum(index_array, out=index_array)
     return RaggedArray(index_array, shape)
 
 
 def str_to_int(number_text):
+    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    is_negative = number_text[:, 0] == "-"
+    number_text[is_negative, 0] = "0"
     number_text = as_encoded_sequence_array(number_text, DigitArray)
     number_digits = RaggedArray(np.asarray(number_text.ravel()),
                                 number_text.shape)
     powers = 10**_build_power_array(number_text.shape)
-    return (number_digits*powers).sum(axis=-1)
+    signs = np.where(is_negative, -1, +1)
+    return (number_digits*powers).sum(axis=-1)*signs
 
 
 def _decimal_str_to_float(number_text):
     number_text = as_encoded_sequence_array(number_text, ASCIIText)
-    flat = number_text._data
-    dots = np.flatnonzero(flat == ".")
-    flat[dots] = "0"
+    is_negative = number_text[:, 0] == "-"
+    number_text[is_negative, 0] = "0" 
+    dots = np.nonzero(number_text == ".")
+    number_text[dots] = "0"
     number_text = as_encoded_sequence_array(number_text, DigitArray)
-    powers = 10**_build_power_array(number_text.shape, dots=dots)
+    power_array = _build_power_array(number_text.shape, dots=dots)
+    powers = 10.**power_array
     number_digits = RaggedArray(np.asarray(number_text.ravel()),
                                 number_text.shape)
     base_numbers = (number_digits*powers).sum(axis=-1)
-    _, col_indices =  number_text.shape.unravel_multi_index(dots)
-    powers = (10**(number_text.shape.lengths-col_indices-1))
-    return base_numbers / powers
+    row_indices, col_indices =  dots# number_text.shape.unravel_multi_index(dots)
+    exponents = np.zeros_like(number_text.shape.lengths)
+    exponents[row_indices] = number_text.shape.lengths[row_indices] - col_indices-1
+    powers = (10.**(exponents))
+    signs = np.where(is_negative, -1, +1)
+    return signs*base_numbers / powers
 
 def _scientific_str_to_float(number_text):
-    pass
+    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    row, cols = np.nonzero(number_text == "e")
+    decimal_text = ragged_slice(number_text, ends=cols)
+    decimal_numbers = _decimal_str_to_float(decimal_text)
+    power_text = ragged_slice(number_text, starts=cols+1)
+    powers = str_to_int(power_text)
+    return decimal_numbers*10.**powers
 
 def str_to_float(number_text):
-    return _decimal_str_to_float(number_text)
-    pass
+    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    scientific = np.any(number_text=="e", axis=-1)
+    numbers = np.empty(len(number_text))
+    if np.sum(scientific):
+        numbers[scientific] = _scientific_str_to_float(number_text[scientific])
+    if np.sum(~scientific):
+        numbers[~scientific] = _decimal_str_to_float(number_text[~scientific])
+    return numbers
+# return _decimal_str_to_float(number_text)
 
 def ints_to_strings(number):
     number = np.asanyarray(number)
