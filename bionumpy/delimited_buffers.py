@@ -5,7 +5,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int
 from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
-from .sequences import Sequence, Sequences, ASCIIText
+from .sequences import Sequence, Sequences, ASCIIText, EncodedArray
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 from .encodings.alphabet_encoding import DigitArray
@@ -350,7 +350,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
             for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
-                elif field.type == str:
+                elif field.type == str or (isinstance(field.type, type) and issubclass(field.type, EncodedArray)):
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
                     col = self.get_integers(col_number).ravel()
