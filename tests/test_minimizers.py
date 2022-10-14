@@ -1,5 +1,5 @@
 from bionumpy.minimizers import Minimizers
-from bionumpy.sequences import Sequence
+from bionumpy.sequences import EncodedArray
 from bionumpy.kmers import KmerEncoding
 from bionumpy.encodings.alphabet_encoding import DNAArray
 from npstructures import RaggedArray

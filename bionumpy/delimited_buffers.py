@@ -5,7 +5,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int, str_to_float
 from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
-from .sequences import Sequence, Sequences, ASCIIText, EncodedArray
+from .sequences import EncodedArray, Sequences, ASCIIText, EncodedArray
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 from .encodings.alphabet_encoding import DigitArray

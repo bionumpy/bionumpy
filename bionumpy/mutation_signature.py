@@ -1,6 +1,6 @@
 import numpy as np
 from .encodings import ACTGEncoding
-from .sequences import as_encoded_sequence_array, as_sequence_array, EncodedArray
+from .sequences import as_encoded_sequence_array, as_encoded_array, EncodedArray
 from .dna import complement, reverse_compliment
 from .chromosome_map import ChromosomeMap
 from .counter import count_encoded, EncodedCounts

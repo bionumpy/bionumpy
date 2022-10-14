@@ -6,7 +6,7 @@ import itertools
 import numpy as np
 import bionumpy as bnp
 import re
-from bionumpy.sequences import Sequence
+from bionumpy.sequences import EncodedArray
 from npstructures import RaggedArray
 
 
@@ -35,7 +35,7 @@ class RegexMatcher(RollableFunction):
     def __init__(self, matching_regex, encoding):
         self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
 
-    def __call__(self, sequence: Sequence):
+    def __call__(self, sequence: EncodedArray):
         raise NotImplementedError
 
     @property

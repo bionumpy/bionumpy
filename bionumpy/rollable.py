@@ -1,5 +1,5 @@
 import numpy as np
-from .sequences import Sequence, as_encoded_sequence_array
+from .sequences import EncodedArray, as_encoded_sequence_array
 from npstructures import RaggedArray
 
 from abc import abstractmethod
@@ -7,7 +7,7 @@ from abc import abstractmethod
 
 class RollableFunction:
     @abstractmethod
-    def __call__(self, sequence: Sequence):
+    def __call__(self, sequence: EncodedArray):
         """Function that returns a single value
 
         Broadcastable function that maps a sequence to a single value.

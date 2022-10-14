@@ -6,7 +6,7 @@ from .sequences import EncodedArray, ASCIIText
 from .encodings import BaseEncoding
 from .encodings.alphabet_encoding import AminoAcidArray
 from .kmers import KmerEncoding
-from .sequences import as_sequence_array, as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
+from .sequences import as_encoded_array, as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
 from .util import apply_to_npdataclass
 import dataclasses
 

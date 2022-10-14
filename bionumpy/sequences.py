@@ -1,7 +1,7 @@
 import numpy as np
 from numbers import Number
 from .encodings.base_encoding import (BaseEncoding, Encoding,
-                                      NumericEncoding, ASCIIEncoding)
+                                      NumericEncoding, BaseEncoding)
 from npstructures import RaggedArray
 
 
@@ -127,7 +127,7 @@ class NumericEncodedArray(EncodedArray):
     pass
 
 
-class Sequence(ASCIIText):
+class EncodedArray(ASCIIText):
     pass
 
 
@@ -143,7 +143,7 @@ def create_sequence_array_from_already_encoded_data(data: np.ndarray, encoding: 
 
 def as_numeric_encoded_array(data: np.ndarray, encoding: NumericEncoding):
     if isinstance(data, (str, list)):
-        data = as_sequence_array(data)
+        data = as_encoded_array(data)
     if isinstance(data, RaggedArray):
         return data.__class__(as_numeric_encoded_array(data.ravel(), encoding), data.shape)
     if isinstance(data, EncodedArray):
@@ -159,7 +159,7 @@ def isinstanceorsubclass(obj, types):
 def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
     if isinstanceorsubclass(encoding, NumericEncoding):
         return as_numeric_encoded_array(s, encoding)
-    s = as_sequence_array(s)
+    s = as_encoded_array(s)
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_sequence_array(s.ravel(), encoding), s.shape)
           
@@ -183,7 +183,7 @@ def as_encoded_sequence_array(s, encoding: Encoding) -> EncodedArray:
     return s
 
 
-def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
+def as_encoded_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     """
     Return a sequence array representation of s
     """
@@ -192,11 +192,11 @@ def as_sequence_array(s) -> EncodedArray:#:, encoding=BaseEncoding):
     elif isinstance(s, np.ndarray):
         return s.view(ASCIIText)
     elif isinstance(s, RaggedArray):
-        return Sequences(as_sequence_array(s._data), s.shape)
+        return Sequences(as_encoded_array(s._data), s.shape)
     elif isinstance(s, str):
         return ASCIIText.from_string(s)
     elif isinstance(s, list):
-        return Sequences(as_sequence_array("".join(s)), [len(ss) for ss in s])
+        return Sequences(as_encoded_array("".join(s)), [len(ss) for ss in s])
     else:
         raise Exception(f"Cannot convert {s} of class {type(s)} to sequence array")
 
@@ -213,7 +213,7 @@ def to_ascii(sequence_array, encoding=None):
 
 
 def from_sequence_array(s) -> str:
-    if isinstance(s, Sequence):
+    if isinstance(s, EncodedArray):
         return s.to_string()
     elif isinstance(s, RaggedArray):
         return [k.to_string() for k in s]

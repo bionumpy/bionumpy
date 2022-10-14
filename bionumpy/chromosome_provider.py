@@ -1,6 +1,6 @@
 import numpy as np
 from itertools import groupby
-from .sequences import Sequence
+from .sequences import EncodedArray
 import logging
 
 logger = logging.getLogger(__name__)
@@ -79,18 +79,18 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                 len(overlay)
                 and self.get_chrom_name(overlay[0][0].chromosome) != start_chrom
             ):
-                overlay[0].chromosome = overlay[0].chromosome.array.view(Sequence)
+                overlay[0].chromosome = overlay[0].chromosome.array.view(EncodedArray)
                 yield self.get_chrom_name(overlay[0][0].chromosome), overlay[0]
                 overlay = []
             if not chrom_changes.size:
                 tmp = np.concatenate(overlay + group)
-                tmp.chromosome = tmp.chromosome.array.view(Sequence)
+                tmp.chromosome = tmp.chromosome.array.view(EncodedArray)
                 yield (start_chrom, tmp)
                 overlay = []
             else:
                 l = last_buffer[: chrom_changes[0]]
                 tmp = np.concatenate(overlay + group[:-1] + [l])
-                tmp.chromosome = tmp.chromosome.array.view(Sequence)
+                tmp.chromosome = tmp.chromosome.array.view(EncodedArray)
                 yield (
                     start_chrom,
                     tmp,
@@ -102,12 +102,12 @@ class ChromosomeFileStreamProvider(ChromosomeStreamProvider):
                         for start, end in zip(chrom_changes[:-1], chrom_changes[1:])
                     )
                     for chunk in chunks:
-                        chunk.chromosome = chunk.chromosome.array.view(Sequence)
+                        chunk.chromosome = chunk.chromosome.array.view(EncodedArray)
                         yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
             last_chrom = last_buffer[-1].chromosome
         if len(overlay):
             chunk = overlay[0]
-            chunk.chromosome = chunk.chromosome.array.view(Sequence)
+            chunk.chromosome = chunk.chromosome.array.view(EncodedArray)
             yield (self.get_chrom_name(chunk.chromosome[0]), chunk)
 
 #

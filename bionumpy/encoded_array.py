@@ -1,12 +1,13 @@
 from npstructures import RaggedArray
 from numbers import Number
-from .encodings import BaseEncoding as ASCIIEncoding, Encoding
+from .encodings.base_encoding import BaseEncoding
+from .encodings import Encoding
 import numpy as np
 
 
 class EncodedRaggedArray(RaggedArray):
     @property
-    def enocding(self):
+    def encoding(self):
         return self._data.encoding
 
 
@@ -17,7 +18,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     encoding = None
 
-    def __init__(self, data, encoding=None):
+    def __init__(self, data, encoding=BaseEncoding):
         self.encoding = encoding
         self.data = np.asarray(data)
 
@@ -73,17 +74,19 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(self.data.ravel(), self.encoding)
 
 
-def as_encoded_array(s, target_encoding: Encoding) -> EncodedArray:
+def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArray:
     if isinstance(s, str):
-        s = EncodedArray([ord(c) for c in s], ASCIIEncoding)
+        s = EncodedArray([ord(c) for c in s], BaseEncoding)
 
     elif isinstance(s, list):
+        print(s)
         s = EncodedRaggedArray(
-            EncodedArray([ord(c) for ss in s for c in s]),
+            EncodedArray([ord(c) for ss in s for c in ss]),
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
     if s.encoding == target_encoding:
         return s
-    elif s.encoding == ASCIIEncoding:
+    elif s.encoding == BaseEncoding:
         return EncodedArray(target_encoding.encode(s.data), target_encoding)
+    assert False, (s.encoding, target_encoding)

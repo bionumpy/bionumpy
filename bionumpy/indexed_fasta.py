@@ -1,6 +1,6 @@
 from .chromosome_provider import ChromosomeDictProvider, GroupedDict
 from .encodings import BaseEncoding
-from .sequences import as_sequence_array
+from .sequences import as_encoded_array
 import numpy as np
 
 
@@ -34,7 +34,7 @@ class IndexedFasta(GroupedDict):
             ret.size - idx["rlen"],
             data.shape,
         )
-        ret = as_sequence_array(((ret - ord("A")) % 32) + ord("A"))
+        ret = as_encoded_array(((ret - ord("A")) % 32) + ord("A"))
         return ret
 
 

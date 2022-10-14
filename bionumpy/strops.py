@@ -1,4 +1,4 @@
-from bionumpy.sequences import Sequence, Sequences, as_encoded_sequence_array, ASCIIText
+from bionumpy.encoded_array import EncodedArray, as_encoded_array
 from npstructures import RaggedArray, RaggedShape
 from bionumpy.encodings.alphabet_encoding import DigitArray
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
@@ -90,7 +90,8 @@ def ints_to_strings(number):
 
 def join(sequences, sep="\t", keep_last=False):
     new_lengths = sequences.shape.lengths+1
-    new_array = sequences.__class__(np.empty(shape=np.sum(new_lengths), dtype=np.uint8).view(sequences.ravel().__class__), new_lengths)
+    new_array = sequences.__class__(
+        EncodedArray(np.empty(shape=np.sum(new_lengths), dtype=np.uint8), sequences.encoding), new_lengths)
     new_array[:, :-1] = sequences
     new_array[:, -1] = sep
     if keep_last:

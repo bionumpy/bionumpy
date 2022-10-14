@@ -1,13 +1,12 @@
 from itertools import accumulate, repeat, takewhile, chain
 from .npdataclassstream import streamable
-from .datatypes import Interval, Bed6, BamEntry
+from .datatypes import Bed6, BamEntry
 from .file_buffers import FileBuffer
 from .cigar import count_reference_length, split_cigar, CigarOpArray
-from .datatypes import SAMEntry
 from npstructures.raggedshape import RaggedView
-from npstructures import RaggedArray, npdataclass
+from npstructures import RaggedArray
 import numpy as np
-from .sequences import as_sequence_array, Sequence, create_sequence_array_from_already_encoded_data
+from .encoded_array import as_encoded_array, EncodedArray
 from .encodings import AlphabetEncoding, BaseEncoding, QualityEncoding, Encoding, NumericEncoding
 from .encodings.alphabet_encoding import BamArray, CigarOpArray
 # from bionumpy.bnpdataclass import bnpdataclass
@@ -21,7 +20,7 @@ class BamBuffer(FileBuffer):
 
     def __init__(self, data, delimiters, header_data):
         super().__init__(data, delimiters)
-        self._chromosome_names = as_sequence_array([header[0] for header in header_data])
+        self._chromosome_names = as_encoded_array([header[0] for header in header_data])
         self._data = np.asarray(self._data)
 
     @classmethod
@@ -127,7 +126,7 @@ class BamIntervalBuffer(BamBuffer):
         cigar_cymbol, cigar_length = split_cigar(cigars)
 
         strand = flag & np.uint16(16)
-        strand = np.where(strand, ord("-"), ord("+"))[:, None].view(Sequence)
+        strand = np.where(strand, ord("-"), ord("+"))[:, None].view(EncodedArray)
         strand.encoding = BaseEncoding
         length = count_reference_length(cigar_cymbol, cigar_length)
         return Bed6(chromosome,
@@ -141,7 +140,7 @@ class BamIntervalBuffer(BamBuffer):
 @streamable()
 def alignment_to_interval(alignment):
     strand = alignment.flag & np.uint16(16)
-    strand = np.where(strand, ord("-"), ord("+"))[:, None].view(Sequence)
+    strand = np.where(strand, ord("-"), ord("+"))[:, None].view(EncodedArray)
     strand.encoding = BaseEncoding
     length = count_reference_length(alignment.cigar_op, alignment.cigar_length)
     return Bed6(alignment.chromosome,
