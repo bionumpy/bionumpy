@@ -1,4 +1,4 @@
-from bionumpy.sequences import Sequence, Sequences, as_encoded_sequence_array
+from bionumpy.sequences import Sequence, Sequences, as_encoded_sequence_array, ASCIIText
 from npstructures import RaggedArray, RaggedShape
 from bionumpy.encodings.alphabet_encoding import DigitArray
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
@@ -12,12 +12,17 @@ def int_to_str(number):
     return digits.view(DigitArray)
 
 
-def _build_power_array(shape):
+
+def _build_power_array(shape, dots=None):
     total_lengths = shape.ends[-1]
     lengths = shape.lengths
     index_array = np.full(total_lengths, -1, dtype=int)
-    index_array[np.cumsum(lengths)[:-1]] = lengths[1:]-1
-    index_array[0] = lengths[0]-1
+    offset = 0 
+    if dots is not None:
+        index_array[dots] = 0
+        offset = 1
+    index_array[np.cumsum(lengths)[:-1]] = lengths[1:]-1-offset
+    index_array[0] = lengths[0]-1-offset
     np.cumsum(index_array, out=index_array)
     return RaggedArray(index_array, shape)
 
