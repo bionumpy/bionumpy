@@ -6,7 +6,7 @@ from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
-from .datatypes import GFFEntry, SAMEntry, ChromosomeSize
+from .datatypes import GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak
 from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
@@ -50,6 +50,7 @@ class NpDataclassReader:
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
+    ".narrowPeak": get_bufferclass_for_datatype(NarrowPeak),
     ".fasta": MultiLineFastaBuffer,
     ".fa": MultiLineFastaBuffer,
     ".fastq": FastQBuffer,

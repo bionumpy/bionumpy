@@ -37,6 +37,13 @@ class Bed6(Interval):
     score: int
     strand: str
 
+@bnpdataclass
+class NarrowPeak(Bed6):
+    signal_value: str
+    p_value: str
+    q_value: str
+    peak: int
+
 
 @bnpdataclass
 class Bed12(Bed6):
