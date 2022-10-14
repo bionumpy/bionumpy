@@ -63,6 +63,7 @@ class DelimitedBuffer(FileBuffer):
         FIXME: Add docs.
 
         """
+        assert np.all(cols<self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
         integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
         integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
