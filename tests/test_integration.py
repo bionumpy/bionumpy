@@ -31,7 +31,7 @@ EEAAF	CCA	V2	J3-2
         j_call: str
 
     buffer_class = get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t', has_header=True)
-    sequences = bnp_open(str(seqs_path), buffer_type=buffer_class, ).read()
+    sequences = bnp_open(str(seqs_path), buffer_type=buffer_class).read()
     assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
     matcher = RegexMatcher('AA', encoding=AminoAcidArray)

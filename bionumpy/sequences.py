@@ -20,7 +20,8 @@ class EncodedArray(np.ndarray):
         return cls(shape=(len(s),), dtype=np.uint8, buffer=bytes(s, encoding="ascii"))
 
     def to_string(self) -> str:
-        return "".join(chr(n) for n in self)
+        text = self.encoding.decode(self) if self.encoding else self
+        return "".join(chr(n) for n in text)
 
     def __str__(self) -> str:
         text = self.encoding.decode(self)
