@@ -2,12 +2,22 @@ import pytest
 from npstructures.testing import assert_raggedarray_equal
 import numpy as np
 from bionumpy import as_sequence_array
-from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal)
+from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float)
 
 
 @pytest.fixture()
 def ints():
     return [1, 12, 123]
+
+
+@pytest.fixture()
+def decimal_floats():
+    return [1.2, 2.11, 3.123]
+
+
+@pytest.fixture()
+def decimal_strings():
+    return ["1.2", "2.11", "3.123"]
 
 
 @pytest.fixture()
@@ -29,6 +39,12 @@ def test_str_to_int(ints, strings):
     for i, s in zip(ints, str_to_int(strings)):
         assert i == s
 
+
+def test_str_to_float(decimal_floats, decimal_strings):
+    np.testing.assert_array_equal(decimal_floats, str_to_float(decimal_strings))
+    # for i, s in zip(decimal_floats, str_to_float(decimal_strings)):
+    #    assert i == s
+    
 
 def test_join(strings):
     seqs = as_sequence_array(strings)

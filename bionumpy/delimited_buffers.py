@@ -3,9 +3,9 @@ from npstructures import RaggedArray, RaggedView
 from typing import List
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int
-from .datatypes import (Interval, Variant, VariantWithGenotypes,
+from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
-from .sequences import Sequence, Sequences, ASCIIText
+from .sequences import Sequence, Sequences, ASCIIText, EncodedArray
 import dataclasses
 from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
 from .encodings.alphabet_encoding import DigitArray
@@ -350,7 +350,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
             for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
-                elif field.type == str:
+                elif field.type == str or (isinstance(field.type, type) and issubclass(field.type, EncodedArray)):
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
                     col = self.get_integers(col_number).ravel()
@@ -376,25 +376,16 @@ Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
 
 
-class VCFMatrixBuffer(_VCFBuffer):
-    dataclass = VariantWithGenotypes
+class VCFMatrixBuffer(VCFBuffer):
+    dataclass = VCFEntry
     genotype_encoding = GenotypeEncoding
 
-    def get_entries(self, fixed_length=False):
-        self.validate_if_not()
-        variants = self.get_variants(fixed_length)
+    def get_data(self):
+        data = VCFBuffer.get_data(self)
         genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
         n_samples = self._n_cols - 9
-        genotypes = self.genotype_encoding.from_bytes(genotypes.reshape(-1, n_samples, 3))
-        return VariantWithGenotypes(
-            variants.chromosome,
-            variants.position,
-            variants.ref_seq,
-            variants.alt_seq,
-            genotypes,
-        )
-
-    get_data = get_entries
+        genotypes = self.genotype_encoding.encode(genotypes.reshape(-1, n_samples, 3))
+        return VCFGenotypeEntry(*data.shallow_tuple(), genotypes)
 
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):

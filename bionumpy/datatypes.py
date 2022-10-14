@@ -69,7 +69,7 @@ class VCFEntry:
 
 
 @bnpdataclass
-class VariantWithGenotypes(Variant):
+class VCFGenotypeEntry(VCFEntry):
     genotypes: int
 
 
