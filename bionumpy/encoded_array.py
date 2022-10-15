@@ -97,12 +97,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
         if func == np.bincount:
             return np.bincount(args[0].data, *args[1:], **kwargs)
         if func == np.concatenate:
             return self.__class__(func([e.data for e in args[0]]), self.encoding)
+        if func == np.where:
+            return self.__class__(func(args[0], args[1].data, args[2].data), encoding = self.encoding)
         elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
             print(func, args[0], args[1:], kwargs, flush=True)
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
@@ -132,7 +132,7 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             return EncodedRaggedArray(data, s.shape)
         return RaggedArray(data, s.shape)
     if isinstance(s, np.ndarray):
-        assert is_subclass_or_instance(target_encoding, NumericEncoding)
+        assert is_subclass_or_instance(target_encoding, NumericEncoding), s
         return s
     assert isinstance(s, EncodedArray), (s, repr(s), type(s))
     if s.encoding == target_encoding:

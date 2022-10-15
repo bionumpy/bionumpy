@@ -10,9 +10,8 @@ from bionumpy.files import bnp_open
 from bionumpy.delimited_buffers import get_bufferclass_for_datatype
 from bionumpy.string_matcher import RegexMatcher
 from bionumpy.bnpdataclass import bnpdataclass
-import pytest
 
-@pytest.mark.skip("tmp")
+
 def test_csv_import_and_regex_matching():
 
     seqs_path = Path("seqs.tsv")
