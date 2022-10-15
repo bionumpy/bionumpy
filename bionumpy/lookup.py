@@ -17,7 +17,6 @@ class Lookup:
 
     def __setitem__(self, idx, value):
         if isinstance(idx, tuple):
-            print(idx)
             idx = tuple(as_encoded_array(i, self._encoding).raw() for i in idx)
         else:
             idx = as_encoded_array(idx, self._encoding).raw()

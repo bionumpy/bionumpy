@@ -23,7 +23,6 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self._data, EncodedArray), self._data
         inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
         kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
-        print(ufunc, inputs, kwargs)
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
         if isinstance(ret._data, EncodedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
@@ -104,7 +103,6 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if func == np.where:
             return self.__class__(func(args[0], args[1].data, args[2].data), encoding = self.encoding)
         elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
-            print(func, args[0], args[1:], kwargs, flush=True)
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
         
         return NotImplemented

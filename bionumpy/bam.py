@@ -105,7 +105,6 @@ class BamBuffer(FileBuffer):
         new_sequences = new_sequences[view]
         quals = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                              self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
-        print([type(c) for c in (chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)])
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
 
     def count_entries(self):

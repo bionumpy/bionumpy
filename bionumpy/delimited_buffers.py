@@ -35,7 +35,6 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
-        print(type(chunk))
         chunk = EncodedArray(chunk)
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
@@ -168,9 +167,6 @@ class DelimitedBuffer(FileBuffer):
     def _validate(self):
         chunk = self._data
         delimiters = self._delimiters[1:]
-        print("##", NEWLINE, type(NEWLINE))
-        print(chunk)
-        print("---", type(chunk), type(chunk[0]))
         n_delimiters_per_line = (
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
@@ -192,8 +188,6 @@ class DelimitedBuffer(FileBuffer):
                  str: lambda x: x}
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
-        for column in columns:
-            print(column)
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
                                   for column in columns], axis=-1).ravel()
         lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),

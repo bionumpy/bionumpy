@@ -48,7 +48,6 @@ class RollableFunction:
             if hasattr(self, "_encoding") and self._encoding is not None:
                 _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
             elif not isinstance(_sequence, RaggedArray):
-                print(_sequence)
                 _sequence = RaggedArray(_sequence)
 
         shape, sequence = (_sequence.shape, _sequence.ravel())
@@ -58,7 +57,6 @@ class RollableFunction:
             windows = as_strided(sequence, strides=sequence.strides + sequence.strides, shape=sequence.shape + (window_size,),
                                                       writeable=False)
         convoluted = self(windows)
-        print(type(_sequence))
         if isinstance(_sequence, RaggedArray):
             out = RaggedArray(convoluted, shape)
         elif isinstance(_sequence, (np.ndarray, EncodedArray)):

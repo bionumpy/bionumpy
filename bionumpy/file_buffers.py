@@ -246,7 +246,6 @@ class FastQBuffer(OneLineBuffer):
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = "+"
-        print(entries.quality)
         lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()))
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = "\n"
