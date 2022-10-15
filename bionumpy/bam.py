@@ -4,9 +4,9 @@ from .datatypes import Bed6, BamEntry
 from .file_buffers import FileBuffer
 from .cigar import count_reference_length, split_cigar, CigarOpEncoding
 from npstructures.raggedshape import RaggedView
-from npstructures import RaggedArray
+from npstructures import RaggedArray, ragged_slice
 import numpy as np
-from .encoded_array import as_encoded_array, EncodedArray
+from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
 from .encodings import AlphabetEncoding, BaseEncoding, QualityEncoding, Encoding, NumericEncoding
 from .encodings.alphabet_encoding import BamEncoding, CigarOpEncoding
 # from bionumpy.bnpdataclass import bnpdataclass
@@ -98,11 +98,12 @@ class BamBuffer(FileBuffer):
             (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)),
             BamEncoding)
         
-        new_sequences = RaggedArray(sequences, n_seq_bytes*2)
+        new_sequences = EncodedRaggedArray(sequences, n_seq_bytes*2)
         view = RaggedView(new_sequences.shape.starts, l_seq)
         new_sequences = new_sequences[view]
         quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                                                      self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
+        print([type(c) for c in (chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)])
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
 
     def count_entries(self):

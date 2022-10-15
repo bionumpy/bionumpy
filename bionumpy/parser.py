@@ -184,6 +184,8 @@ class NpBufferedWriter:
                 self.write(buf)
             return 
         bytes_array = self._buffer_type.from_data(data)
+        if isinstance(bytes_array, EncodedArray):
+            bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
         self._file_obj.flush()
         logger.debug(

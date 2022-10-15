@@ -151,7 +151,7 @@ class OneLineBuffer(FileBuffer):
         chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
-    def get_sequences(self) -> RaggedArray:
+    def get_sequences(self) -> EncodedRaggedArray:
         self.validate_if_not()
         sequence_starts = self._new_lines[:: self.n_lines_per_entry] + 1
         sequence_lens = self._new_lines[1 :: self.n_lines_per_entry] - sequence_starts
@@ -160,7 +160,7 @@ class OneLineBuffer(FileBuffer):
         d = m % self._buffer_divisor
         seq = EncodedArray(np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype))
         seq[:m] = self._data[indices]
-        return RaggedArray(seq, shape)
+        return EncodedRaggedArray(seq, shape)
 
     def get_data(self):
         self.validate_if_not()
@@ -246,7 +246,8 @@ class FastQBuffer(OneLineBuffer):
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = "+"
-        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality))
+        print(entries.quality)
+        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()))
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = "\n"
 

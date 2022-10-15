@@ -1,11 +1,17 @@
 from npstructures import RaggedArray
 from numbers import Number
 from .encodings.base_encoding import BaseEncoding
-from .encodings import Encoding
+from .encodings import Encoding, NumericEncoding
+from .util import is_subclass_or_instance
 import numpy as np
 
 
 class EncodedRaggedArray(RaggedArray):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert isinstance(self._data, EncodedArray), self._data
+
     @property
     def encoding(self):
         return self._data.encoding
@@ -32,6 +38,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     encoding = None
 
     def __init__(self, data, encoding=BaseEncoding):
+        if isinstance(data, EncodedArray):
+            assert data.encoding == encoding
+            data = data.data
         self.encoding = encoding
         self.data = np.asarray(data)
 
@@ -105,6 +114,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(self.data.ravel(), self.encoding)
 
     def as_strided(self, *args, **kwargs):
+        assert isinstance(self.data, np.ndarray) and not np.issubdtype(self.data.dtype, np.object_)
         return self.__class__(np.lib.stride_tricks.as_strided(self.data, *args, **kwargs), self.encoding)
 
 
@@ -113,17 +123,22 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         s = EncodedArray([ord(c) for c in s], BaseEncoding)
 
     elif isinstance(s, list):
-        print(s)
         s = EncodedRaggedArray(
             EncodedArray([ord(c) for ss in s for c in ss]),
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
         return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
-    assert isinstance(s, EncodedArray) # , (s, repr(s), type(s))
+    if isinstance(s, np.ndarray):
+        assert is_subclass_or_instance(target_encoding, NumericEncoding)
+        return s
+    assert isinstance(s, EncodedArray), (s, repr(s), type(s))
     if s.encoding == target_encoding:
         return s
     elif s.encoding == BaseEncoding:
-        return EncodedArray(target_encoding.encode(s.data), target_encoding)
+        encoded = target_encoding.encode(s.data)
+        if issubclass(target_encoding, NumericEncoding):
+            return encoded
+        return EncodedArray(encoded, target_encoding)
     elif target_encoding == BaseEncoding:
         return EncodedArray(s.encoding.decode(s.data), BaseEncoding)
     assert False, (str(s.encoding), str(target_encoding))

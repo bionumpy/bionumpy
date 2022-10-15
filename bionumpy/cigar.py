@@ -1,12 +1,13 @@
 from .encodings.alphabet_encoding import CigarOpEncoding
-from .encoded_array import as_encoded_array, EncodedArray
+from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
 from npstructures import RaggedArray
 import numpy as np
 
 
 def split_cigar(cigars):
     if isinstance(cigars, RaggedArray):
-        return map(lambda data: RaggedArray(data, cigars.shape), split_cigar(cigars.ravel()))
+        symbol, lengths = split_cigar(cigars.ravel())
+        return EncodedRaggedArray(symbol, cigars.shape), RaggedArray(lengths, cigars.shape)
 
     symbol = EncodedArray((cigars & np.uint32(2**4-1)), CigarOpEncoding)
     lengths = (cigars >> 4)

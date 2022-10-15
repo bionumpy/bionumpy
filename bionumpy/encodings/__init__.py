@@ -54,13 +54,12 @@ class PhasedGenotypeEncoding:
 class QualityEncoding(NumericEncoding):
 
     def encode(byte_array):
-        byte_array = byte_array
         assert np.all((byte_array >= ord("!")) & (byte_array < ord("!")+94)), repr(byte_array)
         res = byte_array - ord("!")
         return res
 
     def decode(quality):
-        assert np.all(quality < 94)
+        assert np.all(quality < 94), quality
         res = quality.astype(np.uint8) + ord("!")
         return res
 

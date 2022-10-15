@@ -34,7 +34,6 @@ def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     if buffer_name == "multiline_fasta":
         buf_type.n_characters_per_line = 6
-    print(data)
     data = buf_type.dataclass.stack_with_ragged(data)
     buf = buf_type.from_data(data)
     print(buf.to_string())
@@ -61,7 +60,6 @@ def test_buffered_writer_ctx_manager(file, chunk_size):
 
 
 def test_custom_read():
-    from npstructures import npdataclass
 
     @bnpdataclass
     class SampleDC:

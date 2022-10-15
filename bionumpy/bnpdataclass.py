@@ -3,9 +3,9 @@ from typing import List
 from npstructures.npdataclasses import npdataclass
 from npstructures import RaggedArray
 import numpy as np
-from .encoded_array import EncodedArray, as_encoded_array
-from .encodings import Encoding
-
+from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from .encodings import Encoding, NumericEncoding
+from .util import is_subclass_or_instance
 
 def bnpdataclass(base_class):
     def _implicit_format_conversion(cls, obj):
@@ -14,8 +14,13 @@ def bnpdataclass(base_class):
             if field.type in (int, float, -1):
                 val = np.asanyarray(pre_val)
             elif field.type == str:
+                assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
                 val = as_encoded_array(pre_val)
-            elif (isinstance(field.type, type) and issubclass(field.type, (Encoding))) or isinstance(field.type, Encoding):
+            elif is_subclass_or_instance(field.type, Encoding):
+                if is_subclass_or_instance(field.type, NumericEncoding):
+                    assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, np.ndarray)), (field, pre_val)
+                else:
+                    assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
                 val = as_encoded_array(pre_val, field.type)
             elif field.type == List[int]:
                 val = RaggedArray(pre_val) if not isinstance(pre_val, RaggedArray) else pre_val
