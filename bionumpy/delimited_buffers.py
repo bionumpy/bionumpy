@@ -7,8 +7,8 @@ from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
 from .encoded_array import EncodedArray, EncodedRaggedArray
 import dataclasses
-from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
-
+from .encodings import Encoding, DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
+from .util import is_subclass_or_instance
 import numpy as np
 
 
@@ -375,7 +375,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
             for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
-                elif field.type == str or (isinstance(field.type, type) and issubclass(field.type, EncodedArray)):
+                elif field.type == str or is_subclass_or_instance(field.type, Encoding):
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
                     col = self.get_integers(col_number).ravel()

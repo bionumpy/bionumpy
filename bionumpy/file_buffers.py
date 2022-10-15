@@ -166,7 +166,7 @@ class OneLineBuffer(FileBuffer):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
-        self.lines = RaggedArray(self._data, RaggedShape(lengths))
+        self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
         #sequences = None
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]

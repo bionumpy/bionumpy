@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 def as_strided(arr, *args, **kwargs):
     if hasattr(arr, "as_strided"):
         return arr.as_strided(*args, **kwargs)
+    assert not np.issubdtype(arr.dtype, np.object_), arr
     return np.lib.stride_tricks.as_strided(arr, *args, **kwargs)
 
 

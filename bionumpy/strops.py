@@ -66,6 +66,7 @@ def _scientific_str_to_float(number_text):
     powers = str_to_int(power_text)
     return decimal_numbers*10.**powers
 
+
 def str_to_float(number_text):
     number_text = as_encoded_array(number_text)
     scientific = np.any(number_text == "e", axis=-1)
@@ -76,6 +77,7 @@ def str_to_float(number_text):
         numbers[~scientific] = _decimal_str_to_float(number_text[~scientific])
     return numbers
 # return _decimal_str_to_float(number_text)
+
 
 def ints_to_strings(number):
     number = np.asanyarray(number)

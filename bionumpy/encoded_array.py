@@ -10,7 +10,7 @@ class EncodedRaggedArray(RaggedArray):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert isinstance(self._data, EncodedArray), self._data
+        assert isinstance(self._data, EncodedArray)
 
     @property
     def encoding(self):
@@ -26,8 +26,8 @@ class EncodedRaggedArray(RaggedArray):
         print(ufunc, inputs, kwargs)
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
         if isinstance(ret._data, EncodedArray):
-            return ret
-        return RaggedArray(ret._data, ret.shape)
+            return EncodedRaggedArray(ret._data, ret.shape)
+        return ret
 
 
 class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
@@ -127,7 +127,10 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
             EncodedArray([ord(c) for ss in s for c in ss]),
             [len(ss) for ss in s])
     if isinstance(s, RaggedArray):
-        return s.__class__(as_encoded_array(s.ravel(), target_encoding), s.shape)
+        data = as_encoded_array(s.ravel(), target_encoding)
+        if isinstance(data, EncodedArray):
+            return EncodedRaggedArray(data, s.shape)
+        return RaggedArray(data, s.shape)
     if isinstance(s, np.ndarray):
         assert is_subclass_or_instance(target_encoding, NumericEncoding)
         return s
@@ -136,7 +139,7 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         return s
     elif s.encoding == BaseEncoding:
         encoded = target_encoding.encode(s.data)
-        if issubclass(target_encoding, NumericEncoding):
+        if is_subclass_or_instance(target_encoding, NumericEncoding):
             return encoded
         return EncodedArray(encoded, target_encoding)
     elif target_encoding == BaseEncoding:

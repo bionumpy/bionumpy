@@ -86,14 +86,16 @@ class BamBuffer(FileBuffer):
         n_cigar_op = self._get_ints(16, 2, np.uint16)
         flag = self._get_ints(18, 1, np.uint8)
         n_cigar_bytes = n_cigar_op*4
-        read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
-        cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
-                                                      self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
+        read_names = ragged_slice(self._data, self._new_lines+36, self._new_lines+36+l_read_name-1)
+        read_names = EncodedRaggedArray(
+            EncodedArray(read_names.ravel()), read_names.shape)
+        cigars = ragged_slice(self._data, self._new_lines+36+l_read_name,
+                              self._new_lines+36+l_read_name+n_cigar_bytes)
 
         cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
         cigar_cymbol, cigar_length = split_cigar(cigars)
-        sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
-                                                         self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
+        sequences = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes,
+                                 self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
         sequences = EncodedArray(
             (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)),
             BamEncoding)
@@ -101,8 +103,8 @@ class BamBuffer(FileBuffer):
         new_sequences = EncodedRaggedArray(sequences, n_seq_bytes*2)
         view = RaggedView(new_sequences.shape.starts, l_seq)
         new_sequences = new_sequences[view]
-        quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
-                                                     self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
+        quals = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
+                             self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
         print([type(c) for c in (chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)])
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
 

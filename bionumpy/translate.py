@@ -19,7 +19,7 @@ class DNAToProtein:
 
 class WindowFunction:
     def windowed(self, sequences):
-        sequences = as_encoded_array(sequences, encoding=self._encoding)
+        sequences = as_encoded_array(sequences, target_encoding=self._encoding)
         assert np.all(sequences.shape.lengths % self.window_size == 0)
         tuples = sequences.ravel().reshape(-1, self.window_size)
         tuples.encoding = self._encoding

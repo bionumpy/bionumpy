@@ -42,22 +42,23 @@ class RegexMatcher(RollableFunction):
         return [sub_matcher.window_size for sub_matcher in self._sub_matchers]
 
     def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
-        if not isinstance(_sequence, (np.ndarray, EncodedArray)):
-            if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
-            else:
-                _sequence = RaggedArray(_sequence)
+        print(_sequence)
+        if hasattr(self, "_encoding") and self._encoding is not None:
+            _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
 
         if mode == "valid":
             logging.warning("Mode is set to 'valid' in rolling_window(), but RegexMatcher uses only mode 'same'. Switching to 'same'...")
 
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        out = np.zeros_like(_sequence, dtype=bool)
+        out = RaggedArray(np.zeros(sequence.shape, dtype=bool), shape)
 
         for index, sub_matcher in enumerate(self._sub_matchers):
             windows = as_strided(sequence, strides=sequence.strides + sequence.strides,
                                  shape=sequence.shape + (sub_matcher.window_size,), writeable=False)
+            #print(sequence, type(sequence), sequence.dtype, np.issubdtype(sequence.dtype, np.object0))
+            # break
             convoluted = sub_matcher(windows)
+
             if isinstance(_sequence, RaggedArray):
                 out = np.logical_or(out, RaggedArray(convoluted, shape))
             elif isinstance(_sequence, (np.ndarray, EncodedArray)):

@@ -29,6 +29,7 @@ def decimal_strings():
 def floats():
     return ["2.", ".2e1", "-1.2", "2.11", "3.123", "10.e2", "1.32", "1.1e-2", "-1.2e12", "-2", "100", "100e10"]
 
+
 @pytest.fixture()
 def strings():
     return ["1", "12", "123"]
@@ -55,8 +56,6 @@ def test_str_to_float(floats):
 
 def test_scientific_str_to_float(scientific_floats):
     np.testing.assert_array_almost_equal([float(c) for c in scientific_floats], str_to_float(scientific_floats))
-
-
 def test_join(strings):
     seqs = as_encoded_array(strings)
     print(seqs.shape, seqs._data)
