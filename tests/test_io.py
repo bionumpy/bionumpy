@@ -1,6 +1,10 @@
+import os
+from pathlib import Path
+
 import pytest
 import numpy as np
 from io import BytesIO
+import bionumpy as bnp
 from bionumpy.files import NumpyFileReader, NpDataclassReader
 from .buffers import buffer_texts, combos, big_fastq_text
 from npstructures.testing import assert_npdataclass_equal
@@ -30,3 +34,16 @@ def test_read_big_fastq():
     io_obj = BytesIO(bytes(big_fastq_text*20, encoding="utf8"))
     for b in NpDataclassReader(NumpyFileReader(io_obj, combos["fastq"][2])).read_chunks(chunk_size=1000):
         print(b)
+
+
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
+def test_ctx_manager_read(buffer_name):
+    file_path = Path(f"./{buffer_name}_example.{buffer_name}")
+
+    with open(file_path, "w") as file:
+        file.write(buffer_texts[buffer_name])
+
+    with bnp.open(file_path) as file:
+        file.read()
+
+    os.remove(file_path)
