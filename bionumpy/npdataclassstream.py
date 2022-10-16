@@ -65,9 +65,8 @@ class NpDataclassStream(BnpStream):
     def __str__(self):
         status = "opened" if self._opened else "unopened"
         return f"""\
-{status.capitalize()} stream of {self._buffer_type} buffers. Next buffer:
-{self._peek()}
-"""
+{status.capitalize()} stream of {self._dataclass} buffers. Next buffer:
+{self._peek()}"""
 
     def __getattr__(self, attribute_name):
         if not attribute_name in {f.name for f in dataclasses.fields(self._dataclass)}:
