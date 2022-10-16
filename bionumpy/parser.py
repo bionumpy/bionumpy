@@ -3,6 +3,7 @@ from .npdataclassstream import NpDataclassStream
 import logging
 from npstructures import npdataclass
 from .sequences import EncodedArray
+from .groupby import GroupedStream
 logger = logging.getLogger(__name__)
 
 
@@ -181,6 +182,10 @@ class NpBufferedWriter:
         """
         if isinstance(data, NpDataclassStream):
             for buf in data:
+                self.write(buf)
+            return 
+        if isinstance(data, GroupedStream):
+            for name, buf in data:
                 self.write(buf)
             return 
         bytes_array = self._buffer_type.from_data(data)
