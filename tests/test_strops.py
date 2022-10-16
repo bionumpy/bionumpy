@@ -7,7 +7,7 @@ from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_in
 
 @pytest.fixture()
 def ints():
-    return [1, 12, 123]
+    return [0, 1, 12, 123]
 
 
 @pytest.fixture()
@@ -32,7 +32,7 @@ def floats():
 
 @pytest.fixture()
 def strings():
-    return ["1", "12", "123"]
+    return ["0", "1", "12", "123"]
 
 
 def test_int_to_string(ints, strings):
@@ -73,7 +73,7 @@ def test_split(strings):
 def test_str_equal(strings):
     s = as_encoded_array(strings*2)
     mask = str_equal(s, "12")
-    np.testing.assert_array_equal(mask, [False, True, False]*2)
+    np.testing.assert_array_equal(mask, [False, False, True, False]*2)
 
 
 if __name__ == "__main__":

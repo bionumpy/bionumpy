@@ -8,7 +8,7 @@ import numpy as np
 
 def int_to_str(number):
     number = np.asanyarray(number)
-    L = np.log10(number).astype(int)+1
+    L = np.log10(np.maximum(number, 1)).astype(int)+1
     digits = number // 10**np.arange(L)[::-1] % 10
     return EncodedArray(digits, DigitEncoding)
 
@@ -81,7 +81,7 @@ def str_to_float(number_text):
 
 def ints_to_strings(number):
     number = np.asanyarray(number)
-    lengths = np.log10(number).astype(int)+1
+    lengths = np.log10(np.maximum(number, 1)).astype(int)+1
     shape = RaggedShape(lengths)
     ragged_index = _build_power_array(shape)
     digits = number[:, np.newaxis] // 10**ragged_index % 10
