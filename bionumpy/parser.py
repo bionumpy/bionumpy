@@ -102,6 +102,9 @@ class NumpyFileReader:
         while not self._is_finished:
             yield self.read_chunk(chunk_size)
 
+    def close(self):
+        self._file_obj.close()
+
     def __add_newline_to_end(self, chunk, bytes_read):
         if chunk[bytes_read - 1] != "\n":
             chunk = np.append(chunk, np.uint8(ord("\n")))
