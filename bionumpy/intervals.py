@@ -19,6 +19,7 @@ def sort_intervals(intervals):
 
 @ChromosomeMap()
 def merge_intervals(intervals, distance=0):
+    assert np.all(intervals.start[:-1] <= intervals.start[1:]), "merge_intervals requires intervals sorted on start position"
     ends = np.maximum.accumulate(intervals.end)
     if distance > 0:
         ends += distance
