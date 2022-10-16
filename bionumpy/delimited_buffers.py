@@ -5,11 +5,10 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int, str_to_float
 from .datatypes import (Interval, Variant, VCFGenotypeEntry,
                         SequenceEntry, VCFEntry, Bed12, Bed6)
-from .sequences import Sequence, Sequences, ASCIIText, EncodedArray
+from .encoded_array import EncodedArray, EncodedRaggedArray
 import dataclasses
-from .encodings import DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
-from .encodings.alphabet_encoding import DigitArray
-
+from .encodings import Encoding, DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
+from .util import is_subclass_or_instance
 import numpy as np
 
 
@@ -36,7 +35,7 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
-        chunk = chunk.view(ASCIIText)
+        chunk = EncodedArray(chunk)
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
@@ -163,7 +162,7 @@ class DelimitedBuffer(FileBuffer):
     def _move_ints_to_digit_array(ints, n_digits):
         powers = np.uint8(10)**np.arange(n_digits)[::-1]
         ret = (ints[..., None]//powers) % 10
-        return ret.view(DigitArray)
+        return EncodedArray(ret, DigitEncoding)
 
     def _validate(self):
         chunk = self._data
@@ -189,12 +188,10 @@ class DelimitedBuffer(FileBuffer):
                  str: lambda x: x}
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
-        for column in columns:
-            print(column)
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
                                   for column in columns], axis=-1).ravel()
-        lines = Sequences(np.empty(lengths.sum(), dtype=np.uint8).view(ASCIIText),
-                          lengths)
+        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
+                                   lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):
             lines[i::n_columns, :-1] = column
@@ -372,7 +369,7 @@ def get_bufferclass_for_datatype(_dataclass, delimiter="\t", has_header=False, c
             for col_number, field in enumerate(fields):
                 if field.type is None:
                     col = None
-                elif field.type == str or (isinstance(field.type, type) and issubclass(field.type, EncodedArray)):
+                elif field.type == str or is_subclass_or_instance(field.type, Encoding):
                     col = self.get_text(col_number, fixed_length=False)
                 elif field.type == int:
                     col = self.get_integers(col_number).ravel()

@@ -1,7 +1,7 @@
 import numpy as np
 from .rollable import RollableFunction
-from .sequences import as_encoded_sequence_array, Sequence
-from .encodings import ACTGEncoding
+from .encoded_array import as_encoded_array, EncodedArray
+from .encodings import DNAEncoding
 
 
 class PositionWeightMatrix(RollableFunction):
@@ -11,9 +11,9 @@ class PositionWeightMatrix(RollableFunction):
         self._indices = np.arange(self.window_size)
         self._encoding = encoding
 
-    def __call__(self, sequence: Sequence) -> float:
+    def __call__(self, sequence: EncodedArray) -> float:
         if self._encoding is not None:
-            sequence = as_encoded_sequence_array(sequence, self._encoding)
+            sequence = as_encoded_array(sequence, self._encoding)
         scores = self._matrix[np.asarray(sequence), self._indices]
         return scores.sum(axis=-1)
 

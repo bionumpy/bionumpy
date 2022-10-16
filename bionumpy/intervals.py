@@ -104,6 +104,7 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
 
 def pileup(intervals):
     chroms = np.concatenate([intervals.chromosome, intervals.chromosome])
+
     positions = np.concatenate((intervals.start,
                                 intervals.end))
     args = np.argsort(positions, kind="mergesort")

@@ -1,20 +1,21 @@
-from .encodings.alphabet_encoding import CigarOpArray
-from .sequences import as_encoded_sequence_array
+from .encodings.alphabet_encoding import CigarOpEncoding
+from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
 from npstructures import RaggedArray
 import numpy as np
 
 
 def split_cigar(cigars):
     if isinstance(cigars, RaggedArray):
-        return map(lambda data: RaggedArray(data, cigars.shape), split_cigar(cigars.ravel()))
+        symbol, lengths = split_cigar(cigars.ravel())
+        return EncodedRaggedArray(symbol, cigars.shape), RaggedArray(lengths, cigars.shape)
 
-    symbol = (cigars & np.uint32(2**4-1)).view(CigarOpArray)
+    symbol = EncodedArray((cigars & np.uint32(2**4-1)), CigarOpEncoding)
     lengths = (cigars >> 4)
     return symbol, lengths
 
 
 def count_reference_length(symbol, lengths):
-    consuming = as_encoded_sequence_array("MDN=X", CigarOpArray)
+    consuming = as_encoded_array("MDN=X", CigarOpEncoding)
     mask = (symbol == consuming[0])
     for consuming_symbol in consuming[1:]:
         mask = mask | (symbol == consuming_symbol)

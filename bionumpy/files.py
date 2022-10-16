@@ -1,20 +1,18 @@
 from pathlib import PurePath
 import gzip
-import numpy as np
 import dataclasses
-from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .file_buffers import FastQBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak
-from .parser import NumpyFileReader, NpBufferedWriter, chunk_lines
+from .parser import NumpyFileReader, NpBufferedWriter
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
 import logging
 
 logger = logging.getLogger(__name__)
-# from .gzip import gzip
 
 
 class NpDataclassReader:

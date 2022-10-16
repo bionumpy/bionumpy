@@ -2,7 +2,7 @@ import numpy as np
 from .npdataclassstream import NpDataclassStream
 import logging
 from npstructures import npdataclass
-from .sequences import EncodedArray
+from .encoded_array import EncodedArray
 from .groupby import GroupedStream
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class NumpyFileReader:
     def __read_raw_chunk(self, chunk_size):
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
-        return b.view(EncodedArray), b.size
+        return b, b.size
 
     def _remove_initial_comments(self):
         if self._buffer_type.COMMENT == 0:
@@ -192,6 +192,8 @@ class NpBufferedWriter:
                 self.write(buf)
             return 
         bytes_array = self._buffer_type.from_data(data)
+        if isinstance(bytes_array, EncodedArray):
+            bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
         self._file_obj.flush()
         logger.debug(

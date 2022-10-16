@@ -1,15 +1,14 @@
 from itertools import accumulate, repeat, takewhile, chain
 from .npdataclassstream import streamable
-from .datatypes import Interval, Bed6, BamEntry
+from .datatypes import Bed6, BamEntry
 from .file_buffers import FileBuffer
-from .cigar import count_reference_length, split_cigar, CigarOpArray
-from .datatypes import SAMEntry
+from .cigar import count_reference_length, split_cigar, CigarOpEncoding
 from npstructures.raggedshape import RaggedView
-from npstructures import RaggedArray, npdataclass
+from npstructures import RaggedArray, ragged_slice
 import numpy as np
-from .sequences import as_sequence_array, Sequence, create_sequence_array_from_already_encoded_data
+from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
 from .encodings import AlphabetEncoding, BaseEncoding, QualityEncoding, Encoding, NumericEncoding
-from .encodings.alphabet_encoding import BamArray, CigarOpArray
+from .encodings.alphabet_encoding import BamEncoding, CigarOpEncoding
 # from bionumpy.bnpdataclass import bnpdataclass
 
 # BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
@@ -21,7 +20,7 @@ class BamBuffer(FileBuffer):
 
     def __init__(self, data, delimiters, header_data):
         super().__init__(data, delimiters)
-        self._chromosome_names = as_sequence_array([header[0] for header in header_data])
+        self._chromosome_names = as_encoded_array([header[0] for header in header_data])
         self._data = np.asarray(self._data)
 
     @classmethod
@@ -87,20 +86,25 @@ class BamBuffer(FileBuffer):
         n_cigar_op = self._get_ints(16, 2, np.uint16)
         flag = self._get_ints(18, 1, np.uint8)
         n_cigar_bytes = n_cigar_op*4
-        read_names = self._move_intervals_to_ragged_array(self._new_lines+36, self._new_lines+36+l_read_name-1)
-        cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
-                                                      self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
+        read_names = ragged_slice(self._data, self._new_lines+36, self._new_lines+36+l_read_name-1)
+        read_names = EncodedRaggedArray(
+            EncodedArray(read_names.ravel()), read_names.shape)
+        cigars = ragged_slice(self._data, self._new_lines+36+l_read_name,
+                              self._new_lines+36+l_read_name+n_cigar_bytes)
 
         cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
         cigar_cymbol, cigar_length = split_cigar(cigars)
-        sequences = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes,
-                                                         self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
-        sequences = (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)).view(BamArray)
-        new_sequences = RaggedArray(sequences, n_seq_bytes*2)
+        sequences = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes,
+                                 self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
+        sequences = EncodedArray(
+            (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)),
+            BamEncoding)
+        
+        new_sequences = EncodedRaggedArray(sequences, n_seq_bytes*2)
         view = RaggedView(new_sequences.shape.starts, l_seq)
         new_sequences = new_sequences[view]
-        quals = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
-                                                     self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
+        quals = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
+                             self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
         return BamEntry(chromosome, read_names, flag, pos, mapq, cigar_cymbol, cigar_length, new_sequences, quals)
 
     def count_entries(self):
@@ -127,7 +131,7 @@ class BamIntervalBuffer(BamBuffer):
         cigar_cymbol, cigar_length = split_cigar(cigars)
 
         strand = flag & np.uint16(16)
-        strand = np.where(strand, ord("-"), ord("+"))[:, None].view(Sequence)
+        strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None])
         strand.encoding = BaseEncoding
         length = count_reference_length(cigar_cymbol, cigar_length)
         return Bed6(chromosome,
@@ -141,7 +145,7 @@ class BamIntervalBuffer(BamBuffer):
 @streamable()
 def alignment_to_interval(alignment):
     strand = alignment.flag & np.uint16(16)
-    strand = np.where(strand, ord("-"), ord("+"))[:, None].view(Sequence)
+    strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None])
     strand.encoding = BaseEncoding
     length = count_reference_length(alignment.cigar_op, alignment.cigar_length)
     return Bed6(alignment.chromosome,

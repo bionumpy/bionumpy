@@ -5,7 +5,7 @@ import numpy as np
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 import bionumpy.encodings
-from bionumpy import AminoAcidArray, DNAArray
+from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.files import bnp_open
 from bionumpy.delimited_buffers import get_bufferclass_for_datatype
 from bionumpy.string_matcher import RegexMatcher
@@ -25,8 +25,8 @@ EEAAF	CCA	V2	J3-2
 
     @bnpdataclass
     class SeqAsTSV:
-        sequence_aa: AminoAcidArray
-        sequence: DNAArray
+        sequence_aa: AminoAcidEncoding
+        sequence: DNAEncoding
         v_call: str
         j_call: str
 
@@ -34,9 +34,8 @@ EEAAF	CCA	V2	J3-2
     sequences = bnp_open(str(seqs_path), buffer_type=buffer_class).read()
     assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
-    matcher = RegexMatcher('AA', encoding=AminoAcidArray)
+    matcher = RegexMatcher('AA', encoding=AminoAcidEncoding)
     matches = matcher.rolling_window(sequences.sequence_aa, mode='same')
-
     assert_raggedarray_equal(matches, [[True, True, False, False, False, False],
                                        [False, False, True, False, False]])
     

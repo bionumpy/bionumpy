@@ -1,6 +1,6 @@
-from bionumpy.sequences import Sequence, Sequences, as_encoded_sequence_array, ASCIIText
+from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from npstructures import RaggedArray, RaggedShape
-from bionumpy.encodings.alphabet_encoding import DigitArray
+from bionumpy.encodings.alphabet_encoding import DigitEncoding
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
 import numpy as np
@@ -10,13 +10,13 @@ def int_to_str(number):
     number = np.asanyarray(number)
     L = np.log10(number).astype(int)+1
     digits = number // 10**np.arange(L)[::-1] % 10
-    return digits.view(DigitArray)
+    return EncodedArray(digits, DigitEncoding)
 
 def _build_power_array(shape, dots=None):
     total_lengths = shape.ends[-1]
     lengths = shape.lengths
     index_array = np.full(total_lengths, -1, dtype=int)
-    offset_0, offset_rest =(0, 0)
+    offset_0, offset_rest = (0, 0)
     if dots is not None:
         index_array[shape.ravel_multi_index(dots)] = 0
         offset = np.zeros(len(lengths), dtype=int)
@@ -29,30 +29,28 @@ def _build_power_array(shape, dots=None):
 
 
 def str_to_int(number_text):
-    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    number_text = as_encoded_array(number_text)
     is_negative = number_text[:, 0] == "-"
     number_text[is_negative, 0] = "0"
-    number_text = as_encoded_sequence_array(number_text, DigitArray)
-    number_digits = RaggedArray(np.asarray(number_text.ravel()),
-                                number_text.shape)
+    number_text = as_encoded_array(number_text, DigitEncoding)
+    number_digits = RaggedArray(number_text.ravel().data, number_text.shape)
     powers = 10**_build_power_array(number_text.shape)
     signs = np.where(is_negative, -1, +1)
     return (number_digits*powers).sum(axis=-1)*signs
 
 
 def _decimal_str_to_float(number_text):
-    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    number_text = as_encoded_array(number_text)
     is_negative = number_text[:, 0] == "-"
     number_text[is_negative, 0] = "0" 
     dots = np.nonzero(number_text == ".")
     number_text[dots] = "0"
-    number_text = as_encoded_sequence_array(number_text, DigitArray)
+    number_text = as_encoded_array(number_text, DigitEncoding)
     power_array = _build_power_array(number_text.shape, dots=dots)
     powers = 10.**power_array
-    number_digits = RaggedArray(np.asarray(number_text.ravel()),
-                                number_text.shape)
+    number_digits = number_text.raw()
     base_numbers = (number_digits*powers).sum(axis=-1)
-    row_indices, col_indices =  dots# number_text.shape.unravel_multi_index(dots)
+    row_indices, col_indices = dots# number_text.shape.unravel_multi_index(dots)
     exponents = np.zeros_like(number_text.shape.lengths)
     exponents[row_indices] = number_text.shape.lengths[row_indices] - col_indices-1
     powers = (10.**(exponents))
@@ -60,7 +58,7 @@ def _decimal_str_to_float(number_text):
     return signs*base_numbers / powers
 
 def _scientific_str_to_float(number_text):
-    number_text = as_encoded_sequence_array(number_text, ASCIIText)
+    number_text = as_encoded_array(number_text)
     row, cols = np.nonzero(number_text == "e")
     decimal_text = ragged_slice(number_text, ends=cols)
     decimal_numbers = _decimal_str_to_float(decimal_text)
@@ -68,9 +66,10 @@ def _scientific_str_to_float(number_text):
     powers = str_to_int(power_text)
     return decimal_numbers*10.**powers
 
+
 def str_to_float(number_text):
-    number_text = as_encoded_sequence_array(number_text, ASCIIText)
-    scientific = np.any(number_text=="e", axis=-1)
+    number_text = as_encoded_array(number_text)
+    scientific = np.any(number_text == "e", axis=-1)
     numbers = np.empty(len(number_text))
     if np.sum(scientific):
         numbers[scientific] = _scientific_str_to_float(number_text[scientific])
@@ -79,18 +78,21 @@ def str_to_float(number_text):
     return numbers
 # return _decimal_str_to_float(number_text)
 
+
 def ints_to_strings(number):
     number = np.asanyarray(number)
     lengths = np.log10(number).astype(int)+1
     shape = RaggedShape(lengths)
     ragged_index = _build_power_array(shape)
     digits = number[:, np.newaxis] // 10**ragged_index % 10
-    return RaggedArray(digits.ravel().view(DigitArray), digits.shape)
+    return EncodedRaggedArray(
+        EncodedArray(digits.ravel(), DigitEncoding), digits.shape)
 
 
 def join(sequences, sep="\t", keep_last=False):
     new_lengths = sequences.shape.lengths+1
-    new_array = sequences.__class__(np.empty(shape=np.sum(new_lengths), dtype=np.uint8).view(sequences.ravel().__class__), new_lengths)
+    new_array = sequences.__class__(
+        EncodedArray(np.empty(shape=np.sum(new_lengths), dtype=np.uint8), sequences.encoding), new_lengths)
     new_array[:, :-1] = sequences
     new_array[:, -1] = sep
     if keep_last:
@@ -99,12 +101,13 @@ def join(sequences, sep="\t", keep_last=False):
 
 
 def split(sequence, sep=","):
-    mask = unsafe_extend_right(sequence) == sep
+    us = unsafe_extend_right(sequence)
+    mask = us == sep
     mask[-1] = True
     sep_idx = np.flatnonzero(mask)
     lens = np.diff(unsafe_extend_left(sep_idx))
     lens[0] = sep_idx[0]+1
-    ragged_array = Sequences(unsafe_extend_right(sequence), lens)
+    ragged_array = EncodedRaggedArray(unsafe_extend_right(sequence), lens)
     return ragged_array[:, :-1]
 
 
