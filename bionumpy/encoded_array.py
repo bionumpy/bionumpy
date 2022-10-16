@@ -7,6 +7,7 @@ import numpy as np
 
 
 class EncodedRaggedArray(RaggedArray):
+    """ Class to represnt EnocedArray with different row lengths """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,12 +15,14 @@ class EncodedRaggedArray(RaggedArray):
 
     @property
     def encoding(self):
+        """Make the encoding of the underlying data avaible"""
         return self._data.encoding
 
     def raw(self):
         return RaggedArray(self._data.raw(), self.shape)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """ Convert any data to `EncodedArray` before calling the `ufunc` on them """
         assert isinstance(self._data, EncodedArray), self._data
         inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
         kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
