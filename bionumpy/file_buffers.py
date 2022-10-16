@@ -1,5 +1,7 @@
 import numpy as np
-from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
+from io import FileIO
+from npstructures import RaggedArray, RaggedView, RaggedShape
+from .bnpdataclass import bnpdataclass
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
 from .encoded_array import EncodedArray, EncodedRaggedArray
 from .encodings import QualityEncoding
@@ -10,14 +12,14 @@ NEWLINE = "\n"
 
 class FileBuffer:
     """ Base class for file buffer classes. Different FileBuffer classes
-    should correspond to different file formats. 
+    should correspond to different file formats.
 
     A FileBuffer class can extract the text/bytes corresponding to complete
     entries from a raw buffer (`from_raw_buffer`) and convert the bytes/text from
     those entries into data in `@npdataclass` objects.
 
     The `from_data` method should convert `@npdataclass` objects into text/bytes
-    that can be written to file. 
+    that can be written to file.
 
     This base class provides some convenience methods to extract text form parts of
     a buffer into meaningful data
@@ -26,18 +28,37 @@ class FileBuffer:
     _buffer_divisor = 1
     COMMENT = 0
 
-    def __init__(self, data, new_lines):
-        self._data = data # EncodedArray(np.asanyarray(data))
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray):
+        self._data = data
         self._new_lines = np.asanyarray(new_lines)
         self._is_validated = False
         self.size = self._data.size
 
     @classmethod
-    def read_header(cls, file_object):
+    def read_header(cls, file_object: FileIO):
+        """Read the header data from the file
+
+        The data returned here is passed to each buffer through the
+        `from_raw_buffer` method when reading a file, and can so influence
+        how the data in the file is parsed.
+
+        This function should leave the file pointer pointing to the beginning
+        of the data to be read.
+
+        Parameters
+        ----------
+        file_object : file
+            The file object to read the file from
+
+        Examples
+        --------
+        6
+
+        """
         pass
 
     @classmethod
-    def from_raw_buffer(cls, raw_buffer, header_data=None) -> "FileBuffer":
+    def from_raw_buffer(cls, raw_buffer: np.ndarray, header_data=None) -> "FileBuffer":
         """Create a buffer with full entries
 
         A raw buffer can end with data that does not represent full entries.
@@ -63,7 +84,7 @@ class FileBuffer:
         return NotImplemented
 
     @classmethod
-    def from_data(cls, data: npdataclass) -> "FileBuffer":
+    def from_data(cls, data: bnpdataclass) -> "FileBuffer":
         """Create FileBuffer from a data set
 
         Create a FileBuffer that can be written to file
@@ -84,7 +105,7 @@ class FileBuffer:
         if not self._is_validated:
             self._validate()
 
-    def get_data(self) -> npdataclass:
+    def get_data(self) -> bnpdataclass:
         """Extract the data from the buffer
 
         The default way to extract data from the the buffer
@@ -118,6 +139,8 @@ class FileBuffer:
 
 
 class OneLineBuffer(FileBuffer):
+    """ Base class for file formats where data fields are contained in lines."""
+
     n_lines_per_entry = 2
     _buffer_divisor = 32
 
@@ -151,32 +174,39 @@ class OneLineBuffer(FileBuffer):
         chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
-    def get_sequences(self) -> EncodedRaggedArray:
-        self.validate_if_not()
-        sequence_starts = self._new_lines[:: self.n_lines_per_entry] + 1
-        sequence_lens = self._new_lines[1 :: self.n_lines_per_entry] - sequence_starts
-        indices, shape = RaggedView(sequence_starts, sequence_lens).get_flat_indices()
-        m = indices.size
-        d = m % self._buffer_divisor
-        seq = EncodedArray(np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype))
-        seq[:m] = self._data[indices]
-        return EncodedRaggedArray(seq, shape)
+    def get_data(self) -> bnpdataclass:
+        """Get and parse fields from each line"""
 
-    def get_data(self):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
-        #sequences = None
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
-    def count_entries(self):
+    def count_entries(self) -> int:
+        """Count number of entries in file"""
         return len(self._new_lines)//self.n_lines_per_entry
 
     @classmethod
-    def from_data(cls, entries):
+    def from_data(cls, entries: bnpdataclass) -> "OneLineBuffer":
+        """Convert the data from the entries into a buffer that can be written to file
+        
+        Extract the name and the sequence and make a buffer with alternating lines
+
+        Parameters
+        ----------
+        entries : bnpdataclass
+            The entries to be written to the buffer
+        
+
+        Returns
+        -------
+        "OneLineBuffer"
+            A ASCII encoded buffer
+        """
+
         name_lengths = entries.name.shape.lengths
         sequence_lengths = entries.sequence.shape.lengths
         line_lengths = np.hstack(
