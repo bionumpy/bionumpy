@@ -7,8 +7,54 @@ from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from .encodings import Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 
-def bnpdataclass(base_class):
-    def _implicit_format_conversion(cls, obj):
+
+def bnpdataclass(base_class: type) -> npdataclass:
+    """Create a `bnpdataclass` from a class with fields specified
+
+    A wrapper around `@npdataclass` that includes implicit format conversion
+    for strings and other encoded data. `@npdataclass` is again a wrapper
+    around `dataclasses.dataclass` but where all the fields are assumed to be
+    objects that supports advanced numpy indexing so that any dataclass objects
+    are also indexible like a numpy array.
+
+    `bnpdataclass` classes are meant to be dataclasses and so should not have 
+    any methods other than those implicitly given by `npdataclass`.
+
+    Parameters
+    ----------
+    base_class : type
+        Base class that defines the fields of the dataclass.
+
+    Returns
+    -------
+    npdataclass
+        `bnpdataclass` object that supports numpy like indexing
+
+    Examples
+    --------
+    5
+
+    """
+    def _implicit_format_conversion(cls, obj: npdataclass):
+        """Convert the data in given in the init into numpy like data
+
+        This is convenience functionionality that converts e.g. list of strings
+        into EncodedRaggedArray objects, and numeric data into `np.ndarray` objects.
+
+        Called by the `__init__` method from `npdataclass`.
+
+        Parameters
+        ----------
+        cls : 3
+            The class this is called from
+        obj : 5
+            The partially initialzed object from `npdataclass` `__init__`
+
+        Examples
+        --------
+        7
+
+        """
         for field in dataclasses.fields(obj):
             pre_val = getattr(obj, field.name)
             if field.type in (int, float, -1):
@@ -31,4 +77,3 @@ def bnpdataclass(base_class):
     new_class = npdataclass(base_class)
     new_class._implicit_format_conversion = classmethod(_implicit_format_conversion)
     return new_class
-
