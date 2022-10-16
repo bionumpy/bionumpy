@@ -1,7 +1,7 @@
 from pathlib import PurePath
 import gzip
 import dataclasses
-from .file_buffers import FastQBuffer
+from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
@@ -10,12 +10,14 @@ from .parser import NumpyFileReader, NpBufferedWriter
 from .chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from .npdataclassstream import NpDataclassStream
+from .bnpdataclass import bnpdataclass
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class NpDataclassReader:
+
     def __init__(self, numpyfilereader):
         self._reader = numpyfilereader
 
@@ -25,10 +27,46 @@ class NpDataclassReader:
     def __exit__(self, exc_type, exc_value, traceback):
         self._reader.close()
 
-    def read(self):
+    def read(self) -> bnpdataclass:
+        """Read the whole file into a dataclass
+
+        Use this for small files that can be held in memory
+
+        Returns
+        -------
+        bnpdataclass
+            A dataclass holdin all the entries in the class
+
+        Examples
+        --------
+        4
+
+        """
         return self._reader.read().get_data()
 
-    def read_chunk(self, chunk_size=5000000):
+    def read_chunk(self, chunk_size: int = 5000000) -> bnpdataclass:
+        """Read a single chunk into memory
+
+        Read all complete entries in the next `chunk_size` bytes
+        of the file. Useful for testing out algorithms on a small
+        part of the file.
+
+        Parameters
+        ----------
+        chunk_size: int
+            How many bytes to read from file
+
+        Returns
+        -------
+        bnpdataclass
+            A dataclass holdin all the entries in the next chunk
+
+
+        Examples
+        --------
+        5
+
+        """
         chunk = self._reader.read_chunk(chunk_size)
         if chunk is None:
             # return an empty dataclass
@@ -37,11 +75,40 @@ class NpDataclassReader:
 
         return chunk.get_data()
 
-    def read_chunks(self, chunk_size=5000000):
+    def read_chunks(self, chunk_size: int = 5000000) -> NpDataclassStream:
+        """Read the whole file in chunks
+
+        This returns a generator yielding all the entries in the file 
+        divided into chunks. Can be combined with functions decorated with
+        `@streamable` to apply the function to each chunk in turn
+
+        Parameters
+        ----------
+        chunk_size : int
+            Number of bytes to read per chunk
+
+        Returns
+        -------
+        NpDataclassStream
+            4
+
+        Examples
+        --------
+        5
+
+        """
         return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)),
                                  dataclass=self._reader._buffer_type.dataclass)
 
-    def __iter__(self):
+    def __iter__(self) -> NpDataclassStream:
+        """Iteratate over chunks in the file
+
+        Returns
+        -------
+        NpDataclassStream
+            3
+
+        """
         return self.read_chunks()
 
 
@@ -88,7 +155,34 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename, mode=None, **kwargs):
+def bnp_open(filename: str, mode: str = None, **kwargs) -> NpDataclassReader:
+    """Open a file according to its suffix
+
+    Open a `NpDataclassReader` file object, that can be used to read the file,
+    either in chunks or completely.
+
+    If `mode="w"` it opens a writer object. 
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to open
+    mode : str
+        Either "w" or "r"
+    **kwargs : 5
+        6
+
+    Returns
+    -------
+    NpDataclassReader
+        A file reader object
+
+    Examples
+    --------
+    8
+
+    """
+
     path = PurePath(filename)
     suffix = path.suffixes[-1]
     is_gzip = suffix in (".gz", ".bam")
@@ -100,7 +194,30 @@ def bnp_open(filename, mode=None, **kwargs):
     return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
 
 
-def count_entries(filename, buffer_type=None):
+def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
+    """Count the number of entries in the file
+
+    By default it uses the file suffix to imply the file format. But
+    a specific `FileBuffer` can be provided.
+
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to count the entries of
+    buffer_type : FileBuffer
+        A `FileBuffer` class to specify how the data in the file should be interpreted
+
+    Returns
+    -------
+    int
+        The number of entries in the file
+
+    Examples
+    --------
+    6
+
+    """
     logger.info(f"Counting entries in {filename}")
     path = PurePath(filename)
     suffix = path.suffixes[-1]
