@@ -88,14 +88,14 @@ def test_raises_error_for_unsupported_types():
 
 def test_twoline_fasta_buffer(twoline_fasta_buffer):
     buf = TwoLineFastaBuffer.from_raw_buffer(twoline_fasta_buffer)
-    seqs = buf.get_sequences()
-    assert from_encoded_array(seqs) == ["CTTGTTGA", "CGG"]
+    seqs = buf.get_data()
+    assert from_encoded_array(seqs.sequence) == ["CTTGTTGA", "CGG"]
 
 
 def test_fastq_buffer(fastq_buffer):
     buf = FastQBuffer.from_raw_buffer(fastq_buffer)
-    seqs = buf.get_sequences()
-    assert from_encoded_array(seqs) == ["CTTGTTGA", "CGG"]
+    seqs = buf.get_data()
+    assert from_encoded_array(seqs.sequence) == ["CTTGTTGA", "CGG"]
 
 
 def test_gfa_sequence_buffer(gfa_sequence_buffer):
