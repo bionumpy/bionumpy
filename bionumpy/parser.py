@@ -53,7 +53,6 @@ class NumpyFileReader:
             if hasattr(self._file_obj, "name")
             else str(self._file_obj)
         )
-        self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
         self._do_prepend = False
@@ -136,17 +135,6 @@ class NumpyFileReader:
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
         return b, b.size
-
-    def _remove_initial_comments(self):
-        if self._buffer_type.COMMENT == 0:
-            return
-        comment = self._buffer_type.COMMENT
-        if isinstance(comment, str):
-            comment = ord(comment)
-        for line in self._file_obj:
-            if line[0] != comment:
-                self._file_obj.seek(-len(line), 1)
-                break
 
 
 class NpBufferedWriter:

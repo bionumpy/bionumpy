@@ -410,6 +410,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             List[str]
                 Column names
             """
+            super().read_header(file_object)
             if not has_header:
                 return None
             delimiter = cls.DELIMITER
@@ -470,6 +471,17 @@ VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
     genotype_encoding = GenotypeEncoding
+
+    def read_header(self, file_object):
+        prev_line = None
+        for line in self._file_obj:
+            if line[0] != comment:
+                self._file_obj.seek(-len(line), 1)
+                break
+            prev_line = line
+        sample_names = prev_line.split("\t")[9:]
+        return sample_names
+
 
     def get_data(self):
         data = VCFBuffer.get_data(self)

@@ -55,7 +55,16 @@ class FileBuffer:
         6
 
         """
-        pass
+        if cls.COMMENT == 0:
+            return
+        comment = cls.COMMENT
+        if isinstance(comment, str):
+            comment = ord(comment)
+        for line in file_object:
+            if line[0] != comment:
+                file_object.seek(-len(line), 1)
+                break
+        
 
     @classmethod
     def from_raw_buffer(cls, raw_buffer: np.ndarray, header_data=None) -> "FileBuffer":
