@@ -12,11 +12,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
-def get_kmer_indexes(position, flank=2):
-    return position[..., np.newaxis] + np.arange(-flank, flank + 1)
-
+def get_kmer_indexes(position, flank=1):
+    return np.add.outer(position, np.arange(-flank, flank + 1))
 
 class SNPEncoding:
     lookup = Lookup(np.zeros((4, 4), dtype=np.uint8), DNAEncoding)
@@ -32,7 +29,7 @@ class SNPEncoding:
 
     @classmethod
     def encode(cls, snp):
-        return cls.lookup[snp.ref_seq, snp.alt_seq]
+        return EncodedArray(cls.lookup[snp.ref_seq, snp.alt_seq], cls)
 
     @classmethod
     def decode(cls, encoded):
@@ -40,11 +37,13 @@ class SNPEncoding:
 
 
 class MutationTypeEncoding:
-    def __init__(self, k, encoding=DNAEncoding):
+    def __init__(self, flank, encoding=DNAEncoding):
+        k = flank*2+1
         self.k = k
         self.h = 4 ** np.arange(k)
         self.h[k // 2 + 1 :] = self.h[k // 2 : -1]
         self.h[k // 2] = 0
+        self.h = self.h[::-1]
         self._encoding = encoding
 
     def encode(self, kmer: EncodedArray, snp: Variant) -> np.ndarray:
@@ -57,9 +56,9 @@ class MutationTypeEncoding:
         kmer = np.where(forward_mask[:, None], kmer, reverse_compliment(kmer))
         kmer = kmer.raw()
         kmer_hashes = np.dot(kmer, self.h)
-        snp_hashes = SNPEncoding.encode(snp)
-        
-        return (kmer_hashes + 4 ** (self.k - 1) * snp_hashes)
+        snp_hashes = SNPEncoding.encode(snp).raw()
+        return EncodedArray((kmer_hashes + 4 ** (self.k - 1) * snp_hashes),
+                            self)
 
     def decode(self, encoded):
         snp = SNPEncoding.decode(encoded >> (2 * (self.k - 1)))
@@ -70,7 +69,7 @@ class MutationTypeEncoding:
     def to_string(self, encoded):
         snp = SNPEncoding.to_string(encoded >> (2 * (self.k - 1)))
         chars = (encoded >> (2 * np.arange(self.k - 1))) & 3
-        kmer = "".join(chr(b) for b in self._encoding.decode(chars))
+        kmer = "".join(chr(b) for b in self._encoding.decode(chars))[::-1]
         return kmer[: self.k // 2] + "[" + snp + "]" + kmer[self.k // 2 :]
 
     def get_labels(self):
@@ -81,21 +80,10 @@ class MutationTypeEncoding:
 def count_mutation_types(variants, reference, flank=1):
     snps = variants[is_snp(variants)]
     reference = as_encoded_array(reference, DNAEncoding)
-    # snps.ref_seq = as_encoded_array(snps.ref_seq.ravel(), DNAEncoding)
-    # snps.alt_seq = as_encoded_array(snps.alt_seq.ravel(), DNAEncoding)
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
-    print(kmer_indexes)
     kmers = reference[kmer_indexes]
-    # forward_mask = (snps.ref_seq == "C") | (snps.ref_seq == "T")
-    # kmers = EncodedArray(
-    #     np.where(
-    #         forward_mask[:, None], kmers, reverse_compliment(kmers)
-    #     ), DNAEncoding)
-    signature_encoding = MutationTypeEncoding(flank * 2 + 1)
-    all_hashes = signature_encoding.encode(kmers, snps)
-    all_hashes = EncodedArray(all_hashes, encoding=signature_encoding)
-    n_hashes = 4 ** (flank * 2) * 6
+    hashes = MutationTypeEncoding(flank).encode(kmers, snps)
     if not hasattr(snps, "genotypes"):
-        return count_encoded(all_hashes)
-    return EncodedCounts.concatenate([count_encoded(all_hashes, weights=genotype>0)
+        return count_encoded(hashes)
+    return EncodedCounts.concatenate([count_encoded(hashes, weights=genotype>0)
                                       for genotype in snps.genotypes.T])
