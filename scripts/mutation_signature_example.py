@@ -3,7 +3,6 @@ import bionumpy as bnp
 from bionumpy.mutation_signature import count_mutation_types
 from bionumpy.groupby import groupby
 from bionumpy.delimited_buffers import VCFMatrixBuffer
-from bionumpy.chromosome_map import GroupedStream
 import logging
 logging.basicConfig(level="INFO")
 
