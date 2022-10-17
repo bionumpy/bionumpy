@@ -472,11 +472,13 @@ class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
     genotype_encoding = GenotypeEncoding
 
-    def read_header(self, file_object):
+    @classmethod
+    def read_header(cls, file_object):
         prev_line = None
-        for line in self._file_obj:
-            if line[0] != comment:
-                self._file_obj.seek(-len(line), 1)
+        for line in file_object:
+            line = line.decode()
+            if line[0] != cls.COMMENT:
+                file_object.seek(-len(line), 1)
                 break
             prev_line = line
         sample_names = prev_line.split("\t")[9:]
@@ -488,6 +490,7 @@ class VCFMatrixBuffer(VCFBuffer):
         genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
         n_samples = self._n_cols - 9
         genotypes = self.genotype_encoding.encode(genotypes.reshape(-1, n_samples, 3))
+        # genotypes.column_names = self._header_data
         return VCFGenotypeEntry(*data.shallow_tuple(), genotypes)
 
 

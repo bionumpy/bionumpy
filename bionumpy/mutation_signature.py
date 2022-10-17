@@ -85,5 +85,5 @@ def count_mutation_types(variants, reference, flank=1):
     hashes = MutationTypeEncoding(flank).encode(kmers, snps)
     if not hasattr(snps, "genotypes"):
         return count_encoded(hashes)
-    return EncodedCounts.concatenate([count_encoded(hashes, weights=genotype>0)
+    return EncodedCounts.vstack([count_encoded(hashes, weights=genotype)
                                       for genotype in snps.genotypes.T])

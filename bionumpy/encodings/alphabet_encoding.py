@@ -8,7 +8,7 @@ class AlphabetEncoding(Encoding):
         self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8)
         lower_alphabet = (self._alphabet + ord("a")-ord("A"))
         self._alphabet = self._alphabet
-        self._lookup = np.zeros(256, dtype=np.uint8)
+        self._lookup = np.full(256, 255, dtype=np.uint8)
         self._lookup[self._alphabet] = np.arange(len(alphabet))
         self._lookup[lower_alphabet] = np.arange(len(alphabet))
         self._mask = np.zeros(256, dtype=bool)
@@ -16,7 +16,10 @@ class AlphabetEncoding(Encoding):
         self._mask[lower_alphabet] = True
 
     def encode(self, byte_array):
-        return self._lookup[byte_array]
+
+        ret  = self._lookup[byte_array]
+        # assert not np.any(ret==255), [chr(o) for o in (byte_array[ret==255])]
+        return ret
 
     def decode(self, encoded):
         return self._alphabet[np.asarray(encoded)]

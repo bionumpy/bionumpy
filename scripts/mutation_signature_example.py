@@ -1,13 +1,15 @@
 import numpy as np
 import bionumpy as bnp
+from bionumpy.cli import run_as_commandline
 from bionumpy.mutation_signature import count_mutation_types
 from bionumpy.groupby import groupby
 from bionumpy.delimited_buffers import VCFMatrixBuffer
+from bionumpy.io.matrix_dump import matrix_to_csv
 import logging
 logging.basicConfig(level="INFO")
 
 
-def main(vcf_filename, fasta_filename, flank=1, genotyped=False):
+def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = True):
     if genotyped:
         variants = bnp.open(vcf_filename, buffer_type=VCFMatrixBuffer).read_chunks()
     else:
@@ -15,17 +17,16 @@ def main(vcf_filename, fasta_filename, flank=1, genotyped=False):
     variants = groupby(variants, "chromosome")
     reference = bnp.open(fasta_filename)
     counts = count_mutation_types(variants, reference, flank)
-    print(counts)
+    output = matrix_to_csv(counts.counts, header=counts.alphabet)# , row_names=counts.row_names)
+    if out_filename is not None:
+        open(out_filename, "wb").write(bytes(output.raw()))
+    else:
+        print(output.to_string())
 
 
 def test():
-    main("example_data/few_variants.vcf", "example_data/small_genome.fa.fai")
+    main("example_data/genotype_variants.vcf", "example_data/small_genome.fa.fai")
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv)>1:
-        main(*sys.argv[1:], genotyped=True)
-    else:
-        test()
-    
+    run_as_commandline(main)

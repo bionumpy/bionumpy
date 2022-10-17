@@ -37,8 +37,8 @@ class GenotypeEncoding(Encoding):
     @classmethod
     def encode(cls, bytes_array):
         assert bytes_array.shape[-1] == 3
-        return (bytes_array[..., 0] == ord("1")) + (
-            bytes_array[..., 2] == ord("1")
+        return (bytes_array[..., 0] == "1") + (
+            bytes_array[..., 2] == "1"
         ).astype(np.int8)
 
 
