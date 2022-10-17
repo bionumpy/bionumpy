@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level="INFO")
 
 
-def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = True):
+def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = False):
     if genotyped:
         variants = bnp.open(vcf_filename, buffer_type=VCFMatrixBuffer).read_chunks()
     else:
@@ -25,7 +25,7 @@ def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank
 
 
 def test():
-    main("example_data/genotype_variants.vcf", "example_data/small_genome.fa.fai")
+    main("example_data/few_variants.vcf", "example_data/small_genome.fa.fai")
 
 
 if __name__ == "__main__":
