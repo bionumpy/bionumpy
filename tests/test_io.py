@@ -7,7 +7,16 @@ from io import BytesIO
 import bionumpy as bnp
 from bionumpy.files import NumpyFileReader, NpDataclassReader
 from .buffers import buffer_texts, combos, big_fastq_text
+from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal
+
+
+def test_matrix_to_csv():
+    header = ["A", "AB", "ABC", "ABCD", "ABCDE"]
+    integers = np.arange(20).reshape(4, 5)
+    text = matrix_to_csv(integers, header=header)
+
+    assert text.to_string() == ",".join(header) + "\n" + "\n".join(",".join(str(i) for i in row) for row in integers)+"\n"
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
