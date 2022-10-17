@@ -43,6 +43,7 @@ class AlphabetEncoding(Encoding):
 ACTGEncoding = AlphabetEncoding("ACTG")
 ACGTEncoding = AlphabetEncoding("ACGT")
 ACTGnEncoding = AlphabetEncoding("ACTGn")
+ACGTnEncoding = AlphabetEncoding("ACGTn")
 DigitEncoding = AlphabetEncoding("0123456789")
 DNAEncoding = ACGTEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
