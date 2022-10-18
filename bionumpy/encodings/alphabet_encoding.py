@@ -18,7 +18,7 @@ class AlphabetEncoding(Encoding):
     def encode(self, byte_array):
 
         ret  = self._lookup[byte_array]
-        # assert not np.any(ret==255), [chr(o) for o in (byte_array[ret==255])]
+        assert not np.any(ret==255), [chr(o) for o in (byte_array[ret==255])]
         return ret
 
     def decode(self, encoded):

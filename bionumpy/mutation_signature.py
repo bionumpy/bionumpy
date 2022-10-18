@@ -16,7 +16,7 @@ def get_kmer_indexes(position, flank=1):
     return np.add.outer(position, np.arange(-flank, flank + 1))
 
 class SNPEncoding:
-    lookup = Lookup(np.zeros((4, 4), dtype=np.uint8), DNAEncoding)
+    lookup = Lookup(np.full((4, 4), 255, dtype=np.uint8), DNAEncoding)
     lookup["C", "AGT"] = np.arange(3)
     lookup["G", "TCA"] = np.arange(3)
     lookup["T", "ACG"] = np.arange(3)+3
@@ -29,6 +29,8 @@ class SNPEncoding:
 
     @classmethod
     def encode(cls, snp):
+        values = cls.lookup[snp.ref_seq, snp.alt_seq]
+        assert not np.any(values==255)
         return EncodedArray(cls.lookup[snp.ref_seq, snp.alt_seq], cls)
 
     @classmethod
@@ -50,6 +52,7 @@ class MutationTypeEncoding:
         kmer = as_encoded_array(kmer, self._encoding)
         snp.ref_seq = as_encoded_array(snp.ref_seq.ravel(), self._encoding)
         snp.alt_seq = as_encoded_array(snp.alt_seq.ravel(), self._encoding)
+        assert not np.any(snp.ref_seq == snp.alt_seq)
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
         assert np.all(kmer[..., self.k//2] == snp.ref_seq), (kmer, snp.ref_seq)
         forward_mask = (snp.ref_seq == "C") | (snp.ref_seq == "T")
@@ -79,11 +82,34 @@ class MutationTypeEncoding:
 @ChromosomeMap(reduction=sum)
 def count_mutation_types(variants, reference, flank=1):
     snps = variants[is_snp(variants)]
-    reference = as_encoded_array(reference, DNAEncoding)
+    snps = snps[np.argsort(snps.position)]
+    mnv_mask = (snps.position[1:] == (snps.position[:-1]+1))
+    # mask = np.append(mask, False) | np.insert(mask, 0, False)
+    # snps = snps[~mask]
+    reference = as_encoded_array(reference)
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
+    mask = np.any((kmers=="n") | (kmers=="N"), axis=-1)
+    kmers = kmers[~mask]
+    snps = snps[~mask]
     hashes = MutationTypeEncoding(flank).encode(kmers, snps)
     if not hasattr(snps, "genotypes"):
         return count_encoded(hashes)
-    return EncodedCounts.vstack([count_encoded(hashes, weights=genotype)
-                                      for genotype in snps.genotypes.T])
+    has_snps = (snps.genotypes>0)
+    masks = (has_snps[1:] & has_snps[:-1]) & mnv_mask[:, np.newaxis]
+    masks = np.pad(masks, [(1, 0), (0, 0)]) | np.pad(masks, [(0, 1), (0, 0)])
+    has_snps &= ~masks
+    counts = []
+    for genotype in (snps.genotypes.T>0):
+        idxs = np.flatnonzero(genotype)
+        if len(idxs):
+            # assert np.all(snps.position[idxs[:-1]] < snps.position[idxs[1:]]), snps.position[idxs]
+            mask = (snps.position[idxs[:-1]]+1) >= (snps.position[idxs[1:]])
+            mask = np.append(mask, False) | np.insert(mask, 0, False)
+            idxs = idxs[~mask]
+        counts.append(count_encoded(hashes[idxs]))
+    counts = EncodedCounts.vstack(counts)
+    # assert np.all(counts.counts.sum(axis=-1) == (snps.genotypes>0).sum(axis=0))
+    # ~((np.append(mask, False) | np.insert(mask, 0, False)
+    return counts
+
