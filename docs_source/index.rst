@@ -24,6 +24,15 @@ BioNumPy
 
 
 .. toctree::
+   :maxdepth: 2
+   :caption: API documentation
+   :glob:
+
+   modules
+
+
+
+.. toctree::
    :maxdepth: 0
    :glob:
    :titlesonly:

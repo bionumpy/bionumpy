@@ -31,7 +31,7 @@ import bionumpy
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx', 'sphinx.ext.autosummary']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -155,4 +155,7 @@ texinfo_documents = [
 
 # autodoc
 
+numpydoc_show_class_members = False
+autodoc_default_flags = ['members', 'imported-member']
 autodoc_mock_imports = ["numpy", "npstructures"]
+autosummary_generate = True
