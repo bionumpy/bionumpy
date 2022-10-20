@@ -1,7 +1,6 @@
 
 .. autosummary::
      :toctree: stubs
+     :recursive:
 
-     bionumpy.encodings
-     bionumpy.kmers
-     bionumpy.bnpdataclass
+     bionumpy
