@@ -13,7 +13,7 @@ from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
-from .npdataclassstream import mean, bincount, histogram, streamable
+from .npdataclassstream import mean, bincount, histogram, streamable, quantile
 import npstructures as nps
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
@@ -28,7 +28,7 @@ Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
 __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
-           "bincount", "streamable", "histogram", "count_entries",
+           "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
