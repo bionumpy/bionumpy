@@ -161,3 +161,12 @@ def mean(array, axis=None):
         return _rowmean(array, axis)
     t = sum_and_n(array, axis=axis)
     return t[:-1]/t[-1]
+
+
+def quantile(array, quantiles, axis=None):
+    """
+    """
+    hist = bincount(array)
+    cumulative = np.cumsum(hist)
+    idxs = np.searchsorted(cumulative, quantiles*cumulative[-1])
+    return idxs
