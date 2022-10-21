@@ -1,9 +1,22 @@
+import os
+from pathlib import Path
+
 import pytest
 import numpy as np
 from io import BytesIO
+import bionumpy as bnp
 from bionumpy.files import NumpyFileReader, NpDataclassReader
 from .buffers import buffer_texts, combos, big_fastq_text
+from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal
+
+
+def test_matrix_to_csv():
+    header = ["A", "AB", "ABC", "ABCD", "ABCDE"]
+    integers = np.arange(20).reshape(4, 5)
+    text = matrix_to_csv(integers, header=header)
+
+    assert text.to_string() == ",".join(header) + "\n" + "\n".join(",".join(str(i) for i in row) for row in integers)+"\n"
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
@@ -13,6 +26,7 @@ def test_buffer_read(buffer_name):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
+        print("#####", line, true_line)
         assert_npdataclass_equal(line, true_line)
 
 
@@ -30,3 +44,16 @@ def test_read_big_fastq():
     io_obj = BytesIO(bytes(big_fastq_text*20, encoding="utf8"))
     for b in NpDataclassReader(NumpyFileReader(io_obj, combos["fastq"][2])).read_chunks(chunk_size=1000):
         print(b)
+
+
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
+def test_ctx_manager_read(buffer_name):
+    file_path = Path(f"./{buffer_name}_example.{buffer_name}")
+
+    with open(file_path, "w") as file:
+        file.write(buffer_texts[buffer_name])
+
+    with bnp.open(file_path) as file:
+        file.read()
+
+    os.remove(file_path)

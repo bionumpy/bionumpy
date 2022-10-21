@@ -18,7 +18,7 @@ class Func(RollableFunction):
         return 2
 
     def __call__(self, sequence):
-        return np.all(sequence == np.array([ord("g"), ord("t")], dtype="uint8"), axis=-1)
+        return np.all(sequence == "gt", axis=-1)
 
 
 def test_rollable_same(sequences):

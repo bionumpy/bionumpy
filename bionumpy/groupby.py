@@ -21,7 +21,7 @@ def get_ragged_changes(ragged_array):
     new_indices = RaggedArray(indices, lengths[:-1])+lengths[:-1, np.newaxis]
     new_indices = np.minimum(new_indices, data.size-1)
     next_row_values = RaggedArray(data[new_indices.ravel()], new_indices.shape)
-    eq = next_row_values!=ragged_array[:-1]
+    eq = next_row_values != ragged_array[:-1]
     eq = np.any(eq, axis=-1)
     changes |= eq
     return np.flatnonzero(changes)+1
@@ -47,7 +47,7 @@ def groupby(data, column=None, key=key_func):
         keys = getattr(data, column)
     else:
         keys = data
-    if np.all(keys[-1] == keys[0]):
+    if (keys.shape.lengths[-1] == keys.shape.lengths[0]) and np.all(keys[-1] == keys[0]):
         return GroupedStream((key(keys[start]), data[start:])
                              for start in [0])
 

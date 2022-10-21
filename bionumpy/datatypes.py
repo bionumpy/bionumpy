@@ -1,8 +1,6 @@
 import numpy as np
 from typing import List
-from .encodings import QualityEncoding
-from .encodings.base_encoding import CigarEncoding
-from .encodings.alphabet_encoding import CigarOpArray, BamArray
+from .encodings import CigarOpEncoding, BamEncoding, QualityEncoding, CigarEncoding
 from .bnpdataclass import bnpdataclass
 
 
@@ -36,6 +34,14 @@ class Bed6(Interval):
     name: str
     score: int
     strand: str
+
+
+@bnpdataclass
+class NarrowPeak(Bed6):
+    signal_value: str
+    p_value: str
+    q_value: str
+    peak: int
 
 
 @bnpdataclass
@@ -132,9 +138,9 @@ class BamEntry:
     flag: int
     position: int
     mapq: int
-    cigar_op: CigarOpArray
+    cigar_op: CigarOpEncoding
     cigar_length: CigarEncoding
-    sequence: BamArray
+    sequence: BamEncoding
     quality: QualityEncoding
 
 

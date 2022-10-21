@@ -7,7 +7,8 @@ import dataclasses
 class EncodedCounts:
     alphabet: list
     counts: np.ndarray
-    
+    row_names: list = None
+
     def __str__(self):
         return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts))
 
@@ -27,10 +28,15 @@ class EncodedCounts:
         return dataclasses.replace(self, counts=self.counts+o_counts)
         
     @classmethod
-    def concatenate(cls, counts):
+    def vstack(cls, counts):
         alphabet = counts[0].alphabet
+        row_names = counts[0].row_names
         assert all(count.alphabet==alphabet for count in counts)
-        return cls(alphabet, np.array([count.counts for count in counts], dtype="int"))
+        ret =  cls(alphabet, np.array([count.counts for count in counts], dtype="int"))
+        if row_names is not None:
+            ret.row_names = [count.row_names for count in counts]
+        return ret
+            
 
 
 def count_encoded(values, weights=None):

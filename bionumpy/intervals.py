@@ -3,7 +3,7 @@ import dataclasses
 from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
 from .bnpdataclass import bnpdataclass
-
+from .datatypes import Interval
 
 @bnpdataclass
 class RawInterval:
@@ -18,7 +18,27 @@ def sort_intervals(intervals):
 
 
 @ChromosomeMap()
-def merge_intervals(intervals, distance=0):
+def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
+    """Merge a set of sorted intervals
+
+    Merges any overlapping intervals into a single interval.
+    If `distance` is specified, will merge any intervals that are closer
+    than `distance` apart.
+
+    Parameters
+    ----------
+    intervals : Interval
+        The sorted intervals to be merged
+    distance : int
+        Max distance for merging
+
+    Return
+    --------
+    Merged Intervals
+
+    """
+
+    assert np.all(intervals.start[:-1] <= intervals.start[1:]), "merge_intervals requires intervals sorted on start position"
     ends = np.maximum.accumulate(intervals.end)
     if distance > 0:
         ends += distance
@@ -84,6 +104,7 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
 
 def pileup(intervals):
     chroms = np.concatenate([intervals.chromosome, intervals.chromosome])
+
     positions = np.concatenate((intervals.start,
                                 intervals.end))
     args = np.argsort(positions, kind="mergesort")

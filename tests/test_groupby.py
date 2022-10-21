@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from bionumpy.groupby import get_changes, groupby, join_groupbys
+from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 
@@ -29,21 +30,35 @@ def grouped():
         [[2, 3, 3]]]
 
 
-def test_get_changes(ragged_array):
+@pytest.mark.parametrize("do_encode", [True, False])
+def test_get_changes(ragged_array, do_encode):
+    if do_encode:
+        ragged_array = EncodedRaggedArray(EncodedArray(ragged_array.ravel()), ragged_array.shape)
     changes = get_changes(ragged_array)
     np.testing.assert_equal(changes, [2, 4, 6])
 
-
-def test_groupby(ragged_array, grouped):
+@pytest.mark.parametrize("do_encode", [True, False])
+def test_groupby(ragged_array, grouped, do_encode):
+    if do_encode:
+        ragged_array = EncodedRaggedArray(EncodedArray(ragged_array.ravel()), ragged_array.shape)
     groups = list(groupby(ragged_array))
     assert len(groups) == len(grouped)
     for (k, g), true in zip(groups, grouped):
+        true = RaggedArray(true)
+        if do_encode:
+            true = EncodedRaggedArray(EncodedArray(true.ravel()), true.shape)
         assert_raggedarray_equal(g, true)
 
-
-def test_join_groupbys(ragged_array, grouped):
+@pytest.mark.parametrize("do_encode", [True, False])
+def test_join_groupbys(ragged_array, grouped, do_encode):
+    if do_encode:
+        ragged_array = EncodedRaggedArray(EncodedArray(ragged_array.ravel()), ragged_array.shape)
     gs = [groupby(ragged_array), groupby(ragged_array)]
     groups = list(join_groupbys(gs))
     print(groups)
     for (k, g), true in zip(groups, grouped*2):
+        true = RaggedArray(true)
+        if do_encode:
+            true = EncodedRaggedArray(EncodedArray(true.ravel()), true.shape)
+
         assert_raggedarray_equal(g, true)

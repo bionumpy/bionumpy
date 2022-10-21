@@ -2,7 +2,8 @@ import numpy as np
 from .npdataclassstream import NpDataclassStream
 import logging
 from npstructures import npdataclass
-from .sequences import EncodedArray
+from .encoded_array import EncodedArray
+from .groupby import GroupedStream
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +53,6 @@ class NumpyFileReader:
             if hasattr(self._file_obj, "name")
             else str(self._file_obj)
         )
-        self._remove_initial_comments()
         self._header_data = self._buffer_type.read_header(self._file_obj)
         self._total_bytes_read = 0
         self._do_prepend = False
@@ -101,6 +101,9 @@ class NumpyFileReader:
         while not self._is_finished:
             yield self.read_chunk(chunk_size)
 
+    def close(self):
+        self._file_obj.close()
+
     def __add_newline_to_end(self, chunk, bytes_read):
         if chunk[bytes_read - 1] != "\n":
             chunk = np.append(chunk, np.uint8(ord("\n")))
@@ -131,18 +134,7 @@ class NumpyFileReader:
     def __read_raw_chunk(self, chunk_size):
         b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
-        return b.view(EncodedArray), b.size
-
-    def _remove_initial_comments(self):
-        if self._buffer_type.COMMENT == 0:
-            return
-        comment = self._buffer_type.COMMENT
-        if isinstance(comment, str):
-            comment = ord(comment)
-        for line in self._file_obj:
-            if line[0] != comment:
-                self._file_obj.seek(-len(line), 1)
-                break
+        return b, b.size
 
 
 class NpBufferedWriter:
@@ -183,7 +175,13 @@ class NpBufferedWriter:
             for buf in data:
                 self.write(buf)
             return 
+        if isinstance(data, GroupedStream):
+            for name, buf in data:
+                self.write(buf)
+            return 
         bytes_array = self._buffer_type.from_data(data)
+        if isinstance(bytes_array, EncodedArray):
+            bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
         self._file_obj.flush()
         logger.debug(

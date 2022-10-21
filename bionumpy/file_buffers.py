@@ -1,22 +1,25 @@
 import numpy as np
-from npstructures import RaggedArray, RaggedView, RaggedShape, npdataclass
-from .encodings import BaseEncoding, QualityEncoding
-from .sequences import to_ascii, ASCIIText, Sequences
+from io import FileIO
+from npstructures import RaggedArray, RaggedView, RaggedShape
+from .bnpdataclass import bnpdataclass
 from .datatypes import SequenceEntry, SequenceEntryWithQuality
+from .encoded_array import EncodedArray, EncodedRaggedArray
+from .encodings import QualityEncoding
 
-NEWLINE = 10
+
+NEWLINE = "\n"
 
 
 class FileBuffer:
     """ Base class for file buffer classes. Different FileBuffer classes
-    should correspond to different file formats. 
+    should correspond to different file formats.
 
     A FileBuffer class can extract the text/bytes corresponding to complete
     entries from a raw buffer (`from_raw_buffer`) and convert the bytes/text from
     those entries into data in `@npdataclass` objects.
 
     The `from_data` method should convert `@npdataclass` objects into text/bytes
-    that can be written to file. 
+    that can be written to file.
 
     This base class provides some convenience methods to extract text form parts of
     a buffer into meaningful data
@@ -25,18 +28,46 @@ class FileBuffer:
     _buffer_divisor = 1
     COMMENT = 0
 
-    def __init__(self, data, new_lines):
-        self._data = np.asanyarray(data).view(ASCIIText)
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray):
+        self._data = data
         self._new_lines = np.asanyarray(new_lines)
         self._is_validated = False
         self.size = self._data.size
 
     @classmethod
-    def read_header(cls, file_object):
-        pass
+    def read_header(cls, file_object: FileIO):
+        """Read the header data from the file
+
+        The data returned here is passed to each buffer through the
+        `from_raw_buffer` method when reading a file, and can so influence
+        how the data in the file is parsed.
+
+        This function should leave the file pointer pointing to the beginning
+        of the data to be read.
+
+        Parameters
+        ----------
+        file_object : file
+            The file object to read the file from
+
+        Examples
+        --------
+        6
+
+        """
+        if cls.COMMENT == 0:
+            return
+        comment = cls.COMMENT
+        if isinstance(comment, str):
+            comment = ord(comment)
+        for line in file_object:
+            if line[0] != comment:
+                file_object.seek(-len(line), 1)
+                break
+        
 
     @classmethod
-    def from_raw_buffer(cls, raw_buffer, header_data=None) -> "FileBuffer":
+    def from_raw_buffer(cls, raw_buffer: np.ndarray, header_data=None) -> "FileBuffer":
         """Create a buffer with full entries
 
         A raw buffer can end with data that does not represent full entries.
@@ -62,7 +93,7 @@ class FileBuffer:
         return NotImplemented
 
     @classmethod
-    def from_data(cls, data: npdataclass) -> "FileBuffer":
+    def from_data(cls, data: bnpdataclass) -> "FileBuffer":
         """Create FileBuffer from a data set
 
         Create a FileBuffer that can be written to file
@@ -83,7 +114,7 @@ class FileBuffer:
         if not self._is_validated:
             self._validate()
 
-    def get_data(self) -> npdataclass:
+    def get_data(self) -> bnpdataclass:
         """Extract the data from the buffer
 
         The default way to extract data from the the buffer
@@ -108,17 +139,17 @@ class FileBuffer:
         if lens is None:
             lens = ends - starts
         indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return Sequences(self._data[indices], shape)
+        return EncodedRaggedArray(self._data[indices], shape)
 
     def _move_2d_array_to_intervals(self, array, starts, ends):
-        n_chars = ends - starts
-        n_intervals = starts.size
         max_chars = array.shape[-1]
         to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
         self._data[to_indices] = array[::-1]
 
 
 class OneLineBuffer(FileBuffer):
+    """ Base class for file formats where data fields are contained in lines."""
+
     n_lines_per_entry = 2
     _buffer_divisor = 32
 
@@ -144,6 +175,7 @@ class OneLineBuffer(FileBuffer):
 
         """
         assert header_data is None
+        chunk = EncodedArray(chunk)
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer. Try increasing chunk_size."
@@ -151,38 +183,45 @@ class OneLineBuffer(FileBuffer):
         chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
-    def get_sequences(self) -> RaggedArray:
-        self.validate_if_not()
-        sequence_starts = self._new_lines[:: self.n_lines_per_entry] + 1
-        sequence_lens = self._new_lines[1 :: self.n_lines_per_entry] - sequence_starts
-        indices, shape = RaggedView(sequence_starts, sequence_lens).get_flat_indices()
-        m = indices.size
-        d = m % self._buffer_divisor
-        seq = np.empty(m - d + self._buffer_divisor, dtype=self._data.dtype).view(ASCIIText)
-        seq[:m] = self._data[indices]
-        return RaggedArray(seq, shape)
+    def get_data(self) -> bnpdataclass:
+        """Get and parse fields from each line"""
 
-    def get_data(self):
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
-        self.lines = RaggedArray(self._data, RaggedShape(lengths))
+        self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
         sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
-        #sequences = None
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
-    def count_entries(self):
+    def count_entries(self) -> int:
+        """Count number of entries in file"""
         return len(self._new_lines)//self.n_lines_per_entry
 
     @classmethod
-    def from_data(cls, entries):
+    def from_data(cls, entries: bnpdataclass) -> "OneLineBuffer":
+        """Convert the data from the entries into a buffer that can be written to file
+        
+        Extract the name and the sequence and make a buffer with alternating lines
+
+        Parameters
+        ----------
+        entries : bnpdataclass
+            The entries to be written to the buffer
+        
+
+        Returns
+        -------
+        "OneLineBuffer"
+            A ASCII encoded buffer
+        """
+
         name_lengths = entries.name.shape.lengths
         sequence_lengths = entries.sequence.shape.lengths
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(ASCIIText)
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
@@ -205,9 +244,8 @@ class OneLineBuffer(FileBuffer):
 
 
 class TwoLineFastaBuffer(OneLineBuffer):
-    HEADER = 62
+    HEADER = ">"# 62
     n_lines_per_entry = 2
-    _encoding = BaseEncoding
     dataclass = SequenceEntry
 
 
@@ -241,13 +279,13 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = np.empty(line_lengths.sum(), dtype=np.uint8).view(ASCIIText)
-        lines = RaggedArray(buf, line_lengths)
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
+        lines = EncodedRaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = "+"
-        lines[3::step, :-1] = to_ascii(entries.quality, QualityEncoding)
+        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()))
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = "\n"
 

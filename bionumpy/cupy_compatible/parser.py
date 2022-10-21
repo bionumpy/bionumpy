@@ -1,7 +1,7 @@
 import numpy as np
 import cupy as cp
 
-from ..parser import NpBufferStream
+from ..parser import NumpyFileReader
 
 import logging
 
@@ -17,7 +17,7 @@ def repr_bytes(n):
         return str(n // 1000000) + "Mb"
     return str(n // 1000000000) + "Gb"
 
-class CpBufferStream(NpBufferStream):
+class CpBufferStream(NumpyFileReader):
 
     def __iter__(self):
         self._remove_initial_comments()
