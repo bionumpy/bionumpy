@@ -4,6 +4,43 @@ from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
 from .bnpdataclass import bnpdataclass
 from .datatypes import Interval
+from npstructures.runlengtharray import RunLength2dArray, RunLengthArray
+
+
+def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
+    """Get the number of intervals that overlap each position of the chromosome/contig
+
+    This uses run length encoded arrays to handle the sparse data that
+    we get from intervals.
+
+    Parameters
+    ----------
+    intervals : Interval
+        Intervals on the same chromosome/contig
+    chromosome_size : int
+        size of the chromsome/contig
+
+    """
+    rla = RunLength2dArray.from_intervals(intervals.start, intervals.end, chromosome_size)
+    return rla.sum(axis=0)
+
+def get_boolean_mask(intervals: Interval, chromosome_size: int):
+    """Get a boolean mask representing where any inteval hits
+
+    Uses run length encoded binary arrays to represent the areas
+    covered by any interval
+
+    Parameters
+    ----------
+    intervals : Interval
+        Intervals on the same chromosome/contig
+    chromosome_size : int
+        The size of the chromosome/contig
+
+    """
+    rla = RunLength2dArray.from_intervals(intervals.start, intervals.end, chromosome_size)
+    return rla.any(axis=0)
+
 
 @bnpdataclass
 class RawInterval:
