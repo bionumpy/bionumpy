@@ -1,4 +1,5 @@
-from bionumpy.npdataclassstream import NpDataclassStream, quantile
+from bionumpy.npdataclassstream import NpDataclassStream, quantile, mean
+import numpy as np
 import dataclasses
 import pytest
 
@@ -30,3 +31,22 @@ def test_quantile1():
 def test_quantile2():
     array = [1, 10, 12, 20]
     assert quantile(array, 0.5) == 10
+
+def test_mean():
+    array = np.array([1, 5, 10])
+    assert mean(array) == 16/3
+
+
+def test_mean1():
+    array = np.array([1, 10])
+    assert mean(array) == 5.5
+
+
+def test_mean2():
+    array = np.array([1, 10, 12, 20])
+    assert mean(array) == 43/4
+
+@pytest.mark.skip("Unimplemented")
+def test_colmean():
+    array = np.array([[1, 10], [12, 20]])
+    np.testing.assert_array_equal(mean(array, axis=0), [5.5, 16])
