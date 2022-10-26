@@ -32,8 +32,29 @@ def bnpdataclass(base_class: type) -> npdataclass:
 
     Examples
     --------
-    5
+    >>> @bnpdataclass
+    ... class Person:
+    ...       name: str
+    ...       age: int
+    ... 
+    >>> data = Person(["Knut", "Ivar", "Geir"], [35, 30, 40])
+    >>> print(data)
+    Person with 3 entries
+                         name                      age
+                         Knut                       35
+                         Ivar                       30
+                         Geir                       40
 
+    >>> print(data[[0,2]])
+    Person with 2 entries
+                         name                      age
+                         Knut                       35
+                         Geir                       40
+    
+    >>> print(data[[False,True, False]])
+    Person with 1 entries
+                         name                      age
+                         Ivar                       30
     """
     def _implicit_format_conversion(cls, obj: npdataclass):
         """Convert the data in given in the init into numpy like data
@@ -47,12 +68,8 @@ def bnpdataclass(base_class: type) -> npdataclass:
         ----------
         cls : 3
             The class this is called from
-        obj : 5
+        obj : npdataclass
             The partially initialzed object from `npdataclass` `__init__`
-
-        Examples
-        --------
-        7
 
         """
         for field in dataclasses.fields(obj):

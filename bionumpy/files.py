@@ -17,7 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 class NpDataclassReader:
-
+    """
+    This is the main file reader class for bionumpy. Ordinarily this should
+    be created by using the `bnp.open` function that will create a reader with
+    the correct attributes according to the file suffix. But this class can be used
+    for instance if the a file name is not available (stdin), or you want more control over 
+    the reading. 
+    """
     def __init__(self, numpyfilereader):
         self._reader = numpyfilereader
 
@@ -139,8 +145,8 @@ def _get_buffered_file(
     if mode in ("w", "write", "wb"):
         return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
 
-    kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
-    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type, **kwargs2)
+    # kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
+    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type) # , **kwargs2)
     if is_gzip:
         file_reader.set_prepend_mode()
     return NpDataclassReader(file_reader)
@@ -155,11 +161,13 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename: str, mode: str = None, **kwargs) -> NpDataclassReader:
+def bnp_open(filename: str, mode: str = None, buffer_type=None) -> NpDataclassReader:
     """Open a file according to its suffix
 
     Open a `NpDataclassReader` file object, that can be used to read the file,
-    either in chunks or completely.
+    either in chunks or completely. Files read in chunks can be used together with
+    the `@bnp.streamable` decorator to call a function on all chunks in the file
+    and optionally reduce the results.
 
     If `mode="w"` it opens a writer object. 
 
@@ -169,8 +177,6 @@ def bnp_open(filename: str, mode: str = None, **kwargs) -> NpDataclassReader:
         Name of the file to open
     mode : str
         Either "w" or "r"
-    **kwargs : 5
-        6
 
     Returns
     -------
@@ -179,7 +185,66 @@ def bnp_open(filename: str, mode: str = None, **kwargs) -> NpDataclassReader:
 
     Examples
     --------
-    8
+    >>> import bionumpy as bnp
+    >>> all_data = bnp.open("example_data/big.fq.gz").read()
+    >>> print(all_data)
+    SequenceEntryWithQuality with 1000 entries
+                         name                 sequence                  quality
+      2fa9ee19-5c51-4281-a...  CGGTAGCCAGCTGCGTTCAG...  [10  5  5 12  5  4  3  
+      1f9ca490-2f25-484a-8...  GATGCATACTTCGTTCGATT...  [ 5  4  5  4  6  6  5  
+      06936a64-6c08-40e9-8...  GTTTTGTCGCTGCGTTCAGT...  [ 3  5  6  7  7  5  4  
+      d6a555a1-d8dd-4e55-9...  CGTATGCTTTGAGATTCATT...  [ 2  3  4  4  4  4  6  
+      91ca9c6c-12fe-4255-8...  CGGTGTACTTCGTTCCAGCT...  [ 4  3  5  6  3  5  6  
+      4dbe5037-abe2-4176-8...  GCAGGTGATGCTTTGGTTCA...  [ 2  3  4  6  7  7  6  
+      df3de4e9-48ca-45fc-8...  CATGCTTCGTTGGTTACCTC...  [ 5  5  5  4  7  7  7  
+      bfde9b59-2f6d-48e8-8...  CTGTTGTGCGCTTCGTTCAT...  [ 8  8 10  7  8  6  3  
+      dbcfd59a-7a96-46a2-9...  CGATTATTTGGTTCGTTCAT...  [ 5  4  2  3  5  2  2  
+      a0f83c4e-4c20-4c15-b...  GTTGTACTTTACGTTTCAAT...  [ 3  5 10  6  7  6  6  
+        
+    >>> first_chunk = bnp.open("example_data/big.fq.gz").read_chunk(300000)
+    >>> print(first_chunk)
+    SequenceEntryWithQuality with 511 entries
+                         name                 sequence                  quality
+      2fa9ee19-5c51-4281-a...  CGGTAGCCAGCTGCGTTCAG...  [10  5  5 12  5  4  3  
+      1f9ca490-2f25-484a-8...  GATGCATACTTCGTTCGATT...  [ 5  4  5  4  6  6  5  
+      06936a64-6c08-40e9-8...  GTTTTGTCGCTGCGTTCAGT...  [ 3  5  6  7  7  5  4  
+      d6a555a1-d8dd-4e55-9...  CGTATGCTTTGAGATTCATT...  [ 2  3  4  4  4  4  6  
+      91ca9c6c-12fe-4255-8...  CGGTGTACTTCGTTCCAGCT...  [ 4  3  5  6  3  5  6  
+      4dbe5037-abe2-4176-8...  GCAGGTGATGCTTTGGTTCA...  [ 2  3  4  6  7  7  6  
+      df3de4e9-48ca-45fc-8...  CATGCTTCGTTGGTTACCTC...  [ 5  5  5  4  7  7  7  
+      bfde9b59-2f6d-48e8-8...  CTGTTGTGCGCTTCGTTCAT...  [ 8  8 10  7  8  6  3  
+      dbcfd59a-7a96-46a2-9...  CGATTATTTGGTTCGTTCAT...  [ 5  4  2  3  5  2  2  
+      a0f83c4e-4c20-4c15-b...  GTTGTACTTTACGTTTCAAT...  [ 3  5 10  6  7  6  6  
+    
+    >>> all_chunks = bnp.open("example_data/big.fq.gz").read_chunks(300000)
+    
+    >>> for chunk in all_chunks:
+    ...       print(chunk)
+    ...
+    SequenceEntryWithQuality with 511 entries
+                         name                 sequence                  quality
+      2fa9ee19-5c51-4281-a...  CGGTAGCCAGCTGCGTTCAG...  [10  5  5 12  5  4  3  
+      1f9ca490-2f25-484a-8...  GATGCATACTTCGTTCGATT...  [ 5  4  5  4  6  6  5  
+      06936a64-6c08-40e9-8...  GTTTTGTCGCTGCGTTCAGT...  [ 3  5  6  7  7  5  4  
+      d6a555a1-d8dd-4e55-9...  CGTATGCTTTGAGATTCATT...  [ 2  3  4  4  4  4  6  
+      91ca9c6c-12fe-4255-8...  CGGTGTACTTCGTTCCAGCT...  [ 4  3  5  6  3  5  6  
+      4dbe5037-abe2-4176-8...  GCAGGTGATGCTTTGGTTCA...  [ 2  3  4  6  7  7  6  
+      df3de4e9-48ca-45fc-8...  CATGCTTCGTTGGTTACCTC...  [ 5  5  5  4  7  7  7  
+      bfde9b59-2f6d-48e8-8...  CTGTTGTGCGCTTCGTTCAT...  [ 8  8 10  7  8  6  3  
+      dbcfd59a-7a96-46a2-9...  CGATTATTTGGTTCGTTCAT...  [ 5  4  2  3  5  2  2  
+      a0f83c4e-4c20-4c15-b...  GTTGTACTTTACGTTTCAAT...  [ 3  5 10  6  7  6  6  
+    SequenceEntryWithQuality with 489 entries
+                         name                 sequence                  quality
+      5f27fb90-2cb0-43d0-a...  CGTTGCTGATTCAGCATCAA...  [ 5  3  2  3  2  2  4  
+      e23294d9-0079-4345-a...  CGAGCCGCTTCGTTCCGGTT...  [ 4  5  3  3  3  4  3  
+      56736851-ccc9-41a6-9...  CGGTGCCTTCGTTCATTTCT...  [ 8  3  7  7  3  1  2  
+      f156362d-d380-480d-8...  CTGTTGCGCCCCGGAACAGT...  [ 7 11  9  4  4  4  3  
+      300f89ef-608a-463f-8...  CATACTTTGGTTCATTCTGT...  [ 3  2  4  4  4  4  5  
+      755b1702-4560-4c04-a...  GGTATACTTGCCCTACGTTC...  [10  9 13  6  3  3  4  
+      98de4f6b-d094-41e8-9...  GTTGTACTTCGTTCAGTTTC...  [ 4  5  6  4  7  6  6  
+      00ac3f41-f735-49e5-9...  GTTGTACTTCGTTCAGCTCT...  [ 3  4  5  4  4 10 12 1
+      f92d30bc-f77f-401e-9...  GTTGTACTGCTTCGTTCAGT...  [ 6  3  4  3  6  3  2  
+      7e2c14c0-0662-4cc3-8...  TGATACATTACTTCGTTCGA...  [ 3  8  4  7  2  4  3  
 
     """
 
@@ -190,8 +255,8 @@ def bnp_open(filename: str, mode: str = None, **kwargs) -> NpDataclassReader:
         suffix = path.suffixes[-2]
     if suffix == ".fai":
         assert mode not in ("w", "write", "wb")
-        return IndexedFasta(filename[:-4], **kwargs)
-    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, **kwargs)
+        return IndexedFasta(filename[:-4])
+    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type)
 
 
 def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
