@@ -13,8 +13,8 @@ class PositionWeightMatrix(RollableFunction):
 
     def __call__(self, sequence: EncodedArray) -> float:
         if self._encoding is not None:
-            sequence = as_encoded_array(sequence, self._encoding)
-        scores = self._matrix[np.asarray(sequence), self._indices]
+            sequence = as_encoded_array(sequence, self._encoding).raw()
+        scores = self._matrix[sequence, self._indices]
         return scores.sum(axis=-1)
 
 
