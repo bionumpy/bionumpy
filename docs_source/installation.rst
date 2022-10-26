@@ -23,9 +23,15 @@ Your first BioNumPy program
 
 Assuming you have a file with som biological data, the following will read a chunk from the file and print a description of the content:
 
+.. doctest::
+
     >>> import bionumpy as bnp
     >>> file = bnp.open("example_data/reads.fq")
     >>> chunk = file.read_chunk()
     >>> print(chunk)
+    SequenceEntryWithQuality with 2 entries
+                         name                 sequence                  quality
+                 headerishere                 CTTGTTGA        [2 2 2 2 2 2 2 2]
+                anotherheader                      CGG               [93 93 93]
 
 If the above works, you are now ready to read more about :ref:`reading-files`.

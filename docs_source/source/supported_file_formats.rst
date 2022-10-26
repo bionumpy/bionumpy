@@ -49,16 +49,18 @@ sam / bam
 Example
 =========
 We open a bed file, read one chunk and print a description of that chunk:
+.. testcode::
 
-    >>> data = bnp.open("example_data/test.bed")
-    >>> chunk = data.read_chunk()
-    >>> print(chunk)
+    import bionumpy as bnp
+    data = bnp.open("../example_data/test.bed")
+    chunk = data.read_chunk()
+    print(chunk)
 
 The above example should work wih any of the supported file formats.
 
 This shows us that we have a a chunk of 71 intervals, and we get to see the first of these:
 
-.. code-block::
+.. testoutput::
 
     Interval with 71 entries
     chromosome                    start                      end

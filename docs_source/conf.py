@@ -35,7 +35,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphi
 
 doctest_global_setup = """
 import os
-os.chdir("../")
+if os.getcwd().endswith("docs_source"):
+    os.chdir("../")
 """
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
