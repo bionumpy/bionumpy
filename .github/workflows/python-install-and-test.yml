@@ -38,3 +38,8 @@ jobs:
       run: |
         pytest
         pytest scripts/*_example.py
+    - name: Doctest
+      run: |
+        cd docs_source/
+        make doctest
+        cd ..
