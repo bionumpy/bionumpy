@@ -16,7 +16,7 @@ interval_list = [
 def raw_pileup(intervals, size):
     pileup = np.zeros(size, dtype=int)
     for interval in intervals:
-        pileup[interval.start:interval.end] += 1
+        pileup[interval.start:interval.stop] += 1
     return pileup
 
 

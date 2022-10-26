@@ -26,7 +26,7 @@ class SequenceEntryWithQuality:
 class Interval:
     chromosome: str
     start: int
-    end: int
+    stop: int
 
 
 @bnpdataclass
@@ -109,7 +109,7 @@ class GFFEntry:
     source: str
     feature_type: str
     start: int
-    end: int
+    stop: int
     score: str
     strand: str
     phase: int

@@ -13,7 +13,7 @@ class Entry:
 @npdataclass
 class Interval:
     start: np.ndarray
-    end: np.ndarray
+    stop: np.ndarray
 
 
 @pytest.fixture
