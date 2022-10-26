@@ -1,8 +1,8 @@
 .. highlight:: shell
 
-=================================
+================================
 Installation and getting started
-=================================
+================================
 
 
 To install BioNumPy, run this command in your terminal:
@@ -17,9 +17,9 @@ you through the process.
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
-====================================
+===========================
 Your first BioNumPy program
-====================================
+===========================
 
 Assuming you have a file with som biological data, the following will read a chunk from the file and print a description of the content:
 
@@ -34,4 +34,4 @@ Assuming you have a file with som biological data, the following will read a chu
                  headerishere                 CTTGTTGA        [2 2 2 2 2 2 2 2]
                 anotherheader                      CGG               [93 93 93]
 
-If the above works, you are now ready to read more about :ref:`reading-files`.
+If the above works, you are now ready to read more about :ref:`reading_files`.

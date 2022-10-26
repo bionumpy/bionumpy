@@ -1,10 +1,11 @@
 .. _working_with_big_data:
 
 Working with big data
-----------------------
+---------------------
 Before following this guide we assume you have read how to read a big file under Method3 in :ref:`reading_files`.
 
 The recommended way of working with big data sets (bigger than what you can fit in memory) in BioNumPy is to use the `read_chunks()` method when reading your data.
+
     >>> import bionumpy as bnp
     >>> data = bnp.open("filename").read_chunks() # doctest: +SKIP
 
