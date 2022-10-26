@@ -1,7 +1,7 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer
-from .encoded_array import EncodedArray, EncodedRaggedArray
-from .datatypes import SequenceEntry
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..datatypes import SequenceEntry
 import numpy as np
 
 

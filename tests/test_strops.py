@@ -2,7 +2,7 @@ import pytest
 from npstructures.testing import assert_raggedarray_equal
 import numpy as np
 from bionumpy import as_encoded_array
-from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float)
+from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float)
 
 
 @pytest.fixture()

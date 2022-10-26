@@ -1,9 +1,10 @@
-import numpy as np
-from .npdataclassstream import NpDataclassStream
 import logging
+import numpy as np
 from npstructures import npdataclass
-from .encoded_array import EncodedArray
-from .groupby import GroupedStream
+from ..npdataclassstream import NpDataclassStream
+from ..encoded_array import EncodedArray
+from ..groupby import GroupedStream
+
 logger = logging.getLogger(__name__)
 
 

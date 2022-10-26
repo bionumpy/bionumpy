@@ -3,16 +3,16 @@ import logging
 import dataclasses
 from typing import List
 from npstructures import RaggedArray, RaggedView, ragged_slice
-from .bnpdataclass import bnpdataclass
+
+from ..bnpdataclass import bnpdataclass
+from ..datatypes import (Interval, Variant, VCFGenotypeEntry,
+                         SequenceEntry, VCFEntry, Bed12, Bed6)
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
+                         PhasedGenotypeEncoding)
+from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import ints_to_strings, split, str_to_int, str_to_float
-from .datatypes import (Interval, Variant, VCFGenotypeEntry,
-                        SequenceEntry, VCFEntry, Bed12, Bed6)
-from .encoded_array import EncodedArray, EncodedRaggedArray
-
-
-from .encodings import Encoding, DigitEncoding, GenotypeEncoding, PhasedGenotypeEncoding
-from .util import is_subclass_or_instance
 import numpy as np
 
 
@@ -483,7 +483,6 @@ class VCFMatrixBuffer(VCFBuffer):
             prev_line = line
         sample_names = prev_line.split("\t")[9:]
         return sample_names
-
 
     def get_data(self):
         data = VCFBuffer.get_data(self)

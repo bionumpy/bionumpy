@@ -3,7 +3,7 @@ import bionumpy as bnp
 from bionumpy.cli import run_as_commandline
 from bionumpy.mutation_signature import count_mutation_types
 from bionumpy.groupby import groupby
-from bionumpy.delimited_buffers import VCFMatrixBuffer
+from bionumpy.io.delimited_buffers import VCFMatrixBuffer
 from bionumpy.io.matrix_dump import matrix_to_csv
 import logging
 logging.basicConfig(level="INFO")

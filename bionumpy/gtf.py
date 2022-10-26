@@ -1,6 +1,6 @@
 from .datatypes import GFFEntry
 from .bnpdataclass import bnpdataclass
-from .strops import str_equal, split
+from .io.strops import str_equal, split
 from . import streamable
 
 

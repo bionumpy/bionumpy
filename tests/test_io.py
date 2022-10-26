@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
-from bionumpy.files import NumpyFileReader, NpDataclassReader
+from bionumpy.io.files import NumpyFileReader, NpDataclassReader
 from .buffers import buffer_texts, combos, big_fastq_text
 from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal

@@ -1,18 +1,14 @@
 from itertools import accumulate, repeat, takewhile, chain
-from .npdataclassstream import streamable
-from .datatypes import Bed6, BamEntry
-from .file_buffers import FileBuffer
-from .cigar import count_reference_length, split_cigar, CigarOpEncoding
+import numpy as np
 from npstructures.raggedshape import RaggedView
 from npstructures import RaggedArray, ragged_slice
-import numpy as np
-from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
-from .encodings import AlphabetEncoding, BaseEncoding, QualityEncoding, Encoding, NumericEncoding
-from .encodings.alphabet_encoding import BamEncoding, CigarOpEncoding
-# from bionumpy.bnpdataclass import bnpdataclass
 
-# BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
-# BamArray = get_alphabet_array_class("=ACMGRSVTWYHKDBN")
+from ..datatypes import Bed6, BamEntry
+from ..cigar import count_reference_length, split_cigar
+from ..encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
+from ..encodings import BaseEncoding
+from ..encodings.alphabet_encoding import BamEncoding
+from .file_buffers import FileBuffer
 
 
 class BamBuffer(FileBuffer):
@@ -140,17 +136,3 @@ class BamIntervalBuffer(BamBuffer):
                     read_names,
                     mapq,
                     strand)
-
-
-@streamable()
-def alignment_to_interval(alignment):
-    strand = alignment.flag & np.uint16(16)
-    strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None])
-    strand.encoding = BaseEncoding
-    length = count_reference_length(alignment.cigar_op, alignment.cigar_length)
-    return Bed6(alignment.chromosome,
-                alignment.position,
-                alignment.position+length,
-                alignment.name,
-                alignment.mapq,
-                strand)

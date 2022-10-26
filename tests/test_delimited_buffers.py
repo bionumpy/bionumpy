@@ -1,5 +1,5 @@
 import pytest
-from bionumpy.delimited_buffers import BedBuffer
+from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.datatypes import Interval
 intervals = Interval(["chr1", "chr1"], [2, 10], [100, 20])
 

@@ -1,5 +1,5 @@
 import bionumpy as bnp
-from bionumpy.strops import str_equal, split
+from bionumpy.io.strops import str_equal, split
 from bionumpy.gtf import get_transcripts, get_genes
 
 

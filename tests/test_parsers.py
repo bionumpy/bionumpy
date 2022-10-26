@@ -3,12 +3,12 @@ from itertools import chain
 import pytest
 import numpy as np
 from npstructures.testing import assert_npdataclass_equal 
-from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
+from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
-from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
-from bionumpy.files import bnp_open
+from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
+from bionumpy.io.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
-from bionumpy.parser import chunk_lines
+from bionumpy.io.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encoded_array import from_encoded_array
 import bionumpy as bnp

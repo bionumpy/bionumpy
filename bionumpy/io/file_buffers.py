@@ -1,10 +1,10 @@
 import numpy as np
 from io import FileIO
 from npstructures import RaggedArray, RaggedView, RaggedShape
-from .bnpdataclass import bnpdataclass
-from .datatypes import SequenceEntry, SequenceEntryWithQuality
-from .encoded_array import EncodedArray, EncodedRaggedArray
-from .encodings import QualityEncoding
+from ..bnpdataclass import bnpdataclass
+from ..datatypes import SequenceEntry, SequenceEntryWithQuality
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encodings import QualityEncoding
 
 
 NEWLINE = "\n"

@@ -1,9 +1,11 @@
-from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+import numpy as np
+
 from npstructures import RaggedArray, RaggedShape
-from bionumpy.encodings.alphabet_encoding import DigitEncoding
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
-import numpy as np
+
+from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encodings.alphabet_encoding import DigitEncoding
 
 
 def int_to_str(number):
@@ -11,6 +13,7 @@ def int_to_str(number):
     L = np.log10(np.maximum(number, 1)).astype(int)+1
     digits = number // 10**np.arange(L)[::-1] % 10
     return EncodedArray(digits, DigitEncoding)
+
 
 def _build_power_array(shape, dots=None):
     total_lengths = shape.ends[-1]

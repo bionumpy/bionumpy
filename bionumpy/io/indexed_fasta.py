@@ -1,14 +1,14 @@
-from .chromosome_provider import ChromosomeDictProvider, GroupedDict
-from .encodings import BaseEncoding
-from .encoded_array import EncodedArray
+from ..chromosome_provider import GroupedDict
+from ..encoded_array import EncodedArray
 import numpy as np
 
 
 def read_index(filename):
-    split_lines =(line.split() for line in open(filename))
+    split_lines = (line.split() for line in open(filename))
     return {chromosome:
             {"rlen": int(rlen), "offset": int(offset), "lenc": int(lenc), "lenb": int(lenb)}
             for chromosome, rlen, offset, lenc, lenb in split_lines}
+
 
 class IndexedFasta(GroupedDict):
     def __init__(self, filename, add_chr=False):

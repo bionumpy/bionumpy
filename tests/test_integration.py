@@ -6,8 +6,8 @@ from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 import bionumpy.encodings
 from bionumpy import AminoAcidEncoding, DNAEncoding
-from bionumpy.files import bnp_open
-from bionumpy.delimited_buffers import get_bufferclass_for_datatype
+from bionumpy.io.files import bnp_open
+from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
 from bionumpy.string_matcher import RegexMatcher
 from bionumpy.bnpdataclass import bnpdataclass
 

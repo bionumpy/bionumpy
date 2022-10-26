@@ -1,6 +1,6 @@
 import bionumpy as bnp
 import pytest
-from bionumpy.bam import alignment_to_interval
+from bionumpy.alignments import alignment_to_interval
 
 
 @pytest.mark.skip

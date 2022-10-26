@@ -4,9 +4,13 @@ __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
-from .files import bnp_open as open
+from .io.files import bnp_open as open
+from .io.files import count_entries
+from .io.multiline_buffer import MultiLineFastaBuffer
+from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
+                                GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
-from .files import count_entries
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 # from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
 from .kmers import KmerEncoding
@@ -15,11 +19,8 @@ from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
 from .npdataclassstream import mean, bincount, histogram, streamable, quantile
 import npstructures as nps
-from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
-                                GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .datatypes import SAMEntry, GFFEntry, Bed6
-from .multiline_buffer import MultiLineFastaBuffer
+
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)

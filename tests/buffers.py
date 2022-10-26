@@ -1,8 +1,8 @@
 import pytest
-from bionumpy.file_buffers import FastQBuffer, TwoLineFastaBuffer
+from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry, Bed12
-from bionumpy.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer
-from bionumpy.multiline_buffer import MultiLineFastaBuffer
+from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer
+from bionumpy.io.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.encoded_array import EncodedArray
 import numpy as np
 
