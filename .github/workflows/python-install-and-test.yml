@@ -40,6 +40,7 @@ jobs:
         pytest scripts/*_example.py
     - name: Doctest
       run: |
+        pip install Sphinx==3.5.4
         cd docs_source/
         make doctest
         cd ..
