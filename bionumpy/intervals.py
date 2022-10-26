@@ -20,6 +20,13 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
     chromosome_size : int
         size of the chromsome/contig
 
+    Examples
+    --------
+    >>> intervals = Interval(["chr1", "chr1", "chr1"], [3, 5, 10], [8, 7, 12])
+    >>> pileup = get_pileup(intervals, 20)
+    >>> print(pileup)
+    [0 0 0 1 1 2 2 1 0 0 1 1 0 0 0 0 0 0 0 0]
+
     """
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.end, chromosome_size)
     return rla.sum(axis=0)
@@ -28,7 +35,9 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     """Get a boolean mask representing where any inteval hits
 
     Uses run length encoded binary arrays to represent the areas
-    covered by any interval
+    covered by any interval. The mask that is returned supports numpy ufuncs, 
+    so that you can run logical operations on them s.a. `& | ~` and also 
+    numpy indexing so you can use it to filter positions and intervals.
 
     Parameters
     ----------
@@ -37,6 +46,39 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     chromosome_size : int
         The size of the chromosome/contig
 
+    Examples
+    --------
+
+    >>> intervals = Interval(["chr1", "chr1", "chr1"], [3, 5, 10], [8, 7, 12])
+    >>> print(intervals)
+    Interval with 3 entries
+                   chromosome                    start                      end
+                         chr1                        3                        8
+                         chr1                        5                        7
+                         chr1                       10                       12
+    >>> mask = get_boolean_mask(intervals, 20)
+    >>> print(mask.astype(int))
+    [0 0 0 1 1 1 1 1 0 0 1 1 0 0 0 0 0 0 0 0]
+
+    Get complement of the mask:
+
+    >>> complement = ~mask
+    >>> print(complement.astype(int))
+    [1 1 1 0 0 0 0 0 1 1 0 0 1 1 1 1 1 1 1 1]
+
+    Get the intersections (`&`) and union (`|`) of the mask and another mask
+
+    >>> other_mask = get_boolean_mask(Interval(["chr1"], [9], [15]), 20)
+    >>> intersection = mask & other_mask
+    >>> print(intersection.astype(int))
+    [0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0]
+    >>> union = mask | other_mask
+    >>> print(union.astype(int))
+    [0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 0 0 0 0]
+
+    Find wether some positions overlap the mask:
+    >>> print(other_mask[intervals.start])
+    [False False  True]
     """
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.end, chromosome_size)
     return rla.any(axis=0)
