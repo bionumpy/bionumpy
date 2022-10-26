@@ -13,7 +13,7 @@ If you are working with data sets that are small enough to fit into memory, you 
     >>> data = bnp.open("example_data/test.bed").read()
     >>> print(data)
     Interval with 71 entries
-                   chromosome                    start                      end
+                   chromosome                    start                     stop
                            17                  7512371                  7512447
                            17                  7512377                  7512453
                            17                  7512393                  7512469
