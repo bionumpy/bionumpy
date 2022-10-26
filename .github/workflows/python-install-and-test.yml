@@ -38,3 +38,4 @@ jobs:
       run: |
         pytest
         pytest scripts/*_example.py
+        pytest --doctest-modules bionumpy/ --ignore bionumpy/cupy_compatible/
