@@ -17,6 +17,27 @@ def int_to_str(number: int) -> str:
 
 
 def _build_power_array(shape: RaggedShape, dots: np.ndarray = None) -> RaggedArray:
+    """Build a ragged array where each row is the tenth power of the digit at that position
+
+    If dots is specified, keep that space for a dot in the number
+
+    Parameters
+    ----------
+    shape : RaggedShape
+        The shape of the resulting string
+    dots : np.ndarray
+        Where the dots are located
+
+    Returns
+    -------
+    RaggedArray
+        The power of each digit in the corresponding string
+
+    Examples
+    --------
+    FIXME: Add docs.
+
+    """
     total_lengths = shape.ends[-1]
     lengths = shape.lengths
     index_array = np.full(total_lengths, -1, dtype=int)
@@ -33,9 +54,28 @@ def _build_power_array(shape: RaggedShape, dots: np.ndarray = None) -> RaggedArr
 
 
 def str_to_int(number_text: EncodedArray) -> np.ndarray:
+    """Convert strings in an EncodedRaggedArray to integers in numpy array
+
+    Parameters
+    ----------
+    number_text : EncodedArray
+        integer-strings in ragged array
+
+    Returns
+    -------
+    np.ndarray
+        integer values
+
+    Examples
+    --------
+    FIXME: Add docs.
+
+    """
     number_text = as_encoded_array(number_text)
     is_negative = number_text[:, 0] == "-"
+    is_positive = number_text[:, 0] == "+"
     number_text[is_negative, 0] = "0"
+    number_text[is_positive, 0] = "0"
     number_text = as_encoded_array(number_text, DigitEncoding)
     number_digits = RaggedArray(number_text.ravel().data, number_text.shape)
     powers = 10**_build_power_array(number_text.shape)
@@ -72,7 +112,24 @@ def _scientific_str_to_float(number_text: EncodedArray) -> np.ndarray:
     return decimal_numbers*10.**powers
 
 
-def str_to_float(number_text: EncodedArray) -> np.ndarray:
+def str_to_float(number_text: EncodedRaggedArray) -> np.ndarray:
+    """Convert strings representing floats to floats
+
+    Parameters
+    ----------
+    number_text : EncodedRaggedArray
+        The strings to be converted
+
+    Returns
+    -------
+    np.ndarray
+        Numpy array with the floats
+
+    Examples
+    --------
+    FIXME: Add docs.
+
+    """
     number_text = as_encoded_array(number_text)
     scientific = np.any(number_text == "e", axis=-1)
     numbers = np.empty(len(number_text))
@@ -184,10 +241,25 @@ def split(sequence: EncodedArray, sep: str = ",") -> EncodedRaggedArray:
     return ragged_array[:, :-1]
 
 
-def str_equal(sequences, s):
-    L = len(s)
+def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
+    """Test if any of the sequences in `sequences` equals `match_string`
+
+    Parameters
+    ----------
+    sequences : EncodedRaggedArray
+        The set of sequences to test
+    match_string : str
+        The string to match
+
+    Returns
+    -------
+    np.ndarray
+        Boolean array of which sequences matches the `match_string`
+
+    """
+    L = len(match_string)
     mask = (sequences.shape.lengths == L)
     starts = sequences.shape.starts[mask]
     matrix = sequences.ravel()[starts[:, np.newaxis]+np.arange(L)]
-    mask[mask] &= np.all(matrix == s, axis=-1)
+    mask[mask] &= np.all(matrix == match_string, axis=-1)
     return mask
