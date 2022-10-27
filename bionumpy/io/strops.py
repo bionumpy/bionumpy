@@ -6,6 +6,7 @@ from npstructures.raggedarray.raggedslice import ragged_slice
 
 from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from ..encodings.alphabet_encoding import DigitEncoding
+from ..encodings import BaseEncoding
 
 
 def int_to_str(number: int) -> str:
@@ -83,13 +84,34 @@ def str_to_float(number_text: EncodedArray) -> np.ndarray:
 
 
 def ints_to_strings(number: np.ndarray) -> EncodedRaggedArray:
+    """Convert an array of ints into an ecoded ragged array holding their string representation
+
+    Parameters
+    ----------
+    number : np.ndarray
+        The numbers to be converted
+
+    Returns
+    -------
+    EncodedRaggedArray
+        The string representations in an EncodedRaggedArray
+
+    Examples
+    --------
+    FIXME: Add docs.
+
+    """
     number = np.asanyarray(number)
-    lengths = np.log10(np.maximum(number, 1)).astype(int)+1
-    shape = RaggedShape(lengths)
+    is_negative = number < 0
+    lengths = np.log10(np.maximum(np.abs(number), 1)).astype(int)+1
+    shape = RaggedShape(lengths+is_negative)
     ragged_index = _build_power_array(shape)
-    digits = number[:, np.newaxis] // 10**ragged_index % 10
-    return EncodedRaggedArray(
+    digits = np.abs(number)[:, np.newaxis] // 10**ragged_index % 10
+    digits = EncodedRaggedArray(
         EncodedArray(digits.ravel(), DigitEncoding), digits.shape)
+    digits = as_encoded_array(digits, target_encoding=BaseEncoding)
+    digits[is_negative, 0] = "-"
+    return digits
 
 
 def float_to_strings(floats: np.ndarray) -> EncodedArray:
@@ -100,7 +122,30 @@ def int_lists_to_strings(int_lists, seperator):
     pass
 
 
-def join(sequences, sep="\t", keep_last=False):
+def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False) -> EncodedArray:
+    """Join a set of sequences in an EncodedRaggedArray into a single EncodedArray
+
+    Parameters
+    ----------
+    sequences : EncodedRaggedArray
+        A set of encoded sequences
+    sep : str
+        The character used to separate the sequences
+    keep_last : bool
+        Wheter or not to keep the trailing seperator
+
+    Returns
+    -------
+    EncodedArray
+        `sequences` joined by `sep`
+
+    Examples
+    --------
+    >>> print(join(["actg", "tgc"], sep=","))
+    "actg,tgc"
+    >>> print(join(["a", "b", "c"], sep=".", keep_last=True)
+    "a.b.c."
+    """
     new_lengths = sequences.shape.lengths+1
     new_array = sequences.__class__(
         EncodedArray(np.empty(shape=np.sum(new_lengths), dtype=np.uint8), sequences.encoding), new_lengths)
@@ -111,7 +156,24 @@ def join(sequences, sep="\t", keep_last=False):
     return new_array.ravel()[:-1]
 
 
-def split(sequence, sep=","):
+def split(sequence: EncodedArray, sep: str = ",") -> EncodedRaggedArray:
+    """Split the sequence on `sep` character into a ragged array
+
+    Parameters
+    ----------
+    sequence : EncodedArray
+        The sequence to split
+    sep : str
+        The character to split on
+
+    Returns
+    -------
+    EncodedRaggedArray
+        EncodedRaggedArray where each row is a part after split
+
+    Examples
+    --------
+    """
     us = unsafe_extend_right(sequence)
     mask = us == sep
     mask[-1] = True

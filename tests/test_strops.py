@@ -56,6 +56,7 @@ def test_str_to_float(floats):
 
 def test_scientific_str_to_float(scientific_floats):
     np.testing.assert_array_almost_equal([float(c) for c in scientific_floats], str_to_float(scientific_floats))
+
 def test_join(strings):
     seqs = as_encoded_array(strings)
     print(seqs.shape, seqs._data)
