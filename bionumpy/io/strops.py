@@ -171,12 +171,57 @@ def ints_to_strings(number: np.ndarray) -> EncodedRaggedArray:
     return digits
 
 
-def float_to_strings(floats: np.ndarray) -> EncodedArray:
-    return NotImplemented
+def float_to_strings(floats: np.ndarray) -> EncodedRaggedArray:
+    """Convert floats to strings
+
+    This is actually very hard, need to write dragon4 or similar to
+    numpy. For now use vanilla-speed
+
+    Parameters
+    ----------
+    floats : np.ndarray
+        floats to convert
+
+    Returns
+    -------
+    EncodedRaggedArray
+        strings in EncodedRaggedArray
+
+    """
+    b = np.frombuffer(bytes(np.array2string(floats, max_line_width=10**15, threshold=10**15, separator=",", prefix=""), encoding="ascii"), dtype=np.uint8)
+    return split(EncodedArray(b[1:-1]), sep=",")
 
 
-def int_lists_to_strings(int_lists, seperator):
-    pass
+def int_lists_to_strings(int_lists: RaggedArray, sep: str = ",", keep_last: bool = False) -> EncodedRaggedArray:
+    """Join the ints in each row into a string 
+
+    Parameters
+    ----------
+    int_lists : RaggedArray
+        RaggedArray of ints to be joined
+    sep : str
+        Separator character used to join the strings
+    keep_last : bool
+        Whether or not to keep the trailing separator on each line
+
+    Returns
+    -------
+    EncodedRaggedArray
+        EncodedRaggeadArray with the joined ints
+
+    Examples
+    --------
+    FIXME: Add docs.
+
+    """
+    int_strings = ints_to_strings(int_lists.ravel())
+    lengths = RaggedArray(int_strings.shape.lengths, int_lists.shape)
+    joined = join(int_strings, sep=sep, keep_last=True)
+    row_lens = lengths.sum(axis=-1)+int_lists.shape.lengths
+    ra = EncodedRaggedArray(joined, row_lens)
+    if not keep_last:
+        ra = ra[:, :-1]
+    return ra
 
 
 def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False) -> EncodedArray:
@@ -198,10 +243,6 @@ def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False
 
     Examples
     --------
-    >>> print(join(["actg", "tgc"], sep=","))
-    "actg,tgc"
-    >>> print(join(["a", "b", "c"], sep=".", keep_last=True)
-    "a.b.c."
     """
     new_lengths = sequences.shape.lengths+1
     new_array = sequences.__class__(

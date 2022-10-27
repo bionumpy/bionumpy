@@ -3,11 +3,13 @@ import numpy as np
 from hypothesis import given, example, settings, Verbosity
 import hypothesis.strategies as st
 from bionumpy.io.strops import (join, split, ints_to_strings, str_to_float,
-                                str_to_int, str_equal)
+                                str_to_int, str_equal, int_lists_to_strings,
+                                float_to_strings)
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from bionumpy.testing import assert_encoded_array_equal, assert_encoded_raggedarray_equal
 from bionumpy import as_encoded_array
 from numpy import array
+from npstructures import RaggedArray
 from .strategies import ascii_text, integers, floats
 
 @pytest.mark.parametrize("sep", [",", "\t"])
@@ -39,12 +41,11 @@ def test_ints_to_strings(ints):
 def test_str_to_float(_floats):
     _floats = array(_floats)
     float_strings = [str(f) for f in _floats]
-    print(float_strings)
     floats = str_to_float(as_encoded_array(float_strings))
-    my_diff = np.abs(floats-_floats)
+    # my_diff = np.abs(floats-_floats)
     true = np.array([float(s) for s in float_strings])
     tf, tm = np.frexp(true)
-    f, m = np.frexp(true)
+    f, m = np.frexp(floats)
     assert_array_almost_equal(f, tf)
     assert_array_equal(m, tm)
     
@@ -59,3 +60,23 @@ def test_str_equal(sequences, match_string):
     true = [s==match_string for s in sequences]
     result = str_equal(as_encoded_array(sequences), match_string)
     assert_array_equal(true, result)
+
+@given(st.lists(st.lists(integers(), min_size=1), min_size=1))
+def test_int_lists_to_strings(int_lists):
+    ra = RaggedArray(int_lists)
+    strings = int_lists_to_strings(ra, sep=",")
+    true = as_encoded_array(
+        [",".join(str(i) for i in ints) for ints in int_lists])
+    assert_encoded_raggedarray_equal(strings, true)
+
+@given(st.lists(floats().filter(lambda x: abs(x)>10**(-15)), min_size=1))
+def test_float_to_str(floats):
+    floats = np.array(floats)
+    ra = float_to_strings(floats)
+    true = floats
+    result = np.array([float(row.to_string()) for row in ra])
+    print(true, result)
+    tf, tm = np.frexp(true)
+    f, m = np.frexp(result)
+    tf *= 2**(tm-m)
+    assert_array_almost_equal(f, tf)
