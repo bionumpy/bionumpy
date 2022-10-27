@@ -12,12 +12,14 @@ from numpy import array
 from npstructures import RaggedArray
 from .strategies import ascii_text, integers, floats
 
+
 @pytest.mark.parametrize("sep", [",", "\t"])
 @given(st.lists(ascii_text(), min_size=0))
 def test_join(sep, strings):
     joined = join(as_encoded_array(strings), sep=sep)
     true = as_encoded_array(sep.join(strings))
     assert_encoded_array_equal(joined, true)
+
 
 @given(ascii_text())
 def test_split(sequence):
@@ -27,12 +29,15 @@ def test_split(sequence):
         parts,
         as_encoded_array(sequence.split(",")))
 
+
 @given(st.lists(integers(), min_size=1))
+@example(ints=[-9223372036854775807])
 def test_ints_to_strings(ints):
     strings = ints_to_strings(ints)
     assert_encoded_raggedarray_equal(
         strings,
         as_encoded_array([str(i) for i in ints], strings.encoding))
+
 
 @given(st.lists(floats().filter(lambda x: abs(x)>10**(-15)), min_size=1))
 @example(_floats = array([1.80143985e+15]))
@@ -49,6 +54,7 @@ def test_str_to_float(_floats):
     assert_array_almost_equal(f, tf)
     assert_array_equal(m, tm)
     
+
 @given(st.lists(integers(), min_size=1))
 def test_str_to_int(ints):
     int_strings = [str(i) for i in ints]
@@ -61,6 +67,7 @@ def test_str_equal(sequences, match_string):
     result = str_equal(as_encoded_array(sequences), match_string)
     assert_array_equal(true, result)
 
+
 @given(st.lists(st.lists(integers(), min_size=1), min_size=1))
 def test_int_lists_to_strings(int_lists):
     ra = RaggedArray(int_lists)
@@ -68,6 +75,7 @@ def test_int_lists_to_strings(int_lists):
     true = as_encoded_array(
         [",".join(str(i) for i in ints) for ints in int_lists])
     assert_encoded_raggedarray_equal(strings, true)
+
 
 @given(st.lists(floats().filter(lambda x: abs(x)>10**(-15)), min_size=1))
 def test_float_to_str(floats):
