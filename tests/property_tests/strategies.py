@@ -11,5 +11,5 @@ floats = partial(st.floats,
                  max_value=np.finfo(np.float64).max)
 
 ascii_text = partial(st.text,
-                     alphabet=st.characters(
-                         min_codepoint=0, max_codepoint=127))
+                     alphabet=st.characters(blacklist_characters="\t\n",
+                                            min_codepoint=0, max_codepoint=127))

@@ -1,4 +1,5 @@
 from npstructures import RaggedArray
+from npstructures.mixin import NPSArray
 from typing import Tuple
 from .encodings.base_encoding import BaseEncoding
 from .encodings import Encoding, NumericEncoding
@@ -12,6 +13,10 @@ class EncodedRaggedArray(RaggedArray):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert isinstance(self._data, EncodedArray)
+
+    def __repr__(self) -> str:
+        return f"EncodedRaggedArray({self._data}, self.shape)"
+
 
     @property
     def encoding(self):
@@ -59,7 +64,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             assert data.encoding == encoding
             data = data.data
         self.encoding = encoding
-        self.data = np.asarray(data)
+        self.data = np.asarray(data).view(NPSArray)
+        assert isinstance(self.data, np.ndarray)
 
     def __len__(self) -> int:
         return len(self.data)
@@ -88,6 +94,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     @property
     def dtype(self) -> np.dtype:
         return self.data.dtype
+
+    def __repr__(self) -> str:
+        return f"EncodedArray({self.data}, self.encoding)"
 
     def __str__(self) -> str:
         """Return the data decoded into ASCII string
@@ -122,7 +131,11 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         "EncodedArray"
 
         """
-        return self.__class__(self.data.__getitem__(idx), self.encoding)
+        new_data = self.data.__getitem__(idx)
+        if isinstance(new_data, RaggedArray):
+            return EncodedRaggedArray(EncodedArray(new_data.ravel(), self.encoding),
+                                      new_data.shape)
+        return self.__class__(new_data, self.encoding)
 
     def __setitem__(self, idx, value: "EncodedArray"):
         """ Set the item on the underlying numpy array

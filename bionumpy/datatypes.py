@@ -112,7 +112,7 @@ class GFFEntry:
     stop: int
     score: str
     strand: str
-    phase: int
+    phase: str
     atributes: str
 
 
