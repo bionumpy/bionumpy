@@ -12,7 +12,7 @@ from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
-from .strops import ints_to_strings, split, str_to_int, str_to_float
+from .strops import ints_to_strings, split, str_to_int, str_to_float, int_lists_to_strings, float_to_strings
 import numpy as np
 
 
@@ -208,7 +208,9 @@ class DelimitedBuffer(FileBuffer):
             Data
         """
         funcs = {int: ints_to_strings,
-                 str: lambda x: x}
+                 str: lambda x: x,
+                 List[int]: int_lists_to_strings,
+                 float: float_to_strings}
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
@@ -230,7 +232,7 @@ class DelimitedBuffer(FileBuffer):
         col : int
             Column number
         sep : 5
-            Characted used to separated the integers
+            Characted used to separate the integers
 
         Examples
         --------
