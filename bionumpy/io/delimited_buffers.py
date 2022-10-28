@@ -6,7 +6,7 @@ from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6)
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
 from ..util import is_subclass_or_instance
@@ -213,7 +213,9 @@ class DelimitedBuffer(FileBuffer):
         funcs = {int: ints_to_strings,
                  str: lambda x: x,
                  List[int]: int_lists_to_strings,
-                 float: float_to_strings}
+                 float: float_to_strings,
+                 List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
+        }
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
         lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
@@ -244,12 +246,16 @@ class DelimitedBuffer(FileBuffer):
         """
         self.validate_if_not()
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + 1
+        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + len(sep)
         text = self._data[starts:ends]
         # text = self._move_intervals_to_ragged_array(starts, ends)
-        text[:, -1] = ","
-        int_strings = split(text.ravel()[:-1], sep=sep)
-        return RaggedArray(str_to_int(int_strings), (text==",").sum(axis=-1))
+        if len(sep):
+            text[:, -1] = sep
+            int_strings = split(text.ravel()[:-1], sep=sep)
+            return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
+        else:
+            mask = as_encoded_array(text.ravel(), DigitEncoding).raw()
+            return RaggedArray(mask, text.shape)
 
     def count_entries(self) -> int:
         """Count the number of entries in the buffer"""
@@ -350,6 +356,8 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
                     col = self.get_integers(col_number).ravel()-1
                 elif field.type == List[int]:
                     col = self.get_split_ints(col_number)
+                elif field.type == List[bool]:
+                    col = self.get_split_ints(col_number, sep="").astype(bool)
                 else:
                     assert False, field
                 columns[field.name] = col

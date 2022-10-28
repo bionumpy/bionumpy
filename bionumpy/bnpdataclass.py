@@ -85,7 +85,7 @@ def bnpdataclass(base_class: type) -> npdataclass:
                 else:
                     assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
                 val = as_encoded_array(pre_val, field.type)
-            elif field.type == List[int]:
+            elif field.type == List[int] or field.type == List[bool]:
                 if not isinstance(pre_val, RaggedArray):
                     val = RaggedArray(pre_val)
                 else:

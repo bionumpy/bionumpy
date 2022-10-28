@@ -26,7 +26,9 @@ class DigitEncoding(Encoding):
 
     @classmethod
     def encode(cls, bytes_array):
-        return bytes_array.raw() - cls.MIN_CODE
+        if not isinstance(bytes_array, np.ndarray):
+            bytes_array = bytes_array.raw()
+        return bytes_array - cls.MIN_CODE
 
     @classmethod
     def decode(cls, digits):

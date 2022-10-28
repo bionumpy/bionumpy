@@ -216,6 +216,8 @@ def int_lists_to_strings(int_lists: RaggedArray, sep: str = ",", keep_last: bool
     FIXME: Add docs.
 
     """
+    if len(sep) == 0:
+        return EncodedRaggedArray(EncodedArray(int_lists.ravel(), DigitEncoding), int_lists.shape)
     int_strings = ints_to_strings(int_lists.ravel())
     lengths = RaggedArray(int_strings.shape.lengths, int_lists.shape)
     joined = join(int_strings, sep=sep, keep_last=True)
