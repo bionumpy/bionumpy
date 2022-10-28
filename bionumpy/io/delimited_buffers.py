@@ -131,7 +131,7 @@ class DelimitedBuffer(FileBuffer):
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         if keep_sep:
-            ends+=1
+            ends += 1
         if fixed_length:
             return self._move_intervals_to_2d_array(starts, ends)
         else:

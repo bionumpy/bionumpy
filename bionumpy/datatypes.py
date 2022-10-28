@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
-from .encodings import CigarOpEncoding, BamEncoding, QualityEncoding, CigarEncoding
+from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding, 
+                        CigarEncoding, StrandEncoding)
 from .bnpdataclass import bnpdataclass
 
 
@@ -33,14 +34,14 @@ class Interval:
 class Bed6(Interval):
     name: str
     score: int
-    strand: str
+    strand: StrandEncoding
 
 
 @bnpdataclass
 class NarrowPeak(Bed6):
     signal_value: str
-    p_value: str
-    q_value: str
+    p_value: float
+    q_value: float
     peak: int
 
 
@@ -111,7 +112,7 @@ class GFFEntry:
     start: int
     stop: int
     score: str
-    strand: str
+    strand: StrandEncoding
     phase: str
     atributes: str
 

@@ -2,23 +2,23 @@ import numpy as np
 from .base_encoding import BaseEncoding, Encoding, NumericEncoding, CigarEncoding
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
-                                CigarOpEncoding, BamEncoding)
+                                CigarOpEncoding, BamEncoding, StrandEncoding)
                                 
 
 __all__ = ["BaseEncoding", "Encoding",
            "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]# , "ACTGTwoBitEncoding"]
 
 
-class StrandEncoding(Encoding):
-    MIN_CODE = ord("+")
-
-    @classmethod
-    def encode(cls, bytes_array):
-        return (bytes_array & np.uint8(2)) >> np.uint8(1)
-
-    @classmethod
-    def decode(cls, strands):
-        return 2 * strands + cls.MIN_CODE
+# class StrandEncoding(Encoding):
+#     MIN_CODE = ord("+")
+# 
+#     @classmethod
+#     def encode(cls, bytes_array):
+#         return (bytes_array & np.uint8(2)) >> np.uint8(1)
+# 
+#     @classmethod
+#     def decode(cls, strands):
+#         return 2 * strands + cls.MIN_CODE
 
 
 class DigitEncoding(Encoding):

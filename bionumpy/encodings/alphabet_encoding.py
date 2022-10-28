@@ -1,6 +1,7 @@
 import numpy as np
 from .base_encoding import Encoding
 
+
 class AlphabetEncoding(Encoding):
     def __init__(self, alphabet: str):
         alphabet = [c.upper() for c in alphabet]
@@ -15,9 +16,11 @@ class AlphabetEncoding(Encoding):
         self._mask[lower_alphabet] = True
 
     def encode(self, byte_array):
-
-        ret  = self._lookup[byte_array]
-        if np.any(ret==255):
+        if hasattr(byte_array, "raw"):
+            byte_array = byte_array.raw()
+        print(byte_array)
+        ret = self._lookup[byte_array]
+        if np.any(ret == 255):
             raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array)} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
@@ -32,6 +35,9 @@ class AlphabetEncoding(Encoding):
         return [chr(c) for c in self._alphabet]
 
     def __str__(self):
+        return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
+
+    def __repr__(self):
         return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
 
     def __eq__(self, other):
@@ -51,3 +57,4 @@ RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
 CigarOpEncoding = AlphabetEncoding("MIDNSHP=X")
+StrandEncoding = AlphabetEncoding("+-.")
