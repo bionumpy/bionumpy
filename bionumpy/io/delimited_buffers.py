@@ -2,17 +2,18 @@ import io
 import logging
 import dataclasses
 from typing import List
-from npstructures import RaggedArray, RaggedView, ragged_slice
-
+from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
-from ..datatypes import (Interval, Variant, VCFGenotypeEntry,
+from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
-from .strops import ints_to_strings, split, str_to_int, str_to_float, int_lists_to_strings, float_to_strings, ints_to_strings
+from .strops import (
+    ints_to_strings, split, str_to_int, str_to_float,
+    int_lists_to_strings, float_to_strings)
 import numpy as np
 
 
@@ -244,10 +245,11 @@ class DelimitedBuffer(FileBuffer):
         self.validate_if_not()
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + 1
-        text = self._move_intervals_to_ragged_array(starts, ends)
+        text = self._data[starts:ends]
+        # text = self._move_intervals_to_ragged_array(starts, ends)
         text[:, -1] = ","
         int_strings = split(text.ravel()[:-1], sep=sep)
-        return str_to_int(int_strings)
+        return RaggedArray(str_to_int(int_strings), (text==",").sum(axis=-1))
 
     def count_entries(self) -> int:
         """Count the number of entries in the buffer"""
@@ -265,7 +267,7 @@ class GfaSequenceBuffer(DelimitedBuffer):
     get_data = get_sequences
 
 
-def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool=False, comment: str = "#") -> type:
+def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool=False, comment: str = "#", sub_delimiter=",") -> type:
     """Create a FileBuffer class that can read a delimited file with the fields specified in `_dataclass`
 
     This can be used to create a parser for a custom delimited file format and also more generic csv 

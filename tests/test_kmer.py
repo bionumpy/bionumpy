@@ -9,7 +9,6 @@ def test_kmer_encoding():
     kmers = encoding.sample_domain(100)
     encoded = encoding(kmers)
     decoded = encoding.inverse(encoded)
-    print(kmers, decoded)
     np.testing.assert_equal(np.asarray(kmers), np.asarray(decoded))
 
 

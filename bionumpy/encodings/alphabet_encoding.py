@@ -1,7 +1,6 @@
 import numpy as np
 from .base_encoding import Encoding
 
-
 class AlphabetEncoding(Encoding):
     def __init__(self, alphabet: str):
         alphabet = [c.upper() for c in alphabet]
@@ -18,7 +17,8 @@ class AlphabetEncoding(Encoding):
     def encode(self, byte_array):
 
         ret  = self._lookup[byte_array]
-        assert not np.any(ret==255), [chr(o) for o in (byte_array[ret==255])]
+        if np.any(ret==255):
+            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array)} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
     def decode(self, encoded):

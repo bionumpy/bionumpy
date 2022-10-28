@@ -188,7 +188,9 @@ def float_to_strings(floats: np.ndarray) -> EncodedRaggedArray:
         strings in EncodedRaggedArray
 
     """
-    b = np.frombuffer(bytes(np.array2string(floats, max_line_width=10**15, threshold=10**15, separator=",", prefix=""), encoding="ascii"), dtype=np.uint8)
+    s = np.array2string(floats, max_line_width=10**15, threshold=10**15, separator=",").replace(" ", "")
+    assert " " not in s, s
+    b = np.frombuffer(bytes(s, encoding="ascii"), dtype=np.uint8)
     return split(EncodedArray(b[1:-1]), sep=",")
 
 

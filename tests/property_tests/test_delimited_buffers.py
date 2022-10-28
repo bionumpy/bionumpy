@@ -1,5 +1,6 @@
 from bionumpy.bnpdataclass import bnpdataclass
-from npstructures.testing import assert_npdataclass_equal
+from bionumpy.testing import assert_bnpdataclass_equal
+# from npstructures.testing import assert_npdataclass_equal
 from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
 from typing import List
 from .strategies import integers, floats, ascii_text
@@ -11,19 +12,23 @@ import dataclasses
 
 type_to_strategy = {int: integers,
                     str: partial(ascii_text, min_size=1),
-                    float: floats,
-                    List[int]: lambda: st.lists(integers, min_size=1)}
+                    float: lambda: floats().filter(lambda x: abs(x) > 10**(-15)),
+                    List[int]: partial(st.lists, elements=integers(), min_size=1)
+                    }
 
 
 @bnpdataclass
 class MyDataclass:
     name: str
     age: int
+    money: float
+    child_ages: List[int]
 
 
 def table_strategies(dataclass):
     fixed_dict = {field.name: type_to_strategy[field.type]() for field in dataclasses.fields(dataclass)}
     return st.lists(st.fixed_dictionaries(fixed_dict), min_size=1)
+
 
 def table_to_dataclass(dataclass, table):
     return dataclass(*[
@@ -32,10 +37,13 @@ def table_to_dataclass(dataclass, table):
 
 
 @given(table_strategies(MyDataclass))
-@example(tables=[{'age': 0, 'name': '0'}, {'age': -1, 'name': '0'}])
+#@example(tables=[{'age': 0, 'name': '0'}, {'age': -1, 'name': '0'}])
+@example(tables=[{'age': 0, 'child_ages': [0], 'money': 0.0, 'name': '0'}])
 def test_to_from_data(tables):
     data = table_to_dataclass(MyDataclass, tables)
     buffer_class = get_bufferclass_for_datatype(MyDataclass)
     buf = buffer_class.from_data(data)
-    new_data = buffer_class.from_raw_buffer(buf).get_data()
-    assert_npdataclass_equal(new_data, data)
+    file_buffer = buffer_class.from_raw_buffer(buf)
+    print(file_buffer._data)
+    new_data = file_buffer.get_data()
+    assert_bnpdataclass_equal(new_data, data)
