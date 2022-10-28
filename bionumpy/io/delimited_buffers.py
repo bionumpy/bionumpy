@@ -5,7 +5,8 @@ from typing import List
 from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
-                         SequenceEntry, VCFEntry, Bed12, Bed6)
+                         SequenceEntry, VCFEntry, Bed12, Bed6,
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak)
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
@@ -387,8 +388,6 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
                     col = self.get_integers(col_number).ravel()
                 elif field.type == float:
                     col = self.get_floats(col_number).ravel()
-                elif field.type == -1:
-                    col = self.get_integers(col_number).ravel()-1
                 elif field.type == List[int]:
                     col = self.get_split_ints(col_number)
                 elif field.type == List[bool]:
@@ -420,6 +419,11 @@ class Bed6Buffer(DelimitedBuffer):
 class VCFBuffer(DelimitedBuffer):
     dataclass = VCFEntry
 
+    def get_data(self):
+        data = super().get_data()
+        data.position -= 1
+        return data
+
 
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
@@ -448,3 +452,20 @@ class VCFMatrixBuffer(VCFBuffer):
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     genotype_encoding = PhasedGenotypeEncoding
+
+
+class NarrowPeakBuffer(DelimitedBuffer):
+    dataclass = NarrowPeak
+
+
+class GFFBuffer(DelimitedBuffer):
+    dataclass = GFFEntry
+
+
+class SAMBuffer(DelimitedBuffer):
+    dataclass = SAMEntry
+    COMMENT = "@"
+
+
+class ChromosomeSizeBuffer(DelimitedBuffer):
+    dataclass = ChromosomeSize

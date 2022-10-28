@@ -74,7 +74,7 @@ def bnpdataclass(base_class: type) -> npdataclass:
         """
         for field in dataclasses.fields(obj):
             pre_val = getattr(obj, field.name)
-            if field.type in (int, float, -1):
+            if field.type in (int, float):
                 val = np.asanyarray(pre_val)
             elif field.type == str:
                 assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray)), (field, pre_val)

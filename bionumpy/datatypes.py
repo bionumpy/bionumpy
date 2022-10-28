@@ -65,7 +65,7 @@ class Variant:
 @bnpdataclass
 class VCFEntry:
     chromosome: str
-    position: int(-1)
+    position: int
     id: str
     ref_seq: str
     alt_seq: str

@@ -4,10 +4,10 @@ import dataclasses
 from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
-from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
-from ..datatypes import GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak
+from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
+                                GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
+                                NarrowPeakBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
-from ..chromosome_provider import FullChromosomeDictProvider, ChromosomeFileStreamProvider, LazyChromosomeDictProvider
 from .indexed_fasta import IndexedFasta
 from ..npdataclassstream import NpDataclassStream
 from ..bnpdataclass import bnpdataclass
@@ -21,8 +21,8 @@ class NpDataclassReader:
     This is the main file reader class for bionumpy. Ordinarily this should
     be created by using the `bnp.open` function that will create a reader with
     the correct attributes according to the file suffix. But this class can be used
-    for instance if the a file name is not available (stdin), or you want more control over 
-    the reading. 
+    for instance if the a file name is not available (stdin), or you want more control over
+    the reading.
     """
     def __init__(self, numpyfilereader):
         self._reader = numpyfilereader
@@ -121,18 +121,18 @@ class NpDataclassReader:
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
-    ".narrowPeak": get_bufferclass_for_datatype(NarrowPeak),
+    ".narrowPeak": NarrowPeakBuffer,
     ".fasta": MultiLineFastaBuffer,
     ".fa": MultiLineFastaBuffer,
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
-    ".gff": get_bufferclass_for_datatype(GFFEntry),
-    ".gtf": get_bufferclass_for_datatype(GFFEntry),
-    ".gff3": get_bufferclass_for_datatype(GFFEntry),
-    ".sam": get_bufferclass_for_datatype(SAMEntry, comment="@"),
+    ".gff": GFFBuffer,
+    ".gtf": GFFBuffer,
+    ".gff3": GFFBuffer,
+    ".sam": SAMBuffer, #, comment="@"),
     ".bam": BamBuffer,
-    ".sizes": get_bufferclass_for_datatype(ChromosomeSize)
+    ".sizes": ChromosomeSizeBuffer
 }
 
 
