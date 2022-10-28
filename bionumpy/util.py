@@ -17,10 +17,11 @@ def convolution(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
         convoluted = func(sequence, window_size, *args, **kwargs)
-        if isinstance(_sequence, RaggedArray):
-            out = RaggedArray(convoluted, shape)
-        elif isinstance(_sequence, np.ndarray):
+        if isinstance(shape, tuple):
             out = as_strided(convoluted, shape)
+        else:
+            out = RaggedArray(convoluted, shape)
+
         return out[..., : (-window_size + 1)]
 
     return new_func
