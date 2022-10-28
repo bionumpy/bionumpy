@@ -1,9 +1,10 @@
 import numpy as np
 from .rollable import RollableFunction
 from .encodings import DNAEncoding
+from .encodings.alphabet_encoding import AlphabetEncoding
 from .encoded_array import EncodedArray, as_encoded_array
 from npstructures.bitarray import BitArray
-from .util import convolution
+from .util import convolution, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
 
@@ -31,11 +32,13 @@ class KmerEncoding(RollableFunction):
 
 @convolution
 def fast_hash(sequence, k, encoding=None):
+    assert isinstance(sequence, EncodedArray), sequence
+    assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding)
     sequence = as_encoded_array(sequence, DNAEncoding)
     if encoding:
         sequence = encoding.encode(sequence)
 
-    bit_array = BitArray.pack(sequence, bit_stride=2)
+    bit_array = BitArray.pack(sequence.data, bit_stride=2)
     hashes = bit_array.sliding_window(k)
     return hashes
 
