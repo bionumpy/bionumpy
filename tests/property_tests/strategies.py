@@ -3,8 +3,8 @@ import numpy as np
 from functools import partial
 
 integers = partial(st.integers,
-                   min_value=np.iinfo(np.int64).min,
-                   max_value=np.iinfo(np.int64).max)
+                   min_value=np.iinfo(np.int64).min+1,
+                   max_value=np.iinfo(np.int64).max-1)
 
 floats = partial(st.floats,
                  min_value=np.finfo(np.float64).min,

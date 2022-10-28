@@ -1,7 +1,7 @@
-from bionumpy.kmers import KmerEncoding
+from bionumpy.kmers import KmerEncoding, fast_hash
 import numpy as np
 from npstructures import RaggedShape
-from bionumpy import DNAEncoding, EncodedRaggedArray, EncodedArray
+from bionumpy import DNAEncoding, EncodedRaggedArray, EncodedArray, as_encoded_array
 
 
 def test_kmer_encoding():
@@ -11,6 +11,12 @@ def test_kmer_encoding():
     decoded = encoding.inverse(encoded)
     print(kmers, decoded)
     np.testing.assert_equal(np.asarray(kmers), np.asarray(decoded))
+
+
+def test_fast_hash():
+    kmers = fast_hash(as_encoded_array("cgtt", DNAEncoding), 3)
+    encoding = KmerEncoding(3, DNAEncoding)
+    np.testing.assert_array_equal(kmers, encoding.rolling_window("cgtt"))
 
 
 def test_rolling_hash():
