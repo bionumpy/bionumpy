@@ -20,6 +20,9 @@ class ASCIIEncoding(Encoding):
     def decode(self, encoded):
         return encoded
 
+    def __repr__(self):
+        return "ASCIIEncoding()"
+
 
 class NumericEncoding(Encoding):
     pass

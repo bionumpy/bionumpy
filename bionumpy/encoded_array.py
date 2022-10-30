@@ -15,7 +15,7 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self._data, EncodedArray)
 
     def __repr__(self) -> str:
-        return f"EncodedRaggedArray({self._data}, self.shape)"
+        return f"EncodedRaggedArray({self._data}, {self.shape})"
 
 
     @property
@@ -96,7 +96,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.dtype
 
     def __repr__(self) -> str:
-        return f"EncodedArray({self.data}, self.encoding)"
+        return f"EncodedArray({self.data}, {self.encoding})"
 
     def __str__(self) -> str:
         """Return the data decoded into ASCII string

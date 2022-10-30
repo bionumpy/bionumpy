@@ -5,7 +5,7 @@ __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
 from .io.files import bnp_open as open
-from .io.files import count_entries
+from .io.files import count_entries, open_indexed
 from .io.multiline_buffer import MultiLineFastaBuffer
 from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
@@ -31,7 +31,7 @@ __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
-           "TwoLineFastaBuffer", "FastQBuffer",
+           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 

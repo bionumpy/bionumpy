@@ -259,6 +259,13 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> NpDataclassRe
     return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type)
 
 
+def open_indexed(filename):
+    path = PurePath(filename)
+    suffix = path.suffixes[-1]
+    assert suffix in (".fa", ".fasta"), "Only fasta supported for indexed read"
+    return IndexedFasta(filename)
+
+    
 def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
     """Count the number of entries in the file
 
