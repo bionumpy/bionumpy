@@ -3,9 +3,11 @@ import numpy as np
 import dataclasses
 import pytest
 
+
 @dataclasses.dataclass
 class TestClass:
     pos: int
+
 
 @pytest.fixture
 def test_stream():
@@ -32,6 +34,7 @@ def test_quantile2():
     array = [1, 10, 12, 20]
     assert quantile(array, 0.5) == 10
 
+
 def test_mean():
     array = np.array([1, 5, 10])
     assert mean(array) == 16/3
@@ -45,6 +48,7 @@ def test_mean1():
 def test_mean2():
     array = np.array([1, 10, 12, 20])
     assert mean(array) == 43/4
+
 
 @pytest.mark.skip("Unimplemented")
 def test_colmean():

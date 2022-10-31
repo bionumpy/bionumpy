@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import numpy as np
 from npstructures import npdataclass
-from ..npdataclassstream import NpDataclassStream
+from ..streams import NpDataclassStream
 from ..encoded_array import EncodedArray
 from ..groupby import GroupedStream
 
