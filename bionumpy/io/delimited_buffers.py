@@ -30,6 +30,7 @@ class DelimitedBuffer(FileBuffer):
 
     DELIMITER = "\t"
     COMMENT = "#"
+    INCLUDE_HEADER = False
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
         super().__init__(data, new_lines)
@@ -344,6 +345,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = delimiter
         COMMENT = comment
+        INCLUDE_HEADER = has_header
         dataclass = _dataclass
         fields = None
 

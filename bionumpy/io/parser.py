@@ -173,7 +173,7 @@ class NpBufferedWriter:
             Data set containing entries
 
         """
-        if hasattr(self._buffer_type, 'make_header'):
+        if hasattr(self._buffer_type, 'make_header') and self._file_obj.mode != 'ab' and getattr(self._buffer_type, 'INCLUDE_HEADER', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 

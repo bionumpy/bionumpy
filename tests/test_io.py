@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
+from bionumpy import BedBuffer
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader
 from .buffers import buffer_texts, combos, big_fastq_text
 from bionumpy.io.matrix_dump import matrix_to_csv
@@ -55,5 +56,30 @@ def test_ctx_manager_read(buffer_name):
 
     with bnp.open(file_path) as file:
         file.read()
+
+    os.remove(file_path)
+
+
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
+def test_append_to_file(buffer_name):
+    file_path = Path(f"./{buffer_name}_example.{buffer_name}")
+
+    _, true_data, buf_type = combos[buffer_name]
+    text = buffer_texts[buffer_name]
+    io_obj = BytesIO(bytes(text, encoding="ascii"))
+    data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
+
+    with bnp.open(file_path, mode="w") as file:
+        file.write(data)
+
+    with bnp.open(file_path, mode="a") as file:
+        file.write(data)
+
+    with bnp.open(file_path) as file:
+        data_read = file.read()
+
+    print(data_read)
+
+    assert len(data_read) == len(data) * 2
 
     os.remove(file_path)
