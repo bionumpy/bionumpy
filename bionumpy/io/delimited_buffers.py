@@ -10,6 +10,8 @@ from ..datatypes import (Interval, VCFGenotypeEntry,
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
+from ..encodings.alphabet_encoding import get_alphabet_encodings
+from ..encodings.base_encoding import get_base_encodings
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
@@ -40,7 +42,7 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
 
     @classmethod
-    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None)->"DelimitedBuffer":
+    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
         """Make EncodedArray of the chunk and extract all complete lines
 
         Also find all delimiters in the buffer
@@ -62,12 +64,12 @@ class DelimitedBuffer(FileBuffer):
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
-        n_fields = next((i+1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
+        n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
         if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise
-        new_lines = delimiters[(n_fields-1)::n_fields]
-        delimiters = np.concatenate(([-1], delimiters[:n_fields*len(new_lines)]))
+        new_lines = delimiters[(n_fields - 1)::n_fields]
+        delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
     def get_integers(self, cols: list) -> np.ndarray:
@@ -81,7 +83,7 @@ class DelimitedBuffer(FileBuffer):
             list of columns containing integers
 
         """
-        assert np.all(cols<self._n_cols), (str(self._data), cols, self._n_cols)
+        assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
         integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
         integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
@@ -164,7 +166,7 @@ class DelimitedBuffer(FileBuffer):
         self.validate_if_not()
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
         if end is not None:
-            return self._data[starts[..., np.newaxis] + np.arange(end-start)].reshape(-1, end-start)
+            return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
         else:
             ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
@@ -173,7 +175,7 @@ class DelimitedBuffer(FileBuffer):
         rows = self._data[integer_starts:integer_ends]
         return str_to_int(rows)
         digit_chars = self._move_intervals_to_2d_array(
-            integer_starts, integer_ends, "0" # DigitEncoding.MIN_CODE
+            integer_starts, integer_ends, "0"  # DigitEncoding.MIN_CODE
         )
         n_digits = digit_chars.shape[-1]
         powers = np.uint32(10) ** np.arange(n_digits)[::-1]
@@ -181,8 +183,8 @@ class DelimitedBuffer(FileBuffer):
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
-        powers = np.uint8(10)**np.arange(n_digits)[::-1]
-        ret = (ints[..., None]//powers) % 10
+        powers = np.uint8(10) ** np.arange(n_digits)[::-1]
+        ret = (ints[..., None] // powers) % 10
         return EncodedArray(ret, DigitEncoding)
 
     def _validate(self):
@@ -216,10 +218,14 @@ class DelimitedBuffer(FileBuffer):
                  List[int]: int_lists_to_strings,
                  float: float_to_strings,
                  List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
-        }
+                 }
+
+        all_encodings = get_alphabet_encodings() + get_base_encodings()  # TODO: add other base encodings (now they are a mix of classes and objects)
+
+        funcs = {**funcs, **{encoding: lambda x: encoding.decode(x) for encoding in all_encodings}}
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
-        lengths = np.concatenate([(column.shape.lengths+1)[:, np.newaxis]
+        lengths = np.concatenate([(column.shape.lengths + 1)[:, np.newaxis]
                                   for column in columns], axis=-1).ravel()
         lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
                                    lengths)
@@ -227,8 +233,13 @@ class DelimitedBuffer(FileBuffer):
         for i, column in enumerate(columns):
             lines[i::n_columns, :-1] = column
         lines[:, -1] = "\t"
-        lines[(n_columns-1)::n_columns, -1] = "\n"
+        lines[(n_columns - 1)::n_columns, -1] = "\n"
         return lines.ravel()
+
+    @classmethod
+    def make_header(cls, data: bnpdataclass):
+        """makes a header from field names separated by delimiter"""
+        return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
     def get_data(self) -> bnpdataclass:
         """Parse the data in the buffer according to the fields in _dataclass
@@ -252,7 +263,7 @@ class DelimitedBuffer(FileBuffer):
             elif field.type == float:
                 col = self.get_floats(col_number).ravel()
             elif field.type == -1:
-                col = self.get_integers(col_number).ravel()-1
+                col = self.get_integers(col_number).ravel() - 1
             elif field.type == List[int]:
                 col = self.get_split_ints(col_number)
             elif field.type == List[bool]:
@@ -309,7 +320,8 @@ class GfaSequenceBuffer(DelimitedBuffer):
     get_data = get_sequences
 
 
-def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool=False, comment: str = "#", sub_delimiter=",") -> type:
+def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
+                                 sub_delimiter=",") -> type:
     """Create a FileBuffer class that can read a delimited file with the fields specified in `_dataclass`
 
     This can be used to create a parser for a custom delimited file format and also more generic csv 
@@ -335,7 +347,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
         dataclass = _dataclass
         fields = None
 
-        def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray=None, header_data: List[str] = None):
+        def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data: List[str] = None):
             super().__init__(data, new_lines, delimiters, header_data)
             self.set_fields_from_header(header_data)
 
@@ -399,8 +411,9 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             columns = {c: value if c is not None else np.empty((n_entries, 0))
                        for c, value in columns.items()}
             return self.dataclass(**columns)
-    DatatypeBuffer.__name__ = _dataclass.__name__+"Buffer"
-    DatatypeBuffer.__qualname__ = _dataclass.__qualname__+"Buffer"
+
+    DatatypeBuffer.__name__ = _dataclass.__name__ + "Buffer"
+    DatatypeBuffer.__qualname__ = _dataclass.__qualname__ + "Buffer"
     return DatatypeBuffer
 
 

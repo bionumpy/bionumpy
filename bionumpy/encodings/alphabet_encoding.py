@@ -44,6 +44,9 @@ class AlphabetEncoding(Encoding):
             return False
         return np.all(self._alphabet == other._alphabet)
 
+    def __hash__(self):
+        return hash(repr(self))
+
 
 ACTGEncoding = AlphabetEncoding("ACTG")
 ACGTEncoding = AlphabetEncoding("ACGT")
@@ -57,3 +60,8 @@ AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
 CigarOpEncoding = AlphabetEncoding("MIDNSHP=X")
 StrandEncoding = AlphabetEncoding("+-.")
+
+
+def get_alphabet_encodings():
+    return [ACTGEncoding, ACGTEncoding, ACTGnEncoding, ACGTnEncoding, DigitEncoding, DNAEncoding, ACUGEncoding, RNAENcoding, AminoAcidEncoding,
+            BamEncoding, CigarOpEncoding, StrandEncoding]

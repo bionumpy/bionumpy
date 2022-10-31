@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import numpy as np
 from npstructures import npdataclass
@@ -172,6 +173,10 @@ class NpBufferedWriter:
             Data set containing entries
 
         """
+        if hasattr(self._buffer_type, 'make_header'):
+            header_array = self._buffer_type.make_header(data)
+            self._file_obj.write(header_array)
+
         if isinstance(data, NpDataclassStream):
             for buf in data:
                 self.write(buf)

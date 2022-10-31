@@ -23,6 +23,9 @@ class ASCIIEncoding(Encoding):
     def __repr__(self):
         return "ASCIIEncoding()"
 
+    def __hash__(self):
+        return hash(repr(self))
+
 
 class NumericEncoding(Encoding):
     pass
@@ -39,3 +42,7 @@ class CigarEncoding(NumericEncoding):
 
 
 BaseEncoding = ASCIIEncoding()
+
+
+def get_base_encodings():
+    return [BaseEncoding]  # TODO: add other encodings
