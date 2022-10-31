@@ -5,7 +5,8 @@ from typing import List
 from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
-                         SequenceEntry, VCFEntry, Bed12, Bed6)
+                         SequenceEntry, VCFEntry, Bed12, Bed6,
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak)
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
                          PhasedGenotypeEncoding)
@@ -130,7 +131,7 @@ class DelimitedBuffer(FileBuffer):
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         if keep_sep:
-            ends+=1
+            ends += 1
         if fixed_length:
             return self._move_intervals_to_2d_array(starts, ends)
         else:
@@ -228,6 +229,41 @@ class DelimitedBuffer(FileBuffer):
         lines[:, -1] = "\t"
         lines[(n_columns-1)::n_columns, -1] = "\n"
         return lines.ravel()
+
+    def get_data(self) -> bnpdataclass:
+        """Parse the data in the buffer according to the fields in _dataclass
+
+        Returns
+        -------
+        _dataclass
+            Dataclass with parsed data
+
+        """
+        self.validate_if_not()
+        columns = {}
+        fields = dataclasses.fields(self.dataclass)
+        for col_number, field in enumerate(fields):
+            if field.type is None:
+                col = None
+            elif field.type == str or is_subclass_or_instance(field.type, Encoding):
+                col = self.get_text(col_number, fixed_length=False)
+            elif field.type == int:
+                col = self.get_integers(col_number).ravel()
+            elif field.type == float:
+                col = self.get_floats(col_number).ravel()
+            elif field.type == -1:
+                col = self.get_integers(col_number).ravel()-1
+            elif field.type == List[int]:
+                col = self.get_split_ints(col_number)
+            elif field.type == List[bool]:
+                col = self.get_split_ints(col_number, sep="").astype(bool)
+            else:
+                assert False, field
+            columns[field.name] = col
+        n_entries = len(next(col for col in columns if col is not None))
+        columns = {c: value if c is not None else np.empty((n_entries, 0))
+                   for c, value in columns.items()}
+        return self.dataclass(**columns)
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -352,8 +388,6 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
                     col = self.get_integers(col_number).ravel()
                 elif field.type == float:
                     col = self.get_floats(col_number).ravel()
-                elif field.type == -1:
-                    col = self.get_integers(col_number).ravel()-1
                 elif field.type == List[int]:
                     col = self.get_split_ints(col_number)
                 elif field.type == List[bool]:
@@ -370,10 +404,25 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
     return DatatypeBuffer
 
 
-BedBuffer = get_bufferclass_for_datatype(Interval)
-Bed12Buffer = get_bufferclass_for_datatype(Bed12)
-Bed6Buffer = get_bufferclass_for_datatype(Bed6)
-VCFBuffer = get_bufferclass_for_datatype(VCFEntry)
+class BedBuffer(DelimitedBuffer):
+    dataclass = Interval
+
+
+class Bed12Buffer(DelimitedBuffer):
+    dataclass = Bed12
+
+
+class Bed6Buffer(DelimitedBuffer):
+    dataclass = Bed6
+
+
+class VCFBuffer(DelimitedBuffer):
+    dataclass = VCFEntry
+
+    def get_data(self):
+        data = super().get_data()
+        data.position -= 1
+        return data
 
 
 class VCFMatrixBuffer(VCFBuffer):
@@ -403,3 +452,20 @@ class VCFMatrixBuffer(VCFBuffer):
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     genotype_encoding = PhasedGenotypeEncoding
+
+
+class NarrowPeakBuffer(DelimitedBuffer):
+    dataclass = NarrowPeak
+
+
+class GFFBuffer(DelimitedBuffer):
+    dataclass = GFFEntry
+
+
+class SAMBuffer(DelimitedBuffer):
+    dataclass = SAMEntry
+    COMMENT = "@"
+
+
+class ChromosomeSizeBuffer(DelimitedBuffer):
+    dataclass = ChromosomeSize
