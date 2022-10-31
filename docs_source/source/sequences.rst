@@ -28,7 +28,7 @@ And get numpy-fast performance for the query. We can also use numpy-like indexin
     
 `EncodedRaggedArray`
 ====================
-When working with multiple seqeunces we usually have to use `EncodedRaggedArray` objects. These are much like `EncodedRaggedArray` objects, but instead uses `npstructures.RaggedArray` to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an `EncodedRaggedArray` is to use the `as_encoded_array` function on a list of strings:
+When working with multiple seqeunces we usually have to use `EncodedRaggedArray` objects. These are much like `EncodedArray` objects, but instead uses `npstructures.RaggedArray` to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an `EncodedRaggedArray` is to use the `as_encoded_array` function on a list of strings:
 
     >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
     >>> print(encoded_ragged_array)
@@ -65,7 +65,7 @@ We see we get all the entries in the file, with the corresponding fields. The `s
 
 Reading indexed files (.fa.fai)
 ---------------------
-When reading a reference genome, we often can't read in the whole file (using `.read()`) and it doesn't make sense to read in the chromosome-sequences as entries in chunks (using `.read()`) but we rather want to read specific parts of the genome. In these cases we can use an index to be able to read specific regions. We then use `bnp.open_indexed` function:
+When reading a reference genome, we often can't read in the whole file (using `.read()`) and it doesn't make sense to read in the chromosome-sequences as entries in chunks (using `.read_chunks()`) but we rather want to read specific parts of the genome. In these cases we can use an index to be able to read specific regions. We then use `bnp.open_indexed` function:
 
     >>> reference_sequence = bnp.open_indexed("example_data/small_genome.fa")
     >>> print(reference_sequence["2"][10:20])

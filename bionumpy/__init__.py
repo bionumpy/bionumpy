@@ -13,6 +13,7 @@ from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 # from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
+from .groupby import groupby
 from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
@@ -31,7 +32,7 @@ __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
-           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed",
+           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 
