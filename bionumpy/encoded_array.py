@@ -15,8 +15,18 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self._data, EncodedArray)
 
     def __repr__(self) -> str:
-        return f"EncodedRaggedArray({self._data}, {self.shape})"
-
+        if self.size>1000:
+            rows = [str(row) for row in self[:5]]
+        else:
+            rows = [f"{row.to_string()}" for row in self]
+        encoding_info = f", {self.encoding}" if self.encoding != BaseEncoding else "" 
+        indent = " "*len("encoded_ragged_array([")
+        lines = [f"{indent}'{row}'," for row in rows]
+        lines[0] = lines[0].replace(indent, "encoded_ragged_array([")
+        if self.size > 1000:
+            lines.insert(-1, "...")
+        lines[-1] = lines[-1][:-1] + "]" + encoding_info + ")"
+        return "\n".join(lines)
 
     @property
     def encoding(self):
@@ -96,7 +106,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.dtype
 
     def __repr__(self) -> str:
-        return f"EncodedArray({self.data}, {self.encoding})"
+        if self.encoding == BaseEncoding:
+            return f"encoded_array('{str(self)}')"
+        return f"encoded_array('{str(self)}', {self.encoding})"
 
     def __str__(self) -> str:
         """Return the data decoded into ASCII string

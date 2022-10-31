@@ -1,10 +1,13 @@
-import numpy as np
 import dataclasses
+
+import numpy as np
+from npstructures import RunLength2dArray, RunLengthArray
+
 from .bedgraph import BedGraph
 from .chromosome_map import ChromosomeMap
 from .bnpdataclass import bnpdataclass
 from .datatypes import Interval
-from npstructures.runlengtharray import RunLength2dArray, RunLengthArray
+
 
 
 def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
@@ -82,12 +85,6 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     """
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
     return rla.any(axis=0)
-
-
-@bnpdataclass
-class RawInterval:
-    start: int
-    stop: int
 
 
 @ChromosomeMap()

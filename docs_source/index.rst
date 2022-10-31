@@ -18,7 +18,7 @@ BioNumPy
    source/working_with_big_data.rst
    source/supported_file_formats.rst
    source/sequences.rst
-   sourece/intervals.rst
+   source/intervals.rst
    source/broadcastable_functions.rst
    source/rollable_functions.rst
    source/summarization.rst

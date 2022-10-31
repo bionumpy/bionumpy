@@ -247,6 +247,7 @@ def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False
 
     Examples
     --------
+
     """
     new_lengths = sequences.shape.lengths+1
     new_array = sequences.__class__(

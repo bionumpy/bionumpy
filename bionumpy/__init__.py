@@ -4,6 +4,8 @@ __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
+import npstructures as nps
+
 from .io.files import bnp_open as open
 from .io.files import count_entries, open_indexed
 from .io.multiline_buffer import MultiLineFastaBuffer
@@ -12,14 +14,12 @@ from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-# from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
 from .groupby import groupby
 from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
 from .npdataclassstream import mean, bincount, histogram, streamable, quantile
-import npstructures as nps
 from .datatypes import SAMEntry, GFFEntry, Bed6
 
 
