@@ -18,7 +18,6 @@ class AlphabetEncoding(Encoding):
     def encode(self, byte_array):
         if hasattr(byte_array, "raw"):
             byte_array = byte_array.raw()
-        print(byte_array)
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
             raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array)} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
