@@ -2,10 +2,8 @@ import dataclasses
 import os
 from pathlib import Path
 
-import numpy as np
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
-import bionumpy.encodings
 from bionumpy import AminoAcidEncoding, DNAEncoding, as_encoded_array
 from bionumpy.io.files import bnp_open
 from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
