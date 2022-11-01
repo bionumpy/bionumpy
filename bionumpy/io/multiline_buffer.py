@@ -17,7 +17,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
     def __init__(self, data, new_lines, new_entries):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
-    
+
     def get_data(self):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
@@ -35,7 +35,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         return SequenceEntry(headers, sequences)
 
     def _validate(self):
-        self._is_validated=True
+        self._is_validated = True
 
     @classmethod
     def from_data(cls, entries):
@@ -55,7 +55,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         lines[idxs,:-1] = RaggedArray(entries.sequence.ravel(), line_lengths[idxs]-1)
         lines[:, -1] = "\n"
         return lines.ravel()
-        
+
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
         assert header_data is None, header_data
@@ -63,6 +63,8 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
         new_lines = np.flatnonzero(chunk[:-1] == "\n")
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
+        if new_entries.size == 0:
+            raise RuntimeError(f"No complete entry found in {cls.__name__}: \n{chunk.to_string()}\n. This can be due to badly formatted file, or because the buffer_size ({chunk.size}) is too low. Try increasing buffer_size")
         entry_starts = new_lines[new_entries]+1
         cut_chunk = chunk[:entry_starts[-1]]
         return cls(cut_chunk,
