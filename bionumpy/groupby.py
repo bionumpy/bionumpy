@@ -2,7 +2,7 @@ from npstructures import RaggedView, RaggedArray
 import dataclasses
 import itertools
 import numpy as np
-from .npdataclassstream import streamable
+from .streams import streamable
 from .bnpdataclass import bnpdataclass
 from .chromosome_provider import GroupedStream
 

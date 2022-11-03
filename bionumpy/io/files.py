@@ -9,7 +9,7 @@ from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 NarrowPeakBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
 from .indexed_fasta import IndexedFasta
-from ..npdataclassstream import NpDataclassStream
+from ..streams import NpDataclassStream
 from ..bnpdataclass import bnpdataclass
 import logging
 

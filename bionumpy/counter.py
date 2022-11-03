@@ -2,12 +2,11 @@ import numpy as np
 from numbers import Number
 import dataclasses
 
-
 @dataclasses.dataclass
 class EncodedCounts:
     alphabet: list
     counts: np.ndarray
-    row_names: list = None
+    #     row_names: list = None
 
     def __str__(self):
         return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts))
@@ -26,7 +25,10 @@ class EncodedCounts:
             assert self.alphabet==other.alphabet
             o_counts = other.counts
         return dataclasses.replace(self, counts=self.counts+o_counts)
-        
+
+    def get_count_for_label(self, letter):
+        return self.counts[..., encoded_counts.alphabet.find(letter)]
+
     @classmethod
     def vstack(cls, counts):
         alphabet = counts[0].alphabet
@@ -39,7 +41,7 @@ class EncodedCounts:
             
 
 
-def count_encoded(values, weights=None):
+def count_encoded(values, weights=None, axis=-1):
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:
