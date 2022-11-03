@@ -1,8 +1,8 @@
-from .stream import BnpStream
+from .stream import BnpStream, NpDataclassStream
 from .decorators import streamable
-NpDataclassStream = None
+from .reductions import mean, bincount, histogram, quantile
 
-mean, bincount, histogram, quantile = (None for _ in range(4))
 
 __all__ = ["BnpStream", "streamable", "decorators",
-           "mean", "bincount", "histogram", "quantile"]
+           "mean", "bincount", "histogram", "quantile", "NpDataClassStream",
+           "BnpStream"]

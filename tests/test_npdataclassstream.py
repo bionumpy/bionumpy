@@ -1,4 +1,4 @@
-from bionumpy.npdataclassstream import NpDataclassStream, quantile, mean
+from bionumpy.streams import NpDataclassStream, quantile, mean
 import numpy as np
 import dataclasses
 import pytest
@@ -11,12 +11,12 @@ class TestClass:
 
 @pytest.fixture
 def test_stream():
-    return NpDataclassStream(iter(["hei", "pa", "deg"]), TestClass)
+    return NpDataclassStream(TestClass(word) for word in ["hei", "pa", "deg"])
 
 
 def test_str(test_stream):
     s = str(test_stream)
-    assert s.endswith("hei")
+    assert s.endswith("TestClass(pos='hei')")
     assert "TestClass" in s
 
 
