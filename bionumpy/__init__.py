@@ -19,7 +19,7 @@ from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
-from .npdataclassstream import mean, bincount, histogram, streamable, quantile
+from .streams import mean, bincount, histogram, streamable, quantile
 from .datatypes import SAMEntry, GFFEntry, Bed6
 
 
