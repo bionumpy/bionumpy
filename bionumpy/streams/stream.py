@@ -29,7 +29,11 @@ class BnpStream:
         return f"self.__class__.__name__({self._next_buffer}, {Ellipsis})"
 
 
-class ArrayStream(BnpStream):
+class ChunkStream(BnpStream):
+    pass
+
+
+class ArrayStream(ChunkStream):
     pass
 
 

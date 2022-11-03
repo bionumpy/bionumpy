@@ -2,7 +2,7 @@ from npstructures import RaggedView, RaggedArray
 import dataclasses
 import itertools
 import numpy as np
-from .streams import streamable
+from .streams import streamable, grouped_stream
 from .bnpdataclass import bnpdataclass
 from .chromosome_provider import GroupedStream
 
@@ -106,5 +106,5 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
     changes = get_changes(keys)
     changes = np.append(np.insert(changes, 0, 0), len(data))
     assert np.all(np.diff(changes)>0), changes
-    return GroupedStream((key(keys[start]), data[start:end])
-                         for start, end in zip(changes[:-1], changes[1:]))
+    return grouped_stream(column, ((key(keys[start]), data[start:end])
+                                   for start, end in zip(changes[:-1], changes[1:]))
