@@ -1,5 +1,6 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer
+from ..bnpdataclass import bnpdataclass
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..datatypes import SequenceEntry
 import numpy as np
@@ -7,7 +8,6 @@ import numpy as np
 
 class MultiLineBuffer(FileBuffer):
     pass
-
 
 class MultiLineFastaBuffer(MultiLineBuffer):
     _new_entry_marker = ">"
@@ -70,3 +70,29 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         return cls(cut_chunk,
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
+
+@bnpdataclass
+class FastaIdx:
+    chromosome: str
+    length: int
+    start: int
+    characters_per_line: int
+    line_length: int
+
+
+class FastaIdxBuffer:
+    dataclass = FastaIdx
+    
+    def get_data(self):
+        new_entries = self._data[self._new_lines+1] == self._new_entry_marker
+        line_lengths = np.diff(self._new_lines)
+        lines = RaggedArray(self._data, np.diff(line_lengths, prepend=0))
+        print(lines)
+        
+    @classmethod
+    def from_raw_buffer(cls, chunk, header_data=None):
+        assert header_data is None, header_data
+        chunk = EncodedArray(chunk)
+        assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
+        new_lines = np.flatnonzero(chunk[:-1] == "\n")
+        return cls(chunk[:new_lines[-1]], new_lines[:-1])
