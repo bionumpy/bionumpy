@@ -1,15 +1,5 @@
-"""Console script for bionumpy."""
 import sys
-import click
-
-
-@click.command()
-def main(args=None):
-    """Console script for bionumpy."""
-    click.echo("Replace this message by putting your code into " "bionumpy.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+def run_as_commandline(function):
+    args = sys.argv[1:]
+    args = (_type(arg) for _type, arg in zip(function.__annotations__.values(), args))
+    function(*args)

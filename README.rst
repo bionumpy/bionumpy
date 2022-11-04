@@ -31,7 +31,7 @@ Getting started
 * Free software: MIT license
 * Documentation: https://bionumpy.github.io/bionumpy/.
 
->>> pip install bionumpy
+$ pip install bionumpy
 
 2. Check out the tutorials and getting started guide in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
 

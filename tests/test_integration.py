@@ -1,44 +1,47 @@
+import dataclasses
 import os
 from pathlib import Path
 
-import numpy as np
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
-import bionumpy.encodings
-from bionumpy import AminoAcidArray, DNAArray
-from bionumpy.files import bnp_open
-from bionumpy.delimited_buffers import get_bufferclass_for_datatype
+from bionumpy import AminoAcidEncoding, DNAEncoding, as_encoded_array
+from bionumpy.io.files import bnp_open
+from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
 from bionumpy.string_matcher import RegexMatcher
 from bionumpy.bnpdataclass import bnpdataclass
 
 
 def test_csv_import_and_regex_matching():
-
     seqs_path = Path("seqs.tsv")
-
-    with open(seqs_path, 'w') as file:
-        file.write("""\
-sequence_aa	sequence	v_call	j_call
-AAACCC	A	V1-1	J2
-EEAAF	CCA	V2	J3-2
-""")
 
     @bnpdataclass
     class SeqAsTSV:
-        sequence_aa: AminoAcidArray
-        sequence: DNAArray
+        sequence_aa: AminoAcidEncoding
+        sequence: DNAEncoding
         v_call: str
         j_call: str
 
     buffer_class = get_bufferclass_for_datatype(SeqAsTSV, delimiter='\t', has_header=True)
-    sequences = bnp_open(str(seqs_path), buffer_type=buffer_class, ).read()
+
+    sequences_to_write = SeqAsTSV(sequence_aa=as_encoded_array(["AAACCC", "EEAAF"], AminoAcidEncoding),
+                                  sequence=as_encoded_array(["AT", "CCA"], DNAEncoding),
+                                  v_call=as_encoded_array(['V1-1', 'V2']), j_call=as_encoded_array(['J2', 'J3-2']))
+
+    with bnp_open(seqs_path, buffer_type=buffer_class, mode='w') as file:
+        file.write(sequences_to_write)
+
+    file = bnp_open(str(seqs_path), buffer_type=buffer_class)
+    sequences = file.read()
+    file.close()
     assert isinstance(sequences.sequence_aa, RaggedArray), sequences.sequence_aa
 
-    matcher = RegexMatcher('AA', encoding=AminoAcidArray)
+    matcher = RegexMatcher('AA', encoding=AminoAcidEncoding)
     matches = matcher.rolling_window(sequences.sequence_aa, mode='same')
-
     assert_raggedarray_equal(matches, [[True, True, False, False, False, False],
                                        [False, False, True, False, False]])
-    
+
+    for field in dataclasses.fields(sequences):
+        assert_raggedarray_equal(getattr(sequences_to_write, field.name), getattr(sequences, field.name))
+
     if seqs_path.is_file():
         os.remove(seqs_path)

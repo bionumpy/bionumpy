@@ -1,26 +1,26 @@
 import numpy as np
-from .encodings import ACTGEncoding
-from .sequences import as_encoded_sequence_array, as_sequence_array, EncodedArray
-from .dna import complement, reverse_compliment
+from .encodings import DNAEncoding, BaseEncoding
+from .variants import is_snp
+from .datatypes import Variant
+from .encoded_array import as_encoded_array, EncodedArray
+from .dna import reverse_compliment
 from .chromosome_map import ChromosomeMap
 from .counter import count_encoded, EncodedCounts
-from . import DNAArray 
+from .lookup import Lookup
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def get_kmer_indexes(position, flank=2):
-    return position[..., np.newaxis] + np.arange(-flank, flank + 1)
-
+def get_kmer_indexes(position, flank=1):
+    return np.add.outer(position, np.arange(-flank, flank + 1))
 
 class SNPEncoding:
-    lookup = np.zeros((4, 4), dtype=np.uint8)
-    lookup[int(as_encoded_sequence_array("C", DNAArray).ravel())][as_encoded_sequence_array("AGT", DNAArray)] = np.arange(3)
-    lookup[int(as_encoded_sequence_array("G", DNAArray).ravel())][as_encoded_sequence_array("TCA", DNAArray)] = np.arange(3)
-    lookup[int(as_encoded_sequence_array("T", DNAArray).ravel())][as_encoded_sequence_array("ACG", DNAArray)] = 3 + np.arange(3)
-    lookup[int(as_encoded_sequence_array("A", DNAArray).ravel())][as_encoded_sequence_array("TGC", DNAArray)] = 3 + np.arange(3)
-
+    lookup = Lookup(np.full((4, 4), 255, dtype=np.uint8), DNAEncoding)
+    lookup["C", "AGT"] = np.arange(3)
+    lookup["G", "TCA"] = np.arange(3)
+    lookup["T", "ACG"] = np.arange(3)+3
+    lookup["A", "TGC"] = np.arange(3)+3
     text = np.array([f"C>{c}" for c in "AGT"] + [f"T>{c}" for c in "ACG"])
 
     @classmethod
@@ -29,7 +29,9 @@ class SNPEncoding:
 
     @classmethod
     def encode(cls, snp):
-        return cls.lookup[snp.ref_seq, snp.alt_seq]
+        values = cls.lookup[snp.ref_seq, snp.alt_seq]
+        assert not np.any(values==255)
+        return EncodedArray(cls.lookup[snp.ref_seq, snp.alt_seq], cls)
 
     @classmethod
     def decode(cls, encoded):
@@ -37,71 +39,77 @@ class SNPEncoding:
 
 
 class MutationTypeEncoding:
-    def __init__(self, k, encoding=DNAArray):
+    def __init__(self, flank, encoding=DNAEncoding):
+        k = flank*2+1
         self.k = k
         self.h = 4 ** np.arange(k)
         self.h[k // 2 + 1 :] = self.h[k // 2 : -1]
         self.h[k // 2] = 0
+        self.h = self.h[::-1]
         self._encoding = encoding
 
-    def encode(self, kmer, snp):
-        kmer = as_encoded_sequence_array(kmer, self._encoding)
+    def encode(self, kmer: EncodedArray, snp: Variant) -> np.ndarray:
+        kmer = as_encoded_array(kmer, self._encoding)
+        snp.ref_seq = as_encoded_array(snp.ref_seq.ravel(), self._encoding)
+        snp.alt_seq = as_encoded_array(snp.alt_seq.ravel(), self._encoding)
+        assert not np.any(snp.ref_seq == snp.alt_seq)
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
-        kmer = np.asarray(kmer)
+        assert np.all(kmer[..., self.k//2] == snp.ref_seq), (kmer, snp.ref_seq)
+        forward_mask = (snp.ref_seq == "C") | (snp.ref_seq == "T")
+        kmer = np.where(forward_mask[:, None], kmer, reverse_compliment(kmer))
+        kmer = kmer.raw()
         kmer_hashes = np.dot(kmer, self.h)
-        snp_hashes = SNPEncoding.encode(snp)
-        return (kmer_hashes + 4 ** (self.k - 1) * snp_hashes)
+        snp_hashes = SNPEncoding.encode(snp).raw()
+        return EncodedArray((kmer_hashes + 4 ** (self.k - 1) * snp_hashes),
+                            self)
 
     def decode(self, encoded):
         snp = SNPEncoding.decode(encoded >> (2 * (self.k - 1)))
         chars = (encoded >> (2 * np.arange(self.k - 1))) & 3
-        kmer = "".join(chr(b) for b in self._encoding.encoding.decode(chars))
+        kmer = "".join(chr(b) for b in self._encoding.decode(chars))
         return kmer[: self.k // 2] + "[" + snp + "]" + kmer[self.k // 2 :]
 
     def to_string(self, encoded):
         snp = SNPEncoding.to_string(encoded >> (2 * (self.k - 1)))
         chars = (encoded >> (2 * np.arange(self.k - 1))) & 3
-        kmer = "".join(chr(b) for b in self._encoding.encoding.decode(chars))
+        kmer = "".join(chr(b) for b in self._encoding.decode(chars))[::-1]
         return kmer[: self.k // 2] + "[" + snp + "]" + kmer[self.k // 2 :]
 
     def get_labels(self):
         return [self.to_string(c) for c in np.arange(4**(self.k-1)*6)]
-    
-def get_encoded_array_class(_encoding):
-    class MutationTypeArray(EncodedArray):
-        encoding=_encoding
-    f = _encoding.encode
-    _encoding.encode = lambda *args, **kwargs: f(*args, **kwargs).view(MutationTypeArray)
 
-    return MutationTypeArray
 
 @ChromosomeMap(reduction=sum)
-def count_mutation_types(snps, reference, flank=1):
-    reference = as_encoded_sequence_array(reference, DNAArray)
-    snps.ref_seq = as_encoded_sequence_array(snps.ref_seq.ravel(), DNAArray)
-    snps.alt_seq = as_encoded_sequence_array(snps.alt_seq.ravel(), DNAArray)
+def count_mutation_types(variants, reference, flank=1):
+    snps = variants[is_snp(variants)]
+    snps = snps[np.argsort(snps.position)]
+    mnv_mask = (snps.position[1:] == (snps.position[:-1]+1))
+    # mask = np.append(mask, False) | np.insert(mask, 0, False)
+    # snps = snps[~mask]
+    reference = as_encoded_array(reference)
     kmer_indexes = get_kmer_indexes(snps.position, flank=flank)
     kmers = reference[kmer_indexes]
-    forward_mask = (snps.ref_seq == "C") | (snps.ref_seq == "T")
-    kmers = np.where(
-        forward_mask[:, None], kmers, reverse_compliment(kmers)
-    ).view(DNAArray)
-    signature_encoding = MutationTypeEncoding(flank * 2 + 1)
-    get_encoded_array_class(signature_encoding)
-    all_hashes = signature_encoding.encode(kmers, snps)
-    n_hashes = 4 ** (flank * 2) * 6
-    
+    mask = np.any((kmers=="n") | (kmers=="N"), axis=-1)
+    kmers = kmers[~mask]
+    snps = snps[~mask]
+    hashes = MutationTypeEncoding(flank).encode(kmers, snps)
     if not hasattr(snps, "genotypes"):
-        return count_encoded(all_hashes)
-    return EncodedCounts.concatenate([count_encoded(all_hashes, weights=genotype>0)
-                                      for genotype in snps.genotypes.T])
+        return count_encoded(hashes)
+    has_snps = (snps.genotypes>0)
+    masks = (has_snps[1:] & has_snps[:-1]) & mnv_mask[:, np.newaxis]
+    masks = np.pad(masks, [(1, 0), (0, 0)]) | np.pad(masks, [(0, 1), (0, 0)])
+    has_snps &= ~masks
+    counts = []
+    for genotype in (snps.genotypes.T>0):
+        idxs = np.flatnonzero(genotype)
+        if len(idxs):
+            # assert np.all(snps.position[idxs[:-1]] < snps.position[idxs[1:]]), snps.position[idxs]
+            mask = (snps.position[idxs[:-1]]+1) >= (snps.position[idxs[1:]])
+            mask = np.append(mask, False) | np.insert(mask, 0, False)
+            idxs = idxs[~mask]
+        counts.append(count_encoded(hashes[idxs]))
+    counts = EncodedCounts.vstack(counts)
+    # assert np.all(counts.counts.sum(axis=-1) == (snps.genotypes>0).sum(axis=0))
+    # ~((np.append(mask, False) | np.insert(mask, 0, False)
+    return counts
 
-    return np.array(
-        [
-            np.bincount(
-                all_hashes, weights=snps.genotypes[:, sample] > 0, minlength=n_hashes
-            )
-            for sample in range(snps.genotypes.shape[-1])
-        ],
-        dtype=int,
-    )

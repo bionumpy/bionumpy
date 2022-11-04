@@ -2,7 +2,8 @@ from npstructures import RaggedView, RaggedArray
 import dataclasses
 import itertools
 import numpy as np
-from .npdataclassstream import streamable
+from .streams import streamable
+from .bnpdataclass import bnpdataclass
 from .chromosome_provider import GroupedStream
 
 
@@ -21,7 +22,7 @@ def get_ragged_changes(ragged_array):
     new_indices = RaggedArray(indices, lengths[:-1])+lengths[:-1, np.newaxis]
     new_indices = np.minimum(new_indices, data.size-1)
     next_row_values = RaggedArray(data[new_indices.ravel()], new_indices.shape)
-    eq = next_row_values!=ragged_array[:-1]
+    eq = next_row_values != ragged_array[:-1]
     eq = np.any(eq, axis=-1)
     changes |= eq
     return np.flatnonzero(changes)+1
@@ -41,13 +42,64 @@ def key_func(x):
 
 
 @streamable(join_groupbys)
-def groupby(data, column=None, key=key_func):
+def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
+    """Group the data according to the values in `column`
+
+    This functions behaves similarily to `itertools.groupby`, but
+    requires the values to be sorted beforehand. It will return a
+    generator yielding (name, data) pairs, where name is the value of
+    the groupby'ed column, and data is a bnpdataclass with all the
+    entries for that value. This functions works on both `npdataclass`
+    and `NpDataClassStream`.
+
+    The main intended use for this function is to group data per chromosome/contig.
+
+    Parameters
+    ----------
+    data : bnpdataclass
+        The data to be grouped
+    column : str
+        The name of the attribute that should be used for the grouping
+    key : callable
+        A function to be called on the grouped by attribute for the returned tuple
+    Examples
+    --------
+    >>> from bionumpy.datatypes import Interval
+    >>> intervals = Interval(["1", "1", "2", "2", "3"], [10, 14, 5, 17, 3], [15, 20, 10, 20, 10])
+    >>> print(intervals)
+    Interval with 5 entries
+                   chromosome                    start                      end
+                            1                       10                       15
+                            1                       14                       20
+                            2                        5                       10
+                            2                       17                       20
+                            3                        3                       10
+    >>> for name, data in groupby(intervals, "chromosome"):
+    ...       print(name)
+    ...       print(data)
+    ...
+    1
+    Interval with 2 entries
+                   chromosome                    start                      end
+                            1                       10                       15
+                            1                       14                       20
+    2
+    Interval with 2 entries
+                   chromosome                    start                      end
+                            2                        5                       10
+                            2                       17                       20
+    3
+    Interval with 1 entries
+                   chromosome                    start                      end
+                            3                        3                       10
+
+    """
     if column is not None:
         assert hasattr(data, column), (data.__class__, dataclasses.fields(data), column)
         keys = getattr(data, column)
     else:
         keys = data
-    if np.all(keys[-1] == keys[0]):
+    if (keys.shape.lengths[-1] == keys.shape.lengths[0]) and np.all(keys[-1] == keys[0]):
         return GroupedStream((key(keys[start]), data[start:])
                              for start in [0])
 

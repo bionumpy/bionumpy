@@ -1,7 +1,7 @@
 from npstructures import RaggedArray
-from .file_buffers import FileBuffer, NEWLINE
-from .sequences import EncodedArray, ASCIIText
-from .datatypes import SequenceEntry
+from .file_buffers import FileBuffer
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..datatypes import SequenceEntry
 import numpy as np
 
 
@@ -17,7 +17,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
     def __init__(self, data, new_lines, new_entries):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
-    
+
     def get_data(self):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
@@ -35,7 +35,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         return SequenceEntry(headers, sequences)
 
     def _validate(self):
-        self._is_validated=True
+        self._is_validated = True
 
     @classmethod
     def from_data(cls, entries):
@@ -47,21 +47,24 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         entry_starts = np.insert(np.cumsum(n_lines+1), 0, 0)
         line_lengths[entry_starts[:-1]] = name_lengths + 2
         line_lengths[entry_starts[1:]-1] = last_length + 1
-        lines = RaggedArray(np.zeros(line_lengths.sum(), dtype=np.uint8).view(EncodedArray), line_lengths)
+        lines = EncodedRaggedArray(
+            EncodedArray(np.zeros(line_lengths.sum(), dtype=np.uint8)), line_lengths)
         lines[entry_starts[:-1],1:-1] = entries.name
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
         lines[idxs,:-1] = RaggedArray(entries.sequence.ravel(), line_lengths[idxs]-1)
         lines[:, -1] = "\n"
         return lines.ravel()
-        
+
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
         assert header_data is None, header_data
-        chunk = chunk.view(ASCIIText)
+        chunk = EncodedArray(chunk)
         assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
         new_lines = np.flatnonzero(chunk[:-1] == "\n")
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
+        if new_entries.size == 0:
+            raise RuntimeError(f"No complete entry found in {cls.__name__}: \n{chunk.to_string()}\n. This can be due to badly formatted file, or because the buffer_size ({chunk.size}) is too low. Try increasing buffer_size")
         entry_starts = new_lines[new_entries]+1
         cut_chunk = chunk[:entry_starts[-1]]
         return cls(cut_chunk,

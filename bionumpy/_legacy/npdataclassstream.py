@@ -16,74 +16,40 @@ class BnpStream:
     def __next__(self):
         return next(self._stream)
 
+class streamable:
+    """A decorator to make a function applicable to streams of data
 
-class ArrayStream(BnpStream):
-    def __init__(self, stream, first_buffer=None):
-        self._stream = stream
-        self._first_buffer = first_buffer
+    Examples
+    --------
 
-    def ravel(self):
-        return ArrayStream(arr.ravel() for arr in self)
+    >>> @streamable(list)
+    ... def add(a, b):
+    ...       return a + b
 
+    >>> add(10, 15)
+    25
+    >>> stream = BnpStream(iter(range(10)))
+    >>> add(stream, 15)
+    [15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
-class NpDataclassStream(BnpStream):
-    """
-    Class to hold a stream/generator of npdataclass objects.
-    Works with streamable/bnp_broadcast so that functions decorated
-    with those decorator will apply the function to each element in
-    a NpDataclassStream. To concatenate all the chunks in the generator
-    into one npdataclass, use `NpDataclassStream.join()`
-    """
-    def __init__(self, stream, dataclass):
-        self._stream = stream
-        self._opened = False
-        self._peeked = False
-        self._buffer = None
-        self._dataclass = dataclass
-
-    def _peek(self):
-        if self._peeked:
-            return self._buffer
-        self._buffer = next(self._stream, None)
-        self._peeked = True
-        return self._buffer
-        return next(self._stream)
-
-    def __iter__(self):
-        return self
-    
-    def __next__(self):
-        return next(self._stream)
-
-        self._opened = True
-        if self._peeked:
-            self._peeked = False
-            buf = self._buffer
-            self._buffer = None
-            return buf
-
-    def __str__(self):
-        status = "opened" if self._opened else "unopened"
-        return f"""\
-{status.capitalize()} stream of {self._buffer_type} buffers. Next buffer:
-{self._peek()}
+    >>> @streamable(sum)
+    ... def mul(a, b):
+    ...       return a * b
+    >>> stream = BnpStream(iter([3, 4]))
+    >>> mul(stream, 2)
+    14
 """
 
-    def __getattr__(self, attribute_name):
-        if not attribute_name in {f.name for f in dataclasses.fields(self._dataclass)}:
-            raise Exception(f"{self._dataclass} has no attribute {attribute_name}")
-        return ArrayStream(getattr(chunk, attribute_name) for chunk in self)
-                            
+    def __init__(self, reduction: callable=None):
+        """Take an optional reduction operator that will be called on the result stream
 
-    def element_iter(self):
-        return (elem for elem in chunk for chunk in self)
-
-    def join(self):
-        return np.concatenate(list(self))
-
-
-class streamable:
-    def __init__(self, reduction=None):
+        Parameters
+        ----------
+        reduction : callable
+            A reduction function that can be called on a stream of
+            data
+        """
+        
         self._reduction = reduction
 
     @staticmethod
@@ -96,15 +62,48 @@ class streamable:
                 new_args[i] = stream_arg
             yield new_args
 
-    def __call__(self, func):
+    def __call__(self, func: callable) -> callable:
+        """Return a new function that applies the input function to all chunks in a stream
 
+        Parameters
+        ----------
+        func : callable
+            A normal function that operates on one chunk of data
+
+        Returns
+        -------
+        callable
+            A new function that applies the original function to every
+            chunk in a stream of data
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
+        
         def log(sequence):
             for i, args in enumerate(sequence):
                 logger.info(f"Running {func.__name__} on chunk {i}")
                 yield args
 
         def new_func(*args, **kwargs):
+            """Apply a function to all chunks in a stream if any of the arguments are `BnpStream`
 
+            If no arguments are BnpStream, then the function is simply
+            called on the given `args` and `kwargs`. If however one of
+            the arguments is a `BnpStream` the the function is applied
+            to all chunks in the stream. If the `reduction` parameter
+            was given, then the reduction is also called on the
+            resulting stream.
+
+            Parameters
+            ----------
+            *args :
+            **kwargs :
+
+            """
+            
             stream_args = [i for i, arg in enumerate(args) if isinstance(arg, BnpStream)]
             if len(stream_args) == 0:
                 return func(*args, **kwargs)
@@ -162,3 +161,12 @@ def mean(array, axis=None):
         return _rowmean(array, axis)
     t = sum_and_n(array, axis=axis)
     return t[:-1]/t[-1]
+
+
+def quantile(array, quantiles, axis=None):
+    """
+    """
+    hist = bincount(array)
+    cumulative = np.cumsum(hist)
+    idxs = np.searchsorted(cumulative, quantiles*cumulative[-1])
+    return idxs

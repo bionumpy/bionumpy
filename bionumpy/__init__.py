@@ -4,33 +4,35 @@ __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
 __version__ = "0.1.0"
 
-from .files import bnp_open as open
-from .files import count_entries
-from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
+import npstructures as nps
+
+from .io.files import bnp_open as open
+from .io.files import count_entries, open_indexed
+from .io.multiline_buffer import MultiLineFastaBuffer
+from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
+from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
+                                GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
+from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from .groupby import groupby
 from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
-from . import parser
-from .npdataclassstream import mean, bincount, histogram, streamable
-import npstructures as nps
-from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
-                                GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .streams import mean, bincount, histogram, streamable, quantile
 from .datatypes import SAMEntry, GFFEntry, Bed6
-from .multiline_buffer import MultiLineFastaBuffer
-from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding,
-                                          DNAArray, RNAArray, AminoAcidArray)
+
+
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
-__all__ = ["Sequence", "as_sequence_array", "as_encoded_sequence_array",
+__all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
            "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
-           "bincount", "streamable", "histogram", "count_entries",
+           "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
-           "TwoLineFastaBuffer", "FastQBuffer",
+           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 

@@ -1,9 +1,6 @@
 import bionumpy as bnp
-import gzip
-import numpy as np
-from .buffers import data
 import pytest
-from bionumpy.bam import BamBuffer, alignment_to_interval
+from bionumpy.alignments import alignment_to_interval
 
 
 @pytest.mark.skip

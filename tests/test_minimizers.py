@@ -1,7 +1,7 @@
 from bionumpy.minimizers import Minimizers
-from bionumpy.sequences import Sequence
+from bionumpy.encoded_array import EncodedArray
 from bionumpy.kmers import KmerEncoding
-from bionumpy.encodings.alphabet_encoding import DNAArray
+from bionumpy.encodings.alphabet_encoding import DNAEncoding
 from npstructures import RaggedArray
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ import pytest
 
 @pytest.fixture
 def sequence():
-    return np.array([0, 3, 1, 2, 2, 1, 0]).view(DNAArray)
+    return EncodedArray(np.array([0, 3, 1, 2, 2, 1, 0]), DNAEncoding)
 
 
 @pytest.fixture
@@ -18,18 +18,18 @@ def sequences():
                      [0, 3, 1, 2, 2, 1],
                      [0, 3, 1, 2, 2],
                      [0, 3, 1, 2]])
-    r._data = r._data.view(DNAArray)
+    r._data = EncodedArray(r._data, DNAEncoding)
     return r
 
 
 @pytest.fixture
 def window():
-    return np.array([0, 3, 1, 2]).view(DNAArray)
+    return EncodedArray(np.array([0, 3, 1, 2]), DNAEncoding)
 
 
 @pytest.fixture
 def encoding():
-    return Minimizers(3, KmerEncoding(2, DNAArray))
+    return Minimizers(3, KmerEncoding(2, DNAEncoding))
 
 
 def test_window(window, encoding):

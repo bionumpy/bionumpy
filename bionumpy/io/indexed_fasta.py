@@ -1,14 +1,14 @@
-from .chromosome_provider import ChromosomeDictProvider, GroupedDict
-from .encodings import BaseEncoding
-from .sequences import as_sequence_array
+from ..chromosome_provider import GroupedDict
+from ..encoded_array import EncodedArray
 import numpy as np
 
 
 def read_index(filename):
-    split_lines =(line.split() for line in open(filename))
+    split_lines = (line.split() for line in open(filename))
     return {chromosome:
             {"rlen": int(rlen), "offset": int(offset), "lenc": int(lenc), "lenb": int(lenb)}
             for chromosome, rlen, offset, lenc, lenb in split_lines}
+
 
 class IndexedFasta(GroupedDict):
     def __init__(self, filename, add_chr=False):
@@ -16,8 +16,18 @@ class IndexedFasta(GroupedDict):
         self._index = read_index(filename+".fai")# Faidx(filename).index
         self._f_obj = open(filename, "rb")
 
+    def __get_chrom_name(self, name):
+        if name in self._index:
+            return name
+        elif name.startswith("chr") and name[3:] in self._index:
+            return name[3:]
+        else:
+            if ("chr"+name) in self._index:
+                return "chr" + name
+        assert False
+
     def __getitem__(self, chromosome):
-        idx = self._index[chromosome]
+        idx = self._index[self.__get_chrom_name(chromosome)]
         lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
         n_rows = (rlen + lenc - 1) // lenc
         data = np.empty(lenb * n_rows, dtype=np.uint8)
@@ -34,8 +44,7 @@ class IndexedFasta(GroupedDict):
             ret.size - idx["rlen"],
             data.shape,
         )
-        ret = as_sequence_array(((ret - ord("A")) % 32) + ord("A"))
-        return ret
+        return EncodedArray(((ret - ord("A")) % 32) + ord("A"))
 
 
 to_str = lambda x: "".join(chr(c) for c in x)

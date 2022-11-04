@@ -1,19 +1,18 @@
 import logging
 
 from bionumpy.rollable import RollableFunction
-from bionumpy.sequences import as_encoded_sequence_array, create_sequence_array_from_already_encoded_data
+from bionumpy.encoded_array import as_encoded_array, EncodedArray
+from .util import as_strided
 import itertools
 import numpy as np
-import bionumpy as bnp
 import re
-from bionumpy.sequences import Sequence
 from npstructures import RaggedArray
 
 
 class StringMatcher(RollableFunction):
     def __init__(self, matching_sequence, encoding):
         self._encoding = encoding
-        self._matching_sequence_array = as_encoded_sequence_array(matching_sequence, encoding=encoding)
+        self._matching_sequence_array = as_encoded_array(matching_sequence, target_encoding=encoding)
 
     @property
     def window_size(self):
@@ -35,7 +34,7 @@ class RegexMatcher(RollableFunction):
     def __init__(self, matching_regex, encoding):
         self._sub_matchers = construct_flexible_len_regex_matchers(matching_regex, encoding)
 
-    def __call__(self, sequence: Sequence):
+    def __call__(self, sequence: EncodedArray):
         raise NotImplementedError
 
     @property
@@ -43,26 +42,24 @@ class RegexMatcher(RollableFunction):
         return [sub_matcher.window_size for sub_matcher in self._sub_matchers]
 
     def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
-        if not isinstance(_sequence, np.ndarray):
-            if hasattr(self, "_encoding") and self._encoding is not None:
-                _sequence = as_encoded_sequence_array(_sequence, encoding=self._encoding)
-            else:
-                _sequence = RaggedArray(_sequence)
+        if hasattr(self, "_encoding") and self._encoding is not None:
+            _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
 
         if mode == "valid":
             logging.warning("Mode is set to 'valid' in rolling_window(), but RegexMatcher uses only mode 'same'. Switching to 'same'...")
 
         shape, sequence = (_sequence.shape, _sequence.ravel())
-        out = np.zeros_like(_sequence, dtype=bool)
+        out = RaggedArray(np.zeros(sequence.shape, dtype=bool), shape)
 
         for index, sub_matcher in enumerate(self._sub_matchers):
-            windows = np.lib.stride_tricks.as_strided(sequence, strides=sequence.strides + sequence.strides,
-                                                      shape=sequence.shape + (sub_matcher.window_size,), writeable=False)
+            windows = as_strided(sequence, strides=sequence.strides + sequence.strides,
+                                 shape=sequence.shape + (sub_matcher.window_size,), writeable=False)
             convoluted = sub_matcher(windows)
+
             if isinstance(_sequence, RaggedArray):
                 out = np.logical_or(out, RaggedArray(convoluted, shape))
-            elif isinstance(_sequence, np.ndarray):
-                out = np.logical_or(out, np.lib.stride_tricks.as_strided(convoluted, shape))
+            elif isinstance(_sequence, (np.ndarray, EncodedArray)):
+                out = np.logical_or(out, as_strided(convoluted, shape))
 
         return out
 
@@ -135,10 +132,7 @@ def construct_flexible_len_regex_matchers(matching_regex: str, encoding):
 
 def construct_wildcard_matcher(matching_regex: str, encoding):
     mask = np.array([symbol == '.' for symbol in matching_regex])
-
-    #assert encoding in (bnp.encodings.alphabet_encoding.ACTGArray,
-    #                     bnp.encodings.alphabet_encoding.AminoAcidArray), f"NotImplemented: Support for other encodings {encoding} awaits a generic way to replace '.' with an arbitrary symbol supported by the encoding"
     replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") else chr(encoding.decode(0))
-    base_seq = as_encoded_sequence_array(matching_regex.replace('.', str(replacement)), encoding=encoding)
+    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)), target_encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)

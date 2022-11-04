@@ -1,8 +1,7 @@
 import numpy as np
 from typing import List
-from .encodings import QualityEncoding
-from .encodings.base_encoding import CigarEncoding
-from .encodings.alphabet_encoding import CigarOpArray, BamArray
+from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding, 
+                        CigarEncoding, StrandEncoding)
 from .bnpdataclass import bnpdataclass
 
 
@@ -28,14 +27,21 @@ class SequenceEntryWithQuality:
 class Interval:
     chromosome: str
     start: int
-    end: int
-
+    stop: int
+        
 
 @bnpdataclass
 class Bed6(Interval):
     name: str
     score: int
-    strand: str
+    strand: StrandEncoding
+
+@bnpdataclass
+class NarrowPeak(Bed6):
+    signal_value: str
+    p_value: float
+    q_value: float
+    peak: int
 
 
 @bnpdataclass
@@ -59,7 +65,7 @@ class Variant:
 @bnpdataclass
 class VCFEntry:
     chromosome: str
-    position: int(-1)
+    position: int
     id: str
     ref_seq: str
     alt_seq: str
@@ -103,10 +109,10 @@ class GFFEntry:
     source: str
     feature_type: str
     start: int
-    end: int
+    stop: int
     score: str
-    strand: str
-    phase: int
+    strand: StrandEncoding
+    phase: str
     atributes: str
 
 
@@ -132,9 +138,9 @@ class BamEntry:
     flag: int
     position: int
     mapq: int
-    cigar_op: CigarOpArray
+    cigar_op: CigarOpEncoding
     cigar_length: CigarEncoding
-    sequence: BamArray
+    sequence: BamEncoding
     quality: QualityEncoding
 
 

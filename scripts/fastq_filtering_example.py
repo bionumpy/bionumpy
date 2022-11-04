@@ -19,8 +19,7 @@ def test(file="example_data/big.fq.gz"):
     reads = bnp.open(file).read_chunks()
     reads = filter_reads_on_mean_base_quality(reads, 10)
     reads = filter_reads_on_minimum_base_quality(reads, 1)
-
-    print("Number of reads after filtering: ", sum(len(r) for r in reads))
+    print("Number of reads after filtering: ", streamable(sum)(len)(reads))
 
 
 if __name__ == "__main__":

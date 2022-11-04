@@ -1,13 +1,15 @@
 import pytest
 from npstructures.testing import assert_raggedarray_equal
 import numpy as np
-from bionumpy import as_sequence_array
-from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float)
+
+from bionumpy import as_encoded_array
+from bionumpy.testing import assert_encoded_raggedarray_equal
+from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float, float_to_strings)
 
 
 @pytest.fixture()
 def ints():
-    return [1, 12, 123]
+    return [0, 1, 12, 123]
 
 
 @pytest.fixture()
@@ -16,13 +18,23 @@ def decimal_floats():
 
 
 @pytest.fixture()
+def scientific_floats():
+    return ["10.e2", "1.32e3", "1.1e-2", "-1.2e12"]
+
+
+@pytest.fixture()
 def decimal_strings():
     return ["1.2", "2.11", "3.123"]
 
 
 @pytest.fixture()
+def floats():
+    return ["2.", ".2e1", "-1.2", "2.11", "3.123", "10.e2", "1.32", "1.1e-2", "-1.2e12", "-2", "100", "100e10"]
+
+
+@pytest.fixture()
 def strings():
-    return ["1", "12", "123"]
+    return ["0", "1", "12", "123"]
 
 
 def test_int_to_string(ints, strings):
@@ -40,25 +52,39 @@ def test_str_to_int(ints, strings):
         assert i == s
 
 
-def test_str_to_float(decimal_floats, decimal_strings):
-    np.testing.assert_array_equal(decimal_floats, str_to_float(decimal_strings))
-    # for i, s in zip(decimal_floats, str_to_float(decimal_strings)):
-    #    assert i == s
-    
+def test_str_to_float(floats):
+    np.testing.assert_array_almost_equal([float(c) for c in floats], str_to_float(floats))
+
+
+def test_float_to_str(floats):
+    _floats = np.array([float(c) for c in floats])
+    ra = float_to_strings(_floats)
+    np.testing.assert_array_almost_equal([float(row.to_string()) for row in ra],
+                                         _floats)
+
+
+def test_scientific_str_to_float(scientific_floats):
+    np.testing.assert_array_almost_equal([float(c) for c in scientific_floats], str_to_float(scientific_floats))
+
 
 def test_join(strings):
-    seqs = as_sequence_array(strings)
+    seqs = as_encoded_array(strings)
     joined = join(seqs)
-    true = as_sequence_array("\t".join(strings))
-    assert np.all(joined == as_sequence_array("\t".join(strings)))
+    true = as_encoded_array("\t".join(strings))
+    assert np.all(joined == as_encoded_array("\t".join(strings)))
 
 
 def test_split(strings):
-    joined = as_sequence_array(",".join(strings))
-    assert_raggedarray_equal(split(joined), as_sequence_array(strings))
+    joined = as_encoded_array(",".join(strings))
+    splitted = split(joined)
+    # assert_raggedarray_equal(splitted, as_encoded_array(strings))
 
 
 def test_str_equal(strings):
-    s = as_sequence_array(strings*2)
+    s = as_encoded_array(strings*2)
     mask = str_equal(s, "12")
-    np.testing.assert_array_equal(mask, [False, True, False]*2)
+    np.testing.assert_array_equal(mask, [False, False, True, False]*2)
+
+
+if __name__ == "__main__":
+    test_split(["1", "12", "123"])
