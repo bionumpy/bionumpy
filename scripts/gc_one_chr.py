@@ -20,4 +20,5 @@ def get_gc_content(sequence, intervals):
     gc_content = sum([nn_proportions[nn] for nn in "GC"])
     return gc_content
 
+
 analyze_within_chromosome("example_data/gc_test_onechr.fa", "example_data/gc_bedtest_onechr.bed")
