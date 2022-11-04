@@ -4,7 +4,7 @@ from .stream import BnpStream
 logger = logging.getLogger(__name__)
 
 
-def grouped_dict(attribute_name):
+def grouped_dict(attribute_name=None):
     def decorator(base_class):
         base_class.grouped_dict_attribute = attribute_name
         return base_class
@@ -12,7 +12,7 @@ def grouped_dict(attribute_name):
 
 
 class grouped_stream(BnpStream):
-    def __init__(self, attribute_name, stream):
+    def __init__(self, stream, attribute_name=None):
         self.attribute_name = attribute_name
         super().__init__(stream)
 
@@ -97,14 +97,11 @@ class chromosome_map:
                 args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys
             )
             if is_stream:
-                ret = grouped_stream(self.attribute_name,
-                                     ((chromosome, func(*args, **kwargs))
-                                      for chromosome, args, kwargs in log(new_args))
-            )
+                ret = grouped_stream(((chromosome, func(*args, **kwargs))
+                                      for chromosome, args, kwargs in log(new_args)))
             elif is_dict:
-                ret = grouped_dict(self.attribute_name,
-                                   dict((chromosome, func(*args, **kwargs))
-                                        for chromosome, args, kwargs in log(new_args)))
+                ret = grouped_dict()(dict((chromosome, func(*args, **kwargs))
+                                          for chromosome, args, kwargs in log(new_args)))
             else:
                 assert False
             if self._reduction is None:

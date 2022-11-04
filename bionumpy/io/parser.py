@@ -4,7 +4,7 @@ import numpy as np
 from npstructures import npdataclass
 from ..streams import NpDataclassStream
 from ..encoded_array import EncodedArray
-from ..groupby import GroupedStream
+from ..streams.grouped import grouped_stream
 
 logger = logging.getLogger(__name__)
 
@@ -180,11 +180,11 @@ class NpBufferedWriter:
         if isinstance(data, NpDataclassStream):
             for buf in data:
                 self.write(buf)
-            return 
-        if isinstance(data, GroupedStream):
+            return
+        if isinstance(data, grouped_stream):
             for name, buf in data:
                 self.write(buf)
-            return 
+            return
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
