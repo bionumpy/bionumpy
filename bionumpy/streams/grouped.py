@@ -14,7 +14,7 @@ def grouped_dict(attribute_name):
 class grouped_stream(BnpStream):
     def __init__(self, attribute_name, stream):
         self.attribute_name = attribute_name
-        self._stream = stream
+        super().__init__(stream)
 
 
 class chromosome_map:

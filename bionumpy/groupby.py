@@ -107,4 +107,4 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
     changes = np.append(np.insert(changes, 0, 0), len(data))
     assert np.all(np.diff(changes)>0), changes
     return grouped_stream(column, ((key(keys[start]), data[start:end])
-                                   for start, end in zip(changes[:-1], changes[1:]))
+                                   for start, end in zip(changes[:-1], changes[1:])))
