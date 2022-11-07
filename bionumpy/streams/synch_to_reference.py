@@ -28,5 +28,4 @@ def synch_to_reference(sequence_sizes: SequenceSizes, **kwargs):
         if isinstance(value, BnpStream):
             new_value = groupby(value, "chromosome")
         elif hasattr(value, "__getitem__"):
-            
-            
+            pass
