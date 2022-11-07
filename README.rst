@@ -9,8 +9,6 @@ BioNumPy
         :target: https://github.com/knutdrand/bionumpy/actions/
         :alt: Build and test status
 
-.. image:: coverage.svg
-
 Documentation: `https://uio-bmi.github.io/bionumpy/ <https://uio-bmi.github.io/bionumpy/>`_
 
 
