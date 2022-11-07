@@ -1,6 +1,6 @@
 import pytest
 
-from bionumpy.streams.synch_to_reference import MultiStream, SequenceSizes, StreamError
+from bionumpy.streams.multistream import MultiStream, SequenceSizes, StreamError
 from bionumpy.streams import BnpStream
 from bionumpy.bnpdataclass import bnpdataclass
 
