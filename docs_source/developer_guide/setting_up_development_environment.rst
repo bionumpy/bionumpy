@@ -1,5 +1,5 @@
-Getting started doing development
------------------------------------
+
+.. _development_setup:
 
 Setting up your development environment
 ========================================

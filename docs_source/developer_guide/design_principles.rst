@@ -1,4 +1,6 @@
- Design principles and code overview
+.. _design_principles:
+
+Design principles and code overview
 --------------------------------------
 
 Overview
