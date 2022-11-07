@@ -4,7 +4,7 @@ from .variants import is_snp
 from .datatypes import Variant
 from .encoded_array import as_encoded_array, EncodedArray
 from .dna import reverse_compliment
-from .streams.grouped import chromosome_map
+from .streams import streamable
 from .counter import count_encoded, EncodedCounts
 from .lookup import Lookup
 import logging
@@ -79,9 +79,11 @@ class MutationTypeEncoding:
         return [self.to_string(c) for c in np.arange(4**(self.k-1)*6)]
 
 
-@chromosome_map(reduction=sum)
+@streamable(reduction=sum)
 def count_mutation_types(variants, reference, flank=1):
     snps = variants[is_snp(variants)]
+    if len(snps) == 0:
+        return 0
     snps = snps[np.argsort(snps.position)]
     mnv_mask = (snps.position[1:] == (snps.position[:-1]+1))
     # mask = np.append(mask, False) | np.insert(mask, 0, False)

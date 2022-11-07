@@ -1,7 +1,7 @@
 import pytest
 
 from bionumpy.streams.multistream import MultiStream, SequenceSizes, StreamError
-from bionumpy.streams import BnpStream
+from bionumpy.streams import BnpStream, NpDataclassStream
 from bionumpy.bnpdataclass import bnpdataclass
 
 
@@ -12,7 +12,8 @@ class SimpleClass:
 
 @pytest.fixture
 def stream():
-    return BnpStream([SimpleClass(["chr1"]*3+["chr2"]*2+["chr3"])])
+    return NpDataclassStream([SimpleClass(["chr1"]*3+["chr2"]*2+["chr3"])],
+                             dataclass=SimpleClass)
 
 
 @pytest.fixture
@@ -63,10 +64,17 @@ def test_raises_on_missing_seq_len(stream, indexed, sequence_sizes):
                        multistream.values)))
 
 
-def test_raises_on_missing_stream(stream, indexed, sequence_sizes):
-    stream = BnpStream(elem[:-1] for elem in stream)
+def _test_raises_on_missing_stream(stream, indexed, sequence_sizes):
+    stream = NpDataclassStream((elem[:-1] for elem in stream), dataclass=SimpleClass)
     multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
     with pytest.raises(StreamError):
         print(list(zip(multistream.lengths,
                        multistream.names,
                        multistream.values)))
+
+
+def test_raises_on_sortorder(stream, indexed, sequence_sizes):
+    stream = NpDataclassStream((elem[::-1] for elem in stream), dataclass=SimpleClass)
+    multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
+    with pytest.raises(StreamError):
+        print(list(multistream.names))

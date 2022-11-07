@@ -1,5 +1,17 @@
 from .stream import BnpStream
 from ..groupby import groupby
+import logging
+logger = logging.getLogger(__name__)
+
+
+def alpha_numeric_key_func(chrom_name):
+    assert chrom_name.startswith("chr"), chrom_name
+    parts = chrom_name[3:].split("_", maxsplit=1)
+    assert len(parts) <= 2, chrom_name
+    is_numeric = 1-parts[0].isdigit()
+    b = parts[0] if is_numeric else int(parts[0])
+    c = parts[-1] if len(parts) == 2 else ""
+    return (is_numeric, b, c)
 
 
 class StreamError(Exception):
@@ -15,38 +27,61 @@ class SynchedStream(BnpStream):
         self._stream = stream
         self._contig_order = contig_order
         self._grouping_attribute = "chromosome"
-        self._has_default = False
+        self._has_default = True
+        self._default_value = stream.dataclass.empty()
+        self._key_func = lambda x: x
 
     def set_grouping_attribute(self, attribute_name):
         self._grouping_attribute = attribute_name
 
+    def set_key_function(self, key_function):
+        self._key_func = key_function
+
     def __iter__(self):
         grouped = groupby(self._stream, self._grouping_attribute)
         cur_contig_idx = 0
+        used_names = []
+        seen_contig_names = set([])
         for name, data in grouped:
+            name = self._key_func(name)
+            if name in seen_contig_names:
+                raise StreamError(f"Sort order discrepancy between stream and contig. {name} already occured in {seen_contig_names}")
+            used_names.append(name)
             if name not in self._contig_order:
                 raise StreamError(f"Stream had value not present in contig order: {name} ({self._contig_order})")
-            if name == self._contig_order[cur_contig_idx]:
-                yield data
-                cur_contig_idx += 1
-            else:
+            while cur_contig_idx < len(self._contig_order) and (name != self._contig_order[cur_contig_idx]):
                 if self._has_default:
+                    logger.info(f"Data for contig {self._contig_order[cur_contig_idx]} missing")
                     yield self._default_value
+                    seen_contig_names.add(self._contig_order[cur_contig_idx])
+                    cur_contig_idx += 1
                 else:
                     raise StreamError(
-                        f"Stream's next element is not {self._contig_order[cur_contig_idx]} as expected by contig order. And no default value is set for the stream")
+                        f"Stream's next element ({name}) is not {self._contig_order[cur_contig_idx]} as expected by contig order. And no default value is set for the stream")
+            if name == self._contig_order[cur_contig_idx]:
+                yield data
+                seen_contig_names.add(self._contig_order[cur_contig_idx])
+                cur_contig_idx += 1
+            else:
+                raise StreamError(f"Stream element {name} not present in contig order : {self._contig_order}")
         if cur_contig_idx < len(self._contig_order):
             if self._has_default:
-                for _ in range(cur_contig_idx, len(self._contig_order)):
+
+                for i in range(cur_contig_idx, len(self._contig_order)):
+                    logger.info(f"Data for contig {self._contig_order[i]} missing")
                     yield self._default_value
             else:
                 raise StreamError(
-                    f"Stream's next element is not {self._contig_order[cur_contig_idx]} as expected by contig order. And no default value is set for the stream")
-
+                    f"Stream's next element ({name}) is not {self._contig_order[cur_contig_idx]} as expected by contig order. And no default value is set for the stream")
+        remains = next(grouped, None)
+        if remains is not None:
+            raise StreamError(f"Stream element {remains[0]} not present in contig ordere {self._contig_order}")
+        
     def __repr__(self):
         with_default = f" with default_value {self._default_value}" if self._has_default else ""
         return f"SynchedStream over {self._contig_order}{with_default}.\n{self._stream}"
             
+    __str__ = __repr__
     def set_default(self, default_value):
         self._has_default = True
         self._default_value = default_value
@@ -62,6 +97,8 @@ class IndexedStream(BnpStream):
 
     def __repr__(self):
         return f"IndexedStream over contigs: {self._contig_order}\n{self._lookup}"
+
+    __str__ = __repr__
 
 
 class MultiStream:
@@ -95,3 +132,8 @@ class MultiStream:
         for keyword, default_value in kwargs.items():
             assert keyword in self.__dict__
             self.__dict__[keyword].set_default(default_value)
+
+    def set_key_functions(self, **kwargs):
+        for keyword, key_function in kwargs.items():
+            assert keyword in self.__dict__
+            self.__dict__[keyword].set_key_function(key_function)

@@ -47,6 +47,7 @@ class NpDataclassStream(BnpStream):
     """
     def __init__(self, stream, dataclass=None):
         super().__init__(stream)
+        self.dataclass = dataclass
 
     def __getattr__(self, attribute_name):
         return ArrayStream(getattr(chunk, attribute_name) for chunk in self)
