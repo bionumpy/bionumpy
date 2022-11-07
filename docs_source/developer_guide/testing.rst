@@ -38,3 +38,15 @@ Run tests in only a single example (or file):
 .. code-block:: bash
 
     pytest example/our_example.py
+
+
+
+Dependencies with NpStructures
+=================================
+
+Since development on BioNumPy often is done alongside development on NpStructures, we follow these rules:
+
+* The master branch on BioNumPy should always work with the latest published release of NpStructures
+* The dev-branch and other development-branches on BioNumPy should work with the dev-branch on NpStructures.
+
+The github-actions make sure that the correct branch is being used, but when testing locally you will need to make sure you are having the correct branch of npstructures yourself.

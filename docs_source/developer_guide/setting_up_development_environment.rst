@@ -4,12 +4,22 @@
 Setting up your development environment
 ========================================
 
-Follow the steps below to setup an environment that lets you do development on BioNumPy (including making examples or writing documentation).
+Follow the steps below to set up an environment that lets you do development on BioNumPy, such as making examples, writing documentation or implementing features.
 
 Step 1 (Optional): Install development version of npstructures
 ****************************************************************
-Development on BioNumPy is often done in parallel with development on NpStructures, meaning that
+Development on BioNumPy is often done in parallel with development on NpStructures, meaning that new functionality on BioNumPy depends on unpublished changes on NpStructures. Thus, you will usually need the development version of NpStructures, which you can get by installing the dev branch of NpStructures:
 
+.. code-block:: bash
+
+    git clone git@github.com:knutdrand/npstructures.git
+    cd npstructures
+    git checkout dev
+    pip install -e .
+
+The `-e` installs an editable version, so that if you change anything in NpStructures those changes will have an effect.
+
+NB: You might want to install NpStructures and BioNumPy into a virtual environment. If so, make sure to make one before starting the installation.
 
 Step 2: Install BioNumPy locally (not from PyPi)
 **************************************************
