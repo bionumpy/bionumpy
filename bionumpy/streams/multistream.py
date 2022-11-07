@@ -23,6 +23,16 @@ class SequenceSizes(dict):
 
 
 class SynchedStream(BnpStream):
+    """
+    Groups a stream based on a grouping attribute (defaults to "chromosome"), 
+    and returns data in the order specified in `contig_order`, with empty datastructures
+    if the stream has no attribute for that contig. The column of the grouping attribute
+    needs to be sorted with the same order as `contig_order`. 
+    
+    If it's not, and you're only working with one stream, it's recomended to change the 
+    order of `contig_order` rather than sorting the data file. The sorting mehtod is
+    usually either normal string sort, or sorted using `alpha_numeric_key_func`.
+    """
     def __init__(self, stream, contig_order):
         self._stream = stream
         self._contig_order = contig_order
@@ -88,6 +98,9 @@ class SynchedStream(BnpStream):
 
 
 class IndexedStream(BnpStream):
+    """Creates a stream from a dict-like object that generates
+    values from the dict in the order of `contig_order`
+    """
     def __init__(self, lookup, contig_order):
         self._lookup = lookup
         self._contig_order = contig_order
@@ -102,6 +115,30 @@ class IndexedStream(BnpStream):
 
 
 class MultiStream:
+    """ Class to handle multiple streams/data sources that works on the same
+    set of reference sequences
+
+    Examples
+    --------
+    >>> from bionumpy.streams import NpDataclassStream
+    >>> from bionumpy.datatypes import Interval
+    >>> positions = {"chr1": [1, 2, 3], "chr2": [3, 4, 5]}
+    >>> sequence_sizes = {"chr1": 10, "chr2": 15}
+    >>> stream = NpDataclassStream([Interval(["chr1"]*2, [0, 4], [5, 10]), Interval(["chr2"], [2], [13])], dataclass=Interval)
+    >>> multistream = MultiStream(sequence_sizes, positions=positions, intervals=stream)
+    >>> for pos, interval in zip(multistream.positions, multistream.intervals):
+    ...     print(pos)
+    ...     print(interval)
+    [1, 2, 3]
+    Interval with 2 entries
+                   chromosome                    start                     stop
+                         chr1                        0                        5
+                         chr1                        4                       10
+    [3, 4, 5]
+    Interval with 1 entries
+                   chromosome                    start                     stop
+                         chr2                        2                       13
+    """
     def __init__(self, sequence_sizes: SequenceSizes, **kwargs):
         """Synch different data streams with data on the same reference
     
