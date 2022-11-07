@@ -56,6 +56,7 @@ def bnpdataclass(base_class: type) -> npdataclass:
                          name                      age
                          Ivar                       30
     """
+
     def _implicit_format_conversion(cls, obj: npdataclass):
         """Convert the data in given in the init into numpy like data
 
