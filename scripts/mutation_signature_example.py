@@ -18,12 +18,12 @@ def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank
 
     reference = bnp.open_indexed(fasta_filename)
     sequence_lengths = reference.get_contig_lengths()
-    sequence_lengths = {name: sequence_lengths[name] for name in 
-                        sorted(sequence_lengths.keys(), key=alpha_numeric_key_func)}
+    #sequence_lengths = {name: sequence_lengths[name] for name in 
+    #                     sorted(sequence_lengths.keys(), key=alpha_numeric_key_func)}
     multistream = MultiStream(sequence_lengths,
                               variants=variants,
                               reference=reference)
-    multistream.set_key_functions(variants=lambda x: x if x.startswith("chr") else "chr"+x)
+    # multistream.set_key_functions(variants=lambda x: x if x.startswith("chr") else "chr"+x)
     counts = count_mutation_types(multistream.variants, multistream.reference, flank)
     output = matrix_to_csv(counts.counts, header=counts.alphabet)# , row_names=counts.row_names)
     if out_filename is not None:
