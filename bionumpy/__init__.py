@@ -19,9 +19,8 @@ from .kmers import KmerEncoding
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
-from .streams import mean, bincount, histogram, streamable, quantile
+from .streams import mean, bincount, histogram, streamable, quantile, MultiStream
 from .datatypes import SAMEntry, GFFEntry, Bed6
-
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)

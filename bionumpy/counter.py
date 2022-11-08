@@ -30,8 +30,8 @@ class EncodedCounts:
             o_counts = other.counts
         return dataclasses.replace(self, counts=self.counts+o_counts)
 
-    def get_count_for_label(self, letter):
-        return self.counts[..., encoded_counts.alphabet.find(letter)]
+    def get_count_for_label(self, label):
+        return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
 
     @classmethod
     def vstack(cls, counts):
