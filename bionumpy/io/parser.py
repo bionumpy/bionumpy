@@ -113,12 +113,10 @@ class NumpyFileReader:
             if chunk is None:
                 return None
             temp_chunks.append(chunk)
-            print(temp_chunks)
             if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             self._total_bytes_read += chunk.size
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
-            print(complete_entry_found)
             
         chunk = np.concatenate(temp_chunks)
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)

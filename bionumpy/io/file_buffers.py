@@ -149,7 +149,6 @@ class FileBuffer:
     @classmethod
     def contains_complete_entry(cls, chunks):
         n_new_lines = sum(np.sum(EncodedArray(chunk) == NEWLINE) for chunk in chunks)
-        print(n_new_lines, cls.n_lines_per_entry, n_new_lines >= cls.n_lines_per_entry)
         return n_new_lines >= cls.n_lines_per_entry
 
 
