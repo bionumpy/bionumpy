@@ -79,16 +79,48 @@ class NumpyFileReader:
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
 
-    def read_chunk(self, chunk_size=5000000):
-        chunk = self.__get_buffer(chunk_size)
-        if chunk is None:
-            return None
-        if len(self._prepend):
-            chunk = np.concatenate((self._prepend, chunk))
-            self._prepend = []
+    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> np.ndarray:
+        """Read buffers of size `min_chunk_size` until at least one complete entry is found` Stop at `max_chunk_size`
 
-        self._total_bytes_read += chunk.size
+        Read buffers from the file object. If the `from_raw_buffer`
+        method of `self._file_obj` finds a complete entry, then read
+        some more
+
+        Parameters
+        ----------
+        min_chunk_size : int
+            The size of the buffers to read
+        max_chunk_size : int
+            The max size of the combined buffers. If this is reached
+            before a complete entry is found, raise Exception
+
+        Returns
+        -------
+        np.ndarray
+            A FileBuffer, containing at least one complete entry
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
+        complete_entry_found = False
+        temp_chunks = []
+        if len(self._prepend):
+            temp_chunks.append(self._prepend)
+        while not complete_entry_found:
+            chunk = self._get_buffer(min_chunk_size, max_chunk_size)
+            if chunk is None:
+                return None
+            temp_chunks.append(chunk)
+            if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
+                raise Exception("No complete entry found")
+            self._total_bytes_read += chunk.size
+            complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
+            
+        chunk = np.concatenate(temp_chunks)
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+        self._prepend = []
         if not self._is_finished:
             if not self._do_prepend:
                 self._file_obj.seek(buff.size - chunk.size, 1)
@@ -97,11 +129,11 @@ class NumpyFileReader:
         if chunk is not None and chunk.size:
             return wrapper(buff)
 
-    def read_chunks(self, chunk_size=5000000):
+    def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
         #self._remove_initial_comments()
         #self._header_data = self._buffer_type.read_header(self._file_obj)
         while not self._is_finished:
-            yield self.read_chunk(chunk_size)
+            yield self.read_chunk(min_chunk_size, max_chunk_size)
 
     def close(self):
         self._file_obj.close()
@@ -115,9 +147,9 @@ class NumpyFileReader:
             bytes_read += 1
         return chunk, bytes_read
 
-    def __get_buffer(self, chunk_size):
-        a, bytes_read = self.__read_raw_chunk(chunk_size)
-        self._is_finished = bytes_read < chunk_size
+    def _get_buffer(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
+        a, bytes_read = self.__read_raw_chunk(min_chunk_size, max_chunk_size)
+        self._is_finished = bytes_read < min_chunk_size
         if bytes_read == 0:
             return None
 
@@ -133,8 +165,8 @@ class NumpyFileReader:
         #         bytes_read += 1
         return a[:bytes_read]
 
-    def __read_raw_chunk(self, chunk_size):
-        b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
+    def __read_raw_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
+        b = np.frombuffer(self._file_obj.read(min_chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
         return b, b.size
 

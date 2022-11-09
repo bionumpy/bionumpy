@@ -6,11 +6,21 @@ import dataclasses
 logger = logging.getLogger(__name__)
 
 
-def as_strided(arr, *args, **kwargs):
+def as_strided(arr, shape=None, strides=None, **kwargs):
+    # assert strides is not None, (arr, shape, strides)
+    if strides is None:
+        assert len(arr.shape) == 1
+        if len(shape) == 2:
+            strides = (shape[-1]*arr.strides[-1], arr.strides[-1])
+        elif len(shape) == 1:
+            strides = (arr.strides[-1],)
+        else:
+            assert False, (arr, shape, len(shape))
+
     if hasattr(arr, "as_strided"):
-        return arr.as_strided(*args, **kwargs)
+        return arr.as_strided(shape, strides, **kwargs)
     assert not np.issubdtype(arr.dtype, np.object_), arr
-    return np.lib.stride_tricks.as_strided(arr, *args, **kwargs)
+    return np.lib.stride_tricks.as_strided(arr, shape, strides, **kwargs)
 
 
 def convolution(func):
