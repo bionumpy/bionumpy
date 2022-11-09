@@ -18,6 +18,22 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
 
+    @classmethod
+    def contains_complete_entry(cls, chunks):
+        ends_with_new_line = False
+        for chunk in chunks:
+            chunk = EncodedArray(chunk)
+            new_lines = np.flatnonzero(chunk[:-1] == "\n")
+            new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
+            if new_entries.size >= 1:
+                return True
+            if ends_with_new_line and chunk[0] == cls._new_entry_marker:
+                return True
+            ends_with_new_line = chunk[-1] == "\n"
+        return False
+            
+
+
     def get_data(self):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)

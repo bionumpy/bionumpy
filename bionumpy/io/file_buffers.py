@@ -146,12 +146,19 @@ class FileBuffer:
         to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
         self._data[to_indices] = array[::-1]
 
+    @classmethod
+    def contains_complete_entry(cls, chunks):
+        n_new_lines = sum(np.sum(EncodedArray(chunk) == NEWLINE) for chunk in chunks)
+        print(n_new_lines, cls.n_lines_per_entry, n_new_lines >= cls.n_lines_per_entry)
+        return n_new_lines >= cls.n_lines_per_entry
+
 
 class OneLineBuffer(FileBuffer):
     """ Base class for file formats where data fields are contained in lines."""
 
     n_lines_per_entry = 2
     _buffer_divisor = 32
+
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":

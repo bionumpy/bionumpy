@@ -32,11 +32,12 @@ def test_buffer_read(buffer_name):
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
-def test_buffer_read_chunks(buffer_name):
+@pytest.mark.parametrize("min_chunk_size", [5000000, 50])
+def test_buffer_read_chunks(buffer_name, min_chunk_size):
     _, true_data, buf_type = combos[buffer_name]
     text = buffer_texts[buffer_name]
     io_obj = BytesIO(bytes(text, encoding="utf8"))
-    data = np.concatenate(list(NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read_chunks()))
+    data = np.concatenate(list(NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read_chunks(min_chunk_size)))
     for line, true_line in zip(data, true_data):
         assert_npdataclass_equal(line, true_line)
 

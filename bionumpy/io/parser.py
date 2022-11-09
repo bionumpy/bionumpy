@@ -80,15 +80,49 @@ class NumpyFileReader:
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> np.ndarray:
-        chunk = self.__get_buffer(min_chunk_size, max_chunk_size)
-        if chunk is None:
-            return None
-        if len(self._prepend):
-            chunk = np.concatenate((self._prepend, chunk))
-            self._prepend = []
+        """Read buffers of size `min_chunk_size` until at least one complete entry is found` Stop at `max_chunk_size`
 
-        self._total_bytes_read += chunk.size
+        Read buffers from the file object. If the `from_raw_buffer`
+        method of `self._file_obj` finds a complete entry, then read
+        some more
+
+        Parameters
+        ----------
+        min_chunk_size : int
+            The size of the buffers to read
+        max_chunk_size : int
+            The max size of the combined buffers. If this is reached
+            before a complete entry is found, raise Exception
+
+        Returns
+        -------
+        np.ndarray
+            A FileBuffer, containing at least one complete entry
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
+        complete_entry_found = False
+        temp_chunks = []
+        if len(self._prepend):
+            temp_chunks.append(self._prepend)
+        while not complete_entry_found:
+            chunk = self.__get_buffer(min_chunk_size, max_chunk_size)
+            if chunk is None:
+                return None
+            temp_chunks.append(chunk)
+            print(temp_chunks)
+            if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
+                raise Exception("No complete entry found")
+            self._total_bytes_read += chunk.size
+            complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
+            print(complete_entry_found)
+            
+        chunk = np.concatenate(temp_chunks)
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+        self._prepend = []
         if not self._is_finished:
             if not self._do_prepend:
                 self._file_obj.seek(buff.size - chunk.size, 1)
