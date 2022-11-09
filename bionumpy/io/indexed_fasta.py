@@ -1,18 +1,45 @@
 import numpy as np
 from ..encoded_array import EncodedArray
 from .multiline_buffer import FastaIdxBuffer, FastaIdx
-from .parser import NumpyFileReader
 from .files import bnp_open
 
 
-def read_index(filename):
+def read_index(filename: str) -> dict:
+    """Read a fa.fai into a nested dict
+
+    Parameters
+    ----------
+    filename : str
+        The filename for the fasta index
+
+    Returns
+    -------
+    dict
+        nested dict. chromosome names to dicts of index values
+
+    """
     split_lines = (line.split() for line in open(filename))
     return {chromosome:
-            {"rlen": int(rlen), "offset": int(offset), "lenc": int(lenc), "lenb": int(lenb)}
+            {"rlen": int(rlen), "offset": int(offset),
+             "lenc": int(lenc), "lenb": int(lenb)}
             for chromosome, rlen, offset, lenc, lenb in split_lines}
 
 
-def create_index(filename):
+def create_index(filename: str) -> FastaIdx:
+    """Create a fasta index for a fasta file
+
+    Parameters
+    ----------
+    filename : str
+        Filename of the fasta file
+
+    Returns
+    -------
+    FastaIdx
+        Fasta index as bnpdataclass
+
+    """
+
     reader = bnp_open(filename, buffer_type=FastaIdxBuffer)
     indice_builders = list(reader.read_chunks())
     offsets = np.cumsum([0]+[idx.byte_size[0] for idx in indice_builders])
@@ -26,26 +53,52 @@ def create_index(filename):
 
 
 class IndexedFasta:
-    def __init__(self, filename, add_chr=False):
+    """
+    Class representing an indexed fasta file.
+    Behaves like dict of chrom names to sequences
+    """
+
+    def __init__(self, filename: str):
         self._filename = filename
-        self._index = read_index(filename+".fai")# Faidx(filename).index
+        self._index = read_index(filename+".fai")
         self._f_obj = open(filename, "rb")
 
-    def get_contig_lengths(self):
+    def get_contig_lengths(self) -> dict:
+        """Return a dict of chromosome names to seqeunce lengths
+
+        Returns
+        -------
+        dict
+            chromosome name to sequence length mapping
+        """
         return {name: values["lenc"] for name, values in self._index.items()}
 
-    def __get_chrom_name(self, name):
-        if name in self._index:
-            return name
-        elif name.startswith("chr") and name[3:] in self._index:
-            return name[3:]
-        else:
-            if ("chr"+name) in self._index:
-                return "chr" + name
-        assert False
+    def keys(self):
+        return self._index.keys()
 
-    def __getitem__(self, chromosome):
-        idx = self._index[self.__get_chrom_name(chromosome)]
+    def values(self):
+        return (self[key] for key in self.keys())
+
+    def items(self):
+        return ((key, self[key]) for key in self.keys())
+
+    def __repr__(self):
+        return f"Indexed Fasta File with chromosome sizes: {self.get_contig_lengths()}"
+
+    def __getitem__(self, chromosome: str) -> EncodedArray:
+        """Return entire sequence of the given chromosome
+
+        Parameters
+        ----------
+        chromosome : str
+            chromsome name
+
+        Returns
+        -------
+        EncodedArray
+            The sequence for that chromoeme
+        """
+        idx = self._index[chromosome]
         lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
         n_rows = (rlen + lenc - 1) // lenc
         data = np.empty(lenb * n_rows, dtype=np.uint8)
@@ -63,12 +116,3 @@ class IndexedFasta:
             data.shape,
         )
         return EncodedArray(((ret - ord("A")) % 32) + ord("A"))
-
-to_str = lambda x: "".join(chr(c) for c in x)
-
-if __name__ == "__main__":
-    from pyfaidx import Fasta, Faidx
-
-    filename = "/home/knut/Data/human_g1k_v37.fasta"
-    f = Fasta(filename)
-    f2 = IndexedFasta(filename, add_chr=True)
