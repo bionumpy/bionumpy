@@ -1,13 +1,13 @@
 .. _testing:
 
-Testing
----------
+How we do testing in BioNumPy
+-------------------------------
 
-Tests for BioNumPy are automatically run when you push to the dev branch or make a pull request, but we recommend that you also run all tests locally. This can be done by running the test-script:
+Tests for BioNumPy are automatically run when you push to the dev branch or make a pull request, but we recommend that you also run all tests locally.
 
 .. code-block:: bash
 
-    ./test
+    make test-all
 
 The output will tell you if anything fails.
 
@@ -25,6 +25,8 @@ Run only unit-tests:
 .. code-block:: bash
 
     pytest
+    # or:
+    make test
 
 Run doctests:
 
