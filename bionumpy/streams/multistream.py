@@ -1,10 +1,10 @@
 from .stream import BnpStream
-from ..groupby import groupby
+from . import groupby
 import logging
 logger = logging.getLogger(__name__)
 
 
-def alpha_numeric_key_func(chrom_name):
+def human_key_func(chrom_name):
     assert chrom_name.startswith("chr"), chrom_name
     parts = chrom_name[3:].split("_", maxsplit=1)
     assert len(parts) <= 2, chrom_name
@@ -12,6 +12,10 @@ def alpha_numeric_key_func(chrom_name):
     b = parts[0] if is_numeric else int(parts[0])
     c = parts[-1] if len(parts) == 2 else ""
     return (is_numeric, b, c)
+
+
+def sort_dict_by_key(dictionary, key=None):
+    return {key: dictionary[key] for key in sorted(dictionary.keys())}
 
 
 class StreamError(Exception):
@@ -174,3 +178,17 @@ class MultiStream:
         for keyword, key_function in kwargs.items():
             assert keyword in self.__dict__
             self.__dict__[keyword].set_key_function(key_function)
+
+    @staticmethod
+    def human_key_func(chrom_name):
+        assert chrom_name.startswith("chr"), chrom_name
+        parts = chrom_name[3:].split("_", maxsplit=1)
+        assert len(parts) <= 2, chrom_name
+        is_numeric = 1-parts[0].isdigit()
+        b = parts[0] if is_numeric else int(parts[0])
+        c = parts[-1] if len(parts) == 2 else ""
+        return (is_numeric, b, c)
+
+    @staticmethod
+    def sort_dict_by_key(dictionary, key=None):
+        return {key: dictionary[key] for key in sorted(dictionary.keys(), key=key)}
