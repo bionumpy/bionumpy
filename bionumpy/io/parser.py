@@ -109,7 +109,7 @@ class NumpyFileReader:
         if len(self._prepend):
             temp_chunks.append(self._prepend)
         while not complete_entry_found:
-            chunk = self.__get_buffer(min_chunk_size, max_chunk_size)
+            chunk = self._get_buffer(min_chunk_size, max_chunk_size)
             if chunk is None:
                 return None
             temp_chunks.append(chunk)
@@ -147,7 +147,7 @@ class NumpyFileReader:
             bytes_read += 1
         return chunk, bytes_read
 
-    def __get_buffer(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
+    def _get_buffer(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
         a, bytes_read = self.__read_raw_chunk(min_chunk_size, max_chunk_size)
         self._is_finished = bytes_read < min_chunk_size
         if bytes_read == 0:
