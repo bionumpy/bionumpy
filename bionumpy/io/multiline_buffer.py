@@ -20,10 +20,10 @@ class MultiLineFastaBuffer(MultiLineBuffer):
 
     @classmethod
     def contains_complete_entry(cls, chunks):
+        return True
         ends_with_new_line = False
         for chunk in chunks:
             chunk = EncodedArray(chunk)
-            new_lines = np.flatnonzero(chunk[:-1] == "\n")
             new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
             if new_entries.size >= 1:
                 return True

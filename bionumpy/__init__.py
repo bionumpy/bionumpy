@@ -36,46 +36,68 @@ __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
 
 
 def set_backend(lib):
+    def temp_insert(array, index, value):
+        assert index == 0
+        return lib.concatenate((lib.asarray([value], dtype=array.dtype), array))
+
+    lib.insert = temp_insert
+
     import sys
 
     nps.set_backend(lib)
+
+    from .encodings import set_backend as set_encoding_backend
+    set_encoding_backend(lib)
     
     from npstructures.bitarray import BitArray
     from npstructures import RaggedArray
     from npstructures import RaggedShape, RaggedView
 
-    from bionumpy.cupy_compatible.sequences import CPSequence, CPSequences
-    from bionumpy.cupy_compatible.parser import CpBufferStream
-    from bionumpy.cupy_compatible.file_buffers import CPTwoLineFastaBuffer
+    #from bionumpy.cupy_compatible.sequences import CPSequence, CPSequences
+    #from bionumpy.cupy_compatible.parser import CpBufferStream
+    #from bionumpy.cupy_compatible.file_buffers import CPTwoLineFastaBuffer
     #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
     #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
     #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGnEncoding
     #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
 
-    sys.modules[__name__].Sequence = CPSequence
-    sys.modules[__name__].Sequences = CPSequences
+    from bionumpy.cupy_compatible.parser import CupyFileReader
 
-    from . import file_buffers
+    #sys.modules[__name__].Sequence = CPSequence
+    #sys.modules[__name__].Sequences = CPSequences
+
+    from .io import file_buffers
     file_buffers.np = lib
-    file_buffers.TwoLineFastaBuffer = CPTwoLineFastaBuffer
-    #file_buffers.RaggedShape = RaggedShape
-    #file_buffers.RaggedView = RaggedView
+    #file_buffers.TwoLineFastaBuffer = CPTwoLineFastaBuffer
+    file_buffers.RaggedArray = RaggedArray
+    file_buffers.RaggedShape = RaggedShape
+    file_buffers.RaggedView = RaggedView
 
-    from . import parser
+    from .io import parser
     parser.np = lib
+    parser.NumpyFileReader = CupyFileReader
 
-    from . import files
+    from .io import files
     files.np = lib 
-    files.NpBufferStream = CpBufferStream
-    files.buffer_types[".fa"] = CPTwoLineFastaBuffer
-    files.buffer_types[".fasta"] = CPTwoLineFastaBuffer
+    files.NumpyFileReader = CupyFileReader
+    #files.NpBufferStream = CpBufferStream
+    #files.buffer_types[".fa"] = CPTwoLineFastaBuffer
+    #files.buffer_types[".fasta"] = CPTwoLineFastaBuffer
 
-    from .encodings import set_backend as set_encoding_backend
-    set_encoding_backend(lib)
+    from . import bnpdataclass
+    bnpdataclass.np = lib
+    bnpdataclass.RaggedArray = RaggedArray
+
+    from . import encoded_array
+    encoded_array.np = lib
+    encoded_array.RaggedArray = RaggedArray
+    encoded_array.get_NPSArray = lambda x: x
+
 
     from . import kmers
     #kmers.ACTGEncoding = ACTGEncoding
     kmers.BitArray = BitArray
 
     from . import util
+    util.np = lib
     util.RaggedArray = RaggedArray
