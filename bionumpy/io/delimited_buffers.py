@@ -132,6 +132,7 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
+        assert np.max(col) < self._n_cols, (col, self._n_cols, self._data, self.__class__, self.dataclass)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         if keep_sep:

@@ -160,7 +160,7 @@ class MultiStream:
         FIXME: Add docs.
         """
         self._streams = {}
-        self.lengths = list(sequence_sizes.values())
+        self.lengths = BnpStream(sequence_sizes.values())
         for keyword, value in kwargs.items():
             if isinstance(value, BnpStream):
                 self.__dict__[keyword] = SynchedStream(value, list(sequence_sizes.keys()))
