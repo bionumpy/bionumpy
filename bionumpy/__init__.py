@@ -46,30 +46,17 @@ def set_backend(lib):
     import sys
 
     nps.set_backend(lib)
-
-    from .encodings import set_backend as set_encoding_backend
-    set_encoding_backend(lib)
-    
     from npstructures.bitarray import BitArray
     from npstructures import RaggedArray
     from npstructures import RaggedShape, RaggedView
 
-    #from bionumpy.cupy_compatible.sequences import CPSequence, CPSequences
-    #from bionumpy.cupy_compatible.parser import CpBufferStream
-    #from bionumpy.cupy_compatible.file_buffers import CPTwoLineFastaBuffer
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGnEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
+    from .encodings import set_backend as set_encoding_backend
+    set_encoding_backend(lib)
 
     from bionumpy.cupy_compatible.parser import CupyFileReader
 
-    #sys.modules[__name__].Sequence = CPSequence
-    #sys.modules[__name__].Sequences = CPSequences
-
     from .io import file_buffers
     file_buffers.np = lib
-    #file_buffers.TwoLineFastaBuffer = CPTwoLineFastaBuffer
     file_buffers.RaggedArray = RaggedArray
     file_buffers.RaggedShape = RaggedShape
     file_buffers.RaggedView = RaggedView
@@ -81,9 +68,6 @@ def set_backend(lib):
     from .io import files
     files.np = lib 
     files.NumpyFileReader = CupyFileReader
-    #files.NpBufferStream = CpBufferStream
-    #files.buffer_types[".fa"] = CPTwoLineFastaBuffer
-    #files.buffer_types[".fasta"] = CPTwoLineFastaBuffer
 
     from . import bnpdataclass
     bnpdataclass.np = lib
@@ -94,9 +78,7 @@ def set_backend(lib):
     encoded_array.RaggedArray = RaggedArray
     encoded_array.get_NPSArray = lambda x: x
 
-
     from . import kmers
-    #kmers.ACTGEncoding = ACTGEncoding
     kmers.BitArray = BitArray
 
     from . import util
