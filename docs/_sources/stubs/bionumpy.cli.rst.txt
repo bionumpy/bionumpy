@@ -1,0 +1,29 @@
+bionumpy.cli
+============
+
+.. automodule:: bionumpy.cli
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      run_as_commandline
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

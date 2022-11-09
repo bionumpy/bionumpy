@@ -1,0 +1,29 @@
+bionumpy.streams.decorators
+===========================
+
+.. automodule:: bionumpy.streams.decorators
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      streamable
+   
+   
+
+   
+   
+   
+
+
+

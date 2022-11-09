@@ -1,0 +1,35 @@
+bionumpy.counter
+================
+
+.. automodule:: bionumpy.counter
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      count_encoded
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      EncodedCounts
+   
+   
+
+   
+   
+   
+
+
+

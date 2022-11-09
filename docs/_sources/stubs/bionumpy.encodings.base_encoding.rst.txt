@@ -1,0 +1,38 @@
+bionumpy.encodings.base\_encoding
+=================================
+
+.. automodule:: bionumpy.encodings.base_encoding
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_base_encodings
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ASCIIEncoding
+      CigarEncoding
+      Encoding
+      NumericEncoding
+   
+   
+
+   
+   
+   
+
+
+

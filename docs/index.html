@@ -48,9 +48,14 @@
 <li class="toctree-l1"><a class="reference internal" href="source/sequences.html">Sequences</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/intervals.html">Intervals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/multiple_data_sources.html#sort-order">Sort Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/broadcastable_functions.html">Broadcastable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/rollable_functions.html">Rollable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/summarization.html">Summarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stubs/bionumpy.html">bionumpy</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -64,6 +69,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/getting_started.html">Getting started and how to contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/setting_up_development_environment.html">Setting up your development environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/testing.html">How we do testing in BioNumPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/making_examples.html">Making examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/writing_documentation.html">Writing documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/design_principles.html">Design principles and code overview</a></li>
@@ -141,6 +147,10 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="source/multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/multiple_data_sources.html#sort-order">Sort Order</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/multiple_data_sources.html#two-indexed-files">Two Indexed Files</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="source/broadcastable_functions.html">Broadcastable Functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="source/broadcastable_functions.html#elementwise-broadcasting-in-numpy">Elementwise broadcasting in numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="source/broadcastable_functions.html#vectorwise-broadcasting">Vectorwise broadcasting</a></li>
@@ -152,6 +162,42 @@
 </ul>
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stubs/bionumpy.html">bionumpy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.alignments.html">bionumpy.alignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.bedgraph.html">bionumpy.bedgraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.bionumpy.html">bionumpy.bionumpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.bnpdataclass.html">bionumpy.bnpdataclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.cigar.html">bionumpy.cigar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.cli.html">bionumpy.cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.code_nodes.html">bionumpy.code_nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.counter.html">bionumpy.counter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.cupy_compatible.html">bionumpy.cupy_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.datatypes.html">bionumpy.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.dna.html">bionumpy.dna</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.encoded_array.html">bionumpy.encoded_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.encodings.html">bionumpy.encodings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.gtf.html">bionumpy.gtf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.intervals.html">bionumpy.intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.io.html">bionumpy.io</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.jaspar.html">bionumpy.jaspar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.kmers.html">bionumpy.kmers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.lookup.html">bionumpy.lookup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.minimizers.html">bionumpy.minimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.mutation_signature.html">bionumpy.mutation_signature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.position_weight_matrix.html">bionumpy.position_weight_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.rollable.html">bionumpy.rollable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.streams.html">bionumpy.streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.string_matcher.html">bionumpy.string_matcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.testing.html">bionumpy.testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.translate.html">bionumpy.translate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.util.html">bionumpy.util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.variants.html">bionumpy.variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stubs/bionumpy.vcf.html">bionumpy.vcf</a></li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -168,6 +214,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/getting_started.html">Getting started and how to contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/setting_up_development_environment.html">Setting up your development environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/testing.html">How we do testing in BioNumPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/making_examples.html">Making examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/writing_documentation.html">Writing documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer_guide/design_principles.html">Design principles and code overview</a></li>

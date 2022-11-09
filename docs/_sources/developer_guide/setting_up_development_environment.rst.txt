@@ -53,7 +53,7 @@ BioNumPy has several different sets of test (unit tests, property testing, testi
 
 .. code-block:: bash
 
-    ./test
+    ./run_tests
 
 If the above runs without any errors, you are ready to start doing development. Continue by reading the
 

@@ -1,0 +1,29 @@
+bionumpy.variants
+=================
+
+.. automodule:: bionumpy.variants
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      is_snp
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

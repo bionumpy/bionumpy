@@ -1,0 +1,29 @@
+bionumpy.minimizers
+===================
+
+.. automodule:: bionumpy.minimizers
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Minimizers
+   
+   
+
+   
+   
+   
+
+
+

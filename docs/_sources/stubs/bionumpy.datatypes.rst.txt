@@ -1,0 +1,30 @@
+bionumpy.datatypes
+==================
+
+.. automodule:: bionumpy.datatypes
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SNP
+      SortedIntervals
+   
+   
+
+   
+   
+   
+
+
+

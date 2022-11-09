@@ -1,0 +1,29 @@
+bionumpy.io.matrix\_dump
+========================
+
+.. automodule:: bionumpy.io.matrix_dump
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      matrix_to_csv
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

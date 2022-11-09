@@ -1,0 +1,30 @@
+bionumpy.jaspar
+===============
+
+.. automodule:: bionumpy.jaspar
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      parse_jaspar_line
+      read_jaspar_matrix
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

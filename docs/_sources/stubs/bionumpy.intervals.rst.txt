@@ -1,0 +1,31 @@
+bionumpy.intervals
+==================
+
+.. automodule:: bionumpy.intervals
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_boolean_mask
+      get_pileup
+      pileup
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

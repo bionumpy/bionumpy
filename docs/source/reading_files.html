@@ -54,9 +54,14 @@
 <li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intervals.html">Intervals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_data_sources.html#sort-order">Sort Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broadcastable_functions.html">Broadcastable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rollable_functions.html">Rollable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="summarization.html">Summarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/bionumpy.html">bionumpy</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -70,6 +75,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide/getting_started.html">Getting started and how to contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide/setting_up_development_environment.html">Setting up your development environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/testing.html">How we do testing in BioNumPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide/making_examples.html">Making examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide/writing_documentation.html">Writing documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer_guide/design_principles.html">Design principles and code overview</a></li>
@@ -128,16 +134,16 @@
 <h2>Method 2: Reading a single chunk from a large file<a class="headerlink" href="#method-2-reading-a-single-chunk-from-a-large-file" title="Permalink to this headline">¶</a></h2>
 <p>If you have a large file, and don’t want to read all of it, you can read a single chunk. This can be useful if you only want to get to know your data or perform an analysis on a small subset of your data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;example_data/reads.fq&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">chunk</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read_chunk</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chunk</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read_chunk</span><span class="p">(</span><span class="n">min_chunk_size</span><span class="o">=</span><span class="mi">10000000</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here <cite>chunk_size</cite> is the number of bytes to read. If the file is small enough, you may get the whole file by setting chunk size to a big number, but if you want to make sure you read the whole file as one single cunk you should choose method 1 instead.</p>
+<p>Here <cite>min_chunk_size</cite> is the number of bytes to read. If the file is small enough, you may get the whole file by setting chunk size to a big number, but if you want to make sure you read the whole file as one single cunk you should choose method 1 instead.</p>
 </div>
 <div class="section" id="method-3-reading-whole-file-as-a-stream-of-chunks">
 <h2>Method 3: Reading whole file as a stream of chunks<a class="headerlink" href="#method-3-reading-whole-file-as-a-stream-of-chunks" title="Permalink to this headline">¶</a></h2>
 <p>This is the preferred way you should use for all large files (typically fasta files, fastq files and bam files). The idea is to read the whole file as chunks that can be iterated over. This way, only one single chunk will be kept in memory at the time.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">file</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;example_data/big.fq.gz&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">read_chunks</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">100000</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">read_chunks</span><span class="p">(</span><span class="n">min_chunk_size</span><span class="o">=</span><span class="mi">100000</span><span class="p">):</span>
 <span class="gp">... </span>   <span class="c1"># do stuff with this chunk, e.g. take the mean</span>
 <span class="gp">... </span>   <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">quality</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 <span class="go">11.243155401311078</span>

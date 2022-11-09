@@ -33,9 +33,9 @@ Method 2: Reading a single chunk from a large file
 If you have a large file, and don't want to read all of it, you can read a single chunk. This can be useful if you only want to get to know your data or perform an analysis on a small subset of your data:
 
     >>> file = bnp.open("example_data/reads.fq")
-    >>> chunk = file.read_chunk(chunk_size=10000000)
+    >>> chunk = file.read_chunk(min_chunk_size=10000000)
 
-Here `chunk_size` is the number of bytes to read. If the file is small enough, you may get the whole file by setting chunk size to a big number, but if you want to make sure you read the whole file as one single cunk you should choose method 1 instead.
+Here `min_chunk_size` is the number of bytes to read. If the file is small enough, you may get the whole file by setting chunk size to a big number, but if you want to make sure you read the whole file as one single cunk you should choose method 1 instead.
 
 
 Method 3: Reading whole file as a stream of chunks
@@ -43,7 +43,7 @@ Method 3: Reading whole file as a stream of chunks
 This is the preferred way you should use for all large files (typically fasta files, fastq files and bam files). The idea is to read the whole file as chunks that can be iterated over. This way, only one single chunk will be kept in memory at the time.
 
     >>> file = bnp.open("example_data/big.fq.gz")
-    >>> for chunk in file.read_chunks(chunk_size=100000):
+    >>> for chunk in file.read_chunks(min_chunk_size=100000):
     ...    # do stuff with this chunk, e.g. take the mean
     ...    print(chunk.quality.mean())
     11.243155401311078

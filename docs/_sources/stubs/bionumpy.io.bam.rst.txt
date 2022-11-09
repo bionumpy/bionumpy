@@ -1,0 +1,30 @@
+bionumpy.io.bam
+===============
+
+.. automodule:: bionumpy.io.bam
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BamBuffer
+      BamIntervalBuffer
+   
+   
+
+   
+   
+   
+
+
+

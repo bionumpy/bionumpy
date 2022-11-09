@@ -15,7 +15,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Making examples" href="making_examples.html" />
+    <link rel="next" title="How we do testing in BioNumPy" href="testing.html" />
     <link rel="prev" title="Getting started and how to contribute" href="getting_started.html" /> 
 </head>
 
@@ -49,9 +49,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../source/sequences.html">Sequences</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/intervals.html">Intervals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html#sort-order">Sort Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/broadcastable_functions.html">Broadcastable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/rollable_functions.html">Rollable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/summarization.html">Summarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/bionumpy.html">bionumpy</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -71,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#step-4-test-your-installation">Step 4: Test your installation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">How we do testing in BioNumPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making_examples.html">Making examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="writing_documentation.html">Writing documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design_principles.html">Design principles and code overview</a></li>
@@ -137,7 +143,7 @@ pip install -e .
 <div class="section" id="step-4-test-your-installation">
 <h2>Step 4: Test your installation<a class="headerlink" href="#step-4-test-your-installation" title="Permalink to this headline">¶</a></h2>
 <p>BioNumPy has several different sets of test (unit tests, property testing, testing of examples and doctesting). All should pass if you’ve setup everything correctly. You can run all tests by running the <cite>test</cite>-script:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./test
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./run_tests
 </pre></div>
 </div>
 <p>If the above runs without any errors, you are ready to start doing development. Continue by reading the</p>
@@ -149,7 +155,7 @@ pip install -e .
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started and how to contribute" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="making_examples.html" class="btn btn-neutral float-right" title="Making examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="testing.html" class="btn btn-neutral float-right" title="How we do testing in BioNumPy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

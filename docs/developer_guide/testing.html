@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Testing &mdash; bionumpy  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>How we do testing in BioNumPy &mdash; bionumpy  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -14,7 +14,9 @@
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Making examples" href="making_examples.html" />
+    <link rel="prev" title="Setting up your development environment" href="setting_up_development_environment.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,9 +49,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../source/sequences.html">Sequences</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/intervals.html">Intervals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html#sort-order">Sort Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/broadcastable_functions.html">Broadcastable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/rollable_functions.html">Rollable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../source/summarization.html">Summarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/bionumpy.html">bionumpy</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -60,9 +67,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developer Guide</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started and how to contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setting_up_development_environment.html">Setting up your development environment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How we do testing in BioNumPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies-with-npstructures">Dependencies with NpStructures</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="making_examples.html">Making examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="writing_documentation.html">Writing documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design_principles.html">Design principles and code overview</a></li>
@@ -82,7 +93,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Testing</li>
+      <li class="breadcrumb-item active">How we do testing in BioNumPy</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/developer_guide/testing.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,10 +103,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="testing">
-<span id="id1"></span><h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
-<p>Tests for BioNumPy are automatically run when you push to the dev branch or make a pull request, but we recommend that you also run all tests locally. This can be done by running the test-script:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./test
+  <div class="section" id="how-we-do-testing-in-bionumpy">
+<span id="testing"></span><h1>How we do testing in BioNumPy<a class="headerlink" href="#how-we-do-testing-in-bionumpy" title="Permalink to this headline">¶</a></h1>
+<p>Tests for BioNumPy are automatically run when you push to the dev branch or make a pull request, but we recommend that you also run all tests locally.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make test-all
 </pre></div>
 </div>
 <p>The output will tell you if anything fails.</p>
@@ -103,12 +114,14 @@
 <ul class="simple">
 <li><p>Unit-tests: Quick to run, will test small units of the code)</p></li>
 <li><p>Property-tests: Slow to run, will test properties of the code with big sets of random data)</p></li>
-<li><p>Testing of examples: pytest is run on all files with pattern script/<a href="#id2"><span class="problematic" id="id3">*</span></a>_example.py</p></li>
+<li><p>Testing of examples: pytest is run on all files with pattern script/<a href="#id1"><span class="problematic" id="id2">*</span></a>_example.py</p></li>
 <li><p>Doctesting: This runs doctest on all docstrings.</p></li>
 </ul>
 <p>When doing development, you may only want to run one of these manually to save some time (e.g. only the doctests if you write documentation, or only uni-tests if you develop some code):</p>
 <p>Run only unit-tests:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+<span class="c1"># or:</span>
+make <span class="nb">test</span>
 </pre></div>
 </div>
 <p>Run doctests:</p>
@@ -134,7 +147,10 @@ make doctest
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setting_up_development_environment.html" class="btn btn-neutral float-left" title="Setting up your development environment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="making_examples.html" class="btn btn-neutral float-right" title="Making examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
