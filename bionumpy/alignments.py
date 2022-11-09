@@ -1,4 +1,4 @@
-from .npdataclassstream import streamable
+from .streams import streamable
 from .datatypes import BamEntry, Bed6
 from .encoded_array import EncodedArray
 

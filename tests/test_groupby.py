@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from bionumpy.groupby import get_changes, groupby, join_groupbys
+from bionumpy.streams.groupby_func import get_changes, groupby, join_groupbys
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal

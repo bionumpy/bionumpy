@@ -5,19 +5,19 @@ used tools FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
 import numpy as np
 import bionumpy as bnp
-from bionumpy.npdataclassstream import streamable
 
 
-# @streamable
-def get_base_quality_histogram(reads):
-    return bnp.bincount(reads.quality.ravel(), minlength=60)
+@bnp.streamable()
+def get_base_qualities(reads):
+    return reads.quality.ravel()
 
 
 def plot_base_qualities(reads):
-    qualities = get_base_quality_histogram(reads)
+    qualities = bnp.bincount(get_base_qualities(reads), minlength=60)
     return qualities
 
-@streamable()
+
+@bnp.streamable()
 def get_gc_content(reads):
     sequences = reads.sequence
     mask = (sequences == "G") | (sequences == "C")
@@ -29,7 +29,7 @@ def plot_gc_content(reads):
     return histogram
 
 
-@streamable()
+@bnp.streamable()
 def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
     return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
 
@@ -42,7 +42,7 @@ def plot_averege_quality_scores_per_base(reads):
 def test(do_plot=False):
     examples = [plot_base_qualities, plot_gc_content, plot_averege_quality_scores_per_base]
     for example in examples:
-        reads = bnp.open("example_data/big.fq.gz").read_chunks(chunk_size=1000000)
+        reads = bnp.open("example_data/big.fq.gz").read_chunks(min_chunk_size=1000000)
         result = example(reads)
         if do_plot:
             import matplotlib.pyplot as plt

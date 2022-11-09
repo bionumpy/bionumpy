@@ -9,7 +9,7 @@ from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 NarrowPeakBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
 from .indexed_fasta import IndexedFasta
-from ..npdataclassstream import NpDataclassStream
+from ..streams import NpDataclassStream
 from ..bnpdataclass import bnpdataclass
 import logging
 
@@ -53,7 +53,7 @@ class NpDataclassReader:
         """
         return self._reader.read().get_data()
 
-    def read_chunk(self, chunk_size: int = 5000000) -> bnpdataclass:
+    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> bnpdataclass:
         """Read a single chunk into memory
 
         Read all complete entries in the next `chunk_size` bytes
@@ -76,7 +76,7 @@ class NpDataclassReader:
         5
 
         """
-        chunk = self._reader.read_chunk(chunk_size)
+        chunk = self._reader.read_chunk(min_chunk_size, max_chunk_size)
         if chunk is None:
             # return an empty dataclass
             dataclass = self._reader._buffer_type.dataclass
@@ -84,7 +84,7 @@ class NpDataclassReader:
 
         return chunk.get_data()
 
-    def read_chunks(self, chunk_size: int = 5000000) -> NpDataclassStream:
+    def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> NpDataclassStream:
         """Read the whole file in chunks
 
         This returns a generator yielding all the entries in the file 
@@ -106,7 +106,7 @@ class NpDataclassReader:
         5
 
         """
-        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(chunk_size)),
+        return NpDataclassStream((chunk.get_data() for chunk in self._reader.read_chunks(min_chunk_size, max_chunk_size)),
                                  dataclass=self._reader._buffer_type.dataclass)
 
     def __iter__(self) -> NpDataclassStream:

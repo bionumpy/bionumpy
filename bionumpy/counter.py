@@ -2,7 +2,6 @@ import numpy as np
 from numbers import Number
 import dataclasses
 
-
 @dataclasses.dataclass
 class EncodedCounts:
     alphabet: list
@@ -16,8 +15,12 @@ class EncodedCounts:
         return self.counts[..., self.alphabet.index(idx)]
 
     def __add__(self, other):
-        assert self.alphabet==other.alphabet
-        return dataclasses.replace(self, counts=self.counts+other.counts)
+        if isinstance(other, Number):
+            o_counts = other
+        else:
+            assert self.alphabet==other.alphabet
+            o_counts = other.counts
+        return dataclasses.replace(self, counts=self.counts+o_counts)
 
     def __radd__(self, other):
         if isinstance(other, Number):
@@ -26,7 +29,10 @@ class EncodedCounts:
             assert self.alphabet==other.alphabet
             o_counts = other.counts
         return dataclasses.replace(self, counts=self.counts+o_counts)
-        
+
+    def get_count_for_label(self, label):
+        return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
+
     @classmethod
     def vstack(cls, counts):
         alphabet = counts[0].alphabet
@@ -39,7 +45,7 @@ class EncodedCounts:
             
 
 
-def count_encoded(values, weights=None):
+def count_encoded(values, weights=None, axis=-1):
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:

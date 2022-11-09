@@ -10,7 +10,6 @@ We start by importing all we need:
 
     >>> import numpy as np
     >>> import bionumpy as bnp
-    >>> from bionumpy import streamable
     >>> import matplotlib.pyplot as plt
 
 
@@ -42,7 +41,7 @@ Getting the GC-content for each read can now be done by taking the mean across t
 If we want to do this across all all sequence chunks, we can create a function that does what we want on one chunk and add the streamable decorator:
 
 
-    >>> @streamable()
+    >>> @bnp.streamable()
     ... def get_gc_content(reads):
     ...     sequences = reads.sequence
     ...     mask = (sequences == "G") | (sequences == "C")
@@ -65,8 +64,12 @@ There is some "magic" happening here that might be useful to understand:
 Histogram of base qualities
 ============================
 If we want to plot a histogram of all the base qualities in all reads, we can use the builtin `bnp.bincount` function. This function does a numpy bincount on each chunk and combines the results.
+
+    >>> @bnp.streamable()
+    ... def get_base_qualities(reads):
+    ...     return reads.quality.ravel()
     >>> reads = bnp.open("example_data/big.fq.gz").read_chunks()
-    >>> base_quality_bincount = bnp.bincount(reads.quality.ravel(), minlength=60)
+    >>> base_quality_bincount = bnp.bincount(get_base_qualities(reads), minlength=60)
     >>> plt.plot(base_quality_bincount) # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
@@ -75,7 +78,7 @@ Average base quality per base
 ==============================
 In the GC content histogram example, we saw that we can take the mean the rows (axis=-1). If we instead want to find the average base quality for each position in the reads, we can take the mean across the columns (axis=0). Since the reads may have different lengths, we create a padded matrix filled with zeroes. Note that this means that the average base quality is "wrong" after the minimum read length.
 
-    >>> @streamable()
+    >>> @bnp.streamable()
     ... def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
     ...     return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
 

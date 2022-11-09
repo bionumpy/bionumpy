@@ -1,6 +1,6 @@
 import numpy as np
 from npstructures import RaggedArray
-from .npdataclassstream import streamable
+from .streams import streamable
 from .encodings import BaseEncoding, AlphabetEncoding
 from .kmers import KmerEncoding
 from .encoded_array import as_encoded_array, EncodedArray

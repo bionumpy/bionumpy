@@ -1,8 +1,7 @@
-from ..chromosome_provider import GroupedDict
+import numpy as np
 from ..encoded_array import EncodedArray
 from .multiline_buffer import FastaIdxBuffer
 from .parser import NumpyFileReader
-import numpy as np
 
 
 def read_index(filename):
@@ -12,19 +11,24 @@ def read_index(filename):
             for chromosome, rlen, offset, lenc, lenb in split_lines}
 
 
-def create_index(filename):
-    reader = (filename, buffer_type=MultiLineFastaBuffer)
-    chunks = reader.read_chunks()
-    offset = 0
-    for chunk in chunks:
-        print(chunk)
-    
 
-class IndexedFasta(GroupedDict):
+def create_index(filename):
+    #reader = (filename, buffer_type=MultiLineFastaBuffer)
+    # chunks = reader.read_chunks()
+    #offset = 0
+    # for chunk in chunks:
+    #    print(chunk)
+    pass
+
+
+class IndexedFasta:
     def __init__(self, filename, add_chr=False):
         self._filename = filename
         self._index = read_index(filename+".fai")# Faidx(filename).index
         self._f_obj = open(filename, "rb")
+
+    def get_contig_lengths(self):
+        return {name: values["lenc"] for name, values in self._index.items()}
 
     def __get_chrom_name(self, name):
         if name in self._index:

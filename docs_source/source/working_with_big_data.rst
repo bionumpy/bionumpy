@@ -20,10 +20,9 @@ Thus, to avoid writing for-loops and having to think about multiple chunks, BioN
 
 In addition, BioNumPy provides a streamable decorator that lets you create a function that does something on one chunk and run that function on several chunks.
 
-    >>> from bionumpy import streamable
     >>> # adding @streamable lets you run this function
     >>> # on multiple chunks
-    >>> @streamable()
+    >>> @bnp.streamable()
     ... def procss_chunk(chunk):
     ...    # compute something on a single chunk
     ...    pass
@@ -40,8 +39,7 @@ To test if your code works, it can be a good idea to read one chunk from your fi
 
 The above code will read one chunk and count the reads. Now let's add the streamable decorator and count the reads in all chunks:
 
-    >>> from bionumpy.npdataclassstream import streamable
-    >>> @streamable()
+    >>> @bnp.streamable()
     ... def count_reads(chunk):
     ...     return len(chunk.sequence)
     ...

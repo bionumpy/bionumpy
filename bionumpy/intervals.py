@@ -4,7 +4,7 @@ import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
 
 from .bedgraph import BedGraph
-from .chromosome_map import ChromosomeMap
+from .streams.grouped import chromosome_map
 from .bnpdataclass import bnpdataclass
 from .datatypes import Interval
 
@@ -87,13 +87,13 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     return rla.any(axis=0)
 
 
-@ChromosomeMap()
+@chromosome_map()
 def sort_intervals(intervals):
     args = np.lexsort((intervals.stop, intervals.start))
     return intervals[args]
 
 
-@ChromosomeMap()
+@chromosome_map()
 def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     """Merge a set of sorted intervals
 
@@ -128,7 +128,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     return new_interval
 
 
-@ChromosomeMap(reduction=sum)
+@chromosome_map(reduction=sum)
 def count_overlap(intervals_a, intervals_b):
     starts = np.concatenate([intervals_a.start, intervals_b.start])
     stops = np.concatenate([intervals_a.stop, intervals_b.stop])
@@ -137,7 +137,7 @@ def count_overlap(intervals_a, intervals_b):
     return np.sum(np.maximum(stops[:-1]-starts[1:], 0))
 
 
-@ChromosomeMap()
+@chromosome_map()
 def intersect(intervals_a, intervals_b):
     all_intervals = np.concatenate([intervals_a, intervals_b])
     all_intervals = all_intervals[np.argsort(all_intervals.start, kind="mergesort")]
@@ -147,7 +147,7 @@ def intersect(intervals_a, intervals_b):
     result.stop = stops[:-1][mask]
     return result
 
-@ChromosomeMap()
+@chromosome_map()
 def extend(intervals, both=None, forward=None, reverse=None, left=None, right=None):
     directed = (forward is not None) or (reverse is not None)
     undirected = (left is not None) or (right is not None)

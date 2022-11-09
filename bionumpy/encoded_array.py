@@ -46,6 +46,8 @@ class EncodedRaggedArray(RaggedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
         return ret
 
+def get_NPSArray(array):
+    return array.view(NPSArray)
 
 class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     """ 
@@ -74,8 +76,11 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             assert data.encoding == encoding
             data = data.data
         self.encoding = encoding
-        self.data = np.asarray(data).view(NPSArray)
-        assert isinstance(self.data, np.ndarray)
+        dtype = None if hasattr(data, "dtype") else np.uint8
+        #self.data = np.asarray(data, dtype=dtype).view(NPSArray)
+        self.data = np.asarray(data, dtype=dtype)
+        self.data = get_NPSArray(self.data)
+        #assert isinstance(self.data, np.ndarray)
 
     def __len__(self) -> int:
         return len(self.data)
@@ -174,7 +179,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         Only support euqality checks for now. Numeric operations must be performed
         directly on the underlying data.
         """
-        if method == "__call__" and ufunc in (np.equal, np.not_equal):
+        #if method == "__call__" and ufunc in (np.equal, np.not_equal):
+        if method == "__call__" and ufunc.__name__ in ("equal", "not_equal"):
             return ufunc(*(as_encoded_array(a, self.encoding).raw() for a in inputs))
         return NotImplemented
 
@@ -242,7 +248,7 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         s = EncodedRaggedArray(
             EncodedArray([ord(c) for ss in s for c in ss]),
             [len(ss) for ss in s])
-    if isinstance(s, RaggedArray):
+    if isinstance(s, (RaggedArray, EncodedRaggedArray)):
         data = as_encoded_array(s.ravel(), target_encoding)
         if isinstance(data, EncodedArray):
             return EncodedRaggedArray(data, s.shape)

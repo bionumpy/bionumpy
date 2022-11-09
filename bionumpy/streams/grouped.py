@@ -1,17 +1,23 @@
-from .chromosome_provider import (
-    ChromosomeDictProvider,
-    ChromosomeStreamProvider,
-    PureChromosomeDictProvider,
-    GroupedDict,
-    GroupedStream,
-    GroupedData
-)
 import logging
+from .stream import BnpStream
 
 logger = logging.getLogger(__name__)
 
 
-class ChromosomeMap:
+def grouped_dict(attribute_name=None):
+    def decorator(base_class):
+        base_class.grouped_dict_attribute = attribute_name
+        return base_class
+    return decorator
+
+
+class grouped_stream(BnpStream):
+    def __init__(self, stream, attribute_name=None):
+        self.attribute_name = attribute_name
+        super().__init__(stream)
+
+
+class chromosome_map:
     """
     Decorator that applies a the function to the data of each chromosome
     if a ChromosomeProvider instance is given as an argument.
@@ -28,15 +34,18 @@ class ChromosomeMap:
     ):
         if len(stream_indices) == 1:
             stream = args[stream_indices[0]]
+            self.attribute_name = stream.attribute_name
         elif len(stream_keys) == 1:
             stream = kwargs[stream_keys[0]]
+            self.attribute_name = stream.attribute_name
         elif len(dict_indices) > 0:
             stream_indices.append(dict_indices.pop(0))
+            self.attribute_name = args[stream_indices[-1]].grouped_dict_attribute
             stream = args[stream_indices[-1]].items()
         elif len(dict_keys) > 0:
             stream_keys.append(dict_keys.pop(0))
+            self.attribute_name = args[stream_keys[-1]].grouped_dict_attribute
             stream = kwargs[stream_keys[-1]].items()
-
         new_args = list(args)
         dicts = [args[i] for i in dict_indices]
         dicts_kw = [kwargs[key] for key in dict_keys]
@@ -52,6 +61,10 @@ class ChromosomeMap:
 
             yield chromosome, new_args, kwargs
 
+    @staticmethod
+    def is_grouped_dict(obj):
+        return hasattr(obj, "grouped_dict_attribute")
+
     def __call__(self, func):
         def log(sequence):
             for chromosome, args, kwargs in sequence:
@@ -60,20 +73,20 @@ class ChromosomeMap:
 
         def mapped(*args, **kwargs):
             stream_indices = [
-                i for i, a in enumerate(args) if isinstance(a, GroupedStream)
+                i for i, a in enumerate(args) if isinstance(a, grouped_stream)
             ]
             dict_indices = [
-                i for i, a in enumerate(args) if isinstance(a, GroupedDict)
+                i for i, a in enumerate(args) if self.is_grouped_dict(a)
             ]
             stream_keys = [
                 key
                 for key, val in kwargs.items()
-                if isinstance(val, GroupedStream)
+                if isinstance(val, grouped_stream)
             ]
             dict_keys = [
                 key
                 for key, val in kwargs.items()
-                if isinstance(val, GroupedDict)
+                if self.is_grouped_dict(val)
             ]
             is_stream = len(stream_indices) + len(stream_keys) > 0
             is_dict = not is_stream and (len(dict_keys) + len(dict_indices) > 0)
@@ -84,15 +97,11 @@ class ChromosomeMap:
                 args, kwargs, stream_indices, dict_indices, stream_keys, dict_keys
             )
             if is_stream:
-                ret = GroupedStream(
-                    (chromosome, func(*args, **kwargs))
-                    for chromosome, args, kwargs in log(new_args)
-                )
+                ret = grouped_stream(((chromosome, func(*args, **kwargs))
+                                      for chromosome, args, kwargs in log(new_args)))
             elif is_dict:
-                ret = PureChromosomeDictProvider(
-                    (chromosome, func(*args, **kwargs))
-                    for chromosome, args, kwargs in log(new_args)
-                )
+                ret = grouped_dict()(dict((chromosome, func(*args, **kwargs))
+                                          for chromosome, args, kwargs in log(new_args)))
             else:
                 assert False
             if self._reduction is None:
@@ -100,11 +109,3 @@ class ChromosomeMap:
             return self._reduction(
                 (m[1] for m in ret))
         return mapped
-
-
-def sorted_streams_juggler(streams):
-    """TODO"""
-    n_streams = len(streams)
-    cur_values = [next(stream, None) for stream in streams]
-    while True:
-        next_thing = min(cur_values)

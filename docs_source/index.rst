@@ -19,6 +19,7 @@ BioNumPy
    source/supported_file_formats.rst
    source/sequences.rst
    source/intervals.rst
+   source/multiple_data_sources.rst
    source/broadcastable_functions.rst
    source/rollable_functions.rst
    source/summarization.rst
@@ -42,9 +43,12 @@ BioNumPy
    tutorials/*
 
 .. toctree::
-   :glob:
    :maxdepth: 1
-   :caption: Other
+   :caption: Developer Guide
 
-   contributing
-
+   developer_guide/getting_started.rst
+   developer_guide/setting_up_development_environment.rst
+   developer_guide/testing.rst
+   developer_guide/making_examples.rst
+   developer_guide/writing_documentation.rst
+   developer_guide/design_principles.rst

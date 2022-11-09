@@ -26,17 +26,15 @@ jobs:
       with:
         python-version: "${{ matrix.python-version }}"
     - name: Install npstructures dev
-      if: github.ref == 'refs/heads/dev'
+      if: github.ref != 'refs/heads/master'
       run: |
         pip install git+https://github.com/knutdrand/npstructures.git/@dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
-        pip install hypothesis
+        pip install -r requirements_dev.txt
+        pip install matplotlib
         pip install .
-    - name: Test with pytest
+    - name: Run pytest and doctest
       run: |
-        pytest
-        pytest scripts/*_example.py
-        pytest --doctest-modules bionumpy/ --ignore bionumpy/cupy_compatible/
+        ./run_tests

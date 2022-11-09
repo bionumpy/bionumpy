@@ -2,9 +2,8 @@ from npstructures import RaggedView, RaggedArray
 import dataclasses
 import itertools
 import numpy as np
-from .npdataclassstream import streamable
-from .bnpdataclass import bnpdataclass
-from .chromosome_provider import GroupedStream
+from . import streamable, grouped_stream
+from ..bnpdataclass import bnpdataclass
 
 
 def get_changes(array):
@@ -30,9 +29,9 @@ def get_ragged_changes(ragged_array):
 
 def join_groupbys(grouped_generator):
     double_grouped = itertools.groupby(itertools.chain.from_iterable(grouped_generator), lambda x: x[0])
-    return GroupedStream(
-        (key, np.concatenate([g[1] for g in groups]))
-        for key, groups in double_grouped)
+    return grouped_stream(((key, np.concatenate([g[1] for g in groups]))
+                           for key, groups in double_grouped),
+                          grouped_generator.attribute_name if hasattr(grouped_generator, "attribute_name") else None)
 
 
 def key_func(x):
@@ -100,11 +99,12 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
     else:
         keys = data
     if (keys.shape.lengths[-1] == keys.shape.lengths[0]) and np.all(keys[-1] == keys[0]):
-        return GroupedStream((key(keys[start]), data[start:])
-                             for start in [0])
+        return grouped_stream(((key(keys[start]), data[start:]) for start in [0]), column)
+                                       
 
     changes = get_changes(keys)
     changes = np.append(np.insert(changes, 0, 0), len(data))
     assert np.all(np.diff(changes)>0), changes
-    return GroupedStream((key(keys[start]), data[start:end])
-                         for start, end in zip(changes[:-1], changes[1:]))
+    return grouped_stream(((key(keys[start]), data[start:end])
+                           for start, end in zip(changes[:-1], changes[1:])),
+                          column)

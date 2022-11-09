@@ -28,14 +28,13 @@ class Interval:
     chromosome: str
     start: int
     stop: int
-
+        
 
 @bnpdataclass
 class Bed6(Interval):
     name: str
     score: int
     strand: StrandEncoding
-
 
 @bnpdataclass
 class NarrowPeak(Bed6):
