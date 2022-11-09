@@ -133,7 +133,10 @@ class NumpyFileReader:
         #self._remove_initial_comments()
         #self._header_data = self._buffer_type.read_header(self._file_obj)
         while not self._is_finished:
-            yield self.read_chunk(min_chunk_size, max_chunk_size)
+            chunk = self.read_chunk(min_chunk_size, max_chunk_size)
+            if chunk is None:
+                break
+            yield chunk
 
     def close(self):
         self._file_obj.close()

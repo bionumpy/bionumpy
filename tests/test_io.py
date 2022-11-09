@@ -32,7 +32,7 @@ def test_buffer_read(buffer_name):
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
-@pytest.mark.parametrize("min_chunk_size", [5000000])
+@pytest.mark.parametrize("min_chunk_size", [5000000, 50])
 def test_buffer_read_chunks(buffer_name, min_chunk_size):
     _, true_data, buf_type = combos[buffer_name]
     text = buffer_texts[buffer_name]
