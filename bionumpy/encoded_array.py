@@ -74,7 +74,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             assert data.encoding == encoding
             data = data.data
         self.encoding = encoding
-        self.data = np.asarray(data).view(NPSArray)
+        dtype = None if hasattr(data, "dtype") else np.uint8
+        self.data = np.asarray(data, dtype=dtype).view(NPSArray)
         assert isinstance(self.data, np.ndarray)
 
     def __len__(self) -> int:

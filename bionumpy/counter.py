@@ -6,7 +6,7 @@ import dataclasses
 class EncodedCounts:
     alphabet: list
     counts: np.ndarray
-    #     row_names: list = None
+    row_names: list = None
 
     def __str__(self):
         return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts))
@@ -15,8 +15,12 @@ class EncodedCounts:
         return self.counts[..., self.alphabet.index(idx)]
 
     def __add__(self, other):
-        assert self.alphabet==other.alphabet
-        return dataclasses.replace(self, counts=self.counts+other.counts)
+        if isinstance(other, Number):
+            o_counts = other
+        else:
+            assert self.alphabet==other.alphabet
+            o_counts = other.counts
+        return dataclasses.replace(self, counts=self.counts+o_counts)
 
     def __radd__(self, other):
         if isinstance(other, Number):
@@ -26,8 +30,8 @@ class EncodedCounts:
             o_counts = other.counts
         return dataclasses.replace(self, counts=self.counts+o_counts)
 
-    def get_count_for_label(self, letter):
-        return self.counts[..., encoded_counts.alphabet.find(letter)]
+    def get_count_for_label(self, label):
+        return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
 
     @classmethod
     def vstack(cls, counts):

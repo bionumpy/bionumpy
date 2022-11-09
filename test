@@ -1,0 +1,7 @@
+set -e
+
+pytest --cov=bionumpy --cov-report html
+pytest --cov-report html --cov=bionumpy --cov-append scripts/*_example.py
+pytest --cov-report html --cov=bionumpy --cov-append --doctest-modules bionumpy/ --ignore bionumpy/cupy_compatible/
+cd docs_source && make doctest
+#coverage-badge -f -o coverage.svg

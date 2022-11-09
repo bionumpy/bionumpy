@@ -3,8 +3,6 @@ import numpy as np
 
 import pytest
 
-from bionumpy.chromosome_provider import ChromosomeFileStreamProvider, LazyChromosomeDictProvider, FullChromosomeDictProvider
-from npstructures.npdataclasses import npdataclass
 from bionumpy.bnpdataclass import bnpdataclass
 from npstructures.testing import assert_npdataclass_equal
 
@@ -18,15 +16,6 @@ class DummyClass:
         if isinstance(self.chromosome, (str, list)):# VarLenArray):
             self.chromosome = VarLenArray(np.asanyarray([[ord(c) for c in chrom] for chrom in self.chromosome]))
         self.data = np.asanyarray(self.data)
-# 
-#     def __getitem__(self, idx):
-#         return self.__class__(self.chromosome[idx], self.data[idx])
-# 
-#     def __eq__(self, other):
-#         return np.all(self.chromosome == other.chromosome) and np.all(self.data == other.data)
-# '
-#     def __len__(self):
-#         return len(self.chromosome)
 
     def __eq__(self, other):
         return all(np.all(s == o) for s, o in zip(self.shallow_tuple(), other.shallow_tuple()))
@@ -52,6 +41,7 @@ def buffers():
             DummyClass(["chr1", "chr2"], [2, 3]),
             DummyClass(["chr3", "chr4", "chr5"], [4, 5, 6]),
             DummyClass(["\x00chr5", "chr16"], [7, 8])]
+
 
 @pytest.mark.skip("Needs refactor")
 def test_chromosome_stream(buffers):

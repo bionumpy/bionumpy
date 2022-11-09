@@ -29,7 +29,11 @@ class BnpStream:
         return f"self.__class__.__name__({self._next_buffer}, {Ellipsis})"
 
 
-class ArrayStream(BnpStream):
+class ChunkStream(BnpStream):
+    pass
+
+
+class ArrayStream(ChunkStream):
     pass
 
 
@@ -43,6 +47,7 @@ class NpDataclassStream(BnpStream):
     """
     def __init__(self, stream, dataclass=None):
         super().__init__(stream)
+        self.dataclass = dataclass
 
     def __getattr__(self, attribute_name):
         return ArrayStream(getattr(chunk, attribute_name) for chunk in self)

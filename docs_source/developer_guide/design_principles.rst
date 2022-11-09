@@ -1,6 +1,10 @@
-=================
- Developer Guide
-=================
+.. _design_principles:
+
+Design principles and code overview
+--------------------------------------
+
+Overview
+=========
 
 BioNumpy has a quite clear design principle which can aid you in contributing code. The functionality provided by BioNumpy is divided into three parts:
 
