@@ -5,7 +5,7 @@ A key element of using bioNumpy efficiently is being able to write broadcastable
 
 Elementwise broadcasting in numpy
 ---------------------------------
-One of the main functionalities of numpy is to apply elementwise operations to large arrays of data. For functions with more that one parameters (such as adding or multiplying) this requires that the arrays are somewhat of the same shape. Of course, if the arrays have exactly the same shape, the elementwise operations is just applied to corresponding elements of the array::
+One of the main functionalities of numpy is to apply elementwise operations to large arrays of data. For functions with more that one parameters (such as adding or multiplying) this requires that the arrays are somewhat of the same shape. Of course, if the arrays have exactly the same shape, the elementwise operations is just applied to corresponding elements of the array
   
     >>> import numpy as np
     >>> a = [[1, 2, 3], [4, 5, 6]]
@@ -19,6 +19,7 @@ Broadcasting comes into play when one (or both) of the arrays is missing data in
 Vectorwise broadcasting
 -----------------------
 Elementwise broadcasting is quite common to utilize. But one can also write functions that broadcast functions on vectors. An example is the dot product of vectors. The dot product maps two vectors into a scalar by summing the elementwise products.
+
     >>> v = np.array([2, 3, 5])
     >>> w = np.array([3, 5, 7])
     >>> v.dot(w)
