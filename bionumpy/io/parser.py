@@ -79,8 +79,8 @@ class NumpyFileReader:
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
 
-    def read_chunk(self, chunk_size=5000000):
-        chunk = self.__get_buffer(chunk_size)
+    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> np.ndarray:
+        chunk = self.__get_buffer(min_chunk_size, max_chunk_size)
         if chunk is None:
             return None
         if len(self._prepend):
@@ -97,11 +97,11 @@ class NumpyFileReader:
         if chunk is not None and chunk.size:
             return wrapper(buff)
 
-    def read_chunks(self, chunk_size=5000000):
+    def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
         #self._remove_initial_comments()
         #self._header_data = self._buffer_type.read_header(self._file_obj)
         while not self._is_finished:
-            yield self.read_chunk(chunk_size)
+            yield self.read_chunk(min_chunk_size, max_chunk_size)
 
     def close(self):
         self._file_obj.close()
@@ -115,9 +115,9 @@ class NumpyFileReader:
             bytes_read += 1
         return chunk, bytes_read
 
-    def __get_buffer(self, chunk_size):
-        a, bytes_read = self.__read_raw_chunk(chunk_size)
-        self._is_finished = bytes_read < chunk_size
+    def __get_buffer(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
+        a, bytes_read = self.__read_raw_chunk(min_chunk_size, max_chunk_size)
+        self._is_finished = bytes_read < min_chunk_size
         if bytes_read == 0:
             return None
 
@@ -133,8 +133,8 @@ class NumpyFileReader:
         #         bytes_read += 1
         return a[:bytes_read]
 
-    def __read_raw_chunk(self, chunk_size):
-        b = np.frombuffer(self._file_obj.read(chunk_size), dtype="uint8")
+    def __read_raw_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
+        b = np.frombuffer(self._file_obj.read(min_chunk_size), dtype="uint8")
         # assert not np.any(b & np.uint8(128)), "Unicdoe byte detected, not currently supported"
         return b, b.size
 
