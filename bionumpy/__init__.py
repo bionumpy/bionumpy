@@ -7,7 +7,8 @@ __version__ = '0.2.1'
 import npstructures as nps
 
 from .io.files import bnp_open as open
-from .io.files import count_entries, open_indexed
+from .io.files import count_entries
+from .io.indexed_files import open_indexed
 from .io.multiline_buffer import MultiLineFastaBuffer
 from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,

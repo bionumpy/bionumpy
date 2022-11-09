@@ -8,5 +8,6 @@ from bionumpy.io.indexed_fasta import create_index
 3	1200	1836	80	81
 """
 
+
 def test_fasta_index():
     index = create_index("example_data/small_genome.fa")

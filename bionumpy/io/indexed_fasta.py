@@ -1,7 +1,8 @@
 import numpy as np
 from ..encoded_array import EncodedArray
-from .multiline_buffer import FastaIdxBuffer
+from .multiline_buffer import FastaIdxBuffer, FastaIdx
 from .parser import NumpyFileReader
+from .files import bnp_open
 
 
 def read_index(filename):
@@ -11,14 +12,17 @@ def read_index(filename):
             for chromosome, rlen, offset, lenc, lenb in split_lines}
 
 
-
 def create_index(filename):
-    #reader = (filename, buffer_type=MultiLineFastaBuffer)
-    # chunks = reader.read_chunks()
-    #offset = 0
-    # for chunk in chunks:
-    #    print(chunk)
-    pass
+    reader = bnp_open(filename, buffer_type=FastaIdxBuffer)
+    indice_builders = list(reader.read_chunks())
+    offsets = np.cumsum([0]+[idx.byte_size[0] for idx in indice_builders])
+    return np.concatenate([
+        FastaIdx(idx.chromosome,
+                 idx.length,
+                 idx.start+offset,
+                 idx.characters_per_line,
+                 idx.line_length)
+        for idx, offset in zip(indice_builders, offsets)])
 
 
 class IndexedFasta:
@@ -59,7 +63,6 @@ class IndexedFasta:
             data.shape,
         )
         return EncodedArray(((ret - ord("A")) % 32) + ord("A"))
-
 
 to_str = lambda x: "".join(chr(c) for c in x)
 

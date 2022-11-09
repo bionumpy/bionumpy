@@ -23,7 +23,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         ends_with_new_line = False
         for chunk in chunks:
             chunk = EncodedArray(chunk)
-            new_lines = np.flatnonzero(chunk=="\n")
+            new_lines = np.flatnonzero(chunk[:-1] == "\n")
             new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
             if new_entries.size >= 1:
                 return True
@@ -31,8 +31,6 @@ class MultiLineFastaBuffer(MultiLineBuffer):
                 return True
             ends_with_new_line = chunk[-1] == "\n"
         return False
-            
-
 
     def get_data(self):
         self.validate_if_not()
@@ -87,6 +85,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
 
+
 @bnpdataclass
 class FastaIdx:
     chromosome: str
@@ -96,19 +95,35 @@ class FastaIdx:
     line_length: int
 
 
-class FastaIdxBuffer:
-    dataclass = FastaIdx
+@bnpdataclass
+class FastaIdxBuilder(FastaIdx):
+    byte_size: int
+
+
+class FastaIdxBuffer(MultiLineFastaBuffer):
+    dataclass = FastaIdxBuilder
     
     def get_data(self):
-        new_entries = self._data[self._new_lines+1] == self._new_entry_marker
-        line_lengths = np.diff(self._new_lines)
-        lines = RaggedArray(self._data, np.diff(line_lengths, prepend=0))
-        print(lines)
-        
-    @classmethod
-    def from_raw_buffer(cls, chunk, header_data=None):
-        assert header_data is None, header_data
-        chunk = EncodedArray(chunk)
-        assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
-        new_lines = np.flatnonzero(chunk[:-1] == "\n")
-        return cls(chunk[:new_lines[-1]], new_lines[:-1])
+        self.validate_if_not()
+        line_starts = np.insert(self._new_lines + 1, 0, 0)
+        line_ends = np.append(self._new_lines, self._data.size-1)
+        data = self._move_intervals_to_ragged_array(line_starts, line_ends)
+        new_entries = np.insert(self._new_entries+1, 0, 0)
+        n_lines_per_entry = np.diff(np.append(new_entries, self._new_lines.size+1))-1
+        line_offsets = np.insert(np.cumsum(n_lines_per_entry),0, 0)
+        headers = data[new_entries, 1:]
+        mask = np.ones(len(data), dtype=bool)
+        mask[new_entries] = False
+        sequence_lines = data[mask]
+        seq_lens = sequence_lines.shape.ends[line_offsets[1:]-1]-sequence_lines.shape.starts[line_offsets[:-1]]
+        sequences = RaggedArray(sequence_lines.ravel(), seq_lens)
+
+        seq_starts = line_starts[new_entries+1]
+        seq_line_ends = line_ends[new_entries+1]
+        chars_per_line = seq_line_ends-seq_starts
+        return FastaIdxBuilder(headers,
+                               sequences.shape.lengths,
+                               seq_starts,
+                               chars_per_line,
+                               chars_per_line+1,
+                               [self._data.size]*len(headers))
