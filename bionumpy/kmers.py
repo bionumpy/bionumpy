@@ -34,9 +34,6 @@ class KmerEncoding(RollableFunction):
 def fast_hash(sequence, k, encoding=None):
     assert isinstance(sequence, EncodedArray), sequence
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding)
-    sequence = as_encoded_array(sequence, DNAEncoding)
-    if encoding:
-        sequence = encoding.encode(sequence)
 
     bit_array = BitArray.pack(sequence.data, bit_stride=2)
     hashes = bit_array.sliding_window(k)

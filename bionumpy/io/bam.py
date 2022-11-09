@@ -60,6 +60,10 @@ class BamBuffer(FileBuffer):
         return starts
 
     @classmethod
+    def contains_complete_entry(cls, chunks):
+        return True
+
+    @classmethod
     def from_raw_buffer(cls, chunk, header_data):
         chunk = np.asarray(chunk)
         starts = cls._find_starts(chunk)

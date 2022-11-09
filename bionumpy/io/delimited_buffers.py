@@ -31,6 +31,7 @@ class DelimitedBuffer(FileBuffer):
     DELIMITER = "\t"
     COMMENT = "#"
     INCLUDE_HEADER = False
+    n_lines_per_entry = 1
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
         super().__init__(data, new_lines)

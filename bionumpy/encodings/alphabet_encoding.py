@@ -4,7 +4,13 @@ from .base_encoding import Encoding
 
 class AlphabetEncoding(Encoding):
     def __init__(self, alphabet: str):
-        alphabet = [c.upper() for c in alphabet]
+        self._raw_alphabet = [c.upper() for c in alphabet]
+        self._is_initialized = False
+
+    def _initialize(self):
+        if self._is_initialized:
+            return
+        alphabet = self._raw_alphabet
         self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8)
         lower_alphabet = (self._alphabet + ord("a")-ord("A"))
         self._alphabet = self._alphabet
@@ -14,8 +20,10 @@ class AlphabetEncoding(Encoding):
         self._mask = np.zeros(256, dtype=bool)
         self._mask[self._alphabet] = True
         self._mask[lower_alphabet] = True
+        self._is_initialized = True
 
     def encode(self, byte_array):
+        self._initialize()
         if hasattr(byte_array, "raw"):
             byte_array = byte_array.raw()
         ret = self._lookup[byte_array]
@@ -24,13 +32,16 @@ class AlphabetEncoding(Encoding):
         return ret
 
     def decode(self, encoded):
+        self._initialize()
         return self._alphabet[np.asarray(encoded)]
 
     @property
     def alphabet_size(self):
+        self._initialize()
         return self._alphabet.size
 
     def get_alphabet(self):
+        self._initialize()
         return [chr(c) for c in self._alphabet]
 
     def __str__(self):
@@ -40,6 +51,7 @@ class AlphabetEncoding(Encoding):
         return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
 
     def __eq__(self, other):
+        self._initialize()
         if not isinstance(other, AlphabetEncoding):
             return False
         return np.all(self._alphabet == other._alphabet)

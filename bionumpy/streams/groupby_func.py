@@ -2,8 +2,8 @@ from npstructures import RaggedView, RaggedArray
 import dataclasses
 import itertools
 import numpy as np
-from .streams import streamable, grouped_stream
-from .bnpdataclass import bnpdataclass
+from . import streamable, grouped_stream
+from ..bnpdataclass import bnpdataclass
 
 
 def get_changes(array):

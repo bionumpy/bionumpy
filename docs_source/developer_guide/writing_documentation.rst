@@ -9,13 +9,11 @@ To build and test the documentation locally, run:
 
 .. code-block:: bash
 
-    cd docs_source
-    make html
+    make docs
 
-This will create html files in the `docs_source/_build` directory. Open the index.html file in a web browser to see the build.
+This will create html files in the `docs_source/_build` directory and should open the reuslts in your browser.
 
-
-Note: If you make big changes to the documentation, you will need to clean old html files:
+Alternatively, you can run `make html` inside the docs_source directory to have some more control.
 
 .. code-block:: bash
 
@@ -45,7 +43,7 @@ A thid option is to include code from e.g. the scripts directory directly into t
     .. literalinclude:: /../scripts/your_example.py
 
 
-Check that all code you write passes the tests by running:
+Check that all code you write passes the tests by running this inside the docs_source directory:
 
 .. code-block:: bash
     make doctest
