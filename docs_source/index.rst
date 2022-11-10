@@ -45,7 +45,7 @@ What can you do with BioNumpy?
         Reading and analysing DNA and protein sequences
 
     .. grid-item-card::  Kmers
-        :link: https://example.com
+        :link: topics/kmers.html
 
         Analysing sequence patterns such as kmers, minimzers and motifs
 
