@@ -6,7 +6,7 @@ BioNumPy
         :target: https://pypi.python.org/pypi/bionumpy
 
 .. image:: https://github.com/knutdrand/bionumpy/actions/workflows/python-install-and-test.yml/badge.svg
-        :target: https://github.com/knutdrand/bionumpy/actions/
+        :target: https://github.com/bionumpy/bionumpy/actions/
         :alt: Build and test status
 
 Documentation: `https://uio-bmi.github.io/bionumpy/ <https://uio-bmi.github.io/bionumpy/>`_
