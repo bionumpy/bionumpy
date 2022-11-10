@@ -1,7 +1,7 @@
 import numpy as np
 from .rollable import RollableFunction
 from .encoded_array import as_encoded_array, EncodedArray
-from .encodings import DNAEncoding
+from .encodings import DNAEncoding, AlphabetEncoding
 
 
 class PositionWeightMatrix(RollableFunction):
@@ -21,3 +21,7 @@ class PositionWeightMatrix(RollableFunction):
 def pwm_from_counts(count_matrix):
     with_pseudo = count_matrix+1
     return np.log(with_pseudo/with_pseudo.sum(axis=0, keepdims=True))
+
+def get_motif_scores(sequence, motif):
+    pwm = PositionWeightMatrix(pwm_from_counts(motif.matrix), AlphabetEncoding(motif.alphabet))
+    return pwm.rolling_window(sequence)

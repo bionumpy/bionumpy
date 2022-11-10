@@ -228,12 +228,15 @@ class DelimitedBuffer(FileBuffer):
         funcs = {**funcs, **{encoding: lambda x: encoding.decode(x) for encoding in all_encodings}}
         columns = [funcs[field.type](getattr(data, field.name))
                    for field in dataclasses.fields(data)]
-        lengths = np.concatenate([(column.shape.lengths + 1)[:, np.newaxis]
+        lengths = np.concatenate([((column.shape.lengths if isinstance(column, RaggedArray) else np.array([1]*len(column))) + 1)[:, np.newaxis] #Hacking here to accept EncodedArray
+                                  
                                   for column in columns], axis=-1).ravel()
         lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
                                    lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):
+            if (not isinstance(column, RaggedArray)) and len(column.shape)==1:
+                column = EncodedRaggedArray.from_numpy_array(column[:, np.newaxis]) # AND HERE
             lines[i::n_columns, :-1] = column
         lines[:, -1] = "\t"
         lines[(n_columns - 1)::n_columns, -1] = "\n"

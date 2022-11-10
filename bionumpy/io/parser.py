@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import numpy as np
 from npstructures import npdataclass
-from ..streams import NpDataclassStream
+from ..streams import BnpStream
 from ..encoded_array import EncodedArray
 from ..streams.grouped import grouped_stream
 
@@ -212,7 +212,7 @@ class NpBufferedWriter:
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 
-        if isinstance(data, NpDataclassStream):
+        if isinstance(data, BnpStream):
             for buf in data:
                 self.write(buf)
             return

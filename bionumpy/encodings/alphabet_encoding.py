@@ -54,6 +54,7 @@ class AlphabetEncoding(Encoding):
         self._initialize()
         if not isinstance(other, AlphabetEncoding):
             return False
+        other._initialize()
         return np.all(self._alphabet == other._alphabet)
 
     def __hash__(self):

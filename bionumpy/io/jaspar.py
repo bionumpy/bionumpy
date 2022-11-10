@@ -15,9 +15,3 @@ def read_jaspar_matrix(filename):
     alphabet = "".join(alphabet)
     matrix = np.array(matrix, dtype="float")
     return alphabet, matrix
-
-
-if __name__ == "__main__":
-    filename = "/home/knut/Downloads/MA0001.1.jaspar"
-    alphabet, matrix = read_jaspar_matrix(filename)
-    pwm = get_pwm

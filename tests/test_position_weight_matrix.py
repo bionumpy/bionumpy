@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 import bionumpy as bnp
-from bionumpy.jaspar import read_jaspar_matrix
+from bionumpy.io.jaspar import read_jaspar_matrix
 from bionumpy.position_weight_matrix import PositionWeightMatrix, pwm_from_counts
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 

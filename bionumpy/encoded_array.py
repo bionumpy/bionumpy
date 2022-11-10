@@ -127,7 +127,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         """
         text = self.encoding.decode(self.data)
         if len(self.data.shape) == 0:
-            return chr(int(self.data))
+            return chr(int(text))
         if len(self.data.shape) == 1:
             return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
         a = np.array([str(self.__class__(seq, self.encoding)) for seq in self.data.reshape(-1, self.data.shape[-1])]).reshape(self.data.shape[:-1])[:20]
