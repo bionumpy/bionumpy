@@ -6,7 +6,7 @@ from bionumpy.io.file_buffers import TwoLineFastaBuffer
 
 bnp.set_backend(cp)
 
-fasta_filename = "../../data/fa/testreads20m.fa"
+fasta_filename = "example_data/small.fa"
 chunk_size = 5000000
 
 chunk_generator = bnp.open(fasta_filename, buffer_type=TwoLineFastaBuffer).read_chunks(min_chunk_size=chunk_size)
