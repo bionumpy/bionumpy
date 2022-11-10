@@ -78,13 +78,15 @@ def test_int_lists_to_strings(int_lists):
 
 
 @given(st.lists(floats().filter(lambda x: abs(x)>10**(-15)), min_size=1))
+@settings(max_examples=500)
+@example(floats=[0.015624999592526556])
 def test_float_to_str(floats):
     floats = np.array(floats)
     ra = float_to_strings(floats)
     true = floats
     result = np.array([float(row.to_string()) for row in ra])
-    print(true, result)
     tf, tm = np.frexp(true)
     f, m = np.frexp(result)
-    tf *= 2**(tm-m)
+    tf = np.where(tm > m, tf*2**np.maximum(tm-m, 0), tf)
+    f = np.where(m > tm, f*2**np.maximum(m-tm, 0), f)
     assert_array_almost_equal(f, tf)
