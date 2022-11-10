@@ -2,7 +2,7 @@ BioNumPy
 ======================================
 
 BioNumPy is a Python library for easy and efficient representation and analysis of biological data.
-Since BioNumPy builds on the interface of NumPy, people already used to NumPy or array programming should find BioNumPy very easy to get started.
+Since BioNumPy builds on the interface of NumPy, people already used to NumPy or array programming should find BioNumPy very easy to get started with.
 
 ..
     With BioNumPy, our goal is that everyone should be able to write simple, clean code that scales well to large biological data sets.
@@ -39,37 +39,55 @@ What can you do with BioNumpy?
 
 .. grid:: 3
 
-    .. grid-item-card:: Sequence analysis
-        :link: https://example.com
+    .. grid-item-card:: :material-regular:`library_books;3em`
+        :text-align: center
+        :link: topics/sequence_analysis.html
+
+        **Sequence analysis**
 
         Reading and analysing DNA and protein sequences
 
-    .. grid-item-card::  Kmers
+    .. grid-item-card::  :material-regular:`location_searching;3em`
+        :text-align: center
         :link: topics/kmers.html
+
+        **Kmers**
 
         Analysing sequence patterns such as kmers, minimzers and motifs
 
-    .. grid-item-card::  Genome arithmetics
-        :link: https://example.com
+    .. grid-item-card::  :material-regular:`calculate;3em`
+        :text-align: center
+        :link: topics/genome_arithmetics.html
+
+        **Genome arithmetics**
 
         Analysing genomic tracks (BED-files, VCFs, GFFs, etc)
 
 
 .. grid:: 3
 
-    .. grid-item-card::  Multi-omics
-        :link: https://example.com
+    .. grid-item-card:: :material-regular:`hub;3em`
+        :text-align: center
+        :link: topics/multiomics.html
+
+        **Multiomics**
 
         Combining data-sets from multiple sources/domains
 
-    .. grid-item-card::  GPU-acceleration
-        :link: https://example.com
+    .. grid-item-card:: :material-regular:`rocket_launch;3em`
+        :text-align: center
+        :link: topics/gpu.html
+
+        **GPU-acceleration**
 
         Ultra-fast sequence analysis using GPU
 
 
-    .. grid-item-card::  Build on BioNumpy
-        :link: https://example.com
+    .. grid-item-card::  :material-regular:`construction;3em`
+        :text-align: center
+        :link: topics/extending_bionumpy.html
+
+        **Build on BioNumpy**
 
         Combine core functionality to support your use-case
 
