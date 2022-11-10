@@ -152,6 +152,10 @@ def test_read_gtf():
 
 @pytest.mark.parametrize("file_name", glob.glob("example_data/*"))
 def test_read_example_data(file_name):
+    if "broken" in file_name:
+        # broken data should not pass tests
+        return
+
     if file_name.endswith(".sam"):
         return
 

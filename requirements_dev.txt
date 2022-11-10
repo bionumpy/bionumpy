@@ -14,3 +14,4 @@ hypothesis
 build
 pytest-cov
 coverage-badge
+sphinx-design

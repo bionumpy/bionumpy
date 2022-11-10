@@ -142,7 +142,7 @@ class NumpyFileReader:
         self._file_obj.close()
 
     def __add_newline_to_end(self, chunk, bytes_read):
-        if chunk[bytes_read - 1] != "\n":
+        if chunk[bytes_read - 1] != ord("\n"):
             chunk = np.append(chunk, np.uint8(ord("\n")))
             bytes_read += 1
         if hasattr(self._buffer_type, "_new_entry_marker"):
