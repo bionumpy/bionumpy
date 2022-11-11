@@ -1,6 +1,6 @@
 import pytest
 
-from bionumpy.streams.multistream import MultiStream, SequenceSizes, StreamError
+from bionumpy.streams.multistream import MultiStream, SequenceSizes, StreamError, SequenceInfo
 from bionumpy.streams import BnpStream, NpDataclassStream
 from bionumpy.bnpdataclass import bnpdataclass
 
@@ -28,12 +28,12 @@ def sequence_sizes():
 
 def test_multistream(stream, indexed, sequence_sizes):
     multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
-    output = list(zip(multistream.lengths,
+    output = list(zip(multistream.infos,
                       multistream.names,
                       multistream.values))
-    true = [(20, SimpleClass(["chr1"]*3), 10),
-            (30, SimpleClass(["chr2"]*2), 20),
-            (40, SimpleClass(["chr3"]*1), 30)]
+    true = [(SequenceInfo("chr1", 20), SimpleClass(["chr1"]*3), 10),
+            (SequenceInfo("chr2", 30), SimpleClass(["chr2"]*2), 20),
+            (SequenceInfo("chr3", 40), SimpleClass(["chr3"]*1), 30)]
     assert len(output)==len(true)
     for o, t in zip(output, true):
         assert o == t
@@ -43,12 +43,12 @@ def test_multistream_wtih_repr(stream, indexed, sequence_sizes):
     multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
     assert "SimpleClass" in repr(multistream.names)
     assert "chr1" in repr(multistream.values)
-    output = list(zip(multistream.lengths,
+    output = list(zip(multistream.infos,
                       multistream.names,
                       multistream.values))
-    true = [(20, SimpleClass(["chr1"]*3), 10),
-            (30, SimpleClass(["chr2"]*2), 20),
-            (40, SimpleClass(["chr3"]*1), 30)]
+    true = [(SequenceInfo("chr1", 20), SimpleClass(["chr1"]*3), 10),
+            (SequenceInfo("chr2", 30), SimpleClass(["chr2"]*2), 20),
+            (SequenceInfo("chr3", 40), SimpleClass(["chr3"]*1), 30)]
     assert len(output)==len(true)
     for o, t in zip(output, true):
         assert o == t
@@ -59,7 +59,7 @@ def test_raises_on_missing_seq_len(stream, indexed, sequence_sizes):
     print(sequence_sizes)
     multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
     with pytest.raises(StreamError):
-        print(list(zip(multistream.lengths,
+        print(list(zip(multistream.infos,
                        multistream.names,
                        multistream.values)))
 
@@ -68,7 +68,7 @@ def _test_raises_on_missing_stream(stream, indexed, sequence_sizes):
     stream = NpDataclassStream((elem[:-1] for elem in stream), dataclass=SimpleClass)
     multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
     with pytest.raises(StreamError):
-        print(list(zip(multistream.lengths,
+        print(list(zip(multistream.infos,
                        multistream.names,
                        multistream.values)))
 

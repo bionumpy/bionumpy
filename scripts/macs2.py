@@ -13,6 +13,7 @@ import bionumpy as bnp
 
 logging.basicConfig(level=logging.INFO)
 
+
 @dataclasses.dataclass
 class Params:
     fragment_length: int = 150
@@ -59,11 +60,11 @@ def logsf(count, mu):
     return np.log(pdtrc(count, mu))
 
 
-def get_p_values(intervals, chrom_size, fragment_length, read_rate):
+def get_p_values(intervals, chrom_info, fragment_length, read_rate):
     intervals.strand = intervals.strand.ravel()
-    fragment_pileup = get_fragment_pileup(intervals, fragment_length, chrom_size)
+    fragment_pileup = get_fragment_pileup(intervals, fragment_length, chrom_info.length)
     print(bnp.bedgraph.from_runlength_array(str(intervals.chromosome[0]), fragment_pileup))
-    control = fragment_length*get_control_pileup(intervals, chrom_size, [1000, 10000], read_rate)
+    control = fragment_length*get_control_pileup(intervals, chrom_info.length, [1000, 10000], read_rate)
     p_values = logsf(fragment_pileup, control)
     return p_values
 
@@ -77,10 +78,10 @@ def call_peaks(p_values, p_value_cufoff, min_length, max_gap=30):
 
 
 @bnp.streamable()
-def macs2(intervals, chrom_size, fragment_length, read_rate, p_value_cutoff, min_length, max_gap=30):
+def macs2(intervals, chrom_info, fragment_length, read_rate, p_value_cutoff, min_length, max_gap=30):
     if not len(intervals):
         return Interval.empty()
-    p_values = get_p_values(intervals, chrom_size,
+    p_values = get_p_values(intervals, chrom_info.length,
                             fragment_length, read_rate)
     peaks = call_peaks(p_values, p_value_cutoff, fragment_length)
     return Interval(intervals.chromosome[:len(peaks)], peaks.start, peaks.stop)
@@ -94,7 +95,7 @@ def main(filename, genome_file, fragment_length=150, p_value_cutoff=0.001):
     multistream = bnp.MultiStream(chrom_sizes, intervals=intervals)
     n_reads = 184961616  # bnp.count_entries(filename)
     read_rate = n_reads/genome_size
-    return macs2(multistream.intervals, multistream.lengths, fragment_length,
+    return macs2(multistream.intervals, multistream.infos, fragment_length,
                  read_rate, p_value_cutoff, fragment_length)
 
 

@@ -2,6 +2,13 @@ from .stream import BnpStream
 from . import groupby
 import logging
 logger = logging.getLogger(__name__)
+from dataclasses import dataclass
+
+
+@dataclass
+class SequenceInfo:
+    name: str
+    length: int
 
 
 def human_key_func(chrom_name):
@@ -160,7 +167,7 @@ class MultiStream:
         FIXME: Add docs.
         """
         self._streams = {}
-        self.lengths = BnpStream(sequence_sizes.values())
+        self.infos = BnpStream(SequenceInfo(*item) for item in  sequence_sizes.items())
         for keyword, value in kwargs.items():
             if isinstance(value, BnpStream):
                 self.__dict__[keyword] = SynchedStream(value, list(sequence_sizes.keys()))
