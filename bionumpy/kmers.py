@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class KmerEncoder(RollableFunction):
-
     def __init__(self, k, alphabet_encoding):
         self.window_size = k
         self._k = k
@@ -32,7 +31,34 @@ class KmerEncoder(RollableFunction):
         return EncodedArray((np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(n, self._k)), self._encoding)
 
 
-def get_kmers(sequence, k):
+def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
+    """
+    Get kmers for sequences.
+    Sequences should be encoded with an AlphabetEncoding (e.g. DNAEncoding).
+
+    Parameters
+    ----------
+    sequence : EncodedRaggedArray
+        Sequences to get kmers from
+    k : int
+        The kmer size (1-31)
+
+    Returns
+    -------
+    EncodedRaggedArray
+        Kmers from the sequences.
+
+    Examples
+    --------
+    >>> import bionumpy as bnp
+    >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    >>> bnp.kmers.get_kmers(sequences, 3)
+    encoded_ragged_array([[ACT, CTG],
+                          [AAA],
+                          [TTG, TGG, GGC]], 3merEncoding(AlphabetEncoding('ACGT')))
+    """
+
+    assert 0 < k < 32, "k must be larger than 0 and smaller than 32"
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
         "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding"
 

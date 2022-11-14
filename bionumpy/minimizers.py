@@ -1,4 +1,4 @@
-from . import EncodedArray
+from . import EncodedArray, EncodedRaggedArray
 from .kmers import KmerEncoder, get_kmers
 from .rollable import RollableFunction
 from .encodings import DNAEncoding, AlphabetEncoding
@@ -17,9 +17,37 @@ class Minimizers(RollableFunction):
         return EncodedArray(kmer_hashes.raw().min(axis=-1), kmer_hashes.encoding)
 
 
-def get_minimizers(sequence, k, window_size):
+def get_minimizers(sequence: EncodedRaggedArray, k: int, window_size: int) -> EncodedRaggedArray:
+    """
+    Get minimizers for sequences.
+    Sequences should be encoded with an AlphabetEncoding (e.g. DNAEncoding).
+
+    Parameters
+    ----------
+    sequence : EncodedRaggedArray
+        Sequences to get minimizers from
+    k : int
+        The kmer size
+    window_size : int
+        The window size
+
+    Returns
+    -------
+    EncodedRaggedArray
+        Minimizers from the sequences.
+
+    Examples
+    --------
+    >>> import bionumpy as bnp
+    >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    >>> bnp.minimizers.get_minimizers(sequences, 2, 4)
+    encoded_ragged_array([[AC],
+                          [],
+                          [GG, GC]], 2merEncoding(AlphabetEncoding('ACGT')))
+    """
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
         "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding"
+    assert k <= window_size, "kmer size must be smaller than window size"
 
     result = Minimizers(window_size-k+1, KmerEncoder(k, sequence.encoding)).rolling_window(sequence)
     #KmerEncoder(k, sequence.encoding).rolling_window(sequence)

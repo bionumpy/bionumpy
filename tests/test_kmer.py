@@ -61,3 +61,12 @@ def test_kmer_encoding():
     assert encoding.to_string(1) == "AAAAC"
     assert encoding.to_string(2) == "AAAAG"
     assert encoding.to_string(4) == "AAACA"
+
+
+def test_kmer_encoding_repr_and_string():
+    sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    kmers = bnp.kmers.get_kmers(sequences, 3)
+    print(str(kmers[0]))
+    print(repr(kmers[0]))
+    print(repr(kmers))
+    print(str(kmers))

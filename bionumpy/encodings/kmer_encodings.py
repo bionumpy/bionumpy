@@ -23,15 +23,14 @@ class KmerEncoding(Encoding):
         kmer = "".join(chr(b) for b in self._alphabet_encoding.decode(chars))
         return kmer
 
-
     def get_labels(self):
         return [""]
 
     def __str__(self):
-        return "Kmerencoding(alphabet_encoding: " + str(self._alphabet_encoding) + ", " + str(self._k) + ")"
+        return f"{self._k}merEncoding({self._alphabet_encoding})"
 
     def __repr__(self):
-        return self.__str__()
+        return f"KmerEncoding({self._alphabet_encoding}, {self._k})"
 
     def __eq__(self, other):
         if not isinstance(other, KmerEncoding):
