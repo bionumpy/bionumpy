@@ -1,8 +1,8 @@
 import numpy as np
-from .base_encoding import Encoding
+from .base_encoding import Encoding, OneToOneEncoding
 
 
-class AlphabetEncoding(Encoding):
+class AlphabetEncoding(OneToOneEncoding):
     def __init__(self, alphabet: str):
         self._raw_alphabet = [c.upper() for c in alphabet]
         self._is_initialized = False

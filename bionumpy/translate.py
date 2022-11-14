@@ -2,7 +2,7 @@ import numpy as np
 from npstructures import RaggedArray
 from .streams import streamable
 from .encodings import BaseEncoding, AlphabetEncoding
-from .kmers import KmerEncoding
+from .kmers import KmerEncoder
 from .encoded_array import as_encoded_array, EncodedArray
 from .util import apply_to_npdataclass
 
@@ -14,7 +14,7 @@ class DNAToProtein:
     _lookup = np.array([ord(c) for c in amino_acids], dtype=np.uint8)
 
     def __getitem__(self, key):
-        return self._lookup[key]
+        return self._lookup[key.raw()]
 
 
 class WindowFunction:
@@ -41,7 +41,7 @@ class Translate(WindowFunction):
         e = sequence.encoding
         sequence = sequence[..., ::-1]
         sequence.encoding = e
-        kmer = KmerEncoding(self.window_size,  alphabet_encoding=self._encoding)(sequence)
+        kmer = KmerEncoder(self.window_size, alphabet_encoding=self._encoding)(sequence)
         return self._table[kmer]
 
 

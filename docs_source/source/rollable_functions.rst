@@ -43,5 +43,5 @@ However we can use the `rolling_window` method to match every subsequence of len
 
 For examples of rollable function implementations see:
 * `Minimizers`
-* `KmerEncoding`
+* `KmerEncoder`
 * `PositionWeightMatrix`

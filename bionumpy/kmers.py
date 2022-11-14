@@ -1,15 +1,18 @@
 import numpy as np
+
+from .encodings.kmer_encodings import KmerEncoding
 from .rollable import RollableFunction
 from .encodings import DNAEncoding
 from .encodings.alphabet_encoding import AlphabetEncoding
-from .encoded_array import EncodedArray, as_encoded_array
+from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from npstructures.bitarray import BitArray
 from .util import convolution, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
 
 
-class KmerEncoding(RollableFunction):
+
+class KmerEncoder(RollableFunction):
 
     def __init__(self, k, alphabet_encoding):
         self.window_size = k
@@ -20,23 +23,35 @@ class KmerEncoding(RollableFunction):
 
     def __call__(self, sequence: EncodedArray) -> int:
         sequence = as_encoded_array(sequence, target_encoding=self._encoding)
-        return sequence.data.dot(self._convolution)
+        return EncodedArray(sequence.data.dot(self._convolution), KmerEncoding(self._encoding, self._k))
 
     def inverse(self, kmer_hash: int) -> EncodedArray:
         return EncodedArray(((kmer_hash[:, np.newaxis] // self._convolution) % self._alphabet_size), self._encoding)
-        # s.encoding=self._encoding
 
     def sample_domain(self, n):
         return EncodedArray((np.random.randint(0, self._alphabet_size, size=self._k * n).reshape(n, self._k)), self._encoding)
 
 
+def get_kmers(sequence, k):
+    assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
+        "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding"
+
+    result = KmerEncoder(k, sequence.encoding).rolling_window(sequence)
+    return result
+
+
 @convolution
-def fast_hash(sequence, k, encoding=None):
+def fast_hash(sequence, k):
+    """
+    A faster veresion of get_kmers. Works only for data already encoded with
+    an AlphabetEncoding.
+    """
     assert isinstance(sequence, EncodedArray), sequence
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding)
 
     bit_array = BitArray.pack(sequence.data, bit_stride=2)
     hashes = bit_array.sliding_window(k)
-    return hashes
+    output_encoding = KmerEncoding(sequence.encoding, k)
+    return EncodedArray(hashes, output_encoding)
 
 

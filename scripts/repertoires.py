@@ -42,7 +42,7 @@ def get_kmers(ra, k):
     encoded = RaggedArray(bionumpy.encodings.AminoAcidEncoding.from_bytes(
         ra.ravel()), ra.shape)
     kmers = np.lib.stride_tricks.sliding_window_view(encoded.ravel(), k)
-    hashes = bionumpy.kmers.KmerEncoding(k, 20).from_bytes(kmers)
+    hashes = bionumpy.kmers.KmerEncoder(k, 20).from_bytes(kmers)
     ra = RaggedArray(hashes, encoded.shape)
     return ra[:, :-(k-1)]
 

@@ -5,19 +5,19 @@ import pytest
 
 
 @dataclasses.dataclass
-class TestClass:
+class DummyClass:
     pos: int
 
 
 @pytest.fixture
 def test_stream():
-    return NpDataclassStream(TestClass(word) for word in ["hei", "pa", "deg"])
+    return NpDataclassStream(DummyClass(word) for word in ["hei", "pa", "deg"])
 
 
 def test_str(test_stream):
     s = str(test_stream)
-    assert s.endswith("TestClass(pos='hei')")
-    assert "TestClass" in s
+    assert s.endswith("DummyClass(pos='hei')")
+    assert "DummyClass" in s
 
 
 def test_quantile():
