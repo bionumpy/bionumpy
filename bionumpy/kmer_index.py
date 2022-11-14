@@ -6,12 +6,35 @@ from collections import defaultdict
 
 class KmerIndex:
     def __init__(self, k, lookup, sequences_encoding):
+        """
+
+        """
         self._k = k
         self._lookup = lookup
         self._sequences_encoding = sequences_encoding
 
+    def __repr__(self):
+        return f"{self._k}-merIndex of sequences with {self._sequences_encoding}"
+
+    @property
+    def k(self):
+        return self._k
+
     @classmethod
     def create_index(cls, sequences: EncodedRaggedArray, k: int) -> "KmerIndex":
+        """
+        Create a k-mer index of sequences with a given k
+
+        Parameters
+        ----------
+        sequences: EncodedRaggedArray
+        k: int
+
+        Returns
+        -------
+        KmerIndex
+
+        """
         func = KmerEncoder(k=k, alphabet_encoding=sequences.encoding).rolling_window
         kmers = func(sequences).raw()
         unique_kmers = np.unique(kmers.ravel())
@@ -37,6 +60,9 @@ class KmerLookup:
     def __init__(self, kmer_index: KmerIndex, sequences: EncodedRaggedArray):
         self._kmer_index = kmer_index
         self._sequences = sequences
+
+    def __repr__(self):
+        return f"Lookup on {self._kmer_index.k}-merIndex of {len(self._sequences)} sequences"
 
     @classmethod
     def create_lookup(cls, sequences: EncodedRaggedArray, k: int) -> "KmerLookup":
