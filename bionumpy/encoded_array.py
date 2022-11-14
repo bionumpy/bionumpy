@@ -88,7 +88,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return len(self.data)
 
     def raw(self) -> np.ndarray:
-        return self.data
+        return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
         return "".join([chr(c) for c in self.encoding.decode(self.data)])
