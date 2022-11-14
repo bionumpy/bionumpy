@@ -165,6 +165,9 @@ def test_read_example_data(file_name):
     if file_name.endswith(".jaspar"):
         return
 
+    if file_name.endswith(".tsv"):
+        return
+
     file = bnp.open(file_name)
     for chunk in file.read_chunks():
         continue
