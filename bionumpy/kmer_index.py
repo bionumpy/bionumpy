@@ -1,5 +1,5 @@
 from . import EncodedRaggedArray
-from .kmers import KmerEncoding
+from .kmers import KmerEncoder
 import numpy as np
 from collections import defaultdict
 
@@ -35,12 +35,12 @@ class KmerIndex:
         KmerIndex
 
         """
-        func = KmerEncoding(k=k, alphabet_encoding=sequences.encoding).rolling_window
-        kmers = func(sequences)
+        func = KmerEncoder(k=k, alphabet_encoding=sequences.encoding).rolling_window
+        kmers = func(sequences).raw()
         unique_kmers = np.unique(kmers.ravel())
         lookup = defaultdict(list)
         for kmer in unique_kmers:
-            lookup[kmer] = cls._get_index_for_kmer(kmers, kmer)
+            lookup[int(kmer)] = cls._get_index_for_kmer(kmers, kmer)
         return cls(k, lookup, sequences.encoding)
 
     @classmethod
@@ -50,10 +50,10 @@ class KmerIndex:
     def get_kmer_indices(self, kmer):
         if isinstance(kmer, str):
             assert len(kmer) == self._k
-            encoded_kmer = KmerEncoding(self._k, self._sequences_encoding)(kmer)
-            return self._lookup[encoded_kmer]
+            encoded_kmer = KmerEncoder(self._k, self._sequences_encoding)(kmer).raw()
+            return self._lookup[int(encoded_kmer)]
         else:
-            return self._lookup[kmer]
+            return self._lookup[int(kmer)]
 
 
 class KmerLookup:

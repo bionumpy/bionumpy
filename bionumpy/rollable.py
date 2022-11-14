@@ -1,5 +1,5 @@
 import numpy as np
-from .encoded_array import EncodedArray, as_encoded_array
+from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from .util import as_strided
 from npstructures import RaggedArray
 
@@ -29,7 +29,7 @@ class RollableFunction:
     def rolling_window(self, _sequence: RaggedArray, window_size: int = None, mode="valid"):
         """Applies the function `self.__call__` to all subsequences in _sequence
 
-        Uses sliding_window_view to apply `self.__call__` to all subsequences of length
+        Uses sliding_window_Rollview to apply `self.__call__` to all subsequences of length
         `self.window_size` or `window_size` in `_sequence`
 
 
@@ -58,7 +58,10 @@ class RollableFunction:
                                                       writeable=False)
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
-            out = RaggedArray(convoluted, shape)
+            if isinstance(convoluted, EncodedArray):
+                out = EncodedRaggedArray(convoluted, shape)
+            else:
+                out = RaggedArray(convoluted, shape)
         elif isinstance(_sequence, (np.ndarray, EncodedArray)):
             out = as_strided(convoluted, shape)
         if mode == "valid":

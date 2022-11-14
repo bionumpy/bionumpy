@@ -15,7 +15,7 @@ from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from .kmers import KmerEncoding
+from .kmers import KmerEncoder
 from .minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
@@ -28,7 +28,7 @@ GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
 __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
-           "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
+           "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",

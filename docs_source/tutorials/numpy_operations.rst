@@ -6,7 +6,6 @@ This is just some short examples to show how numpy concepts like indexing, broad
 .. code-block:: python
 
     import bionumpy as bnp
-    from bionumpy.groupby import groupby
     import numpy as np
     import matplotlib.pyplot as plt
     

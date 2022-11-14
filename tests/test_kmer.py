@@ -1,27 +1,63 @@
-from bionumpy.kmers import KmerEncoding, fast_hash
+import pytest
+from bionumpy.kmers import KmerEncoder, fast_hash
 import numpy as np
 from npstructures import RaggedShape
 from bionumpy import DNAEncoding, EncodedRaggedArray, EncodedArray, as_encoded_array
+import bionumpy as bnp
 
 
 def test_kmer_encoding():
-    encoding = KmerEncoding(3, DNAEncoding)
+    encoding = KmerEncoder(3, DNAEncoding)
     kmers = encoding.sample_domain(100)
     encoded = encoding(kmers)
     decoded = encoding.inverse(encoded)
     np.testing.assert_equal(np.asarray(kmers), np.asarray(decoded))
 
 
-def test_fast_hash():
+@pytest.mark.parametrize("sequences", [
+    "ACTG",
+    "ACACATCGACGAgactagct",
+    "AacACtggatcggacTTATCTGACG",
+    "G"
+])
+def test_fast_hash_equals_get_kmers(sequences):
     kmers = fast_hash(as_encoded_array("cgtt", DNAEncoding), 3)
-    encoding = KmerEncoding(3, DNAEncoding)
+    encoding = KmerEncoder(3, DNAEncoding)
     np.testing.assert_array_equal(kmers, encoding.rolling_window("cgtt"))
 
 
 def test_rolling_hash():
     lengths = np.arange(3, 10)
-    encoding = KmerEncoding(3, DNAEncoding)
+    encoding = KmerEncoder(3, DNAEncoding)
     kmers = EncodedArray(np.arange(lengths.sum()) % 4, DNAEncoding)
     ragged = EncodedRaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)
     assert encoded.shape == RaggedShape(lengths-3+1)
+
+
+def test_get_kmers():
+    sequence = bnp.as_encoded_array(
+        ["ACTG", "CAAAAA", "TTT"], bnp.DNAEncoding
+    )
+    correct = [
+        ["ACT", "CTG"],
+        ["CAA", "AAA", "AAA", "AAA"],
+        ["TTT"]
+    ]
+    kmers = bnp.kmers.get_kmers(sequence, 3)
+    decoded_kmers = [
+        [str(k) for k in read_kmers] for read_kmers in kmers
+    ]
+
+    print(decoded_kmers == correct)
+
+
+
+@pytest.mark.skip("Not correct")
+def test_kmer_encoding():
+    encoding = bnp.encodings.kmer_encodings.KmerEncoding(
+        bnp.encodings.DNAEncoding, k=5
+    )
+    assert encoding.to_string(1) == "AAAAC"
+    assert encoding.to_string(2) == "AAAAG"
+    assert encoding.to_string(4) == "AAACA"

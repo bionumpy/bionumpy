@@ -1,7 +1,7 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
-from .encodings.base_encoding import BaseEncoding
+from .encodings.base_encoding import BaseEncoding, OneToOneEncoding
 from .encodings import Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
@@ -46,8 +46,10 @@ class EncodedRaggedArray(RaggedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
         return ret
 
+
 def get_NPSArray(array):
     return array.view(NPSArray)
+
 
 class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     """ 
@@ -86,7 +88,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return len(self.data)
 
     def raw(self) -> np.ndarray:
-        return self.data
+        return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
         return "".join([chr(c) for c in self.encoding.decode(self.data)])
@@ -125,13 +127,34 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         str
 
         """
-        text = self.encoding.decode(self.data)
-        if len(self.data.shape) == 0:
-            return chr(int(text))
-        if len(self.data.shape) == 1:
-            return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
-        a = np.array([str(self.__class__(seq, self.encoding)) for seq in self.data.reshape(-1, self.data.shape[-1])]).reshape(self.data.shape[:-1])[:20]
-        return str(a)
+        if not is_subclass_or_instance(self.encoding, OneToOneEncoding):
+            # not possible to decode, get string
+            data_to_show = np.atleast_1d(self.data)
+            n_dims = len(data_to_show.shape)
+            assert n_dims == 1 or n_dims == 2, "Unsupported number of dimensions for data"
+
+            if n_dims == 1:
+                data_to_show = data_to_show[0:20]
+            elif n_dims == 2:
+                # show first columns and rows
+                raise NotImplemented("Str for n_dims=2 not implemented")
+                # data_to_show = None
+            text = ",".join(self.encoding.to_string(e) for e in data_to_show)
+            return text
+
+        else:
+            text = self.encoding.decode(self.data)
+
+            if len(self.data.shape) == 0:
+                return chr(int(text))
+            if len(self.data.shape) == 1:
+                return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
+
+            a = np.array([str(self.__class__(seq, self.encoding))
+                          for seq in self.data.reshape(-1, self.data.shape[-1])]
+                         ).reshape(self.data.shape[:-1])[:20]
+            return str(a)
+
 
     def __getitem__(self, idx) -> "EncodedArray":
         """Delegate the indexing to the underlying numpy array
