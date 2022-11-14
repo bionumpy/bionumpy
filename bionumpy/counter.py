@@ -44,8 +44,10 @@ class EncodedCounts:
         return ret
             
 
-
 def count_encoded(values, weights=None, axis=-1):
+    if axis is None:
+        values = values.ravel()
+
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:

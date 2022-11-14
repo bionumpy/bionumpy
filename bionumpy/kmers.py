@@ -69,11 +69,15 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
 @convolution
 def fast_hash(sequence, k):
     """
-    A faster veresion of get_kmers. Works only for data already encoded with
-    an AlphabetEncoding.
+    A faster version alternative to get_kmers that can be used with sequences encoded
+     with an AlphabetEncoding with alphabet size **exactly equal to 4**.
+
+    See get_kmers for documentation on use.
     """
     assert isinstance(sequence, EncodedArray), sequence
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding)
+    assert sequence.encoding.alphabet_size == 4, \
+        "Only supported for sequence encoded with an AlphabetEncoding with alphabetsize 4"
 
     bit_array = BitArray.pack(sequence.data, bit_stride=2)
     hashes = bit_array.sliding_window(k)

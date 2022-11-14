@@ -1,4 +1,6 @@
 import pytest
+
+from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.kmers import KmerEncoder, fast_hash
 import numpy as np
 from npstructures import RaggedShape
@@ -70,3 +72,22 @@ def test_kmer_encoding_repr_and_string():
     print(repr(kmers[0]))
     print(repr(kmers))
     print(str(kmers))
+
+
+def test_get_kmer_encoding_labels():
+    encoding = KmerEncoding(bnp.DNAEncoding, 3)
+    labels = encoding.get_labels()
+    assert labels[0:5] == [
+        "AAA",
+        "CAA",
+        "GAA",
+        "TAA",
+        "ACA"
+    ]
+
+
+def test_count_kmers():
+    sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    kmers = bnp.kmers.get_kmers(sequences, 3)
+    counts = bnp.count_encoded(kmers, axis=None)
+    

@@ -24,7 +24,8 @@ class KmerEncoding(Encoding):
         return kmer
 
     def get_labels(self):
-        return [""]
+        assert self._k <= 5, "Only supported for k <= 5"
+        return [self.to_string(kmer) for kmer in range(self._alphabet_encoding.alphabet_size**self._k)]
 
     def __str__(self):
         return f"{self._k}merEncoding({self._alphabet_encoding})"

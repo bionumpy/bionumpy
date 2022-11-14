@@ -4,6 +4,9 @@
 Using BioNumPy to analyse kmers, minimzers and motifs
 ========================================================
 
+BioNumPy has functionality for easily finding kmers and minimizers in a set of sequences.
+
+
 [Introduction motivating stuff]
 
 
