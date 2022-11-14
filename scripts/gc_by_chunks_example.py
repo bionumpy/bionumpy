@@ -1,10 +1,10 @@
 import bionumpy as bnp
-from bionumpy.groupby import groupby
+
 
 def analyze_across_chromosome(seq_fn, genes_fn):
     all_sequence = bnp.open(seq_fn).read_chunks(50)
     all_genes = bnp.open(genes_fn).read()
-    genes_by_chr = groupby(all_genes, "chromosome")
+    genes_by_chr = bnp.groupby(all_genes, "chromosome")
     nn_counts = {nn:0 for nn in "ACTG"}
     for seq, (chr, genes) in zip(all_sequence, genes_by_chr):
         assert str(seq.name[0]) == chr, (seq, seq.name, chr)
