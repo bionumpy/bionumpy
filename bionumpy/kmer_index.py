@@ -46,7 +46,7 @@ class KmerIndex:
     def _get_index_for_kmer(cls, kmers, kmer):
         return np.flatnonzero(np.any(kmers == kmer, axis=-1))
 
-    def get_kmer_indices(self, kmer):
+    def get_indices(self, kmer):
         if isinstance(kmer, str):
             assert len(kmer) == self._k
             encoded_kmer = get_kmers(sequence=as_encoded_array(kmer,self._sequences_encoding), k=self._k).raw()
@@ -56,7 +56,10 @@ class KmerIndex:
 
 
 class KmerLookup:
-    def __init__(self, kmer_index: KmerIndex, sequences: EncodedRaggedArray):
+
+    index_class = KmerIndex
+
+    def __init__(self, kmer_index: index_class, sequences: EncodedRaggedArray):
         self._kmer_index = kmer_index
         self._sequences = sequences
 
@@ -64,10 +67,10 @@ class KmerLookup:
         return f"Lookup on {self._kmer_index.k}-merIndex of {len(self._sequences)} sequences"
 
     @classmethod
-    def create_lookup(cls, sequences: EncodedRaggedArray, k: int) -> "KmerLookup":
-        index = KmerIndex.create_index(sequences=sequences, k=k)
+    def create_lookup(cls, sequences: EncodedRaggedArray, *args, **kwargs) -> "KmerLookup":
+        index = cls.index_class.create_index(sequences=sequences, *args, **kwargs)
         return cls(index, sequences)
 
-    def get_sequences_with_kmer(self, kmer):
-        kmer_indices = self._kmer_index.get_kmer_indices(kmer)
+    def get_sequences(self, kmer):
+        kmer_indices = self._kmer_index.get_indices(kmer)
         return self._sequences[kmer_indices]

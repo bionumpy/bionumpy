@@ -11,18 +11,18 @@ def sequences():
 
 def test_kmer_index(sequences):
     index = KmerIndex.create_index(sequences, k=3)
-    assert index.get_kmer_indices("ACG") == [0]
-    assert index.get_kmer_indices("AAA") == [1]
-    np.testing.assert_equal(index.get_kmer_indices("TAA"), [0, 1])
-    assert index.get_kmer_indices("GAA") == []
+    assert index.get_indices("ACG") == [0]
+    assert index.get_indices("AAA") == [1]
+    np.testing.assert_equal(index.get_indices("TAA"), [0, 1])
+    assert index.get_indices("GAA") == []
 
 
 def test_multiple_occurrences(sequences):
     index = KmerIndex.create_index(sequences, k=2)
-    np.testing.assert_equal(index.get_kmer_indices("AA"), [0, 1])
+    np.testing.assert_equal(index.get_indices("AA"), [0, 1])
 
 
 def test_kmer_lookup(sequences):
     lookup = KmerLookup.create_lookup(sequences, k=3)
-    sequences_with_kmer = lookup.get_sequences_with_kmer(kmer="CGT")
+    sequences_with_kmer = lookup.get_sequences(kmer="CGT")
     assert sequences_with_kmer == ["ACGTAA"]

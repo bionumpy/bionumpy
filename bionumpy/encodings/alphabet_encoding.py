@@ -46,6 +46,9 @@ class AlphabetEncoding(OneToOneEncoding):
         self._initialize()
         return [chr(c) for c in self._alphabet]
 
+    def get_labels(self):
+        return self.get_alphabet()
+
     def __str__(self):
         return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
 

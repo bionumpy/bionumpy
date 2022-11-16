@@ -1,7 +1,9 @@
 import numpy as np
 from numpy.typing import ArrayLike
-from collections import defaultdict
 from bionumpy import EncodedRaggedArray
+from functools import reduce
+
+from bionumpy.kmer_index import KmerLookup
 
 
 class WildCardIndex:
@@ -13,20 +15,22 @@ class WildCardIndex:
     def create_index(cls, sequences: EncodedRaggedArray) -> "WildCardIndex":
         shape = sequences.shape
         flat_sequences = sequences.ravel()
-        letter_map = defaultdict(list)
-        for index, letter in enumerate(flat_sequences):
-            letter_map[str(letter)].append(index)
-        letter_map = {key: np.array(value) for key, value in letter_map.items()}
+        letter_map = {letter: np.flatnonzero(flat_sequences == letter) for letter in sequences.encoding.get_labels()}
         return cls(shape, letter_map)
 
-    def get_pattern_indices(self, pattern: str) -> set:
-        index_sets = []
-        for index, letter in enumerate(pattern):
-            if letter == ".":
-                continue
-            positions = self._letter_map[letter] - index
-            index_sets.append(set(positions))
-        common_indices = set.intersection(*index_sets)
+    def get_indices(self, pattern: str) -> ArrayLike:
+        index_sets = (self._letter_map[letter] - index for index, letter in enumerate(pattern) if letter != ".")
+        common_indices = reduce(np.intersect1d, index_sets)
         sequence_indices = np.searchsorted(self._shape.starts, list(common_indices), side="right")-1
-        mask = np.array(list(common_indices))+len(pattern) <= self._shape.ends[sequence_indices]
+        mask = common_indices + len(pattern) <= self._shape.ends[sequence_indices]
         return np.unique(sequence_indices[mask])
+
+
+class WildCardLookup(KmerLookup):
+    index_class = WildCardIndex
+
+    def __repr__(self):
+        return f"Lookup on WildcardIndex of {len(self._sequences)} sequences"
+
+
+

@@ -18,8 +18,8 @@ def read_index(filename: str) -> dict:
         nested dict. chromosome names to dicts of index values
 
     """
-    split_lines = (line.split() for line in open(filename))
-    return {chromosome:
+    split_lines = (line.split("\t") for line in open(filename))
+    return {chromosome.split()[0]:
             {"rlen": int(rlen), "offset": int(offset),
              "lenc": int(lenc), "lenb": int(lenb)}
             for chromosome, rlen, offset, lenc, lenb in split_lines}

@@ -17,5 +17,5 @@ class OlgaBuffer(DelimitedBuffer):
 def test():
     olga_sequence_data = bnp.open(filename="example_data/airr.tsv", buffer_type=OlgaBuffer).read()
     dna_3mer_lookup = KmerLookup.create_lookup(olga_sequence_data.dna, k=3)
-    tgc_sequences = dna_3mer_lookup.get_sequences_with_kmer("TGC")
+    tgc_sequences = dna_3mer_lookup.get_sequences("TGC")
     print(tgc_sequences)
