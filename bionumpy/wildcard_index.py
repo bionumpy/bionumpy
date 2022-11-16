@@ -29,5 +29,8 @@ class WildCardIndex:
 class WildCardLookup(KmerLookup):
     index_class = WildCardIndex
 
+    def __repr__(self):
+        return f"Lookup on WildcardIndex of {len(self._sequences)} sequences"
+
 
 
