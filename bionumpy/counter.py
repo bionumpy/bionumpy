@@ -48,8 +48,8 @@ def count_encoded(values, weights=None, axis=-1):
     if axis is None:
         values = values.ravel()
 
-    assert np.issubdtype(values.dtype, np.signedinteger), \
-        "dtype is %s. Count encoded needs signed integers to do bincount" % values.dtype
+    #assert np.issubdtype(values.dtype, np.signedinteger), \
+    #    "dtype is %s. Count encoded needs signed integers to do bincount" % values.dtype
 
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
