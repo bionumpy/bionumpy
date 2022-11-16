@@ -2,8 +2,8 @@ import numpy as np
 import dataclasses
 from numpy.random import default_rng
 
-from ..io.motifs import read_motif, Motif
-from ..position_weight_matrix import get_motif_scores
+from ..io.motifs import Motif
+from ..sequence.position_weight_matrix import get_motif_scores
 from ..datatypes import Interval, Bed6
 from .. import streamable, EncodedArray
 from ..encodings import AlphabetEncoding, StrandEncoding
