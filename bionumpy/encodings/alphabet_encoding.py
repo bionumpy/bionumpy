@@ -33,6 +33,8 @@ class AlphabetEncoding(OneToOneEncoding):
 
     def decode(self, encoded):
         self._initialize()
+        if hasattr(encoded, "encoding"):
+            encoded = encoded.raw()
         return self._alphabet[np.asarray(encoded)]
 
     @property
@@ -76,5 +78,6 @@ StrandEncoding = AlphabetEncoding("+-.")
 
 
 def get_alphabet_encodings():
-    return [ACTGEncoding, ACGTEncoding, ACTGnEncoding, ACGTnEncoding, DigitEncoding, DNAEncoding, ACUGEncoding, RNAENcoding, AminoAcidEncoding,
+    return [ACTGEncoding, ACGTEncoding, ACTGnEncoding, ACGTnEncoding, DigitEncoding,
+            DNAEncoding, ACUGEncoding, RNAENcoding, AminoAcidEncoding,
             BamEncoding, CigarOpEncoding, StrandEncoding]

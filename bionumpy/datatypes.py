@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
-from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding, 
-                        CigarEncoding, StrandEncoding)
+from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
+                        CigarEncoding, StrandEncoding, GenotypeRowEncoding)
 from .bnpdataclass import bnpdataclass
 
 
@@ -76,7 +76,7 @@ class VCFEntry:
 
 @bnpdataclass
 class VCFGenotypeEntry(VCFEntry):
-    genotypes: int
+    genotypes: GenotypeRowEncoding
 
 
 class SNP(Variant):
