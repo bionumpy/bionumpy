@@ -70,9 +70,9 @@ class VCFEntry:
     id: str
     ref_seq: str
     alt_seq: str
-    # quality: int
-    # filter: str
-    # info: str
+    quality: str
+    filter: str
+    info: str
 
 
 @bnpdataclass

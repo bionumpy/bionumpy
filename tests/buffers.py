@@ -42,14 +42,14 @@ chr1\t40\t60\t.\t.\t+
 chr20\t400\t600\t.\t.\t+
 """
     , "vcf": """\
-chr1	88362	rs4970378	A	G
-chr1	887560	rs3748595	A	C
-chr2	8878	rs3828047	A	G
+chr1	88362	rs4970378	A	G	.	.	.
+chr1	887560	rs3748595	A	C	.	.	.
+chr2	8878	rs3828047	A	G	.	.	.
 """
     , "vcf2": """\
-chr1	88362	rs4970378	A	G
-chr1	887560	rs3748595	A	CAA
-chr2	8878	rs3828047	AGG	C
+chr1	88362	rs4970378	A	G	.	.	.
+chr1	887560	rs3748595	A	CAA	.	.	.
+chr2	8878	rs3828047	AGG	C	.	.	.
 """
     , "vcf_matrix": """\
 chr1	883625	rs4970378	A	G\t.\t.\t.\t.\t1|1:0,4:4:6:70,6,0	1|1:0,19:19:36:358,36,0	1|1:0,3:3:6:67,6,0	1|1:0,1:1:3:34,3,0
@@ -85,13 +85,13 @@ data = {
         Interval.single_entry("chr1", 40, 60),
         Interval.single_entry("chr20",  400, 600)],
     "vcf2": [
-        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G"),
-        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"CAA"),
-        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"AGG",	"C")],
+        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
+        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"CAA", ".", ".", "."),
+        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"AGG",	"C", ".", ".", ".")],
     "vcf": [
-        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G"),
-        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"C"),
-        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"A",	"G")],
+        VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
+        VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"C", ".", ".", "."),
+        VCFEntry.single_entry("chr2",	8877, "rs3828047",	"A",	"G", ".", ".", ".")],
     "fastq": [
         SequenceEntryWithQuality.single_entry("headerishere", "CTTGTTGA", "".join("!" for _ in "CTTGTTGA")),
         SequenceEntryWithQuality.single_entry("anotherheader", "CGG", "".join("~" for _ in "CGG"))],
@@ -164,18 +164,18 @@ chr2\t400\t600\t.\t.\t+
 @pytest.fixture
 def vcf_buffer():
     t = """\
-chr1	88362	rs4970378	A	G
-chr1	887560	rs3748595	A	C
-chr2	8878	rs3828047	A	G
+chr1	88362	rs4970378	A	G	.	.	.
+chr1	887560	rs3748595	A	C	.	.	.
+chr2	8878	rs3828047	A	G	.	.	.
 """
     return chunk_from_text(t)
 
 @pytest.fixture
 def vcf_buffer2():
     t = """\
-chr1	88362	rs4970378	A	G
-chr1	887560	rs3748595	A	CAA
-chr2	8878	rs3828047	AGG	C
+chr1	88362	rs4970378	A	G	.	.	.
+chr1	887560	rs3748595	A	CAA	.	.	.
+chr2	8878	rs3828047	AGG	C	.	.	.
 """
     return chunk_from_text(t)
 
