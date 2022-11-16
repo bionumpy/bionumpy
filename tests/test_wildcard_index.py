@@ -13,4 +13,8 @@ def test_wildcard_index(sequences):
     index = WildCardIndex.create_index(sequences)
     pattern_indices = index.get_pattern_indices(pattern="A.G")
     np.testing.assert_equal(pattern_indices, [0])
+    np.testing.assert_equal(index.get_pattern_indices("CGT"), [0, 1])
+    np.testing.assert_equal(index.get_pattern_indices("ACG"), [0])
+    np.testing.assert_equal(index.get_pattern_indices("ACGCG"), [])
+
 

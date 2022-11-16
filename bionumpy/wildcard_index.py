@@ -24,14 +24,9 @@ class WildCardIndex:
         for index, letter in enumerate(pattern):
             if letter == ".":
                 continue
-            positions = self._letter_map[letter]
-            positions -= index
+            positions = self._letter_map[letter] - index
             index_sets.append(set(positions))
         common_indices = set.intersection(*index_sets)
         sequence_indices = np.searchsorted(self._shape.starts, list(common_indices), side="right")-1
-        print(np.unique(sequence_indices))
-        return np.unique(sequence_indices)
-
-    def _get_sequence_indices(self, flat_indices):
-        sequence_indices = np.searchsorted(self._shape.starts, flat_indices)
-        print(sequence_indices)
+        mask = np.array(list(common_indices))+len(pattern) <= self._shape.ends[sequence_indices]
+        return np.unique(sequence_indices[mask])
