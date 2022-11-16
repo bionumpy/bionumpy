@@ -1,4 +1,3 @@
-import numpy as np
 import cupy as cp
 import sys
 import bionumpy as bnp
@@ -12,7 +11,7 @@ def run(fasta_filename="example_data/small.fa"):
     chunk_generator = bnp.open(fasta_filename, buffer_type=TwoLineFastaBuffer).read_chunks(min_chunk_size=chunk_size)
     for chunk, _ in zip(chunk_generator, range(5)):
         encoded_sequence = bnp.as_encoded_array(chunk.sequence, bnp.encodings.alphabet_encoding.ACTGEncoding)
-        kmers = bnp.kmers.fast_hash(encoded_sequence, 31, bnp.encodings.alphabet_encoding.ACTGEncoding).ravel()
+        kmers = bionumpy.sequence.kmers.get_kmers(encoded_sequence, 31).ravel()
         print(type(kmers))
         print(kmers)
 

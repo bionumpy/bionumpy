@@ -1,8 +1,8 @@
-from . import EncodedArray, EncodedRaggedArray
-from .kmers import KmerEncoder, get_kmers
-from .rollable import RollableFunction
-from .encodings import DNAEncoding, AlphabetEncoding
-from .util import is_subclass_or_instance
+from .. import EncodedArray, EncodedRaggedArray
+from .kmers import KmerEncoder
+from ..rollable import RollableFunction
+from ..encodings import AlphabetEncoding
+from ..util import is_subclass_or_instance
 
 
 class Minimizers(RollableFunction):
@@ -40,7 +40,7 @@ def get_minimizers(sequence: EncodedRaggedArray, k: int, window_size: int) -> En
     --------
     >>> import bionumpy as bnp
     >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
-    >>> bnp.minimizers.get_minimizers(sequences, 2, 4)
+    >>> bnp.sequence.get_minimizers(sequences, 2, 4)
     encoded_ragged_array([[AC],
                           [],
                           [GG, GC]], 2merEncoding(AlphabetEncoding('ACGT')))

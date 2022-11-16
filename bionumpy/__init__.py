@@ -15,8 +15,8 @@ from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from .kmers import KmerEncoder
-from .minimizers import Minimizers
+from .sequence import KmerEncoder
+from .sequence.minimizers import Minimizers
 from .position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
@@ -42,8 +42,6 @@ def set_backend(lib):
         return lib.concatenate((lib.asarray([value], dtype=array.dtype), array))
 
     lib.insert = temp_insert
-
-    import sys
 
     nps.set_backend(lib)
     from npstructures.bitarray import BitArray
@@ -78,7 +76,7 @@ def set_backend(lib):
     encoded_array.RaggedArray = RaggedArray
     encoded_array.get_NPSArray = lambda x: x
 
-    from . import kmers
+    from .sequence import kmers
     kmers.BitArray = BitArray
 
     from . import util

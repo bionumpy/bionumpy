@@ -1,5 +1,5 @@
 from . import EncodedRaggedArray
-from .kmers import KmerEncoder
+from .sequence import KmerEncoder
 import numpy as np
 from collections import defaultdict
 

@@ -2,7 +2,7 @@ import numpy as np
 from npstructures import RaggedArray
 from .streams import streamable
 from .encodings import BaseEncoding, AlphabetEncoding
-from .kmers import KmerEncoder
+from .sequence import KmerEncoder
 from .encoded_array import as_encoded_array, EncodedArray
 from .util import apply_to_npdataclass
 

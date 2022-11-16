@@ -1,15 +1,14 @@
 import numpy as np
 
-from .encodings.kmer_encodings import KmerEncoding
-from .rollable import RollableFunction
-from .encodings import DNAEncoding
-from .encodings.alphabet_encoding import AlphabetEncoding
-from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from bionumpy.encodings.kmer_encodings import KmerEncoding
+from bionumpy.rollable import RollableFunction
+from bionumpy.encodings import DNAEncoding
+from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
+from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from npstructures.bitarray import BitArray
-from .util import convolution, is_subclass_or_instance
+from bionumpy.util import convolution, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
-
 
 
 class KmerEncoder(RollableFunction):
@@ -52,7 +51,7 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     --------
     >>> import bionumpy as bnp
     >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
-    >>> bnp.kmers.get_kmers(sequences, 3)
+    >>> bnp.sequence.get_kmers(sequences, 3)
     encoded_ragged_array([[ACT, CTG],
                           [AAA],
                           [TTG, TGG, GGC]], 3merEncoding(AlphabetEncoding('ACGT')))
@@ -62,18 +61,24 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
         "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding"
 
-    result = KmerEncoder(k, sequence.encoding).rolling_window(sequence)
-    return result
+    if sequence.encoding.alphabet_size == 4:
+        # use the faster _get_dna_kmers
+        return _get_dna_kmers(sequence, k)
+
+    return KmerEncoder(k, sequence.encoding).rolling_window(sequence)
 
 
 @convolution
-def fast_hash(sequence, k):
+def _get_dna_kmers(sequence, k):
     """
     A faster version alternative to get_kmers that can be used with sequences encoded
      with an AlphabetEncoding with alphabet size **exactly equal to 4**.
 
+    This function is called by get_kmers when alphabet size is 4 to get some speedup.
+
     See get_kmers for documentation on use.
     """
+    assert 0 < k < 32, "k must be larger than 0 and smaller than 32"
     assert isinstance(sequence, EncodedArray), sequence
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding)
     assert sequence.encoding.alphabet_size == 4, \
@@ -81,6 +86,8 @@ def fast_hash(sequence, k):
 
     bit_array = BitArray.pack(sequence.data, bit_stride=2)
     hashes = bit_array.sliding_window(k)
+    assert hashes.dtype == np.uint64
+    hashes = hashes.view(np.int64)
     output_encoding = KmerEncoding(sequence.encoding, k)
     return EncodedArray(hashes, output_encoding)
 
