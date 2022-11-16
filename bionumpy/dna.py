@@ -4,7 +4,7 @@ from .lookup import Lookup
 
 def _get_complement_lookup(alphabet_encoding):
     alphabet = alphabet_encoding.get_alphabet()
-    complements = {"A": "T", "G": "C", "C": "G", "T": "A"}
+    complements = {"A": "T", "G": "C", "C": "G", "T": "A", "N": "N"}
     new_alphabet = "".join(complements[c] for c in alphabet)
     return Lookup(as_encoded_array(new_alphabet, alphabet_encoding),
                   alphabet_encoding)
