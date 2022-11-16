@@ -3,7 +3,7 @@ import bionumpy as bnp
 from bionumpy.streams.multistream import MultiStream
 from bionumpy.cli import run_as_commandline
 from bionumpy.mutation_signature import count_mutation_types
-from bionumpy.io.delimited_buffers import VCFMatrixBuffer
+from bionumpy.io.delimited_buffers import PhasedVCFMatrixBuffer
 from bionumpy.io.matrix_dump import matrix_to_csv
 import logging
 logging.basicConfig(level="INFO")
@@ -11,7 +11,7 @@ logging.basicConfig(level="INFO")
 
 def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = False):
     if genotyped:
-        variants = bnp.open(vcf_filename, buffer_type=VCFMatrixBuffer).read_chunks()
+        variants = bnp.open(vcf_filename, buffer_type=PhasedVCFMatrixBuffer).read_chunks()
     else:
         variants = bnp.open(vcf_filename).read_chunks()
 

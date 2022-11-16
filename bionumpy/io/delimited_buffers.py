@@ -6,9 +6,10 @@ from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak)
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from ..encodings import (Encoding, DigitEncoding, GenotypeRowEncoding)
+from ..encodings import (Encoding, DigitEncoding)
+from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
 from ..encodings.base_encoding import get_base_encodings
 from ..util import is_subclass_or_instance
@@ -249,7 +250,7 @@ class DelimitedBuffer(FileBuffer):
                  List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
                  }
 
-        all_encodings = get_alphabet_encodings() + get_base_encodings() + [GenotypeRowEncoding]
+        all_encodings = get_alphabet_encodings() + get_base_encodings() + [PhasedGenotypeRowEncoding]
         # TODO: add other base encodings (now they are a mix of classes and objects)
 
         def get_func_for_datatype(datatype):
@@ -498,9 +499,9 @@ class VCFBuffer(DelimitedBuffer):
         return data
 
 
-
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
+    genotype_dataclass = VCFGenotypeEntry
     genotype_encoding = GenotypeRowEncoding
 
     @classmethod
@@ -512,6 +513,9 @@ class VCFMatrixBuffer(VCFBuffer):
                 file_object.seek(-len(line), 1)
                 break
             prev_line = line
+        if prev_line is None:
+            return []
+
         sample_names = prev_line.split("\t")[9:]
         return sample_names
 
@@ -519,11 +523,13 @@ class VCFMatrixBuffer(VCFBuffer):
         data = VCFBuffer.get_data(self)
         genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
         genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
-        return VCFGenotypeEntry(*data.shallow_tuple(), genotypes)
+        return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
 
 
-#class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
-#    genotype_encoding = PhasedGenotypeEncoding
+class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
+    dataclass = VCFEntry
+    genotype_dataclass = PhasedVCFGenotypeEntry
+    genotype_encoding = PhasedGenotypeRowEncoding
 
 
 class NarrowPeakBuffer(DelimitedBuffer):
