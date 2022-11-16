@@ -10,3 +10,8 @@ def test_from_data():
 chr1\t2\t100
 chr1\t10\t20
 """
+
+
+def test_phased_vcf_buffer():
+    #f = bnp.open("example_data/")
+    pass

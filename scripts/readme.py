@@ -16,7 +16,7 @@ matrix = np.log([[0.1, 0.2],
                  [0.2, 0.3],
                  [0.4, 0.1],
                  [0.3, 0.4]])
-pwm = bnp.position_weight_matrix.PositionWeightMatrix(matrix)
+pwm = bionumpy.sequence.position_weight_matrix.PositionWeightMatrix(matrix)
 pwm("ac")
 pwm(["ac", "cg"])
 pwm.rolling_window(sequences)

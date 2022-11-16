@@ -1,4 +1,4 @@
-from bionumpy.translate import Translate
+from bionumpy.sequence.translate import Translate
 from bionumpy import as_encoded_array
 
 

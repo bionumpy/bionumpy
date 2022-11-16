@@ -1,6 +1,5 @@
 import bionumpy as bnp
-import numpy as np
-from bionumpy.string_matcher import StringMatcher, RegexMatcher
+from bionumpy.sequence.string_matcher import StringMatcher, RegexMatcher
 
 #For small exploration, we can define our list of sequences directly:
 sequences = bnp.as_sequence_array(["ACGT", "AATGAT"], encoding=bnp.encodings.ACTGEncoding)

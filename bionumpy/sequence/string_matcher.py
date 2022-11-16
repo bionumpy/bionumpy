@@ -2,7 +2,7 @@ import logging
 
 from bionumpy.rollable import RollableFunction
 from bionumpy.encoded_array import as_encoded_array, EncodedArray
-from .util import as_strided
+from bionumpy.util import as_strided
 import itertools
 import numpy as np
 import re
