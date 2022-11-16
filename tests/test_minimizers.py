@@ -1,7 +1,7 @@
 from bionumpy.encodings.kmer_encodings import KmerEncoding
-from bionumpy.minimizers import Minimizers, get_minimizers
+from bionumpy.sequence.minimizers import Minimizers, get_minimizers
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
-from bionumpy.kmers import KmerEncoder
+from bionumpy.sequence.kmers import KmerEncoder
 from bionumpy.encodings.alphabet_encoding import DNAEncoding
 from npstructures import RaggedArray
 import numpy as np

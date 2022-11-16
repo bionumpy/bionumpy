@@ -3,7 +3,8 @@ from .base_encoding import BaseEncoding, Encoding, NumericEncoding, CigarEncodin
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)
-                                
+#from ..sequence.kmers import KmerEncoding
+
 
 __all__ = ["BaseEncoding", "Encoding",
            "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]# , "ACTGTwoBitEncoding"]
