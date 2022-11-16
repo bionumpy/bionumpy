@@ -6,7 +6,7 @@ from bionumpy.encodings import DNAEncoding
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from npstructures.bitarray import BitArray
-from bionumpy.util import convolution, is_subclass_or_instance
+from bionumpy.util import as_strided, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,20 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     return KmerEncoder(k, sequence.encoding).rolling_window(sequence)
 
 
+def convolution(func):
+    def new_func(_sequence, window_size, *args, **kwargs):
+        shape, sequence = (_sequence.shape, _sequence.ravel())
+        convoluted = func(sequence, window_size, *args, **kwargs)
+        if isinstance(shape, tuple):
+            out = as_strided(convoluted, shape)
+        else:
+            out = EncodedRaggedArray(convoluted, shape)
+
+        return out[..., : (-window_size + 1)]
+
+    return new_func
+
+
 @convolution
 def _get_dna_kmers(sequence, k):
     """
@@ -90,5 +104,4 @@ def _get_dna_kmers(sequence, k):
     hashes = hashes.view(np.int64)
     output_encoding = KmerEncoding(sequence.encoding, k)
     return EncodedArray(hashes, output_encoding)
-
 
