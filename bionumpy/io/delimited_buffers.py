@@ -125,6 +125,8 @@ class DelimitedBuffer(FileBuffer):
             column index
         fixed_length : bool
             whether all strings have equal length
+        keep_sep : bool
+            keep seperator at end
 
         Examples
         --------
@@ -141,6 +143,30 @@ class DelimitedBuffer(FileBuffer):
             return self._move_intervals_to_2d_array(starts, ends)
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
+
+    def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
+        """Get multiple columns as text
+
+       Parameters
+        ----------
+        col_start : int
+            column index to start at
+        col_end : int
+            column index to end at
+        keep_sep : bool
+            keep seperator at end
+        """
+        self.validate_if_not()
+        assert col_start < col_end
+        assert col_start < self._n_cols, self._n_cols
+        assert col_end <= self._n_cols
+
+        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col_start] + 1
+        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col_end-1]
+        if keep_sep:
+            ends += 1
+
+        return self._move_intervals_to_ragged_array(starts, ends)
 
     def get_text_range(self, col, start=0, end=None) -> np.ndarray:
         """Get substrings of a column
@@ -445,6 +471,7 @@ class VCFBuffer(DelimitedBuffer):
         return data
 
 
+
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
     genotype_encoding = GenotypeEncoding
@@ -469,6 +496,8 @@ class VCFMatrixBuffer(VCFBuffer):
         # genotypes.column_names = self._header_data
         return VCFGenotypeEntry(*data.shallow_tuple(), genotypes)
 
+    def from_data(cls, data: bnpdataclass) -> "DelimitedBuffer":
+        vcf_entry = VCFGenotypeEntry()
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     genotype_encoding = PhasedGenotypeEncoding

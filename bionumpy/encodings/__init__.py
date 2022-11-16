@@ -3,7 +3,6 @@ from .base_encoding import BaseEncoding, Encoding, NumericEncoding, CigarEncodin
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)
-#from ..sequence.kmers import KmerEncoding
 
 
 __all__ = ["BaseEncoding", "Encoding",
@@ -37,21 +36,44 @@ class DigitEncoding(Encoding):
 
 
 class GenotypeEncoding(Encoding):
-    @classmethod
-    def encode(cls, bytes_array):
+    def get_labels(self):
+        pass
+
+    def encode(bytes_array):
         assert bytes_array.shape[-1] == 3
         return (bytes_array[..., 0] == "1") + (
             bytes_array[..., 2] == "1"
         ).astype(np.int8)
 
 
-class PhasedGenotypeEncoding:
-    @classmethod
-    def from_bytes(cls, bytes_array):
+class PhasedGenotypeEncoding(GenotypeEncoding):
+    """
+    For a single phased genotype, e.g. 0|1
+    """
+    #lookup = as_encoded_array(["0|0", "0|1", "1|0", "1|1"], BaseEncoding).to_numpy_array()
+    lookup = np.array([
+        [ord(chr) for chr in genotype]
+        for genotype in ["0|0", "0|1", "1|0", "1|1"]], dtype=np.uint8)
+
+    def encode(bytes_array):
         assert bytes_array.shape[-1] == 3
-        return 2*(bytes_array[..., 0] == ord("1")) + (
-            bytes_array[..., 2] == ord("1")
+        return 2*(bytes_array[..., 0] == "1") + (
+            bytes_array[..., 2] == "1"
         ).astype(np.int8)
+
+    @classmethod
+    def decode(cls, genotype):
+        return cls.lookup[genotype]
+
+
+class PhasedGenotypeRowEncoding(PhasedGenotypeEncoding):
+    """
+    For a "row" of phased genotypes (all genotypes at a variant)
+    """
+
+    def encode(self, bytes_array):
+        pass
+
 
 
 class QualityEncoding(NumericEncoding):

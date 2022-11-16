@@ -1,8 +1,7 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
-from .encodings.base_encoding import BaseEncoding, OneToOneEncoding
-from .encodings import Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
