@@ -9,12 +9,12 @@ class GenotypeRowEncoding(Encoding):
     Encoding for a row of genotype data in VCF-format.
     Supports phased and unphased genotypes and missing genotypes on the format ./.
 
-    Does only support biallelic variants.
+    Does only support biallelic and triallelic variants.
     """
 
     # makes a flexible lookup by combining possible alleles
     # with the possible seperators. Can be extended by adding alleles or seperators
-    _alleles = ["0", "1", "."]
+    _alleles = ["0", "1", "2", "."]
     _seperators = ["|", "/"]
     _alphabet = _alleles + _seperators
     _reverse_alphabet_lookup = np.array([ord(c) for c in _alphabet], dtype=np.uint8)
@@ -41,12 +41,8 @@ class GenotypeRowEncoding(Encoding):
 
     @classmethod
     def encode(cls, genotype_rows):
-        from ..io.strops import split, replace_inplace
-        data = genotype_rows
+        data = cls._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)
-        # hack because the row sometime ends with \n and sometimes with \t
-        replace_inplace(data, "\n", "\t")
-        data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
         encoded = \
             cls._alphabet_size**2 * cls._alphabet_lookup[data[:, 0].raw()] + \
             cls._alphabet_size ** 1 * cls._alphabet_lookup[data[:, 1].raw()] + \
@@ -54,6 +50,16 @@ class GenotypeRowEncoding(Encoding):
 
         encoded = encoded.reshape(n_rows, len(encoded)//n_rows).astype(np.int8)
         return encoded
+
+    @classmethod
+    def _preprocess_data_for_encoding(cls, genotype_rows):
+        # split the row of genotype data
+        from ..io.strops import split, replace_inplace
+        data = genotype_rows
+        # hack because the row sometime ends with \n and sometimes with \t
+        replace_inplace(data, "\n", "\t")
+        data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
+        return data
 
     @classmethod
     def decode(cls, genotype):
@@ -72,8 +78,7 @@ class GenotypeRowEncoding(Encoding):
 
 
 class PhasedGenotypeRowEncoding(GenotypeRowEncoding):
-    """
-    Encoding that can be used when all records are phased
+    """Encoding that can be used when all records are phased
      and there is no missing data, i.e. every genotype is
      either 0|0, 0|1, 1|0 or 1|1.
 
@@ -90,13 +95,8 @@ class PhasedGenotypeRowEncoding(GenotypeRowEncoding):
 
     @classmethod
     def encode(cls, genotype_rows):
-        from ..io.strops import split, replace_inplace
-        data = genotype_rows
+        data = cls._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)
-        # idea: Ravel, convert all, split on \t and reshape back to original shape
-        # hack because the row sometime ends with \n and sometimes with \t
-        replace_inplace(data, "\n", "\t")
-        data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
-        encoded = (data[:, 0] == "1") + 2 * (data[:, 2] == "1")
+        encoded = (data[:, 0] == "1") * 2 + (data[:, 2] == "1")
         encoded = encoded.reshape(n_rows, len(encoded)//n_rows).astype(np.int8)
         return encoded

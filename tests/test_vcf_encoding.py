@@ -28,8 +28,8 @@ def test_phased_genotype_encoding():
     ])
     encoded = PhasedGenotypeRowEncoding.encode(data)
     correct = np.array(
-        [[0, 2, 1],
-        [0, 2, 3]]
+        [[0, 1, 2],
+        [0, 1, 3]]
     )
     assert np.all(encoded == correct)
 
@@ -72,6 +72,6 @@ def test_parse_phased_vcf():
     assert np.all(data ==
                   [
                       [3, 3, 3, 3],
-                      [0, 1, 3, 3],
-                      [2, 1, 2, 3]
+                      [0, 2, 3, 3],
+                      [1, 2, 1, 3]
                   ])
