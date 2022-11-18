@@ -1,8 +1,7 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
-from .encodings.base_encoding import BaseEncoding, OneToOneEncoding
-from .encodings import Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -141,7 +140,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
                 data_to_show = data_to_show[0:20]
             elif n_dims == 2:
                 # show first columns and rows
-                raise NotImplemented("Str for n_dims=2 not implemented")
+                #raise NotImplemented("Str for n_dims=2 not implemented")
+                return self.encoding.to_string(self.data)[0:40] + "..."
                 # data_to_show = None
             text = "[" + ", ".join(self.encoding.to_string(e) for e in data_to_show) + "]"
             return text

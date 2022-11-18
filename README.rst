@@ -9,7 +9,7 @@ BioNumPy
         :target: https://github.com/bionumpy/bionumpy/actions/
         :alt: Build and test status
 
-Documentation: `https://uio-bmi.github.io/bionumpy/ <https://uio-bmi.github.io/bionumpy/>`_
+Documentation: `https://bionumpy.github.io/bionumpy/ <https://bionumpy.github.io/bionumpy/>`_
 
 
 What is BioNumPy?
@@ -29,11 +29,11 @@ Getting started
 1. Install with pip:
 
 * Free software: MIT license
-* Documentation: https://uio-bmi.github.io/bionumpy/.
+* Documentation: https://bionumpy.github.io/bionumpy/.
 
 $ pip install bionumpy
 
-2. Check out the tutorials and getting started guide in the `documentation <https://uio-bmi.github.io/bionumpy/>`_.
+2. Check out the tutorials and getting started guide in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
 
 
 Features

@@ -11,8 +11,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = ['numpy>=1.19',
-                'npstructures>=0.2.0']
-# 'pip install git+https://github.com/knutdrand/npstructures.git@dev']
+                'npstructures>=0.2.3']
+# 'npstructures @ git+https://github.com/knutdrand/npstructures.git']
 
 test_requirements = ['pytest>=3', ]
 
@@ -46,6 +46,9 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/knutdrand/bionumpy',
-    version='0.2.1',
+    version='0.2.2',
     zip_safe=False,
 )
+
+# python -m build
+# twine upload dist/*

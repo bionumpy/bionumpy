@@ -2,7 +2,7 @@
 
 __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 import npstructures as nps
 
@@ -11,8 +11,8 @@ from .io.files import count_entries
 from .io.indexed_files import open_indexed
 from .io.multiline_buffer import MultiLineFastaBuffer
 from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .io.delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
-                                GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .io.delimited_buffers import (BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
+                                   GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from .sequence.kmers import KmerEncoder
@@ -30,7 +30,8 @@ Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 __all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
-           "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
+           "BedBuffer", "VCFBuffer", "PhasedVCFMatrixBuffer", "VCFMatrixBuffer",
+           "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
