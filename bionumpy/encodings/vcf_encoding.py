@@ -63,6 +63,9 @@ class GenotypeRowEncoding(Encoding):
 
     @classmethod
     def decode(cls, genotype):
+        if len(genotype.shape) == 0:
+            return cls.decode_lookup()[genotype]
+
         new_shape = genotype.shape[:-1] + (4*genotype.shape[-1],)
         if not isinstance(genotype, np.ndarray):
             genotype = genotype.raw()
@@ -74,6 +77,10 @@ class GenotypeRowEncoding(Encoding):
     def to_string(cls, e):
         if isinstance(e, np.ndarray):
             e = np.atleast_1d(e)
+
+        if len(e.shape) == 2:
+            return '\n'.join(cls.to_string(c) for c in e)
+
         return ''.join(chr(c) for c in cls.decode(e))
 
 

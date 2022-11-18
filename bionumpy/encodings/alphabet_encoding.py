@@ -28,7 +28,7 @@ class AlphabetEncoding(OneToOneEncoding):
             byte_array = byte_array.raw()
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
-            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array)} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
+            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
     def decode(self, encoded):

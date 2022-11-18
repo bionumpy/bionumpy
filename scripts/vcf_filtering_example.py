@@ -13,8 +13,14 @@ def remove_variants_with_N(chunk):
     #    f.write(new_variants)
 
 
+def phsased_vcf_example(chunk):
+    genotypes = chunk.genotypes
+    print(chunk)
+
+
 def test():
-    analyses = [remove_variants_with_N]
+    analyses = [remove_variants_with_N, phsased_vcf_example]
+    analyses = [phsased_vcf_example]
     for func in analyses:
         f = bnp.open("example_data/variants_with_header.vcf", buffer_type=bnp.VCFMatrixBuffer)
         data = f.read()
