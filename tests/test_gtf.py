@@ -18,5 +18,6 @@ def test_get_transcript_sequences(gtf_entries, reference_sequences):
     transcript_sequences = get_transcript_sequences(gtf_entries, reference_sequences)
     print(transcript_sequences)
 
+
 def test_get_exons(gtf_entries):
     assert len(get_exons(gtf_entries)) == 3
