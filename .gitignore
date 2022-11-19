@@ -68,7 +68,8 @@ instance/
 
 # Sphinx documentation
 docs_source/_build/
-docs/
+docs/*
+docs_source/stubs
 
 # PyBuilder
 target/
@@ -109,3 +110,5 @@ ENV/
 # IDE settings
 *~*
 *#*
+.idea  # pycharm
+
