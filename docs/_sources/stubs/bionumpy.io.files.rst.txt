@@ -1,0 +1,37 @@
+bionumpy.io.files
+=================
+
+.. automodule:: bionumpy.io.files
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      bnp_open
+      count_entries
+      open_indexed
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      NpDataclassReader
+   
+   
+
+   
+   
+   
+
+
+

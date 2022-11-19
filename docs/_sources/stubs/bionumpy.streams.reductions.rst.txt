@@ -1,0 +1,32 @@
+bionumpy.streams.reductions
+===========================
+
+.. automodule:: bionumpy.streams.reductions
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      bincount_reduce
+      histogram_reduce
+      mean
+      quantile
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

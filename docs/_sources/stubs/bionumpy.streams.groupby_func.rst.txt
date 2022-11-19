@@ -1,0 +1,32 @@
+bionumpy.streams.groupby\_func
+==============================
+
+.. automodule:: bionumpy.streams.groupby_func
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_changes
+      get_ragged_changes
+      join_groupbys
+      key_func
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

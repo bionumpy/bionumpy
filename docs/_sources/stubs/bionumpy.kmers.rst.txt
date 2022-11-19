@@ -1,0 +1,29 @@
+bionumpy.kmers
+==============
+
+.. automodule:: bionumpy.kmers
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      KmerEncoding
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,29 @@
+bionumpy.rollable
+=================
+
+.. automodule:: bionumpy.rollable
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RollableFunction
+   
+   
+
+   
+   
+   
+
+
+

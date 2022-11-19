@@ -1,0 +1,29 @@
+bionumpy.bnpdataclass
+=====================
+
+.. automodule:: bionumpy.bnpdataclass
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      bnpdataclass
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

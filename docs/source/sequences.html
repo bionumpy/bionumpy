@@ -15,7 +15,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Broadcastable Functions" href="broadcastable_functions.html" />
+    <link rel="next" title="Intervals" href="intervals.html" />
     <link rel="prev" title="Currently supported file formats" href="supported_file_formats.html" /> 
 </head>
 
@@ -34,21 +34,41 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">What is BioNumPy?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
 </ul>
+<p class="caption"><span class="caption-text">BioNumPy Concepts</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="reading_files.html">Reading files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="working_with_big_data.html">Working with big data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html">Currently supported file formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Sequences</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sequences</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#encodedarray"><cite>EncodedArray</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#encodedraggedarray"><cite>EncodedRaggedArray</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-sequences-from-file">Reading sequences from file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reading-sequence-entries-fa-fq-bam">Reading sequence entries (.fa, .fq, .bam)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reading-indexed-files-fa-fai">Reading indexed files (.fa.fai)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions-workin-on-sequences">Functions workin on sequences</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intervals.html">Intervals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_data_sources.html#sort-order">Sort Order</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broadcastable_functions.html">Broadcastable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rollable_functions.html">Rollable Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="summarization.html">Summarization</a></li>
 </ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/bionumpy.html">bionumpy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/bam_handling.html">BAM Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/fastq_filtering.html">FASTQ filtering</a></li>
@@ -56,8 +76,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/getting_started.html">Getting started and how to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/setting_up_development_environment.html">Setting up your development environment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/testing.html">How we do testing in BioNumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/making_examples.html">Making examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/writing_documentation.html">Writing documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/design_principles.html">Design principles and code overview</a></li>
 </ul>
 
         </div>
@@ -73,8 +99,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Sequences</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Sequences</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/source/sequences.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,10 +112,75 @@
              
   <div class="section" id="sequences">
 <span id="id1"></span><h1>Sequences<a class="headerlink" href="#sequences" title="Permalink to this headline">¶</a></h1>
-<p><cite>bnp.Sequences</cite> objects are numpy arrays structured in a way that allows them to hold many sequences of unequal lenght. Under the hood they are <cite>npstructures.RaggedArray</cite> objects that hold byte-arrays, with an encoding that specifies which characters each byte represents. Most of the time, it is not necessary to think about these inner workings, but one can think of them as lists of strings (with the possibility of performing numpy functions on them). The most common way to get <cite>Sequences</cite> objects is to read a file, but they can also be created from lists of strings using the <cite>bnp.as_sequence_array</cite> function:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bnp</span><span class="o">.</span><span class="n">as_sequence_array</span><span class="p">([</span><span class="s2">&quot;acgttgta&quot;</span><span class="p">,</span> <span class="s2">&quot;gcttca&quot;</span><span class="p">,</span> <span class="s2">&quot;gttattc&quot;</span><span class="p">])</span>
-<span class="go">Sequences(acgttgta, gcttca, gttattc)</span>
+<div class="section" id="encodedarray">
+<h2><cite>EncodedArray</cite><a class="headerlink" href="#encodedarray" title="Permalink to this headline">¶</a></h2>
+<p>Sequence data in BioNumPy are are represented by <cite>EncodedArray</cite> objects. These are basically <cite>numpy</cite> arrays of integers, that have an encoding that specifies which character each integer represent. This representataion allows us to do fast <cite>numpy</cite> operation on the seqeunces, while still allowing for human readable representation of them. The easiest way to create an <cite>EncodedArray</cite> is to use the <cite>as_encoded_array</cite> function.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">bionumpy</span> <span class="k">as</span> <span class="nn">bnp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_array</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">as_encoded_array</span><span class="p">(</span><span class="s2">&quot;actggtcc&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_array</span>
+<span class="go">encoded_array(&#39;actggtcc&#39;)</span>
 </pre></div>
+</div>
+<p>We see that the encoded array represents the text “actggtcc”, but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">encoded_array</span> <span class="o">==</span> <span class="s2">&quot;g&quot;</span><span class="p">)</span>
+<span class="go">[False False False  True  True False False False]</span>
+</pre></div>
+</div>
+<p>And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_array</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">encoded_array(&#39;tggt&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="encodedraggedarray">
+<h2><cite>EncodedRaggedArray</cite><a class="headerlink" href="#encodedraggedarray" title="Permalink to this headline">¶</a></h2>
+<p>When working with multiple seqeunces we usually have to use <cite>EncodedRaggedArray</cite> objects. These are much like <cite>EncodedArray</cite> objects, but instead uses <cite>npstructures.RaggedArray</cite> to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an <cite>EncodedRaggedArray</cite> is to use the <cite>as_encoded_array</cite> function on a list of strings:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_ragged_array</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">as_encoded_array</span><span class="p">([</span><span class="s2">&quot;ctt&quot;</span><span class="p">,</span> <span class="s2">&quot;actg&quot;</span><span class="p">,</span> <span class="s2">&quot;ag&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_ragged_array</span>
+<span class="go">encoded_ragged_array([&#39;ctt&#39;,</span>
+<span class="go">                      &#39;actg&#39;,</span>
+<span class="go">                      &#39;ag&#39;])</span>
+</pre></div>
+</div>
+<p>These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_ragged_array</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">encoded_array(&#39;tg&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reading-sequences-from-file">
+<h2>Reading sequences from file<a class="headerlink" href="#reading-sequences-from-file" title="Permalink to this headline">¶</a></h2>
+<p>Usually we get sequences directly from file. BioNumPy supports a range of file formats containing sequence data including fasta, fastq, indexed fasta and bam files.</p>
+<div class="section" id="reading-sequence-entries-fa-fq-bam">
+<h3>Reading sequence entries (.fa, .fq, .bam)<a class="headerlink" href="#reading-sequence-entries-fa-fq-bam" title="Permalink to this headline">¶</a></h3>
+<p>To read in a set of sequence entries, we can just use the <cite>bnp.open</cite> method (here we read a fastq file, but this works the same for fasta and bam files):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">entries</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;example_data/reads.fq&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entries</span>
+<span class="go">SequenceEntryWithQuality with 2 entries</span>
+<span class="go">                     name                 sequence                  quality</span>
+<span class="go">             headerishere                 CTTGTTGA        [2 2 2 2 2 2 2 2]</span>
+<span class="go">            anotherheader                      CGG               [93 93 93]</span>
+</pre></div>
+</div>
+<p>We see we get all the entries in the file, with the corresponding fields. The <cite>sequence</cite> field here is an <cite>EncodedRaggedArray</cite> and thus supports numpy-like indexing etc:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">entries</span><span class="o">.</span><span class="n">sequence</span><span class="o">==</span><span class="s2">&quot;T&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Count the number of T&#39;s</span>
+<span class="go">array([4, 0])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reading-indexed-files-fa-fai">
+<h3>Reading indexed files (.fa.fai)<a class="headerlink" href="#reading-indexed-files-fa-fai" title="Permalink to this headline">¶</a></h3>
+<p>When reading a reference genome, we often can’t read in the whole file (using <cite>.read()</cite>) and it doesn’t make sense to read in the chromosome-sequences as entries in chunks (using <cite>.read_chunks()</cite>) but we rather want to read specific parts of the genome. In these cases we can use an index to be able to read specific regions. We then use <cite>bnp.open_indexed</cite> function:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reference_sequence</span> <span class="o">=</span> <span class="n">bnp</span><span class="o">.</span><span class="n">open_indexed</span><span class="p">(</span><span class="s2">&quot;example_data/small_genome.fa&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_sequence</span><span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">][</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
+<span class="go">encoded_array(&#39;ATATTAGCCA&#39;)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="functions-workin-on-sequences">
+<h2>Functions workin on sequences<a class="headerlink" href="#functions-workin-on-sequences" title="Permalink to this headline">¶</a></h2>
+<p>A set of functions working on sequences are gathered in the <cite>bnp.seqeunce</cite> module.</p>
 </div>
 </div>
 
@@ -98,7 +189,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="supported_file_formats.html" class="btn btn-neutral float-left" title="Currently supported file formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="broadcastable_functions.html" class="btn btn-neutral float-right" title="Broadcastable Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="intervals.html" class="btn btn-neutral float-right" title="Intervals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

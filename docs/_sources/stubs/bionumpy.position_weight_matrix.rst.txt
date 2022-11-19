@@ -1,0 +1,35 @@
+bionumpy.position\_weight\_matrix
+=================================
+
+.. automodule:: bionumpy.position_weight_matrix
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      pwm_from_counts
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PositionWeightMatrix
+   
+   
+
+   
+   
+   
+
+
+

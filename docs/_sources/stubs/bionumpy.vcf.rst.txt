@@ -1,0 +1,31 @@
+bionumpy.vcf
+============
+
+.. automodule:: bionumpy.vcf
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      parse_header
+      parse_info_line
+      read_header
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

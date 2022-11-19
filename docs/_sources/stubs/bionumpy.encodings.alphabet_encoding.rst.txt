@@ -1,0 +1,35 @@
+bionumpy.encodings.alphabet\_encoding
+=====================================
+
+.. automodule:: bionumpy.encodings.alphabet_encoding
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_alphabet_encodings
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AlphabetEncoding
+   
+   
+
+   
+   
+   
+
+
+

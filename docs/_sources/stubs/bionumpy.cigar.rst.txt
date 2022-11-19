@@ -1,0 +1,30 @@
+bionumpy.cigar
+==============
+
+.. automodule:: bionumpy.cigar
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      count_reference_length
+      split_cigar
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

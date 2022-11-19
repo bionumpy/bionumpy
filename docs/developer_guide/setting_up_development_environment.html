@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting up your development environment &mdash; bionumpy  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How we do testing in BioNumPy" href="testing.html" />
+    <link rel="prev" title="Getting started and how to contribute" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> bionumpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">What is BioNumPy?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation and getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#your-first-bionumpy-program">Your first BioNumPy program</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BioNumPy Concepts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../source/reading_files.html">Reading files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/working_with_big_data.html">Working with big data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/supported_file_formats.html">Currently supported file formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/supported_file_formats.html#implementing-a-new-file-format">Implementing a new file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/intervals.html">Intervals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html">Working with Multiple Files/Data Sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/multiple_data_sources.html#sort-order">Sort Order</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/broadcastable_functions.html">Broadcastable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/rollable_functions.html">Rollable Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/summarization.html">Summarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/bionumpy.html">bionumpy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/bam_handling.html">BAM Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastq_filtering.html">FASTQ filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/fastqc.html">Simple quality checking of fastq files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/numpy_operations.html">Using Numpy Functionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/position_weight_matrix.html">Position Weight Matrix</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started and how to contribute</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting up your development environment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-optional-install-development-version-of-npstructures">Step 1 (Optional): Install development version of npstructures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-install-bionumpy-locally-not-from-pypi">Step 2: Install BioNumPy locally (not from PyPi)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-install-development-dependencies">Step 3: Install development dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-test-your-installation">Step 4: Test your installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">How we do testing in BioNumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="making_examples.html">Making examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writing_documentation.html">Writing documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design_principles.html">Design principles and code overview</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">bionumpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Setting up your development environment</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/developer_guide/setting_up_development_environment.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="setting-up-your-development-environment">
+<span id="development-setup"></span><h1>Setting up your development environment<a class="headerlink" href="#setting-up-your-development-environment" title="Permalink to this headline">¶</a></h1>
+<p>Follow the steps below to set up an environment that lets you do development on BioNumPy, such as making examples, writing documentation or implementing features.</p>
+<div class="section" id="step-1-optional-install-development-version-of-npstructures">
+<h2>Step 1 (Optional): Install development version of npstructures<a class="headerlink" href="#step-1-optional-install-development-version-of-npstructures" title="Permalink to this headline">¶</a></h2>
+<p>Development on BioNumPy is often done in parallel with development on NpStructures, meaning that new functionality on BioNumPy depends on unpublished changes on NpStructures. Thus, you will usually need the development version of NpStructures, which you can get by installing the dev branch of NpStructures:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:knutdrand/npstructures.git
+<span class="nb">cd</span> npstructures
+git checkout dev
+pip install -e .
+</pre></div>
+</div>
+<p>The <cite>-e</cite> installs an editable version, so that if you change anything in NpStructures those changes will have an effect.</p>
+<p>NB: You might want to install NpStructures and BioNumPy into a virtual environment. If so, make sure to make one before starting the installation.</p>
+</div>
+<div class="section" id="step-2-install-bionumpy-locally-not-from-pypi">
+<h2>Step 2: Install BioNumPy locally (not from PyPi)<a class="headerlink" href="#step-2-install-bionumpy-locally-not-from-pypi" title="Permalink to this headline">¶</a></h2>
+<p>In order to develop on BioNumPy you will need to clone this repository and install BioNumPy:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:bionumpy/bionumpy.git
+</pre></div>
+</div>
+<p>We suggest installing a local editable copy of BioNumPy so that you get BioNumPy in your Python path. It can be a good idea to create a Python virtual environment before doing this. If you installed NpStructures in the previous step, make sure you use the same virtual environment now:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bionumpy
+pip install -e .
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-3-install-development-dependencies">
+<h2>Step 3: Install development dependencies<a class="headerlink" href="#step-3-install-development-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The above installation will install all required dependencies that BioNumPy uses, but for development there are some more dependencies that you will need (e.g. for testing). Install these by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements_dev.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-4-test-your-installation">
+<h2>Step 4: Test your installation<a class="headerlink" href="#step-4-test-your-installation" title="Permalink to this headline">¶</a></h2>
+<p>BioNumPy has several different sets of test (unit tests, property testing, testing of examples and doctesting). All should pass if you’ve setup everything correctly. You can run all tests by running the <cite>test</cite>-script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./run_tests
+</pre></div>
+</div>
+<p>If the above runs without any errors, you are ready to start doing development. Continue by reading the</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started and how to contribute" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="testing.html" class="btn btn-neutral float-right" title="How we do testing in BioNumPy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Knut Rand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

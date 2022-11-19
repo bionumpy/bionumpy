@@ -1,0 +1,30 @@
+bionumpy.dna
+============
+
+.. automodule:: bionumpy.dna
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      complement
+      reverse_compliment
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

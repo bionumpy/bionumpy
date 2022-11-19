@@ -1,0 +1,38 @@
+bionumpy.io.parser
+==================
+
+.. automodule:: bionumpy.io.parser
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      chunk_lines
+      repr_bytes
+      wrapper
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      NpBufferedWriter
+      NumpyFileReader
+   
+   
+
+   
+   
+   
+
+
+
