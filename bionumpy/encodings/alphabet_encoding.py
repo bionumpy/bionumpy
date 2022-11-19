@@ -1,8 +1,8 @@
 import numpy as np
-from .base_encoding import Encoding
+from .base_encoding import Encoding, OneToOneEncoding
 
 
-class AlphabetEncoding(Encoding):
+class AlphabetEncoding(OneToOneEncoding):
     def __init__(self, alphabet: str):
         self._raw_alphabet = [c.upper() for c in alphabet]
         self._is_initialized = False
@@ -28,11 +28,13 @@ class AlphabetEncoding(Encoding):
             byte_array = byte_array.raw()
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
-            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array)} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
+            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
     def decode(self, encoded):
         self._initialize()
+        if hasattr(encoded, "encoding"):
+            encoded = encoded.raw()
         return self._alphabet[np.asarray(encoded)]
 
     @property
@@ -44,6 +46,9 @@ class AlphabetEncoding(Encoding):
         self._initialize()
         return [chr(c) for c in self._alphabet]
 
+    def get_labels(self):
+        return self.get_alphabet()
+
     def __str__(self):
         return f"""AlphabetEncoding('{"".join(self.get_alphabet())}')"""
 
@@ -54,6 +59,7 @@ class AlphabetEncoding(Encoding):
         self._initialize()
         if not isinstance(other, AlphabetEncoding):
             return False
+        other._initialize()
         return np.all(self._alphabet == other._alphabet)
 
     def __hash__(self):
@@ -75,5 +81,6 @@ StrandEncoding = AlphabetEncoding("+-.")
 
 
 def get_alphabet_encodings():
-    return [ACTGEncoding, ACGTEncoding, ACTGnEncoding, ACGTnEncoding, DigitEncoding, DNAEncoding, ACUGEncoding, RNAENcoding, AminoAcidEncoding,
+    return [ACTGEncoding, ACGTEncoding, ACTGnEncoding, ACGTnEncoding, DigitEncoding,
+            DNAEncoding, ACUGEncoding, RNAENcoding, AminoAcidEncoding,
             BamEncoding, CigarOpEncoding, StrandEncoding]

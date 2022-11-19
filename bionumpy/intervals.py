@@ -5,9 +5,14 @@ from npstructures import RunLength2dArray, RunLengthArray
 
 from .bedgraph import BedGraph
 from .streams.grouped import chromosome_map
-from .bnpdataclass import bnpdataclass
 from .datatypes import Interval
+from .bnpdataclass import bnpdataclass
 
+
+@bnpdataclass
+class RawInterval:
+    start: int
+    stop: int
 
 
 def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
@@ -33,6 +38,7 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
     """
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
     return rla.sum(axis=0)
+
 
 def get_boolean_mask(intervals: Interval, chromosome_size: int):
     """Get a boolean mask representing where any inteval hits

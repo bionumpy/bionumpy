@@ -2,6 +2,9 @@ import numpy as np
 from numbers import Number
 import dataclasses
 
+from bionumpy import EncodedArray
+
+
 @dataclasses.dataclass
 class EncodedCounts:
     alphabet: list
@@ -9,7 +12,7 @@ class EncodedCounts:
     row_names: list = None
 
     def __str__(self):
-        return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts))
+        return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts.T))
 
     def __getitem__(self, idx):
         return self.counts[..., self.alphabet.index(idx)]
@@ -38,17 +41,25 @@ class EncodedCounts:
         alphabet = counts[0].alphabet
         row_names = counts[0].row_names
         assert all(count.alphabet==alphabet for count in counts)
-        ret =  cls(alphabet, np.array([count.counts for count in counts], dtype="int"))
+        ret = cls(alphabet, np.array([count.counts for count in counts], dtype="int"))
         if row_names is not None:
             ret.row_names = [count.row_names for count in counts]
         return ret
             
 
-
 def count_encoded(values, weights=None, axis=-1):
+    if axis is None:
+        values = values.ravel()
+
+    #assert np.issubdtype(values.dtype, np.signedinteger), \
+    #    "dtype is %s. Count encoded needs signed integers to do bincount" % values.dtype
+
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:
         alphabet = values.encoding.get_labels()
-    counts = np.bincount(values, weights=weights, minlength=len(alphabet))
+    if isinstance(values, EncodedArray) and len(values.shape) == 1:
+        counts = np.bincount(values, weights=weights, minlength=len(alphabet))
+    elif axis == -1:
+        counts = np.array([np.bincount(row, weights=weights, minlength=len(alphabet)) for row in values])
     return EncodedCounts(alphabet, counts)

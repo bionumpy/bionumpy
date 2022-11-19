@@ -2,11 +2,15 @@ import numpy as np
 import logging
 from npstructures import RaggedArray
 import dataclasses
+import sys
 
 logger = logging.getLogger(__name__)
 
 
 def as_strided(arr, shape=None, strides=None, **kwargs):
+    logger.warning(f"{(arr, shape, strides)}")
+    sys.stdout.flush()
+    sys.stderr.flush()
     # assert strides is not None, (arr, shape, strides)
     if strides is None:
         assert len(arr.shape) == 1
@@ -21,20 +25,6 @@ def as_strided(arr, shape=None, strides=None, **kwargs):
         return arr.as_strided(shape, strides, **kwargs)
     assert not np.issubdtype(arr.dtype, np.object_), arr
     return np.lib.stride_tricks.as_strided(arr, shape, strides, **kwargs)
-
-
-def convolution(func):
-    def new_func(_sequence, window_size, *args, **kwargs):
-        shape, sequence = (_sequence.shape, _sequence.ravel())
-        convoluted = func(sequence, window_size, *args, **kwargs)
-        if isinstance(shape, tuple):
-            out = as_strided(convoluted, shape)
-        else:
-            out = RaggedArray(convoluted, shape)
-
-        return out[..., : (-window_size + 1)]
-
-    return new_func
 
 
 def rolling_window_function(func):

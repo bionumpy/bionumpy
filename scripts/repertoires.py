@@ -3,7 +3,7 @@ import gzip
 import numpy as np
 import yaml
 from importlib import reload
-import bionumpy.kmers
+import bionumpy.sequence.kmers
 # from npstructures import RaggedArray
 import npstructures.raggedarray as npsa
 import npstructures.raggedshape as npss
@@ -12,7 +12,7 @@ import milem.categorical as EM
 # from milem import SparseEM, MultiCategorical
 reload(EM)
 reload(bionumpy.encodings)
-reload(bionumpy.kmers)
+reload(bionumpy.sequence.kmers)
 reload(npsa)
 reload(npss)
 RaggedArray = npsa.RaggedArray
@@ -42,7 +42,7 @@ def get_kmers(ra, k):
     encoded = RaggedArray(bionumpy.encodings.AminoAcidEncoding.from_bytes(
         ra.ravel()), ra.shape)
     kmers = np.lib.stride_tricks.sliding_window_view(encoded.ravel(), k)
-    hashes = bionumpy.kmers.KmerEncoding(k, 20).from_bytes(kmers)
+    hashes = bionumpy.sequence.kmers.KmerEncoder(k, 20).from_bytes(kmers)
     ra = RaggedArray(hashes, encoded.shape)
     return ra[:, :-(k-1)]
 

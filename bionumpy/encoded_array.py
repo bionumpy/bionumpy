@@ -1,8 +1,7 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
-from .encodings.base_encoding import BaseEncoding
-from .encodings import Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -18,10 +17,11 @@ class EncodedRaggedArray(RaggedArray):
         if self.size>1000:
             rows = [str(row) for row in self[:5]]
         else:
-            rows = [f"{row.to_string()}" for row in self]
+            rows = [f"{row}" for row in self]
         encoding_info = f", {self.encoding}" if self.encoding != BaseEncoding else "" 
         indent = " "*len("encoded_ragged_array([")
-        lines = [f"{indent}'{row}'," for row in rows]
+        quotes = "'" if is_subclass_or_instance(self.encoding, OneToOneEncoding) else ""
+        lines = [f"{indent}{quotes}{row}{quotes}," for row in rows]
         lines[0] = lines[0].replace(indent, "encoded_ragged_array([")
         if self.size > 1000:
             lines.insert(-1, "...")
@@ -46,8 +46,10 @@ class EncodedRaggedArray(RaggedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
         return ret
 
+
 def get_NPSArray(array):
     return array.view(NPSArray)
+
 
 class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     """ 
@@ -86,7 +88,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return len(self.data)
 
     def raw(self) -> np.ndarray:
-        return self.data
+        return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
         return "".join([chr(c) for c in self.encoding.decode(self.data)])
@@ -111,9 +113,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.dtype
 
     def __repr__(self) -> str:
+        quotes = "'" if is_subclass_or_instance(self.encoding, OneToOneEncoding) else ""
         if self.encoding == BaseEncoding:
-            return f"encoded_array('{str(self)}')"
-        return f"encoded_array('{str(self)}', {self.encoding})"
+            return f"encoded_array({quotes}{str(self)}{quotes})"
+        return f"encoded_array({quotes}{str(self)}{quotes}, {self.encoding})"
 
     def __str__(self) -> str:
         """Return the data decoded into ASCII string
@@ -125,13 +128,37 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         str
 
         """
-        text = self.encoding.decode(self.data)
-        if len(self.data.shape) == 0:
-            return chr(int(self.data))
-        if len(self.data.shape) == 1:
-            return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
-        a = np.array([str(self.__class__(seq, self.encoding)) for seq in self.data.reshape(-1, self.data.shape[-1])]).reshape(self.data.shape[:-1])[:20]
-        return str(a)
+        if not is_subclass_or_instance(self.encoding, OneToOneEncoding):
+            # not possible to decode, get string
+            n_dims = len(self.data.shape)
+            assert n_dims in [0, 1, 2], "Unsupported number of dimensions for data"
+
+            data_to_show = self.data
+            if n_dims == 0:
+                return self.encoding.to_string(self.data)
+            elif n_dims == 1:
+                data_to_show = data_to_show[0:20]
+            elif n_dims == 2:
+                # show first columns and rows
+                #raise NotImplemented("Str for n_dims=2 not implemented")
+                return self.encoding.to_string(self.data)[0:40] + "..."
+                # data_to_show = None
+            text = "[" + ", ".join(self.encoding.to_string(e) for e in data_to_show) + "]"
+            return text
+
+        else:
+            text = self.encoding.decode(self.data)
+
+            if len(self.data.shape) == 0:
+                return chr(int(text))
+            if len(self.data.shape) == 1:
+                return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
+
+            a = np.array([str(self.__class__(seq, self.encoding))
+                          for seq in self.data.reshape(-1, self.data.shape[-1])]
+                         ).reshape(self.data.shape[:-1])[:20]
+            return str(a)
+
 
     def __getitem__(self, idx) -> "EncodedArray":
         """Delegate the indexing to the underlying numpy array

@@ -7,7 +7,7 @@ from npstructures.testing import assert_raggedarray_equal
 from bionumpy import AminoAcidEncoding, DNAEncoding, as_encoded_array
 from bionumpy.io.files import bnp_open
 from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
-from bionumpy.string_matcher import RegexMatcher
+from bionumpy.sequence.string_matcher import RegexMatcher
 from bionumpy.bnpdataclass import bnpdataclass
 
 

@@ -3,7 +3,7 @@ from .base_encoding import BaseEncoding, Encoding, NumericEncoding, CigarEncodin
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)
-                                
+
 
 __all__ = ["BaseEncoding", "Encoding",
            "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]# , "ACTGTwoBitEncoding"]
@@ -35,24 +35,6 @@ class DigitEncoding(Encoding):
         return digits + cls.MIN_CODE
 
 
-class GenotypeEncoding(Encoding):
-    @classmethod
-    def encode(cls, bytes_array):
-        assert bytes_array.shape[-1] == 3
-        return (bytes_array[..., 0] == "1") + (
-            bytes_array[..., 2] == "1"
-        ).astype(np.int8)
-
-
-class PhasedGenotypeEncoding:
-    @classmethod
-    def from_bytes(cls, bytes_array):
-        assert bytes_array.shape[-1] == 3
-        return 2*(bytes_array[..., 0] == ord("1")) + (
-            bytes_array[..., 2] == ord("1")
-        ).astype(np.int8)
-
-
 class QualityEncoding(NumericEncoding):
 
     def encode(byte_array):
@@ -67,8 +49,6 @@ class QualityEncoding(NumericEncoding):
 
 
 def set_backend(lib):
-    import sys
-
     #from ..cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
     #from ..cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
     #from ..cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding

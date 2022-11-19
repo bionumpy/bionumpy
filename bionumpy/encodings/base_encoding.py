@@ -3,7 +3,16 @@ import numpy as np
 
 
 class Encoding:
+    @abstractmethod
+    def encode(self, *args, **kwargs):
+        return NotImplemented
 
+    @abstractmethod
+    def get_labels(self):
+        pass
+
+
+class OneToOneEncoding(Encoding):
     @abstractmethod
     def encode(self, ascii_codes):
         return NotImplemented
@@ -13,7 +22,7 @@ class Encoding:
         return NotImplemented
 
 
-class ASCIIEncoding(Encoding):
+class ASCIIEncoding(OneToOneEncoding):
     def encode(self, ascii_codes):
         return ascii_codes
 
@@ -27,7 +36,7 @@ class ASCIIEncoding(Encoding):
         return hash(repr(self))
 
 
-class NumericEncoding(Encoding):
+class NumericEncoding(OneToOneEncoding):
     pass
 
 

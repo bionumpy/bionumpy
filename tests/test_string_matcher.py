@@ -2,7 +2,7 @@ import re
 
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
-from bionumpy.string_matcher import RegexMatcher, FixedLenRegexMatcher, StringMatcher
+from bionumpy.sequence.string_matcher import RegexMatcher, FixedLenRegexMatcher, StringMatcher
 import bionumpy as bnp
 
 

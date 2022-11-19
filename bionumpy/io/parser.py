@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import numpy as np
 from npstructures import npdataclass
-from ..streams import NpDataclassStream
+from ..streams import BnpStream
 from ..encoded_array import EncodedArray
 from ..streams.grouped import grouped_stream
 
@@ -142,7 +142,7 @@ class NumpyFileReader:
         self._file_obj.close()
 
     def __add_newline_to_end(self, chunk, bytes_read):
-        if chunk[bytes_read - 1] != "\n":
+        if chunk[bytes_read - 1] != ord("\n"):
             chunk = np.append(chunk, np.uint8(ord("\n")))
             bytes_read += 1
         if hasattr(self._buffer_type, "_new_entry_marker"):
@@ -212,13 +212,15 @@ class NpBufferedWriter:
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 
-        if isinstance(data, NpDataclassStream):
+        if isinstance(data, BnpStream):
             for buf in data:
-                self.write(buf)
+                if len(buf) > 0:
+                    self.write(buf)
             return
         if isinstance(data, grouped_stream):
             for name, buf in data:
-                self.write(buf)
+                if len(buf) > 0:
+                    self.write(buf)
             return
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):

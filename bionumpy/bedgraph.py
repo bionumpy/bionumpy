@@ -22,6 +22,11 @@ class BedGraph:
     value: int
 
 
+def from_runlength_array(chromosome_name, rle_array):
+    return BedGraph([chromosome_name]*len(rle_array.starts), rle_array.starts,
+                    rle_array.ends, rle_array.values)
+
+
 def get_pileup(intervals, size):
     positions = np.concatenate(([0], intervals.start,
                                 intervals.stop, [size]))

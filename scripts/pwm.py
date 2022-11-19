@@ -1,7 +1,7 @@
 import bionumpy as bnp
 import matplotlib.pyplot as plt
 from bionumpy.jaspar import read_jaspar_matrix
-from bionumpy.position_weight_matrix import PositionWeightMatrix, pwm_from_counts
+from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, pwm_from_counts
 from bionumpy.encodings.alphabet_encoding import get_alphabet_array_class
 
 # Read the alphabet and counts from jaspar file

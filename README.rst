@@ -28,30 +28,7 @@ Getting started
 
 1. Install with pip:
 
-* Free software: MIT license
-* Documentation: https://bionumpy.github.io/bionumpy/.
-
-$ pip install bionumpy
+	$ pip install bionumpy
 
 2. Check out the tutorials and getting started guide in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
 
-
-Features
-------------
-
-The features of BioNumPy can roughly be divided into two:
-
-1. Reading biological data sets (e.g. fasta, vcf, bed) into NumPy-like objects
-2. Analysing, modifying, filtering these NumPy-like objects in meaningful ways
-
-BioNumPy also supports writing most data types to file.
-
-
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage

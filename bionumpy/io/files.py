@@ -8,7 +8,6 @@ from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
                                 NarrowPeakBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
-from .indexed_fasta import IndexedFasta
 from ..streams import NpDataclassStream
 from ..bnpdataclass import bnpdataclass
 import logging
@@ -258,17 +257,7 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> NpDataclassRe
     is_gzip = suffix in (".gz", ".bam")
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    if suffix == ".fai":
-        assert mode not in ("w", "write", "wb")
-        return IndexedFasta(filename[:-4])
     return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type)
-
-
-def open_indexed(filename):
-    path = PurePath(filename)
-    suffix = path.suffixes[-1]
-    assert suffix in (".fa", ".fasta"), "Only fasta supported for indexed read"
-    return IndexedFasta(filename)
 
     
 def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:

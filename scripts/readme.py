@@ -16,18 +16,18 @@ matrix = np.log([[0.1, 0.2],
                  [0.2, 0.3],
                  [0.4, 0.1],
                  [0.3, 0.4]])
-pwm = bnp.position_weight_matrix.PositionWeightMatrix(matrix)
+pwm = bionumpy.sequence.position_weight_matrix.PositionWeightMatrix(matrix)
 pwm("ac")
 pwm(["ac", "cg"])
 pwm.rolling_window(sequences)
 pwm.rolling_window(sequences).max(axis=-1)
 
 
-bnp.KmerEncoding(3).rolling_window(sequences)
+bnp.KmerEncoder(3).rolling_window(sequences)
 
 fastq_entries_stream = bnp.open("example_data/reads.fq")
 counts = np.zeros(4**3, dtype=int)
-kmer_encoding = bnp.KmerEncoding(3)
+kmer_encoding = bnp.KmerEncoder(3)
 for fastq_entries in fastq_entries_stream:
     kmer_hashes = kmer_encoding.rolling_window(fastq_entries.sequence)
     counts += np.bincount(kmer_hashes.ravel(), minlength=4**3)

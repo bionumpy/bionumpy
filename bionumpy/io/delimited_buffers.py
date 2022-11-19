@@ -6,10 +6,10 @@ from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak)
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from ..encodings import (Encoding, DigitEncoding, GenotypeEncoding,
-                         PhasedGenotypeEncoding)
+from ..encodings import (Encoding, DigitEncoding)
+from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
 from ..encodings.base_encoding import get_base_encodings
 from ..util import is_subclass_or_instance
@@ -125,6 +125,8 @@ class DelimitedBuffer(FileBuffer):
             column index
         fixed_length : bool
             whether all strings have equal length
+        keep_sep : bool
+            keep seperator at end
 
         Examples
         --------
@@ -132,6 +134,7 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
+        assert np.max(col) < self._n_cols, (col, self._n_cols, self._data, self.__class__, self.dataclass)
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         if keep_sep:
@@ -140,6 +143,30 @@ class DelimitedBuffer(FileBuffer):
             return self._move_intervals_to_2d_array(starts, ends)
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
+
+    def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
+        """Get multiple columns as text
+
+       Parameters
+        ----------
+        col_start : int
+            column index to start at
+        col_end : int
+            column index to end at
+        keep_sep : bool
+            keep seperator at end
+        """
+        self.validate_if_not()
+        assert col_start < col_end
+        assert col_start < self._n_cols, self._n_cols
+        assert col_end <= self._n_cols
+
+        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col_start] + 1
+        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col_end-1]
+        if keep_sep:
+            ends += 1
+
+        return self._move_intervals_to_ragged_array(starts, ends)
 
     def get_text_range(self, col, start=0, end=None) -> np.ndarray:
         """Get substrings of a column
@@ -215,6 +242,7 @@ class DelimitedBuffer(FileBuffer):
         data : bnpdataclass
             Data
         """
+
         funcs = {int: ints_to_strings,
                  str: lambda x: x,
                  List[int]: int_lists_to_strings,
@@ -222,17 +250,47 @@ class DelimitedBuffer(FileBuffer):
                  List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
                  }
 
-        all_encodings = get_alphabet_encodings() + get_base_encodings()  # TODO: add other base encodings (now they are a mix of classes and objects)
+        all_encodings = get_alphabet_encodings() + get_base_encodings() + [PhasedGenotypeRowEncoding]
+        # TODO: add other base encodings (now they are a mix of classes and objects)
 
-        funcs = {**funcs, **{encoding: lambda x: encoding.decode(x) for encoding in all_encodings}}
-        columns = [funcs[field.type](getattr(data, field.name))
+        def get_func_for_datatype(datatype):
+            if is_subclass_or_instance(datatype, Encoding):
+                encoding = datatype
+                def dynamic(x):
+                    if isinstance(x, EncodedRaggedArray):
+                        print(repr(x.ravel()))
+                        return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel())), x.shape)
+                    return EncodedArray(encoding.decode(x))
+                return dynamic
+            else:
+                return funcs[datatype]
+
+        #funcs.update({encoding: lambda x: EncodedArray(encoding.decode(x))
+        #                     for encoding in all_encodings})
+        print(funcs)
+
+        #for field in dataclasses.fields(data):
+        #    print(field)
+
+        #funcs = {**funcs, **{encoding: lambda x: EncodedArray(encoding.decode(x))
+        #                     for encoding in all_encodings}}
+        columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
                    for field in dataclasses.fields(data)]
-        lengths = np.concatenate([(column.shape.lengths + 1)[:, np.newaxis]
+
+        lengths = np.concatenate([((column.shape.lengths if
+                                    isinstance(column, RaggedArray)
+                                    else np.array([
+                                                column.shape[-1] if len(column.shape) == 2 else 1
+                                                  ]*len(column))) + 1
+                                   )[:, np.newaxis] #Hacking here to accept EncodedArray
+                                  
                                   for column in columns], axis=-1).ravel()
         lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
                                    lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):
+            if (not isinstance(column, RaggedArray)) and len(column.shape)==1:
+                column = EncodedRaggedArray.from_numpy_array(column[:, np.newaxis]) # AND HERE
             lines[i::n_columns, :-1] = column
         lines[:, -1] = "\t"
         lines[(n_columns - 1)::n_columns, -1] = "\n"
@@ -443,7 +501,8 @@ class VCFBuffer(DelimitedBuffer):
 
 class VCFMatrixBuffer(VCFBuffer):
     dataclass = VCFEntry
-    genotype_encoding = GenotypeEncoding
+    genotype_dataclass = VCFGenotypeEntry
+    genotype_encoding = GenotypeRowEncoding
 
     @classmethod
     def read_header(cls, file_object):
@@ -454,20 +513,23 @@ class VCFMatrixBuffer(VCFBuffer):
                 file_object.seek(-len(line), 1)
                 break
             prev_line = line
+        if prev_line is None:
+            return []
+
         sample_names = prev_line.split("\t")[9:]
         return sample_names
 
     def get_data(self):
         data = VCFBuffer.get_data(self)
-        genotypes = self.get_text_range(np.arange(9, self._n_cols), end=3)
-        n_samples = self._n_cols - 9
-        genotypes = self.genotype_encoding.encode(genotypes.reshape(-1, n_samples, 3))
-        # genotypes.column_names = self._header_data
-        return VCFGenotypeEntry(*data.shallow_tuple(), genotypes)
+        genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
+        genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
+        return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
 
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
-    genotype_encoding = PhasedGenotypeEncoding
+    dataclass = VCFEntry
+    genotype_dataclass = PhasedVCFGenotypeEntry
+    genotype_encoding = PhasedGenotypeRowEncoding
 
 
 class NarrowPeakBuffer(DelimitedBuffer):

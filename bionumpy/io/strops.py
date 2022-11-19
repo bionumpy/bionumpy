@@ -53,6 +53,18 @@ def _build_power_array(shape: RaggedShape, dots: np.ndarray = None) -> RaggedArr
     return RaggedArray(index_array, shape)
 
 
+def replace_inplace(number_text: EncodedArray, replace_from: str, replace_to: str) -> None:
+    """ Replace inplace.
+
+    Parameters
+    ----------
+    number_text : EncodedArray
+    replace_from : str
+    replace_to : str
+    """
+    number_text[number_text == replace_from] = replace_to
+
+
 def str_to_int(number_text: EncodedArray) -> np.ndarray:
     """Convert strings in an EncodedRaggedArray to integers in numpy array
 
