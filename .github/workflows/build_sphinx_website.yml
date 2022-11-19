@@ -23,11 +23,8 @@ jobs:
     
       - name: install dependencies
         run: |
-          pip install Sphinx==3.5.4
-          pip install numpy
-          pip install npstructures
-          pip install sphinx_rtd_theme
-        
+          pip install -r requirements_dev.txt 
+
       - name: make html & commit the changes
         run: |
           sphinx-build -b html ./docs_source ./docs

@@ -1,7 +1,7 @@
 name: Upload to PyPI
 
 on:
-  # only on successful bumpversion
+  # run after completed bump version
   workflow_run:
     workflows: [ "Bump version" ]
     branches: [ master ]
@@ -12,6 +12,8 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
+    # only run if bumpversion was successful
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: actions/checkout@v3
