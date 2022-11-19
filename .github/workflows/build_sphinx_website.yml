@@ -32,7 +32,6 @@ jobs:
         run: |
           sphinx-build -b html ./docs_source ./docs
           git config user.name "knutrand"
-          git checkout gh-pages
           git add -f ./docs
           git commit -m 'update docs'
           
