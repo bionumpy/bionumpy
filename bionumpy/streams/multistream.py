@@ -1,6 +1,7 @@
 from .stream import BnpStream
 from . import groupby
 import logging
+import sys
 logger = logging.getLogger(__name__)
 
 
@@ -57,6 +58,9 @@ class SynchedStream(BnpStream):
         used_names = []
         seen_contig_names = set([])
         for name, data in grouped:
+            logger.info(f"handling data for {name}")
+            sys.stdout.flush()
+            sys.stderr.flush()
             name = self._key_func(name)
             if name in seen_contig_names:
                 raise StreamError(f"Sort order discrepancy between stream and contig. {name} already occured in {seen_contig_names}")
@@ -65,7 +69,9 @@ class SynchedStream(BnpStream):
                 raise StreamError(f"Stream had value not present in contig order: {name} ({self._contig_order})")
             while cur_contig_idx < len(self._contig_order) and (name != self._contig_order[cur_contig_idx]):
                 if self._has_default:
-                    logger.info(f"Data for contig {self._contig_order[cur_contig_idx]} missing")
+                    logger.info(f"Data for contig {self._contig_order[cur_contig_idx]} missing; using default value: {self._default_value}")
+                    sys.stdout.flush()
+                    sys.stderr.flush()
                     yield self._default_value
                     seen_contig_names.add(self._contig_order[cur_contig_idx])
                     cur_contig_idx += 1
@@ -83,6 +89,8 @@ class SynchedStream(BnpStream):
 
                 for i in range(cur_contig_idx, len(self._contig_order)):
                     logger.info(f"Data for contig {self._contig_order[i]} missing")
+                    sys.stdout.flush()
+                    sys.stderr.flush()
                     yield self._default_value
             else:
                 raise StreamError(

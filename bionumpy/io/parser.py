@@ -214,11 +214,13 @@ class NpBufferedWriter:
 
         if isinstance(data, BnpStream):
             for buf in data:
-                self.write(buf)
+                if len(buf) > 0:
+                    self.write(buf)
             return
         if isinstance(data, grouped_stream):
             for name, buf in data:
-                self.write(buf)
+                if len(buf) > 0:
+                    self.write(buf)
             return
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):

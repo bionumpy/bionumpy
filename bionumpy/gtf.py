@@ -56,17 +56,26 @@ def get_exons(gtf_entries):
 
 @streamable()
 def get_transcript_sequences(gtf_entries, reference_sequence):
+    if len(gtf_entries) == 0:
+        return SequenceEntry.empty()
     reference_sequence = as_encoded_array(reference_sequence, bnp.encodings.alphabet_encoding.ACGTnEncoding)
     exon_entries = get_exons(gtf_entries)
     exon_sequences = reference_sequence[exon_entries.start:exon_entries.stop]
-    groups = itertools.groupby(zip(exon_entries, exon_sequences), key=lambda pair: str(pair[0].transcript_id))
-    sequences = {}
-    for transcript_id, pairs in groups:
-        pairs = list(pairs)
-        strand = pairs[0][0].strand
-        sequence = np.concatenate([pair[1] for pair in pairs])
-        if strand == "-":
-            sequence = reverse_compliment(sequence)
-        sequence = EncodedRaggedArray(sequence, [len(sequence)])
-        sequences[transcript_id] = sequence
-    return SequenceEntry(list(sequences.keys()), np.concatenate(list(sequences.values())))
+    flat_exon_seqeunece = exon_sequences.ravel()
+    groups = itertools.groupby(exon_entries, key=lambda entry: str(entry.transcript_id))
+    infos = []
+    for transcript_id, entries in groups:
+        entries = list(entries)
+        print("transcript id", transcript_id, "n_pairs:", len(entries))
+        strand = entries[0].strand
+        seq_length = sum(entry.stop - entry.start for entry in entries)
+        infos.append((transcript_id, strand, seq_length))
+        # sequence = np.concatenate([entries[1] for pair in entries])
+        # if strand == "-":
+        #     sequence = reverse_compliment(sequence)
+        # sequence = EncodedRaggedArray(sequence, [len(sequence)])
+        # sequences[transcript_id] = sequence
+    names, strands, lengths = zip(*infos)
+    transcript_sequences = EncodedRaggedArray(flat_exon_seqeunece, list(lengths))
+    # keys = list(sequences.keys())
+    return SequenceEntry(list(names), transcript_sequences)
