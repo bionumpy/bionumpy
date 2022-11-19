@@ -32,10 +32,11 @@ jobs:
         run: |
           sphinx-build -b html ./docs_source ./docs
           git config user.name "knutrand"
+          git checkout gh-pages
           git add -f ./docs
           git commit -m 'update docs'
           
       - name: push changes to gh-pages to show automatically
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: gh-pages
