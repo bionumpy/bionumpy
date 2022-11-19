@@ -5,7 +5,7 @@ BioNumPy
 .. image:: https://img.shields.io/pypi/v/bionumpy.svg
         :target: https://pypi.python.org/pypi/bionumpy
 
-.. image:: https://github.com/knutdrand/bionumpy/actions/workflows/python-install-and-test.yml/badge.svg
+.. image:: https://github.com/bionumpy/bionumpy/actions/workflows/python-install-and-test.yml/badge.svg
         :target: https://github.com/bionumpy/bionumpy/actions/
         :alt: Build and test status
 
