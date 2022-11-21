@@ -228,7 +228,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return self.__class__(func([e.data for e in args[0]]), self.encoding)
         if func == np.where:
             return self.__class__(func(args[0], args[1].data, args[2].data), encoding = self.encoding)
-        elif func in (np.append, np.insert, np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
+        if func == np.zeros_like:
+            return self.__class__(func(args[0].data, *args[1:], **kwargs), encoding=self.encoding)
+        if func == np.append:
+            return self.__class__(func(args[0].data, args[1].data, *args[2:], **kwargs), encoding=self.encoding)
+        if func == np.insert:
+            return self.__class__(func(args[0].data, args[1], args[2].data, *args[3:], **kwargs), encoding = self.encoding)
+        elif func in (np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
         
         return NotImplemented
