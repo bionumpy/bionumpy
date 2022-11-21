@@ -72,7 +72,7 @@ def test_join(strings):
     seqs = as_encoded_array(strings)
     joined = join(seqs)
     true = as_encoded_array("\t".join(strings))
-    assert np.all(joined == as_encoded_array("\t".join(strings)))
+    assert np.all(joined == true)
 
 
 def test_split(strings):
