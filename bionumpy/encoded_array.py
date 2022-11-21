@@ -303,8 +303,8 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         return np_array_as_encoded_array(s, target_encoding)
     else:
         assert isinstance(s, EncodedArray)
-        if s.encoding != BaseEncoding and s.encoding != target_encoding:
-            raise EncodingException("Trying to encoded already encoded array with encoding %s to encoding %s" % (s.encoding, target_encoding))
+        #if s.encoding != BaseEncoding and s.encoding != target_encoding:
+        #    raise EncodingException("Trying to encoded already encoded array with encoding %s to encoding %s" % (s.encoding, target_encoding))
 
         return _encode_encoded_array(s, target_encoding)
 
