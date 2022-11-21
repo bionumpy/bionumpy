@@ -54,6 +54,9 @@ def get_exons(gtf_entries):
     return GFFExonEntry(*genes.shallow_tuple(), **attributes)
 
 
+def get_stranded_intervals(encoded_array, stranded_intervals):
+    pass
+
 @streamable()
 def get_transcript_sequences(gtf_entries, reference_sequence):
     if len(gtf_entries) == 0:
