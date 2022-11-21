@@ -69,16 +69,10 @@ def get_transcript_sequences(gtf_entries, reference_sequence):
     infos = []
     for transcript_id, entries in groups:
         entries = list(entries)
-        print("transcript id", transcript_id, "n_pairs:", len(entries))
-        strand = entries[0].strand
+        strand = str(entries[0].strand)
         seq_length = sum(entry.stop - entry.start for entry in entries)
         infos.append((transcript_id, strand, seq_length))
-        # sequence = np.concatenate([entries[1] for pair in entries])
-        # if strand == "-":
-        #     sequence = reverse_compliment(sequence)
-        # sequence = EncodedRaggedArray(sequence, [len(sequence)])
-        # sequences[transcript_id] = sequence
     names, strands, lengths = zip(*infos)
     transcript_sequences = EncodedRaggedArray(flat_exon_seqeunece, list(lengths))
-    # keys = list(sequences.keys())
+    transcript_sequences = np.where((as_encoded_array(''.join(strands)) == "-")[:, np.newaxis], reverse_compliment(transcript_sequences), transcript_sequences)
     return SequenceEntry(list(names), transcript_sequences)

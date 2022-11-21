@@ -1,5 +1,6 @@
 import pytest
 import bionumpy as bnp
+import numpy as np
 from bionumpy import as_encoded_array
 from bionumpy.gtf import get_transcript_sequences, get_exons
 
@@ -16,7 +17,8 @@ def reference_sequences():
 
 def test_get_transcript_sequences(gtf_entries, reference_sequences):
     transcript_sequences = get_transcript_sequences(gtf_entries, reference_sequences)
-    print(transcript_sequences)
+    assert np.all(transcript_sequences.sequence==['T'*(gtf_entries.stop[0]-gtf_entries.start[0]), 'A'*588])
+
 
 
 def test_get_exons(gtf_entries):
