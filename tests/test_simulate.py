@@ -1,8 +1,10 @@
 import pytest
 from bionumpy.io.motifs import Motif, read_motif
 from bionumpy.simulate.chipseq import simulate_chip_seq_fragments, simulate_read_fragments
+from bionumpy.simulate.rnaseq import get_transcript_copies
 import bionumpy as bnp
 import numpy as np
+from itertools import chain
 
 
 @pytest.fixture
@@ -24,3 +26,18 @@ def test_simulate_chipseq(sequence, motif):
     assert isinstance(fragments, bnp.datatypes.Interval)
     reads = simulate_read_fragments(fragments, 5)
     assert isinstance(reads, bnp.datatypes.Interval)
+
+@pytest.fixture
+def sequences():
+    return bnp.as_encoded_array(["ACGT", "GCTA", "GTAAAT"], bnp.DNAEncoding)
+
+@pytest.fixture
+def sequence_counts():
+    return [2,1,3]
+
+def test_get_transcript_copies(sequences, sequence_counts):
+    truth = bnp.as_encoded_array(list(chain(*[[sequence.to_string()]*count for sequence,count in zip(sequences, sequence_counts)])), bnp.DNAEncoding)
+    result = get_transcript_copies(sequences, sequence_counts)
+    bnp.testing.assert_encoded_raggedarray_equal(truth,result)
+
+
