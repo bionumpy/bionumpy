@@ -2,7 +2,7 @@ from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from .encodings.identity_encoding import IdentityEncoding
 from typing import Tuple, List
-from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, Encoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -386,7 +386,7 @@ def _encode_base_encoded_array(encoded_array, target_encoding):
 
 
 def np_array_as_encoded_array(s, target_encoding):
-    assert is_subclass_or_instance(target_encoding, NumericEncoding), s
+    assert hasattr(target_encoding, "is_numeric")
     return s
 
 
