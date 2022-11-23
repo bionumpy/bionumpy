@@ -3,6 +3,8 @@ import numpy as np
 import bionumpy as bnp
 from .datatypes import GFFEntry
 from .bnpdataclass import bnpdataclass
+from .encoded_array import change_encoding
+from .encodings import BaseEncoding
 from .io.strops import str_equal, split
 from . import streamable, EncodedRaggedArray, as_encoded_array
 from .dna import reverse_compliment
@@ -75,4 +77,7 @@ def get_transcript_sequences(gtf_entries, reference_sequence):
     names, strands, lengths = zip(*infos)
     transcript_sequences = EncodedRaggedArray(flat_exon_seqeunece, list(lengths))
     transcript_sequences = np.where((as_encoded_array(''.join(strands)) == "-")[:, np.newaxis], reverse_compliment(transcript_sequences), transcript_sequences)
-    return SequenceEntry(list(names), transcript_sequences)
+
+    # convert transcript encoding to BaseEncoding so that we can create a
+    # SequenceEntry.
+    return SequenceEntry(list(names), change_encoding(transcript_sequences, BaseEncoding))

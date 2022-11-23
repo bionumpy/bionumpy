@@ -4,7 +4,7 @@ from npstructures import RaggedArray, RaggedShape
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
 
-from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray, change_encoding
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encodings import BaseEncoding
 
@@ -178,7 +178,8 @@ def ints_to_strings(number: np.ndarray) -> EncodedRaggedArray:
     digits = np.abs(number)[:, np.newaxis] // 10**ragged_index % 10
     digits = EncodedRaggedArray(
         EncodedArray(digits.ravel(), DigitEncoding), digits.shape)
-    digits = as_encoded_array(digits, target_encoding=BaseEncoding)
+    digits = change_encoding(digits, BaseEncoding)
+    #digits = as_encoded_array(digits, target_encoding=BaseEncoding)
     digits[is_negative, 0] = "-"
     return digits
 

@@ -1,3 +1,4 @@
+import logging
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
@@ -7,6 +8,10 @@ import numpy as np
 
 
 class EncodingException(Exception):
+    pass
+
+
+class IncompatibleEncodingsException(Exception):
     pass
 
 
@@ -45,6 +50,7 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self._data, EncodedArray), self._data
         inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
         kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
+
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
         if isinstance(ret._data, EncodedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
@@ -271,13 +277,14 @@ def str_or_list_as_encoded_array(s, target_encoding):
 
 
 def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArray:
-    """Main function used to create encoded arrays
+    """Main function used to create encoded arrays from e.g. strings orl lists.
+    Can be called with already encoded arrays, and will then do nothing.
 
-    If input is `str` or `List[str]` objects, create an `EncodedArray` or `EncodedRaggedArray`
+    If input is `str` or `List[str]` objects, creates an `EncodedArray` or `EncodedRaggedArray`
     object from them with the given encoding.
 
-    If the input is an `EncodedArray` or `EncodedRaggedArray`, encode them to the `target_encoding`
-    if possible.
+    If the input is an `EncodedArray` or `EncodedRaggedArray` AND input is BaseEncoded,
+    encode the input to the `target_encoding` if possible. If `target_encoding` is None, nothing is done.
 
     Raw encoded data as `np.ndarray` objects should not be passed to this function. If you have
     already encoded data in `np.ndarray` objects, use the `EncodedArray.__init__`directly
@@ -294,6 +301,11 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
     EncodedArray
         Encoded data in an EncodedArray
 
+    default target encoding None:
+    if None: encode as base encoding if it is not encoded
+    if already encoded: do nothing
+    this function is not for changing encoding on stuff
+
     """
     if isinstance(s, str) or isinstance(s, list):
         return str_or_list_as_encoded_array(s, target_encoding)
@@ -303,8 +315,8 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         return np_array_as_encoded_array(s, target_encoding)
     else:
         assert isinstance(s, EncodedArray)
-        #if s.encoding != BaseEncoding and s.encoding != target_encoding:
-        #    raise EncodingException("Trying to encoded already encoded array with encoding %s to encoding %s" % (s.encoding, target_encoding))
+        if s.encoding != BaseEncoding and s.encoding != target_encoding:
+            raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s" % (s.encoding, target_encoding))
 
         return _encode_encoded_array(s, target_encoding)
 
@@ -321,10 +333,24 @@ def _encode_encoded_array(encoded_array, target_encoding):
     elif target_encoding == BaseEncoding:
         encoded_array = EncodedArray(encoded_array.encoding.decode(encoded_array.data), BaseEncoding)
     else:
-        raise EncodingException("Can only encode EncodedArray with BaseEncoding or target encoding. "
-                                "Base encoding is %s, target encoding is %s"
-                                % (str(encoded_array.encoding), str(target_encoding)))
+        raise IncompatibleEncodingsException("Can only encode EncodedArray with BaseEncoding or target encoding. "
+                                             "Base encoding is %s, target encoding is %s"
+                                            % (str(encoded_array.encoding), str(target_encoding)))
     return encoded_array
+
+
+def change_encoding(encoded_array, new_encoding):
+    assert isinstance(encoded_array, (EncodedArray, EncodedRaggedArray)), \
+        "Can only change encoding of EncodedArray or EncodedRaggedArray"
+
+    new_data = new_encoding.encode(
+        encoded_array.encoding.decode(encoded_array.ravel())
+    )
+    
+    if isinstance(encoded_array, EncodedArray):
+        return EncodedArray(new_data, new_encoding)
+    elif isinstance(encoded_array, EncodedRaggedArray):
+        return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array.shape)
 
 
 def _encode_base_encoded_array(encoded_array, target_encoding):
