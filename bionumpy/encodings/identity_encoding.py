@@ -7,8 +7,10 @@ class IdentityEncoding:
     def is_one_to_one_encoding(self):
         return True
 
-    def encode(self, s):
+    @classmethod
+    def encode(cls, s):
         return s
 
-    def decode(self, s):
+    @classmethod
+    def decode(cls, s):
         return s

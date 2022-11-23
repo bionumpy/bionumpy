@@ -284,7 +284,7 @@ def encode_string(s: str, target_encoding):
 
 def encode_list_of_strings(s: str, target_encoding):
     s = EncodedRaggedArray(
-        EncodedArray([ord(c) for ss in s for c in ss]),
+        EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding),
         [len(ss) for ss in s])
     return ragged_array_as_encoded_array(s, target_encoding)
 
@@ -324,7 +324,7 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
         if target_encoding is None or s.encoding == target_encoding:
             return s
         else:
-            if s.encoding != BaseEncoding:
+            if not s.encoding.is_base_encoding():
                 raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s. "
                                         "This is not supported. Use the change_encoding function." % (
                     s.encoding, target_encoding))
@@ -351,9 +351,9 @@ def _encode_encoded_array(encoded_array, target_encoding):
     if encoded_array.encoding == target_encoding:
         return encoded_array
 
-    if encoded_array.encoding == BaseEncoding:
+    if encoded_array.encoding.is_base_encoding():
         encoded_array = _encode_base_encoded_array(encoded_array, target_encoding)
-    elif target_encoding == BaseEncoding:
+    elif target_encoding.is_base_encoding():
         encoded_array = EncodedArray(encoded_array.encoding.decode(encoded_array.data), BaseEncoding)
     else:
         raise IncompatibleEncodingsException("Can only encode EncodedArray with BaseEncoding or target encoding. "
@@ -365,7 +365,6 @@ def _encode_encoded_array(encoded_array, target_encoding):
 def _encode_base_encoded_array(encoded_array, target_encoding):
     assert encoded_array.encoding.is_base_encoding()
     encoded_array = target_encoding.encode(encoded_array.data)
-    #if is_subclass_or_instance(target_encoding, NumericEncoding):
     if hasattr(target_encoding, "is_numeric"):
         encoded_array = encoded_array
     else:

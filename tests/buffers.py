@@ -4,11 +4,12 @@ from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval
 from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer
 from bionumpy.io.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.encoded_array import EncodedArray
+from bionumpy.encodings import BaseEncoding
 import numpy as np
 
 
 def chunk_from_text(text):
-    return EncodedArray(np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8))
+    return EncodedArray(np.frombuffer(bytes(text, encoding="utf8"), dtype=np.uint8), BaseEncoding)
 
 
 buffer_texts = {
