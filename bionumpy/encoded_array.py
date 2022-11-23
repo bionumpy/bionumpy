@@ -2,7 +2,7 @@ from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from .encodings.identity_encoding import IdentityEncoding
 from typing import Tuple, List
-from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -70,7 +70,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     encoding = None
 
-    def __init__(self, data: np.ndarray, encoding: Encoding = BaseEncoding):
+    def __init__(self, data: np.ndarray, encoding):
         """Create an encoded array form raw data and encoding.
 
         This should seldom be used directly. Only when you for some reason 
@@ -344,7 +344,7 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
 
     if isinstance(s, str):
         return encode_string(s, target_encoding)
-    elif isinstance(s, list) and len(s)>0 and isinstance(s[0], EncodedArray):
+    elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return list_of_encoded_arrays_as_encoded_ragged_array(s)
     elif isinstance(s, list):
         return encode_list_of_strings(s, target_encoding)

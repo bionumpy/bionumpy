@@ -2,6 +2,7 @@ import numpy as np
 from ..encoded_array import EncodedArray
 from .multiline_buffer import FastaIdxBuffer, FastaIdx
 from .files import bnp_open
+from ..encodings import BaseEncoding
 
 
 def read_index(filename: str) -> dict:
@@ -115,4 +116,4 @@ class IndexedFasta:
             ret.size - idx["rlen"],
             data.shape,
         )
-        return EncodedArray(((ret - ord("A")) % 32) + ord("A"))
+        return EncodedArray(((ret - ord("A")) % 32) + ord("A"), BaseEncoding)

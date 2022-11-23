@@ -1,5 +1,6 @@
 import pytest
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from bionumpy.encodings import BaseEncoding
 from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 import bionumpy as bnp
 import numpy as np
@@ -46,7 +47,7 @@ def test_works_with_ragged():
 
 def test_empty_encoded():
     result = as_encoded_array(['', ''])
-    true = EncodedRaggedArray(EncodedArray(np.empty((0,), dtype=np.uint8)),
+    true = EncodedRaggedArray(EncodedArray(np.empty((0,), dtype=np.uint8), BaseEncoding),
                               [0, 0])
                                            
     assert_encoded_raggedarray_equal(result, true)

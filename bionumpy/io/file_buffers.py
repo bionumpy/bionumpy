@@ -5,8 +5,7 @@ from npstructures import RaggedArray, RaggedView, RaggedShape
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import SequenceEntry, SequenceEntryWithQuality
 from ..encoded_array import EncodedArray, EncodedRaggedArray
-from ..encodings import QualityEncoding
-
+from ..encodings import QualityEncoding, BaseEncoding
 
 NEWLINE = "\n"
 
@@ -149,7 +148,7 @@ class FileBuffer:
 
     @classmethod
     def contains_complete_entry(cls, chunks):
-        n_new_lines = sum(np.sum(EncodedArray(chunk) == NEWLINE) for chunk in chunks)
+        n_new_lines = sum(np.sum(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
 
@@ -182,7 +181,7 @@ class OneLineBuffer(FileBuffer):
 
         """
         assert header_data is None
-        chunk = EncodedArray(chunk)
+        chunk = EncodedArray(chunk, BaseEncoding)
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer. Try increasing chunk_size."
@@ -228,7 +227,7 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
         lines = RaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
@@ -286,13 +285,13 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
         lines = EncodedRaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
         lines[1::step, :-1] = entries.sequence
         lines[2::step, 0] = "+"
-        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()))
+        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = "\n"
 

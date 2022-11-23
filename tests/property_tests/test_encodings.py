@@ -3,6 +3,7 @@ import bionumpy.encodings.alphabet_encoding as ae
 from bionumpy.testing import assert_encoded_array_equal
 import hypothesis.strategies as st
 from hypothesis import given
+import bionumpy as bnp
 from .strategies import get_strategy_from_encoding
 objs = (getattr(ae, name) for name in dir(ae) if not name.startswith("_"))
 encodings = [obj for obj in objs if isinstance(obj, ae.AlphabetEncoding)]
@@ -20,5 +21,5 @@ def test_encode_decode(data):
     lower_unencoded = unencoded.upper()
     unencoded = as_encoded_array(unencoded)
     encoded = encoding.encode(unencoded)
-    decoded = EncodedArray(encoding.decode(encoded))
+    decoded = EncodedArray(encoding.decode(encoded), bnp.encodings.BaseEncoding)
     assert_encoded_array_equal(decoded, as_encoded_array(lower_unencoded))

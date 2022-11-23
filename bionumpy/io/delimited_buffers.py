@@ -11,7 +11,7 @@ from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
-from ..encodings.base_encoding import get_base_encodings
+from ..encodings.base_encoding import get_base_encodings, BaseEncoding
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
@@ -62,7 +62,7 @@ class DelimitedBuffer(FileBuffer):
             DelimitedBuffer object of all complete lines
 
         """
-        chunk = EncodedArray(chunk)
+        chunk = EncodedArray(chunk, BaseEncoding)
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
@@ -259,8 +259,8 @@ class DelimitedBuffer(FileBuffer):
                 def dynamic(x):
                     if isinstance(x, EncodedRaggedArray):
                         print(repr(x.ravel()))
-                        return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel())), x.shape)
-                    return EncodedArray(encoding.decode(x))
+                        return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
+                    return EncodedArray(encoding.decode(x), BaseEncoding)
                 return dynamic
             else:
                 return funcs[datatype]
@@ -285,7 +285,7 @@ class DelimitedBuffer(FileBuffer):
                                    )[:, np.newaxis] #Hacking here to accept EncodedArray
                                   
                                   for column in columns], axis=-1).ravel()
-        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8)),
+        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8), BaseEncoding),
                                    lengths)
         n_columns = len(columns)
         for i, column in enumerate(columns):

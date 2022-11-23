@@ -5,6 +5,8 @@ from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..datatypes import SequenceEntry
 import numpy as np
 
+from ..encodings import BaseEncoding
+
 
 class MultiLineBuffer(FileBuffer):
     pass
@@ -22,7 +24,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
     def contains_complete_entry(cls, chunks):
         ends_with_new_line = False
         for chunk in chunks:
-            chunk = EncodedArray(chunk)
+            chunk = EncodedArray(chunk, BaseEncoding)
             new_lines = np.flatnonzero(chunk[:-1] == "\n")
             new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
             if new_entries.size >= 1:
@@ -62,7 +64,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         line_lengths[entry_starts[:-1]] = name_lengths + 2
         line_lengths[entry_starts[1:]-1] = last_length + 1
         lines = EncodedRaggedArray(
-            EncodedArray(np.zeros(line_lengths.sum(), dtype=np.uint8)), line_lengths)
+            EncodedArray(np.zeros(line_lengths.sum(), dtype=np.uint8), BaseEncoding), line_lengths)
         lines[entry_starts[:-1],1:-1] = entries.name
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
@@ -73,7 +75,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None):
         assert header_data is None, header_data
-        chunk = EncodedArray(chunk)
+        chunk = EncodedArray(chunk, BaseEncoding)
         assert chunk[0] == cls._new_entry_marker, str(chunk[:100])
         new_lines = np.flatnonzero(chunk[:-1] == "\n")
         new_entries = np.flatnonzero(chunk[new_lines+1] == cls._new_entry_marker)
