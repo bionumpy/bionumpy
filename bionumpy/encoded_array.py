@@ -1,6 +1,6 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
-from typing import Tuple
+from typing import Tuple, List
 from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
@@ -270,6 +270,16 @@ def str_or_list_as_encoded_array(s, target_encoding):
     return s
 
 
+def list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArray]):
+    assert all(isinstance(a, EncodedArray) for a in array_list)
+    encoding = array_list[0].encoding
+    assert all(a.encoding == encoding for a in array_list)
+    data = np.concatenate([a.data for a in array_list])
+    shape = [len(a) for a in array_list]
+    return EncodedRaggedArray(EncodedArray(data, encoding), shape)
+    
+    
+
 def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArray:
     """Main function used to create encoded arrays
 
@@ -295,6 +305,8 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
         Encoded data in an EncodedArray
 
     """
+    if isinstance(s, list) and len(s)>0 and isinstance(s[0], EncodedArray):
+        return list_of_encoded_arrays_as_encoded_ragged_array(s)
     if isinstance(s, str) or isinstance(s, list):
         return str_or_list_as_encoded_array(s, target_encoding)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):
