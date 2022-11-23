@@ -12,12 +12,71 @@ class BNPDataClass:
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
+        """
+        Parameters
+        ----------
+        fields: tuple
+            A tuple in format (field_name, field_type) for the new fields to be added
+        name: str
+            The optional user-defined name for the new class
+
+        Returns
+        --------
+        BNPDataClass with added fields
+
+        Examples
+        ---------
+
+        >>> from bionumpy.bnpdataclass import bnpdataclass
+        >>> from bionumpy.encodings import AminoAcidEncoding, DNAEncoding
+        >>> @bnpdataclass
+        ... class BaseDC:
+        ...     sequence_aa: AminoAcidEncoding
+
+        >>> extended_class = BaseDC.extend((('sequence', DNAEncoding), ('s1', int)))
+        >>> assert all(field.name in ['sequence', 'sequence_aa', 's1'] for field in dataclasses.fields(extended_class))
+        >>> print([field.name for field in dataclasses.fields(extended_class)])
+        ['sequence_aa', 'sequence', 's1']
+
+        """
         name = f"Dynamic{cls.__name__}" if name is None else name
         return bnpdataclass(dataclasses.make_dataclass(name, bases=(cls,), fields=fields))
 
     def add_fields(self, fields: dict, field_type_map: dict = None) -> 'BNPDataClass':
+        """
+        Parameters
+        ----------
+        fields: dict
+            a dictionary in containing the names of the new fields as keys and lists of values for each of the field as values
+
+        field_type_map: dict
+            a dictionary with field names as keys and types as values; for basic types, they can be inferred from the data and don't need to be
+            specified; but for fields that need to use some of the encodings, the specific encoding can be provided here
+
+        Returns
+        --------
+        BNPDataClass object with added fields with the provided values
+
+        Examples
+        ---------
+
+        >>> from bionumpy.bnpdataclass import bnpdataclass
+        >>> from bionumpy.encodings import AminoAcidEncoding, DNAEncoding
+        >>> @bnpdataclass
+        ... class BaseDC:
+        ...     sequence_aa: AminoAcidEncoding
+
+        >>> base_obj = BaseDC(['ACD', "EEA"])
+        >>> res_obj = base_obj.add_fields({"sequence": ['AA', 'ACT']}, field_type_map={'sequence': DNAEncoding})
+        >>> print(res_obj)
+        DynamicBaseDC with 2 entries
+                      sequence_aa                 sequence
+                              ACD                       AA
+                              EEA                      ACT
+
+        """
         fields_with_types = _extract_field_types(fields, field_type_map)
-        new_class = self.__class__.extend(tuple(fields_with_types.items()), self.__class__.__name__)
+        new_class = self.__class__.extend(tuple(fields_with_types.items()))
         return new_class(**{**vars(self), **fields})
 
 
@@ -118,6 +177,22 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
 
 
 def make_dataclass(fields: list, name: str = "DynamicDC") -> Type[BNPDataClass]:
+    """
+    Constructs a dynamic dataclass from a list of attributes
+
+    Parameters
+    ----------
+    fields: list
+        a list of tuples in format (field_name, field_type) to be used to construct the dynamic bnp dataclass
+
+    name: str
+        optional name of new class
+
+    Returns
+    -------
+    new BNPDataClass
+
+    """
     return bnpdataclass(dataclasses.make_dataclass(name, fields=fields))
 
 
