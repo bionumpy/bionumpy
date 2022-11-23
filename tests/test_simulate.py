@@ -1,7 +1,8 @@
 import pytest
 from bionumpy.io.motifs import Motif, read_motif
 from bionumpy.simulate.chipseq import simulate_chip_seq_fragments, simulate_read_fragments
-from bionumpy.simulate.rnaseq import get_transcript_copies
+from bionumpy.simulate.rnaseq import get_transcript_copies, fragment_transcript_copies
+from bionumpy.sequence import get_kmers
 import bionumpy as bnp
 import numpy as np
 from itertools import chain
@@ -40,4 +41,14 @@ def test_get_transcript_copies(sequences, sequence_counts):
     result = get_transcript_copies(sequences, sequence_counts)
     bnp.testing.assert_encoded_raggedarray_equal(truth,result)
 
+def test_fragment_transcript_copies(sequences, fragment_size=2):
+    truth = []
+    for sequence in sequences:
+        for i in range(0, len(sequence) - fragment_size + 1, fragment_size):
+            truth.append(sequence[i:i + fragment_size])
+    result = fragment_transcript_copies(sequences, fragment_size)
+    bnp.testing.assert_encoded_raggedarray_equal(truth,result)
+
+def test_sample_transcript_fragments(sequences, sampling_rate=0.9):
+    pass
 
