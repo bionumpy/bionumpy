@@ -56,6 +56,8 @@ class EncodedRaggedArray(RaggedArray):
             return EncodedRaggedArray(ret._data, ret.shape)
         return ret
 
+    def tolist(self):
+        return [row.to_string() for row in self]
 
 def get_NPSArray(array):
     return array.view(NPSArray)

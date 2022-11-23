@@ -16,3 +16,4 @@ pytest-cov
 coverage-badge
 sphinx-design
 sphinx_rtd_theme
+matplotlib
