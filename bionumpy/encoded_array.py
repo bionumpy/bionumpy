@@ -276,7 +276,7 @@ def str_or_list_as_encoded_array(s, target_encoding):
     return s
 
 
-def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArray:
+def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
     Can be called with already encoded arrays, and will then do nothing.
 
@@ -307,6 +307,18 @@ def as_encoded_array(s, target_encoding: Encoding = BaseEncoding) -> EncodedArra
     this function is not for changing encoding on stuff
 
     """
+    if isinstance(s, (EncodedArray, EncodedRaggedArray)):
+        if target_encoding is None or s.encoding == target_encoding:
+            return s
+        else:
+            if s.encoding != BaseEncoding:
+                raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s. "
+                                        "This is not supported. Use the change_encoding function." % (
+                    s.encoding, target_encoding))
+    else:
+        if target_encoding is None:
+            target_encoding = BaseEncoding
+
     if isinstance(s, str) or isinstance(s, list):
         return str_or_list_as_encoded_array(s, target_encoding)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):

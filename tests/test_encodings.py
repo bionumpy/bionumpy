@@ -16,3 +16,7 @@ def test_change_encoding_on_encoded_ragged_array():
 
     assert_raggedarray_equal(a.encoding.decode(a.ravel()), b.encoding.decode(b.ravel()))
 
+
+def test_as_encoded_on_already_encoded():
+    a = bnp.as_encoded_array(["ACTG"], bnp.encodings.DNAEncoding)
+
