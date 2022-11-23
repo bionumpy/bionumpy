@@ -1,8 +1,8 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
-from typing import Tuple
-from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
 from .encodings.identity_encoding import IdentityEncoding
+from typing import Tuple, List
+from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -282,6 +282,15 @@ def encode_string(s: str, target_encoding):
     return s
 
 
+def list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArray]):
+    assert all(isinstance(a, EncodedArray) for a in array_list)
+    encoding = array_list[0].encoding
+    assert all(a.encoding == encoding for a in array_list)
+    data = np.concatenate([a.data for a in array_list])
+    shape = [len(a) for a in array_list]
+    return EncodedRaggedArray(EncodedArray(data, encoding), shape)
+    
+
 def encode_list_of_strings(s: str, target_encoding):
     s = EncodedRaggedArray(
         EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding),
@@ -333,6 +342,8 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
 
     if isinstance(s, str):
         return encode_string(s, target_encoding)
+    elif isinstance(s, list) and len(s)>0 and isinstance(s[0], EncodedArray):
+        return list_of_encoded_arrays_as_encoded_ragged_array(s)
     elif isinstance(s, list):
         return encode_list_of_strings(s, target_encoding)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):

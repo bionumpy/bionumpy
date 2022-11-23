@@ -70,5 +70,13 @@ def test_insert_function(simple_sequence):
     assert_encoded_array_equal(result, concat_sequence)
 
 
+def test_encoded_array_list_to_raggedarray(simple_sequence):
+    array_list = as_encoded_array([simple_sequence, simple_sequence])
+    str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
+    assert_encoded_raggedarray_equal(array_list, str_list)
+                                
+    
+
+
 if __name__ == "__main__":
     test_works_with_ragged()
