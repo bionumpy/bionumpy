@@ -1,7 +1,8 @@
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
 from typing import Tuple
-from .encodings.base_encoding import BaseEncoding, OneToOneEncoding, Encoding, NumericEncoding
+from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
+from .encodings.identity_encoding import IdentityEncoding
 from .util import is_subclass_or_instance
 import numpy as np
 
@@ -26,9 +27,9 @@ class EncodedRaggedArray(RaggedArray):
             rows = [str(row) for row in self[:5]]
         else:
             rows = [f"{row}" for row in self]
-        encoding_info = f", {self.encoding}" if self.encoding != BaseEncoding else "" 
+        encoding_info = f", {self.encoding}" if not self.encoding.is_base_encoding()  else ""
         indent = " "*len("encoded_ragged_array([")
-        quotes = "'" if is_subclass_or_instance(self.encoding, OneToOneEncoding) else ""
+        quotes = "'" if self.encoding.is_one_to_one_encoding() else ""
         lines = [f"{indent}{quotes}{row}{quotes}," for row in rows]
         lines[0] = lines[0].replace(indent, "encoded_ragged_array([")
         if self.size > 1000:
@@ -122,8 +123,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.dtype
 
     def __repr__(self) -> str:
-        quotes = "'" if is_subclass_or_instance(self.encoding, OneToOneEncoding) else ""
-        if self.encoding == BaseEncoding:
+        quotes = "'" if self.encoding.is_one_to_one_encoding() else ""
+        if self.encoding.is_base_encoding():
             return f"encoded_array({quotes}{str(self)}{quotes})"
         return f"encoded_array({quotes}{str(self)}{quotes}, {self.encoding})"
 
@@ -137,7 +138,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         str
 
         """
-        if not is_subclass_or_instance(self.encoding, OneToOneEncoding):
+        if not self.encoding.is_one_to_one_encoding():
             # not possible to decode, get string
             n_dims = len(self.data.shape)
             assert n_dims in [0, 1, 2], "Unsupported number of dimensions for data"
@@ -276,7 +277,7 @@ def str_or_list_as_encoded_array(s, target_encoding):
 
 
 def encode_string(s: str, target_encoding):
-    s = EncodedArray([ord(c) for c in s], BaseEncoding)
+    s = EncodedArray([ord(c) for c in s], IdentityEncoding)
     s = _encode_base_encoded_array(s, target_encoding)
     return s
 
@@ -362,9 +363,10 @@ def _encode_encoded_array(encoded_array, target_encoding):
 
 
 def _encode_base_encoded_array(encoded_array, target_encoding):
-    assert encoded_array.encoding == BaseEncoding
+    assert encoded_array.encoding.is_base_encoding()
     encoded_array = target_encoding.encode(encoded_array.data)
-    if is_subclass_or_instance(target_encoding, NumericEncoding):
+    #if is_subclass_or_instance(target_encoding, NumericEncoding):
+    if hasattr(target_encoding, "is_numeric"):
         encoded_array = encoded_array
     else:
         encoded_array = EncodedArray(encoded_array, target_encoding)
