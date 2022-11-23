@@ -315,9 +315,8 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
                 raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s. "
                                         "This is not supported. Use the change_encoding function." % (
                     s.encoding, target_encoding))
-    else:
-        if target_encoding is None:
-            target_encoding = BaseEncoding
+    elif target_encoding is None:
+        target_encoding = BaseEncoding
 
     if isinstance(s, str) or isinstance(s, list):
         return str_or_list_as_encoded_array(s, target_encoding)
@@ -327,9 +326,6 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
         return np_array_as_encoded_array(s, target_encoding)
     else:
         assert isinstance(s, EncodedArray)
-        if s.encoding != BaseEncoding and s.encoding != target_encoding:
-            raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s" % (s.encoding, target_encoding))
-
         return _encode_encoded_array(s, target_encoding)
 
 
