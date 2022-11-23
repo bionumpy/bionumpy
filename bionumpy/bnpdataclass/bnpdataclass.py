@@ -1,6 +1,6 @@
 import dataclasses
 from typing import List, Type
-from npstructures.npdataclasses import npdataclass
+from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
 import numpy as np
 from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
@@ -8,7 +8,7 @@ from ..encodings import Encoding, NumericEncoding
 from ..util import is_subclass_or_instance
 
 
-class BNPDataClass:
+class BNPDataClass(NpDataClass):
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
