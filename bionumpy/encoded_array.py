@@ -49,6 +49,7 @@ class EncodedRaggedArray(RaggedArray):
         """ Convert any data to `EncodedArray` before calling the `ufunc` on them """
         assert isinstance(self._data, EncodedArray), self._data
         inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
+        #inputs = _parse_ufunc_inputs(inputs, self._data.encoding)
         kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
 
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
@@ -222,9 +223,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         Only support euqality checks for now. Numeric operations must be performed
         directly on the underlying data.
         """
-        #if method == "__call__" and ufunc in (np.equal, np.not_equal):
+
         if method == "__call__" and ufunc.__name__ in ("equal", "not_equal"):
-            return ufunc(*(as_encoded_array(a, self.encoding).raw() for a in inputs))
+            inputs = _parse_ufunc_inputs(inputs, self.encoding)
+            return ufunc(*inputs)
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):
@@ -265,17 +267,14 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(np.lib.stride_tricks.as_strided(self.data, *args, **kwargs), self.encoding)
 
 
-def str_or_list_as_encoded_array(s, target_encoding):
-    if isinstance(s, (EncodedArray, EncodedRaggedArray)):
-        assert s.encoding == target_encoding
-    elif isinstance(s, str):
-        s = encode_string(s, target_encoding)
-    elif isinstance(s, list):
-        s = encode_list_of_strings(s, target_encoding)
-    else:
-        raise EncodingException("Tried encoding str or list of strings but got %s" % type(s))
-
-    return s
+def _parse_ufunc_inputs(inputs, target_encoding):
+    for a in inputs:
+        assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), repr(a)
+        if isinstance(a, str):
+            a = encode_string(a, target_encoding)
+        elif isinstance(a, list):
+            a = encode_list_of_strings(a, target_encoding)
+        yield a.raw()
 
 
 def encode_string(s: str, target_encoding):

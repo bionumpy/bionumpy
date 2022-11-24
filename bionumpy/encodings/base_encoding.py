@@ -23,9 +23,22 @@ class OneToOneEncoding(Encoding):
     def encode(self, ascii_codes):
         return NotImplemented
 
-    @abstractmethod
-    def decode(self, encoded):
-        return NotImplemented
+    def encode(self, data):
+        from ..encoded_array import EncodedArray, EncodedRaggedArray
+        assert hasattr(self, "_encode"), "Missing implementation of _encode for %s" % self
+
+
+        if isinstance(data, (EncodedArray, EncodedRaggedArray)):
+            assert data.encoding.is_base_encoding(), "Data is already encoded. " \
+                                                     "Can only encode already encoded data if it is base encoded."
+
+        return self._encode(data)
+
+    def decode(self, data):
+        if hasattr(self, "_decode"):
+            return self._decode(data)
+
+        raise Exception("Missing implementation of _decode for %s" % self)
 
     def is_one_to_one_encoding(self):
         return True
