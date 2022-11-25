@@ -31,10 +31,8 @@ class AlphabetEncoding(OneToOneEncoding):
                              f"{[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
-    def decode(self, encoded):
+    def _decode(self, encoded):
         self._initialize()
-        if hasattr(encoded, "encoding"):
-            encoded = encoded.raw()
         return self._alphabet[np.asarray(encoded)]
 
     @property

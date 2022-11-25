@@ -106,7 +106,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if hasattr(self.encoding, "_decode"):
             # new system, can be used in all cases after refactoring
             data = self
-            return "".join([chr(c[0]) for c in self.encoding.decode(data)])
+            return "".join([chr(c) for c in self.encoding.decode(data).raw()])
         else:
             data = self.data
             return "".join([chr(c) for c in self.encoding.decode(data)])
