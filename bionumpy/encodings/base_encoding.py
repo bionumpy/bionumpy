@@ -104,8 +104,10 @@ class OneToOneEncoding(Encoding):
         if not hasattr(self, "_decode"):
             raise Exception("Missing implementation of _decode for %s" % self)
 
-        if isinstance(data, np.ndarray):
-            assert isinstance(self, NumericEncoding)
+        if isinstance(data, int):
+            return EncodedArray(self._decode(np.atleast_1d(data)), self)
+        elif isinstance(data, np.ndarray):
+            assert isinstance(self, NumericEncoding), "%s" % data
             return data
         elif isinstance(data, EncodedRaggedArray):
             return EncodedRaggedArray(
@@ -139,7 +141,6 @@ class ASCIIEncoding(OneToOneEncoding):
 
 class NumericEncoding(OneToOneEncoding):
     is_numeric = True
-    pass
 
 
 class CigarEncoding(NumericEncoding):

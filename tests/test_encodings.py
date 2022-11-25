@@ -8,6 +8,7 @@ import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
 from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding
+from bionumpy.encoded_array_functions import as_encoded_array
 
 
 #from bionumpy.encodings.base_encoding import OneToOneEncoding
@@ -39,6 +40,15 @@ class CustomEncoding(OneToOneEncoding):
         return data - 1
 
 
+class CustomNumericEncoding(NumericEncoding):
+    def _decode(self, data):
+        return data
+
+    def _encode(self, data):
+        return data
+
+
+
 @pytest.mark.parametrize("data", ["test", ["test1", "test2"]])
 def test_public_encode_decode_string(data):
     custom_encoding = CustomEncoding()
@@ -47,3 +57,19 @@ def test_public_encode_decode_string(data):
     encoded2 = custom_encoding.encode(decoded)
     assert np.all(encoded == encoded2)
 
+
+@pytest.mark.parametrize("data", [np.array([1, 2, 3])])
+def test_public_encode_decode_numeric(data):
+    custom_encoding = CustomNumericEncoding()
+    encoded = custom_encoding.encode(data)
+    decoded = custom_encoding.decode(encoded)
+    encoded2 = custom_encoding.encode(decoded)
+    assert np.all(encoded == encoded2)
+
+
+def test1():
+    seq = as_encoded_array(["ACTG", "AC"])
+    print(seq)
+    for s in seq:
+        print("SEQ: ", s.to_string())
+    assert True

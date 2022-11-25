@@ -53,6 +53,7 @@ def rnaseq_simulation_settings(sequence_counts):
 
 
 def test_get_transcript_copies(sequences, sequence_counts):
+    print("SEQUENCES: %s" % repr(sequences[0].to_string()))
     truth = bionumpy.encoded_array_functions.as_encoded_array(
         list(chain(*[[sequence.to_string()] * count for sequence, count in zip(sequences, sequence_counts)])),
         bnp.DNAEncoding)

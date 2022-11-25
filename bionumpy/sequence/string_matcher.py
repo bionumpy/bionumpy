@@ -1,5 +1,6 @@
 import logging
 
+import bionumpy.encodings
 from bionumpy.rollable import RollableFunction
 from bionumpy.encoded_array import EncodedArray
 from bionumpy import as_encoded_array
@@ -8,6 +9,7 @@ import itertools
 import numpy as np
 import re
 from npstructures import RaggedArray
+from bionumpy.encodings import AlphabetEncoding
 
 
 class StringMatcher(RollableFunction):
@@ -131,9 +133,16 @@ def construct_flexible_len_regex_matchers(matching_regex: str, encoding):
              for symbol in [str("." * n) for n in range(min_gap, max_gap + 1)]]))
 
 
+
+
 def construct_wildcard_matcher(matching_regex: str, encoding):
+    assert isinstance(encoding, AlphabetEncoding)
+
     mask = np.array([symbol == '.' for symbol in matching_regex])
-    replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") else chr(encoding.decode(0))
-    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)), target_encoding=encoding)
+    #replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") \
+    #    else chr(encoding.decode(0))
+    replacement = encoding._raw_alphabet[0]
+    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)),
+                                target_encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)
