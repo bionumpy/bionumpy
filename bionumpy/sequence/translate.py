@@ -3,7 +3,8 @@ from npstructures import RaggedArray
 from bionumpy.streams import streamable
 from bionumpy.encodings import BaseEncoding, AlphabetEncoding
 from bionumpy.sequence.kmers import KmerEncoder
-from bionumpy.encoded_array import as_encoded_array, EncodedArray
+from bionumpy.encoded_array import EncodedArray
+from bionumpy import as_encoded_array
 from bionumpy.util import apply_to_npdataclass
 
 

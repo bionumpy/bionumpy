@@ -1,6 +1,7 @@
 import numpy as np
 from bionumpy.rollable import RollableFunction
-from bionumpy.encoded_array import as_encoded_array, EncodedArray
+from bionumpy.encoded_array import EncodedArray
+from bionumpy import as_encoded_array
 from bionumpy.encodings import DNAEncoding, AlphabetEncoding
 
 

@@ -1,5 +1,6 @@
 import pytest
-from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
+from bionumpy import as_encoded_array
 from bionumpy.encodings import BaseEncoding
 from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 import bionumpy as bnp

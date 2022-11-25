@@ -4,7 +4,9 @@ from npstructures import RaggedArray, RaggedShape
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
 
-from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray, change_encoding
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array_functions import change_encoding
+from ..encoded_array_functions import as_encoded_array
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encodings import BaseEncoding
 

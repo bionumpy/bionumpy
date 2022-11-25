@@ -1,5 +1,6 @@
 import pytest
 
+import bionumpy.encoded_array_functions
 from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.sequence.kmers import KmerEncoder, _get_dna_kmers
 import numpy as np
@@ -39,7 +40,7 @@ def test_rolling_hash():
 
 
 def test_get_kmers():
-    sequence = bnp.as_encoded_array(
+    sequence = bionumpy.encoded_array_functions.as_encoded_array(
         ["ACTG", "CAAAAA", "TTT"], bnp.DNAEncoding
     )
     correct = [
@@ -67,7 +68,7 @@ def test_kmer_encoding():
 
 
 def test_kmer_encoding_repr_and_string():
-    sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    sequences = bionumpy.encoded_array_functions.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     kmers = bnp.sequence.get_kmers(sequences, 3)
     print(str(kmers[0]))
     print(repr(kmers[0]))
@@ -88,7 +89,7 @@ def test_get_kmer_encoding_labels():
 
 
 def test_count_kmers():
-    sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    sequences = bionumpy.encoded_array_functions.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     kmers = bnp.sequence.get_kmers(sequences, 3)
     counts = bnp.count_encoded(kmers, axis=None)
     assert counts["ACT"] == 1

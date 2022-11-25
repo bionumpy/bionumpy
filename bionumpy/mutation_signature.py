@@ -2,7 +2,8 @@ import numpy as np
 from .encodings import DNAEncoding, BaseEncoding
 from .variants import is_snp
 from .datatypes import Variant
-from .encoded_array import as_encoded_array, EncodedArray
+from .encoded_array import EncodedArray
+from . import as_encoded_array
 from .dna import reverse_compliment
 from .streams import streamable
 from .counter import count_encoded, EncodedCounts

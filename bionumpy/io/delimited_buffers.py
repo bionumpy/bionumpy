@@ -7,7 +7,8 @@ from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
                          GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
-from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array_functions import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings

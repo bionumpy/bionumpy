@@ -3,7 +3,8 @@ from typing import List, Type
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
 import numpy as np
-from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array_functions import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
 from ..util import is_subclass_or_instance
 

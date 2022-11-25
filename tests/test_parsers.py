@@ -10,7 +10,7 @@ from bionumpy.io.files import bnp_open
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
 from bionumpy.io.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.encoded_array import from_encoded_array
+from bionumpy.encoded_array_functions import from_encoded_array
 import bionumpy as bnp
 import glob
 

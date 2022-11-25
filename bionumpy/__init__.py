@@ -14,7 +14,8 @@ from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .io.delimited_buffers import (BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                                    GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
-from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from .encoded_array import EncodedArray, EncodedRaggedArray
+from .encoded_array_functions import as_encoded_array
 from .sequence.kmers import KmerEncoder
 from .sequence.minimizers import Minimizers
 from .sequence.position_weight_matrix import PositionWeightMatrix
@@ -28,7 +29,7 @@ SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
-__all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
+__all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "PhasedVCFMatrixBuffer", "VCFMatrixBuffer",

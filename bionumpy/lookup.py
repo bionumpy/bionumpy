@@ -1,5 +1,5 @@
 from .encodings import BaseEncoding
-from .encoded_array import as_encoded_array
+from . import as_encoded_array
 
 
 class Lookup:

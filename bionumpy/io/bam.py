@@ -5,7 +5,8 @@ from npstructures import RaggedArray, ragged_slice
 
 from ..datatypes import Bed6, BamEntry
 from ..cigar import count_reference_length, split_cigar
-from ..encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array_functions import as_encoded_array
 from ..encodings import BaseEncoding
 from ..encodings.alphabet_encoding import BamEncoding
 from .file_buffers import FileBuffer

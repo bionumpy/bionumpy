@@ -1,5 +1,6 @@
 import numpy as np
-from .encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from .encoded_array import EncodedArray, EncodedRaggedArray
+from . import as_encoded_array
 from .util import as_strided
 from npstructures import RaggedArray
 
