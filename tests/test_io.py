@@ -95,16 +95,3 @@ def test_write_dna_fastq():
     print(result)
     assert np.all(entry.sequence == result.sequence)
 
-
-def test_fastq_raises_format_exception():
-    _, _, buf_type = combos["fastq"]
-    text = """\
-@header
-actg
--
-!!!!
-"""
-    with pytest.raises(FormatException):
-        buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
-        buf.get_data()
-        

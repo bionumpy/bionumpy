@@ -257,7 +257,7 @@ class OneLineBuffer(FileBuffer):
         #               byte_position_number = header_idxs[self._data[header_idxs] != self.HEADER][0])
         # 
                       
-        assert np.all(self._data[header_idxs] == self.HEADER)
+        # assert np.all(self._data[header_idxs] == self.HEADER)
         self._is_validated = True
 
 

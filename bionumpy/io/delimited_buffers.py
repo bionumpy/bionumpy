@@ -17,6 +17,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
     ints_to_strings, split, str_to_int, str_to_float,
     int_lists_to_strings, float_to_strings)
+from .exceptions import FormatException
 import numpy as np
 
 
@@ -227,11 +228,11 @@ class DelimitedBuffer(FileBuffer):
             i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
         )
         delimiters = delimiters[: delimiters.size - last_new_line]
-        assert (
-            delimiters.size % n_delimiters_per_line == 0
-        ), f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})"
+        if delimiters.size % n_delimiters_per_line != 0:
+            raise FormatException(f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
         delimiters = delimiters.reshape(-1, n_delimiters_per_line)
-        assert np.all(chunk[delimiters[:, -1]] == NEWLINE), chunk
+        if not np.all(chunk[delimiters[:, -1]] == NEWLINE):
+            raise FormatException(f"irregular number of delimiters per line: {chunk}")
         self._validated = True
 
     @classmethod
