@@ -21,31 +21,22 @@ __all__ = ["BaseEncoding", "Encoding",
 #         return 2 * strands + cls.MIN_CODE
 
 
-class DigitEncoding(Encoding):
-    MIN_CODE = ord("0")
+class DigitEncodingFactory(NumericEncoding):
+    def __init__(self, min_code):
+        self._min_code = ord(min_code)
 
-    @classmethod
-    def encode(cls, bytes_array):
+    def encode(self, bytes_array):
         if not isinstance(bytes_array, np.ndarray):
             bytes_array = bytes_array.raw()
-        return bytes_array - cls.MIN_CODE
+        return bytes_array - self._min_code
 
-    @classmethod
-    def decode(cls, digits):
-        return digits + cls.MIN_CODE
+    def decode(self, digits):
+        return digits + self._min_code
 
 
-class QualityEncoding(NumericEncoding):
+DigitEncoding = DigitEncodingFactory("0")
+QualityEncoding = DigitEncodingFactory("!")
 
-    def encode(byte_array):
-        assert np.all((byte_array >= ord("!")) & (byte_array < ord("!")+94)), repr(byte_array)
-        res = byte_array - ord("!")
-        return res
-
-    def decode(quality):
-        assert np.all(quality < 94), quality
-        res = quality.astype(np.uint8) + ord("!")
-        return res
 
 
 def set_backend(lib):

@@ -148,7 +148,7 @@ def from_encoded_array(encoded_array: EncodedArray) -> str:
     if isinstance(encoded_array, EncodedRaggedArray):
         return [from_encoded_array(row) for row in encoded_array]
     else:
-        return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array.data))
+        return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array).raw())
 
 
 def change_encoding(encoded_array, new_encoding):

@@ -123,10 +123,10 @@ class OneToOneEncoding(Encoding):
 
 
 class ASCIIEncoding(OneToOneEncoding):
-    def encode(self, ascii_codes):
+    def _encode(self, ascii_codes):
         return ascii_codes
 
-    def decode(self, encoded):
+    def _decode(self, encoded):
         return encoded
 
     def __repr__(self):
