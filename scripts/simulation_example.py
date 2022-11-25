@@ -1,6 +1,5 @@
 from bionumpy.io.motifs import read_motif
 from bionumpy.simulate.chipseq import simulate_chip_seq_reads, simulate_sequence, ChipSeqSimulationSettings
-import matplotlib.pyplot as plt
 import bionumpy as bnp
 from bionumpy.intervals import get_pileup
 
@@ -22,6 +21,7 @@ def pass_through(func):
 
 @bnp.streamable()
 def plot_pileup(reads, length):
+    import matplotlib.pyplot as plt
     pileup = get_pileup(reads, length)
     plt.plot(pileup.to_array())
     plt.show()

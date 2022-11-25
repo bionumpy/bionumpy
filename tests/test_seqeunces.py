@@ -1,11 +1,12 @@
 import pytest
 from bionumpy.encoded_array import EncodedArray
+from bionumpy.encodings import BaseEncoding
 import numpy as np
 
 
 @pytest.fixture
 def sequence():
-    return EncodedArray(np.array([[1, 2], [2, 3]], dtype=np.uint8)+64)
+    return EncodedArray(np.array([[1, 2], [2, 3]], dtype=np.uint8)+64, BaseEncoding)
 
 
 def _test_sequence_repr(sequence):

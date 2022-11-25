@@ -9,6 +9,7 @@ from hypothesis import strategies as st
 from hypothesis import given, example
 from functools import partial
 import dataclasses
+import pytest
 
 type_to_strategy = {int: integers,
                     str: partial(ascii_text, min_size=1),
@@ -42,6 +43,7 @@ def table_to_dataclass(dataclass, table):
 # @given(table_strategies(MyDataclass))
 # @example(tables=[{'age': 0, 'name': '0'}, {'age': -1, 'name': '0'}])
 # @example(tables=[{'age': 0, 'child_ages': [0], 'money': 0.0, 'name': '0'}])
+@pytest.mark.skip("Skipped because requires encoding already encoded array with different encoding. Not supported")
 def _test_to_from_data(tables):
     data = table_to_dataclass(MyDataclass, tables)
     buffer_class = get_bufferclass_for_datatype(MyDataclass)

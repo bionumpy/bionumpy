@@ -3,6 +3,8 @@ import numpy as np
 import bionumpy as bnp
 from .datatypes import GFFEntry
 from .bnpdataclass import bnpdataclass
+from .encoded_array import change_encoding
+from .encodings import BaseEncoding
 from .io.strops import str_equal, split
 from . import streamable, EncodedRaggedArray, as_encoded_array
 from .dna import reverse_compliment
@@ -54,6 +56,9 @@ def get_exons(gtf_entries):
     return GFFExonEntry(*genes.shallow_tuple(), **attributes)
 
 
+def get_stranded_intervals(encoded_array, stranded_intervals):
+    pass
+
 @streamable()
 def get_transcript_sequences(gtf_entries, reference_sequence):
     if len(gtf_entries) == 0:
@@ -66,16 +71,13 @@ def get_transcript_sequences(gtf_entries, reference_sequence):
     infos = []
     for transcript_id, entries in groups:
         entries = list(entries)
-        print("transcript id", transcript_id, "n_pairs:", len(entries))
-        strand = entries[0].strand
+        strand = str(entries[0].strand)
         seq_length = sum(entry.stop - entry.start for entry in entries)
         infos.append((transcript_id, strand, seq_length))
-        # sequence = np.concatenate([entries[1] for pair in entries])
-        # if strand == "-":
-        #     sequence = reverse_compliment(sequence)
-        # sequence = EncodedRaggedArray(sequence, [len(sequence)])
-        # sequences[transcript_id] = sequence
     names, strands, lengths = zip(*infos)
     transcript_sequences = EncodedRaggedArray(flat_exon_seqeunece, list(lengths))
-    # keys = list(sequences.keys())
-    return SequenceEntry(list(names), transcript_sequences)
+    transcript_sequences = np.where((as_encoded_array(''.join(strands)) == "-")[:, np.newaxis], reverse_compliment(transcript_sequences), transcript_sequences)
+
+    # convert transcript encoding to BaseEncoding so that we can create a
+    # SequenceEntry.
+    return SequenceEntry(list(names), change_encoding(transcript_sequences, BaseEncoding))

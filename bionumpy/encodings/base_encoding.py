@@ -11,6 +11,12 @@ class Encoding:
     def get_labels(self):
         pass
 
+    def is_base_encoding(self):
+        return False
+
+    def is_one_to_one_encoding(self):
+        return False
+
 
 class OneToOneEncoding(Encoding):
     @abstractmethod
@@ -20,6 +26,9 @@ class OneToOneEncoding(Encoding):
     @abstractmethod
     def decode(self, encoded):
         return NotImplemented
+
+    def is_one_to_one_encoding(self):
+        return True
 
 
 class ASCIIEncoding(OneToOneEncoding):
@@ -35,8 +44,12 @@ class ASCIIEncoding(OneToOneEncoding):
     def __hash__(self):
         return hash(repr(self))
 
+    def is_base_encoding(self):
+        return True
+
 
 class NumericEncoding(OneToOneEncoding):
+    is_numeric = True
     pass
 
 

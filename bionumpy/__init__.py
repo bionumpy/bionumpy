@@ -21,6 +21,7 @@ from .sequence.position_weight_matrix import PositionWeightMatrix
 from .counter import count_encoded
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
+from . import testing, simulate
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)

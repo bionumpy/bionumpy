@@ -1,0 +1,40 @@
+import dataclasses
+
+from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass
+
+
+def test_add_fields():
+    @bnpdataclass
+    class BaseDC:
+        sequence_aa: AminoAcidEncoding
+
+    base_obj = BaseDC(['ACD', "EEA"])
+    for field_map_dict in [{"sequence": DNAEncoding}, None]:
+        res_obj = base_obj.add_fields({"sequence": ['AA', 'ACT']}, field_map_dict)
+
+        print(res_obj)
+
+        assert all(field.name in ['sequence', 'sequence_aa'] for field in dataclasses.fields(res_obj))
+        assert res_obj.sequence.tolist() == ["AA", "ACT"]  # TODO: fix type hinting for fully dynamic stuff
+
+
+def test_extend():
+    @bnpdataclass
+    class BaseDC:
+        sequence_aa: AminoAcidEncoding
+
+    extended_class = BaseDC.extend((('sequence', DNAEncoding), ('s1', int)))
+    assert issubclass(extended_class, BaseDC)
+    assert extended_class.__name__ == "DynamicBaseDC"
+    assert all(field.name in ['sequence', 'sequence_aa', 's1'] for field in dataclasses.fields(extended_class))
+
+
+def test_make_dataclass():
+
+    new_cls = make_dataclass([("sequence", DNAEncoding), ('signal1', int)])
+
+    assert issubclass(new_cls, BNPDataClass)
+    assert new_cls.__name__ == "DynamicDC"
+    assert all(field.name in ['sequence', 'signal1'] for field in dataclasses.fields(new_cls))

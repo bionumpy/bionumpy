@@ -1,6 +1,7 @@
 import pytest
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from bionumpy.testing import assert_encoded_raggedarray_equal
+from bionumpy.encodings import BaseEncoding
+from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 import bionumpy as bnp
 import numpy as np
 
@@ -8,6 +9,10 @@ import numpy as np
 @pytest.fixture
 def sequence():
     return EncodedArray(np.array([[1, 2], [2, 3]], dtype=np.uint8)+64, bnp.encodings.BaseEncoding)
+
+@pytest.fixture
+def simple_sequence():
+    return EncodedArray(np.array([1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
 
 
 def _test_sequence_repr(sequence):
@@ -42,7 +47,7 @@ def test_works_with_ragged():
 
 def test_empty_encoded():
     result = as_encoded_array(['', ''])
-    true = EncodedRaggedArray(EncodedArray(np.empty((0,), dtype=np.uint8)),
+    true = EncodedRaggedArray(EncodedArray(np.empty((0,), dtype=np.uint8), BaseEncoding),
                               [0, 0])
                                            
     assert_encoded_raggedarray_equal(result, true)
@@ -54,6 +59,23 @@ def test_empty_dna_encoded():
                               [0, 0])
                                            
     assert_encoded_raggedarray_equal(result, true)
+
+def test_array_function(simple_sequence):
+    result = np.append(simple_sequence, simple_sequence)
+    concat_sequence = EncodedArray(np.array([1, 2, 2, 3, 1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
+    assert_encoded_array_equal(result,  concat_sequence)
+
+def test_insert_function(simple_sequence):
+    result = np.insert(simple_sequence, 0, simple_sequence)
+    concat_sequence = EncodedArray(np.array([1, 2, 2, 3, 1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
+    assert_encoded_array_equal(result, concat_sequence)
+
+
+def test_encoded_array_list_to_raggedarray(simple_sequence):
+    array_list = as_encoded_array([simple_sequence, simple_sequence])
+    str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
+    assert_encoded_raggedarray_equal(array_list, str_list)
+                                
     
 
 

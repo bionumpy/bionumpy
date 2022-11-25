@@ -42,7 +42,7 @@ def test_genotype_encoding():
         "1/1\t./0\t0/.\t",
     ]
     data = bnp.as_encoded_array(raw_data)
-    encoded = bnp.EncodedArray(GenotypeRowEncoding.encode(data))
+    encoded = bnp.EncodedArray(GenotypeRowEncoding.encode(data), bnp.encodings.BaseEncoding)
     decoded = GenotypeRowEncoding.decode(encoded)
     decoded_string = [
         ''.join((chr(c) for c in d)) + "\t" for d in decoded

@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 def as_strided(arr, shape=None, strides=None, **kwargs):
-    logger.warning(f"{(arr, shape, strides)}")
     sys.stdout.flush()
     sys.stderr.flush()
     # assert strides is not None, (arr, shape, strides)

@@ -35,7 +35,7 @@ def simulate_chip_seq_fragments(reference_sequence, motif, n_fragments=1000, fra
     return Interval(["."]*len(start), start, stop)
 
 @streamable()
-def simulate_read_fragments(fragments, read_length):
+def simulate_read_fragments(fragments: Interval, read_length: int):
     read_length=read_length
     strands = EncodedArray(rng.choice([0, 1], replace=True, size=len(fragments)), StrandEncoding)
     print(strands)

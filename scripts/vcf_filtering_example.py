@@ -9,8 +9,8 @@ def remove_variants_with_N(chunk):
     new_variants = chunk[~mask]
 
     # write new variants to file:
-    #with bnp.open("tmp_variants.tmp", "w", buffer_type=bnp.VCFMatrixBuffer) as f:
-    #    f.write(new_variants)
+    with bnp.open("tmp_variants.vcf", "w", buffer_type=bnp.VCFMatrixBuffer) as f:
+        f.write(new_variants)
 
 
 def phsased_vcf_example(chunk):
@@ -20,7 +20,7 @@ def phsased_vcf_example(chunk):
 
 def test():
     analyses = [remove_variants_with_N, phsased_vcf_example]
-    analyses = [phsased_vcf_example]
+    analyses = [remove_variants_with_N]
     for func in analyses:
         f = bnp.open("example_data/variants_with_header.vcf", buffer_type=bnp.VCFMatrixBuffer)
         data = f.read()

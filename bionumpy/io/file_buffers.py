@@ -2,11 +2,11 @@ import sys
 import numpy as np
 from io import FileIO
 from npstructures import RaggedArray, RaggedView, RaggedShape
+from .exceptions import FormatException
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import SequenceEntry, SequenceEntryWithQuality
 from ..encoded_array import EncodedArray, EncodedRaggedArray
-from ..encodings import QualityEncoding
-
+from ..encodings import QualityEncoding, BaseEncoding
 
 NEWLINE = "\n"
 
@@ -34,6 +34,10 @@ class FileBuffer:
         self._new_lines = np.asanyarray(new_lines)
         self._is_validated = False
         self.size = self._data.size
+
+    def raise_if(condition, *args, **kwargs):
+        if condition:
+            raise FormatException(*args, **kwargs)
 
     @classmethod
     def read_header(cls, file_object: FileIO):
@@ -65,7 +69,6 @@ class FileBuffer:
             if line[0] != comment:
                 file_object.seek(-len(line), 1)
                 break
-        
 
     @classmethod
     def from_raw_buffer(cls, raw_buffer: np.ndarray, header_data=None) -> "FileBuffer":
@@ -87,8 +90,6 @@ class FileBuffer:
 
         Examples
         --------
-        
-
         """
 
         return NotImplemented
@@ -149,7 +150,7 @@ class FileBuffer:
 
     @classmethod
     def contains_complete_entry(cls, chunks):
-        n_new_lines = sum(np.sum(EncodedArray(chunk) == NEWLINE) for chunk in chunks)
+        n_new_lines = sum(np.sum(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
 
@@ -158,7 +159,6 @@ class OneLineBuffer(FileBuffer):
 
     n_lines_per_entry = 2
     _buffer_divisor = 32
-
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
@@ -182,7 +182,7 @@ class OneLineBuffer(FileBuffer):
 
         """
         assert header_data is None
-        chunk = EncodedArray(chunk)
+        chunk = EncodedArray(chunk, BaseEncoding)
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
         assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer. Try increasing chunk_size."
@@ -192,12 +192,11 @@ class OneLineBuffer(FileBuffer):
 
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
-
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        sequences = self.lines[1 :: self.n_lines_per_entry, :-1]
+        sequences = self.lines[1::self.n_lines_per_entry, :-1]
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
@@ -228,11 +227,12 @@ class OneLineBuffer(FileBuffer):
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
-        lines = RaggedArray(buf, line_lengths)
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
+        lines = EncodedRaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
-        lines[1::step, :-1] = entries.sequence
+        lines[1::step, :-1] = EncodedRaggedArray(
+            EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()),  entries.sequence.encoding),entries.sequence.shape)
 
         lines[0::step, 0] = ">"
 
@@ -246,6 +246,16 @@ class OneLineBuffer(FileBuffer):
             self._new_lines[self.n_lines_per_entry - 1 : -1 : self.n_lines_per_entry]
             + 1
         )
+        # if np.any(self._data[header_idxs] != self.HEADER):
+        #     entry_number = np.flatnonzero(self._data[header_idxs] != self.HEADER)[0]
+        #     byte_position = header_idxs[entry_number]
+        #     offending_text = self._data(header_idxs[entry_number]:header_idxs[entry_number+1]))
+        #                             
+        # self.raise_if(np.any(self._data[header_idxs] != self.HEADER),
+        #               "Missing header symbol for header",
+        #               byte_position_number = header_idxs[self._data[header_idxs] != self.HEADER][0])
+        # 
+                      
         assert np.all(self._data[header_idxs] == self.HEADER)
         self._is_validated = True
 
@@ -286,13 +296,13 @@ class FastQBuffer(OneLineBuffer):
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8))
+        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
         lines = EncodedRaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
         lines[0::step, 1:-1] = entries.name
-        lines[1::step, :-1] = entries.sequence
+        lines[1::step, :-1] = EncodedRaggedArray(EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()), BaseEncoding), entries.sequence.shape)
         lines[2::step, 0] = "+"
-        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()))
+        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding)
         lines[0::step, 0] = cls.HEADER
         lines[:, -1] = "\n"
 

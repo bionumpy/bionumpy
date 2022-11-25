@@ -88,7 +88,7 @@ class BamBuffer(FileBuffer):
         n_cigar_bytes = n_cigar_op*4
         read_names = ragged_slice(self._data, self._new_lines+36, self._new_lines+36+l_read_name-1)
         read_names = EncodedRaggedArray(
-            EncodedArray(read_names.ravel()), read_names.shape)
+            EncodedArray(read_names.ravel(), BaseEncoding), read_names.shape)
         cigars = ragged_slice(self._data, self._new_lines+36+l_read_name,
                               self._new_lines+36+l_read_name+n_cigar_bytes)
 
