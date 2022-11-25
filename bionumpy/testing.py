@@ -2,15 +2,17 @@ import dataclasses
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from npstructures.testing import assert_raggedarray_equal
 from npstructures.npdataclasses import shallow_tuple
-from .encoded_array import EncodedArray, EncodedRaggedArray
+from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from npstructures import RaggedArray
 import numpy as np
 
 def assert_encoded_array_equal(array1, array2):
+    # array1, array2 = (as_encoded_array(a) for a in (array1, array2))
     assert array1.encoding == array2.encoding, (array1.encoding, array2.encoding)
     assert_array_equal(array1.raw(), array2.raw())
 
 def assert_encoded_raggedarray_equal(array1, array2):
+    # array1, array2 = (as_encoded_array(a) for a in (array1, array2))
     assert array1.encoding == array2.encoding, (array1.encoding, array2.encoding)
     assert_raggedarray_equal(array1.raw(), array2.raw())
 

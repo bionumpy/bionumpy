@@ -89,5 +89,5 @@ def test_get_rnaseq_reads(sequences, read_length=3):
 
 def test_simualte_rnaseq(sequences, rnaseq_simulation_settings):
     result = simulate_rnaseq(sequences, rnaseq_simulation_settings)
-    assert np.all([len(item) for item in result] == [rnaseq_simulation_settings.read_length] * len(result))
+    assert np.all([len(item.sequence) for item in result] == [rnaseq_simulation_settings.read_length] * len(result))
 

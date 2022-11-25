@@ -7,7 +7,8 @@ from io import BytesIO
 import bionumpy as bnp
 from bionumpy import BedBuffer
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader
-from .buffers import buffer_texts, combos, big_fastq_text
+from bionumpy.io.exceptions import FormatException
+from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
 from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal
 
@@ -84,3 +85,27 @@ def test_append_to_file(buffer_name):
     assert len(data_read) == len(data) * 2
 
     os.remove(file_path)
+
+
+def test_write_dna_fastq():
+    _, data, buf_type= combos["fastq"]
+    entry = SequenceEntryWithQuality(["name"], ["ACGT"], ["!!!!"])
+    entry.sequence = bnp.as_encoded_array(entry.sequence, bnp.DNAEncoding)
+    result = buf_type.from_raw_buffer(buf_type.from_data(entry)).get_data()
+    print(result)
+    assert np.all(entry.sequence == result.sequence)
+
+
+@pytest.mark.skip("unimplemented")
+def test_fastq_raises_format_exception():
+    _, _, buf_type = combos["fastq"]
+    text = """\
+@header
+actg
+-
+!!!!
+"""
+    with pytest.raises(FormatException):
+        buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
+        buf.get_data()
+        
