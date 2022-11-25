@@ -24,17 +24,15 @@ class AlphabetEncoding(OneToOneEncoding):
 
     def _encode(self, byte_array):
         self._initialize()
-        if hasattr(byte_array, "raw"):
-            byte_array = byte_array.raw()
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
-            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
+            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} "
+                             f"to {self.__class__.__name__}. Invalid character(s): "
+                             f"{[chr(c) for c in byte_array[ret==255]]}")
         return ret
 
     def decode(self, encoded):
         self._initialize()
-        if hasattr(encoded, "encoding"):
-            encoded = encoded.raw()
         return self._alphabet[np.asarray(encoded)]
 
     @property
