@@ -58,6 +58,7 @@ class EncodedRaggedArray(RaggedArray):
     def tolist(self):
         return [row.to_string() for row in self]
 
+
 def get_NPSArray(array):
     return array.view(NPSArray)
 
@@ -102,7 +103,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
-        return "".join([chr(c) for c in self.encoding.decode(self.data)])
+        if hasattr(self, "_decode"):
+            # new system, can be used in all cases after refactoring
+            data = self
+        else:
+            data = self.data
+        return "".join([chr(c) for c in self.encoding.decode(data)])
 
     def reshape(self, *args, **kwargs) -> "EncodedArray":
         return self.__class__(self.data.reshape(*args, **kwargs), self.encoding)
@@ -158,7 +164,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return text
 
         else:
-            text = self.encoding.decode(self.data)
+            data = self.data
+            if hasattr(self.encoding, "_decode"):
+                data = self  # todo: Default after encoding refactoring
+                text = self.encoding.decode(data).raw()
+            else:
+                text = self.encoding.decode(data)
 
             if len(self.data.shape) == 0:
                 return chr(int(text))

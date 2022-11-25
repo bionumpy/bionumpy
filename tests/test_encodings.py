@@ -1,10 +1,15 @@
 import numpy as np
+import pytest
+
 import bionumpy as bnp
 from npstructures.testing import assert_raggedarray_equal
 
 import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
+from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding
+
+
 #from bionumpy.encodings.base_encoding import OneToOneEncoding
 
 
@@ -26,7 +31,7 @@ def test_as_encoded_on_already_encoded():
     a = bionumpy.encoded_array_functions.as_encoded_array(["ACTG"], bnp.encodings.DNAEncoding)
 
 
-class CustomEncoding(bnp.encodings.base_encoding.OneToOneEncoding):
+class CustomEncoding(OneToOneEncoding):
     def _encode(self, data):
         return data + 1
 
@@ -34,9 +39,11 @@ class CustomEncoding(bnp.encodings.base_encoding.OneToOneEncoding):
         return data - 1
 
 
-def test_public_encode_decode():
+@pytest.mark.parametrize("data", ["test", ["test1", "test2"]])
+def test_public_encode_decode_string(data):
     custom_encoding = CustomEncoding()
-    data = np.zeros(4)
     encoded = custom_encoding.encode(data)
     decoded = custom_encoding.decode(encoded)
-    assert np.all(data == decoded)
+    encoded2 = custom_encoding.encode(decoded)
+    assert np.all(encoded == encoded2)
+

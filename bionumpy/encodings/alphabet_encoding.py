@@ -22,7 +22,7 @@ class AlphabetEncoding(OneToOneEncoding):
         self._mask[lower_alphabet] = True
         self._is_initialized = True
 
-    def encode(self, byte_array):
+    def _encode(self, byte_array):
         self._initialize()
         if hasattr(byte_array, "raw"):
             byte_array = byte_array.raw()
