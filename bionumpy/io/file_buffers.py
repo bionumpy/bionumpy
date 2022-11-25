@@ -246,7 +246,8 @@ class OneLineBuffer(FileBuffer):
             self._new_lines[self.n_lines_per_entry - 1 : -1 : self.n_lines_per_entry]
             + 1
         )
-        # if np.any(self._data[header_idxs] != self.HEADER):
+        if np.any(self._data[header_idxs] != self.HEADER):
+            raise FormatException("Invalid header in chunk" % self._data)
         #     entry_number = np.flatnonzero(self._data[header_idxs] != self.HEADER)[0]
         #     byte_position = header_idxs[entry_number]
         #     offending_text = self._data(header_idxs[entry_number]:header_idxs[entry_number+1]))
@@ -292,6 +293,11 @@ class FastQBuffer(OneLineBuffer):
             ).ravel()
             + 1
         )
+
+    def _validate(self):
+        super()._validate()
+        if np.any(self._data[self._new_lines[1::self.n_lines_per_entry] + 1] != "+"):
+            raise FormatException(f"Expected '+' at third line of entry in {self._data}")
 
     @classmethod
     def from_data(cls, entries):

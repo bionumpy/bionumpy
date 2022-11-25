@@ -96,7 +96,6 @@ def test_write_dna_fastq():
     assert np.all(entry.sequence == result.sequence)
 
 
-@pytest.mark.skip("unimplemented")
 def test_fastq_raises_format_exception():
     _, _, buf_type = combos["fastq"]
     text = """\
