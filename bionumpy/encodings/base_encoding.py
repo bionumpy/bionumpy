@@ -44,6 +44,7 @@ class OneToOneEncoding(Encoding):
             return r
         elif isinstance(data, np.ndarray):
             if isinstance(self, NumericEncoding):
+                #out = data
                 out = self._encode(data)
             else:
                 out = EncodedArray(self._encode(data), self)

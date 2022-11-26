@@ -84,6 +84,7 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
         #new = target_encoding.encode(s)
         #assert isinstance(new, RaggedArray), "%s, %s" % (type(new), type(s))
         old = ragged_array_as_encoded_array(s, target_encoding)
+        #assert np.all(old.ravel() == new.ravel()), "%s, %s != %s, %s, %s, %s, %s" % (target_encoding, old, new, type(old), type(new), repr(old), repr(new))
         #assert old.shape == new.shape, "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
         #assert_raggedarray_equal(old, new), "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
         return old
@@ -127,6 +128,7 @@ def _encode_base_encoded_array(encoded_array, target_encoding):
 def np_array_as_encoded_array(s, target_encoding):
     assert hasattr(target_encoding, "is_numeric")
     return s
+    #return target_encoding.encode(s)
 
 
 def ragged_array_as_encoded_array(s, target_encoding):
