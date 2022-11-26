@@ -30,23 +30,24 @@ class OneToOneEncoding(Encoding):
             assert data.encoding.is_base_encoding(), "Data is already encoded. " \
                                                      "Can only encode already encoded data if it is base encoded."
         if isinstance(data, str):
-            return self._encode_string(data)
+            out = self._encode_string(data)
         elif isinstance(data, list) and len(data) > 0 and isinstance(data[0], EncodedArray):
-            return list_of_encoded_arrays_as_encoded_ragged_array(data)
+            out = list_of_encoded_arrays_as_encoded_ragged_array(data)
         elif isinstance(data, list):
-            return self._encode_list_of_strings(data)
+            out = self._encode_list_of_strings(data)
         elif isinstance(data, (RaggedArray, EncodedRaggedArray)):
-            return self._ragged_array_as_encoded_array(data)
+            out = self._ragged_array_as_encoded_array(data)
         elif isinstance(data, np.ndarray):
             if isinstance(self, NumericEncoding):
-                return self._encode(data)
+                out = self._encode(data)
             else:
-                return EncodedArray(self._encode(data), self)
+                out = EncodedArray(self._encode(data), self)
         else:
             assert isinstance(data, EncodedArray)
-            return self._encode_encoded_array(data)
+            out = self._encode_encoded_array(data)
 
-        return self._encode(data)
+        return out
+
 
     def _encode_encoded_array(self, encoded_array):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -75,7 +76,10 @@ class OneToOneEncoding(Encoding):
     def _ragged_array_as_encoded_array(self, s):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
         if isinstance(self, NumericEncoding):
-            data = self._encode(s.ravel())
+            if isinstance(s, EncodedRaggedArray):
+                s = s.raw()
+            s = s.ravel()
+            data = self._encode(s)
             out_class = RaggedArray
         else:
             out_class = EncodedRaggedArray
@@ -108,10 +112,13 @@ class OneToOneEncoding(Encoding):
             return EncodedArray(self._decode(np.atleast_1d(data)), self)
         elif isinstance(data, np.ndarray):
             assert isinstance(self, NumericEncoding), "%s" % data
-            return data
+            return self._decode(data)
         elif isinstance(data, EncodedRaggedArray):
             return EncodedRaggedArray(
                 EncodedArray(self._decode(data.raw().ravel()), BaseEncoding), data.shape)
+        elif isinstance(data, RaggedArray):
+            assert isinstance(self, NumericEncoding), "%s" % data
+            return RaggedArray(self._decode(data.ravel()), data.shape)
         elif isinstance(data, EncodedArray):
             return EncodedArray(self._decode(data.raw()), BaseEncoding)
         else:

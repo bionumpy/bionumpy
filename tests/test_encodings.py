@@ -3,10 +3,11 @@ import pytest
 
 import bionumpy as bnp
 from npstructures.testing import assert_raggedarray_equal
-
+from npstructures import RaggedArray
 import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
+from bionumpy.encodings import DigitEncoding
 from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding
 from bionumpy.encoded_array_functions import as_encoded_array
 
@@ -48,7 +49,6 @@ class CustomNumericEncoding(NumericEncoding):
         return data
 
 
-
 @pytest.mark.parametrize("data", ["test", ["test1", "test2"]])
 def test_public_encode_decode_string(data):
     custom_encoding = CustomEncoding()
@@ -58,13 +58,24 @@ def test_public_encode_decode_string(data):
     assert np.all(encoded == encoded2)
 
 
-@pytest.mark.parametrize("data", [np.array([1, 2, 3])])
-def test_public_encode_decode_numeric(data):
+@pytest.mark.parametrize("data", [np.array([1, 2, 3]), np.array([[1, 10], [1]])])
+def test_encode_numeric(data):
     custom_encoding = CustomNumericEncoding()
     encoded = custom_encoding.encode(data)
     decoded = custom_encoding.decode(encoded)
     encoded2 = custom_encoding.encode(decoded)
     assert np.all(encoded == encoded2)
+
+
+@pytest.mark.parametrize("data", ["1234", ["1234", "5678"]])
+def test_digit_encoding(data):
+    encoding = DigitEncoding
+    encoded = encoding.encode(data)
+    decoded = encoding.decode(encoded)
+    encoded2 = encoding.encode(decoded)
+    assert_raggedarray_equal(encoded, encoded2)
+
+
 
 
 def test1():

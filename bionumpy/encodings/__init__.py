@@ -25,12 +25,10 @@ class DigitEncodingFactory(NumericEncoding):
     def __init__(self, min_code):
         self._min_code = ord(min_code)
 
-    def encode(self, bytes_array):
-        if not isinstance(bytes_array, np.ndarray):
-            bytes_array = bytes_array.raw()
+    def _encode(self, bytes_array):
         return bytes_array - self._min_code
 
-    def decode(self, digits):
+    def _decode(self, digits):
         return digits + self._min_code
 
 
