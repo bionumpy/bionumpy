@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 import bionumpy as bnp
 from npstructures.testing import assert_raggedarray_equal
 from npstructures import RaggedArray
@@ -67,15 +66,17 @@ def test_encode_numeric(data):
     assert np.all(encoded == encoded2)
 
 
-@pytest.mark.parametrize("data", ["1234", ["1234", "5678"]])
+@pytest.mark.parametrize("data",
+                         ["1234",
+                         ["1234", "5678"],
+                         np.array([1, 2, 3, 4]),
+                         RaggedArray([[1, 2, 3], [4]])])
 def test_digit_encoding(data):
     encoding = DigitEncoding
     encoded = encoding.encode(data)
     decoded = encoding.decode(encoded)
     encoded2 = encoding.encode(decoded)
     assert_raggedarray_equal(encoded, encoded2)
-
-
 
 
 def test1():
