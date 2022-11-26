@@ -29,15 +29,25 @@ def test_buffer_read(buffer_name):
         assert_npdataclass_equal(line, true_line)
 
 
-@pytest.mark.parametrize("buffer_name", ["fasta", "fastq", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
+#@pytest.mark.parametrize("buffer_name", ["fastq", "fasta", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
+@pytest.mark.parametrize("buffer_name", ["fastq"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
 def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     if buffer_name == "multiline_fasta":
         buf_type.n_characters_per_line = 6
     data = buf_type.dataclass.stack_with_ragged(data)
+    print("DATA")
+    print(repr(data))
     buf = buf_type.from_data(data)
+    print("Buffer")
+    print(repr(buf))
     print(buf.to_string())
     print(true_buf.to_string())
+    print("BUF")
+    print(repr(buf))
+    print("TRUE BUF")
+    print(repr(true_buf))
+    print("BUF qual")
     assert np.all(true_buf == buf)
 
 

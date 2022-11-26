@@ -1,5 +1,5 @@
 import numpy as np
-from .base_encoding import BaseEncoding, Encoding, NumericEncoding, CigarEncoding
+from .base_encoding import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)
@@ -34,7 +34,7 @@ class DigitEncodingFactory(NumericEncoding):
 
 DigitEncoding = DigitEncodingFactory("0")
 QualityEncoding = DigitEncodingFactory("!")
-
+CigarEncoding = DigitEncodingFactory(chr(0))
 
 
 def set_backend(lib):

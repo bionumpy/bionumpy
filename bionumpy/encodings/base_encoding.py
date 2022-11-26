@@ -29,42 +29,28 @@ class OneToOneEncoding(Encoding):
         if isinstance(data, (EncodedArray, EncodedRaggedArray)):
             assert data.encoding.is_base_encoding(), "Data is already encoded. " \
                                                      "Can only encode already encoded data if it is base encoded."
+            data = data.raw()  # input from here is always "raw"
+
         if isinstance(data, str):
             out = self._encode_string(data)
         elif isinstance(data, list) and len(data) > 0 and isinstance(data[0], EncodedArray):
             out = list_of_encoded_arrays_as_encoded_ragged_array(data)
         elif isinstance(data, list):
             out = self._encode_list_of_strings(data)
-        elif isinstance(data, (RaggedArray, EncodedRaggedArray)):
-            out = self._ragged_array_as_encoded_array(data)
+        elif isinstance(data, RaggedArray):
+            print("IS RAGGED ARRAY")
+            r = self._ragged_array_as_encoded_array(data)
+            assert isinstance(r, (EncodedRaggedArray, RaggedArray))
+            return r
         elif isinstance(data, np.ndarray):
             if isinstance(self, NumericEncoding):
                 out = self._encode(data)
             else:
                 out = EncodedArray(self._encode(data), self)
         else:
-            assert isinstance(data, EncodedArray)
-            out = self._encode_encoded_array(data)
+            assert False
 
         return out
-
-
-    def _encode_encoded_array(self, encoded_array):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
-        """Encode an encoded array with a new encoding.
-        Encoded array should either be BaseEncoded or have target_encoding"""
-        assert isinstance(encoded_array, EncodedArray), (encoded_array, repr(encoded_array), type(encoded_array))
-        if encoded_array.encoding == self:
-            return encoded_array
-
-        if encoded_array.encoding.is_base_encoding():
-            encoded_array = self._encode_base_encoded_array(encoded_array)
-        elif self.is_base_encoding():
-            encoded_array = EncodedArray(encoded_array.encoding.decode(encoded_array.data), BaseEncoding)
-        else:
-            raise Exception("Can only encode EncodedArray with BaseEncoding or target encoding. "
-                            "Base encoding is %s, target encoding is %s" % (str(encoded_array.encoding), str(self)))
-        return encoded_array
 
     def _encode_list_of_strings(self, s: str):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -75,17 +61,29 @@ class OneToOneEncoding(Encoding):
 
     def _ragged_array_as_encoded_array(self, s):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
+
+        data = self.encode(s.ravel())
+        if isinstance(data, EncodedArray):
+            return EncodedRaggedArray(data, s.shape)
+
+        print("_ragged array as encoded array")
+        print(s)
+
+        return RaggedArray(data, s.shape)
+
+        """
+        if isinstance(s, EncodedRaggedArray):
+            s = s.raw()
+
         if isinstance(self, NumericEncoding):
-            if isinstance(s, EncodedRaggedArray):
-                s = s.raw()
-            s = s.ravel()
-            data = self._encode(s)
+            data = self._encode(s.ravel())
             out_class = RaggedArray
         else:
             out_class = EncodedRaggedArray
-            data = EncodedArray(self._encode(s.raw().ravel()), self)
+            data = EncodedArray(self._encode(s.ravel()), self)
 
         return out_class(data, s.shape)
+        """
 
     def _encode_string(self, string: str):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -150,6 +148,7 @@ class NumericEncoding(OneToOneEncoding):
     is_numeric = True
 
 
+"""
 class CigarEncoding(NumericEncoding):
     @classmethod
     def encode(cls, data):
@@ -158,6 +157,7 @@ class CigarEncoding(NumericEncoding):
     @classmethod
     def decode(cls, data):
         return np.asarray(data)
+"""
 
 
 BaseEncoding = ASCIIEncoding()

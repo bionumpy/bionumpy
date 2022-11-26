@@ -1,6 +1,8 @@
 from typing import List
 import numpy as np
 from npstructures import RaggedArray
+from npstructures.testing import assert_raggedarray_equal
+
 from .encoded_array import EncodedArray, EncodedRaggedArray
 from .encoded_array import EncodingException, IncompatibleEncodingsException
 from .encodings import Encoding, BaseEncoding
@@ -27,6 +29,10 @@ def encode_list_of_strings(s: str, target_encoding):
         EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding),
         [len(ss) for ss in s])
     return ragged_array_as_encoded_array(s, target_encoding)
+
+
+def _is_encoded(data):
+    return isinstance(data, (EncodedArray, EncodedRaggedArray))
 
 
 def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
@@ -71,19 +77,23 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
     elif target_encoding is None:
         target_encoding = BaseEncoding
 
-    if isinstance(s, str):
-        return encode_string(s, target_encoding)
-    elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
+    if isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return list_of_encoded_arrays_as_encoded_ragged_array(s)
-    elif isinstance(s, list):
-        return encode_list_of_strings(s, target_encoding)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):
-        return ragged_array_as_encoded_array(s, target_encoding)
+        #assert hasattr(target_encoding, "_encode"), target_encoding
+        #new = target_encoding.encode(s)
+        #assert isinstance(new, RaggedArray), "%s, %s" % (type(new), type(s))
+        old = ragged_array_as_encoded_array(s, target_encoding)
+        #assert old.shape == new.shape, "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
+        #assert_raggedarray_equal(old, new), "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
+        return old
     elif isinstance(s, np.ndarray):
         return np_array_as_encoded_array(s, target_encoding)
     else:
-        assert isinstance(s, EncodedArray)
-        return _encode_encoded_array(s, target_encoding)
+        if _is_encoded(s) and target_encoding == s.encoding:
+            return s
+        else:
+            return target_encoding.encode(s)
 
 
 def _encode_encoded_array(encoded_array, target_encoding):

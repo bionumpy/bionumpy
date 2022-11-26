@@ -6,8 +6,10 @@ from npstructures import RaggedArray
 import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
-from bionumpy.encodings import DigitEncoding
-from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding
+from bionumpy import FastQBuffer
+from bionumpy.datatypes import SequenceEntryWithQuality
+from bionumpy.encodings import DigitEncoding, QualityEncoding
+from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding, BaseEncoding
 from bionumpy.encoded_array_functions import as_encoded_array
 
 
@@ -79,9 +81,35 @@ def test_digit_encoding(data):
     assert_raggedarray_equal(encoded, encoded2)
 
 
+@pytest.mark.parametrize("data", ["!!@-^", ["!!@@", "!+"]])
+def test_base_quality_encoding(data):
+    encoding = QualityEncoding
+    encoded = encoding.encode(data)
+    print(type(encoded))
+    print(encoded)
+    decoded = encoding.decode(encoded)
+    print(type(decoded))
+    print(decoded)
+    encoded2 = encoding.encode(decoded)
+    assert np.all(encoded2 == encoded)
+
+
 def test1():
     seq = as_encoded_array(["ACTG", "AC"])
     print(seq)
     for s in seq:
         print("SEQ: ", s.to_string())
     assert True
+
+
+def test_encoding_sequence_entry():
+    s = SequenceEntryWithQuality(
+        name=as_encoded_array(['headerishere'], BaseEncoding),
+        sequence=as_encoded_array(['CTTGTTGA'], BaseEncoding),
+        quality=np.array([[223, 223, 223, 223, 223, 223, 223, 223]], dtype=np.uint8))
+
+    data = FastQBuffer.dataclass.stack_with_ragged(s)
+    print("DATA")
+    #print(data)
+    #buf = FastQBuffer.from_data(data)
+    #print(buf.raw())
