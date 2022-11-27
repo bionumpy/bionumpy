@@ -259,7 +259,7 @@ class DelimitedBuffer(FileBuffer):
                 encoding = datatype
                 def dynamic(x):
                     if isinstance(x, EncodedRaggedArray):
-                        print(repr(x.ravel()))
+                        # print(repr(x.ravel()))
                         return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
                     return EncodedArray(encoding.decode(x), BaseEncoding)
                 return dynamic
@@ -268,7 +268,7 @@ class DelimitedBuffer(FileBuffer):
 
         #funcs.update({encoding: lambda x: EncodedArray(encoding.decode(x))
         #                     for encoding in all_encodings})
-        print(funcs)
+        # print(funcs)
 
         #for field in dataclasses.fields(data):
         #    print(field)
