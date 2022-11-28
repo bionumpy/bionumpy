@@ -70,8 +70,10 @@ class DelimitedBuffer(FileBuffer):
         n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
         if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-            raise
+            raise 
         new_lines = delimiters[(n_fields - 1)::n_fields]
+        if not all(chunk[new_lines] == "\n"):
+            raise FormatException("Irregular number of columns in file")
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
@@ -203,13 +205,11 @@ class DelimitedBuffer(FileBuffer):
 
     def _extract_integers(self, integer_starts, integer_ends):
         rows = self._data[integer_starts:integer_ends]
-        return str_to_int(rows)
-        digit_chars = self._move_intervals_to_2d_array(
-            integer_starts, integer_ends, "0"  # DigitEncoding.MIN_CODE
-        )
-        n_digits = digit_chars.shape[-1]
-        powers = np.uint32(10) ** np.arange(n_digits)[::-1]
-        return DigitEncoding.encode(digit_chars) @ powers
+        try:
+            strs = str_to_int(rows)
+        except ValueError as e:
+            raise FormatException(e.args[0])
+        return strs
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
@@ -265,16 +265,6 @@ class DelimitedBuffer(FileBuffer):
                 return dynamic
             else:
                 return funcs[datatype]
-
-        #funcs.update({encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings})
-        print(funcs)
-
-        #for field in dataclasses.fields(data):
-        #    print(field)
-
-        #funcs = {**funcs, **{encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings}}
         columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
                    for field in dataclasses.fields(data)]
 
