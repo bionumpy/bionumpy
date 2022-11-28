@@ -130,43 +130,25 @@ def test_encoding_sequence_entry():
 
 @pytest.mark.parametrize("data", ["!!@-^", ["!!@@", "!+"]])
 def test_cigar_encoding(data):
-
     encoding = CigarEncoding
     encoded = encoding.encode(data)
-    encoded_old = as_encoded_array(data, encoding)
-    print(encoded)
-    print(encoded_old)
-    assert_raggedarray_equal(encoded, encoded_old)
     decoded = encoding.decode(encoded)
-    print(decoded)
     encoded2 = encoding.encode(decoded)
-    encoded2_old = as_encoded_array(decoded, encoding)
-    #assert assert_raggedarray_equal(encoded2, encoded2_old)
-    print(encoded2)
-    #assert np.all(encoded2 == encoded)
+    assert np.all(encoded2 == encoded)
 
 
-
-class TestNumericEncoding(NumericEncoding):
+class CustomNumericEncoding(NumericEncoding):
     def _encode(self, data):
-        return data - 49
+        return data - 1
 
     def _decode(self, data):
-        return data + 49
+        return data + 1
 
 
 def test_custom_numeric_encoding():
-    encoding = QualityEncoding
+    encoding = CustomNumericEncoding()
     string = "!#!#"
     array = bnp.EncodedArray(np.array([33, 35, 33, 35]), BaseEncoding)
     encoded = encoding.encode(string)
-    encoded_old = as_encoded_array(string, encoding)
-    print("ENcoded new")
-    print(repr(encoded))
-    print("ENcoded old")
-    print(repr(encoded_old))
-    print("Encoded old array")
-    print(as_encoded_array(array, encoding))
-    decoded = encoding.decode(encoded)
-    print(repr(decoded))
-    #assert False
+    encoded2 = encoding.encode(array)
+    assert_raggedarray_equal(encoded, encoded2)
