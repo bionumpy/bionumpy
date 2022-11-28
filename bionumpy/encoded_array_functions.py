@@ -3,7 +3,7 @@ import numpy as np
 from npstructures import RaggedArray
 from .encoded_array import EncodedArray, EncodedRaggedArray
 from .encoded_array import EncodingException
-from .encodings import Encoding, BaseEncoding
+from .encodings import BaseEncoding
 from .encodings.identity_encoding import IdentityEncoding
 
 
@@ -20,7 +20,7 @@ def _is_encoded(data):
     return isinstance(data, (EncodedArray, EncodedRaggedArray))
 
 
-def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
+def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
     Can be called with already encoded arrays, and will then do nothing.
 
