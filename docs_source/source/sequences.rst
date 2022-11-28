@@ -10,6 +10,4710 @@ Sequences
 Sequence data in BioNumPy are are represented by `EncodedArray` objects. These are basically `numpy` arrays of integers, that have an encoding that specifies which character each integer represent. This representataion allows us to do fast `numpy` operation on the seqeunces, while still allowing for human readable representation of them. The easiest way to create an `EncodedArray` is to use the `as_encoded_array` function.
 
 import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+import bionumpy.encoded_array    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array_functions.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array    >>> import bionumpy as bnp
+    >>> encoded_array = bionumpy.encoded_array.as_encoded_array("actggtcc")
+    >>> encoded_array
+    encoded_array('actggtcc')
+
+We see that the encoded array represents the text "actggtcc", but under the hood these are just integers with an ASCII encoding. You seldom have to think about this internal representation, but it is what allow us to write for instance:
+
+    >>> print(encoded_array == "g")
+    [False False False  True  True False False False]
+
+And get numpy-fast performance for the query. We can also use numpy-like indexing on encoded arrays, so that we can for instance trim the first and last two characters from the sequence:
+
+    >>> encoded_array[2:-2]
+    encoded_array('tggt')
+
+
+import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
     >>> encoded_array = bnp.as_encoded_array("actggtcc")
     >>> encoded_array
     encoded_array('actggtcc')
@@ -123,6 +4827,468 @@ And get numpy-fast performance for the query. We can also use numpy-like indexin
 `EncodedRaggedArray`
 ====================
 When working with multiple seqeunces we usually have to use `EncodedRaggedArray` objects. These are much like `EncodedArray` objects, but instead uses `npstructures.RaggedArray` to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an `EncodedRaggedArray` is to use the `as_encoded_array` function on a list of strings:
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bionumpy.encoded_array.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bionumpy.encoded_array_functions.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
+
+import bionumpy.encoded_array    >>> encoded_ragged_array = bionumpy.encoded_array.as_encoded_array(["ctt", "actg", "ag"])
+    >>> encoded_ragged_array
+    encoded_ragged_array(['ctt',
+                          'actg',
+                          'ag'])
+
+These objects also behave very much like numpy arrays, in indexing and broadcasting. For instance, to get the 2nd character of the first and third seqeunce:
+
+    >>> encoded_ragged_array[[0, 2], 1]
+    encoded_array('tg')
 
 import bionumpy.encoded_array_functions    >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
     >>> encoded_ragged_array

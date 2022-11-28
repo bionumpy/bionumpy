@@ -3,7 +3,7 @@ import numpy as np
 import bionumpy as bnp
 from .datatypes import GFFEntry
 from .bnpdataclass import bnpdataclass
-from .encoded_array_functions import change_encoding
+from .encoded_array import change_encoding
 from .encodings import BaseEncoding
 from .io.strops import str_equal, split
 from . import streamable, EncodedRaggedArray, as_encoded_array

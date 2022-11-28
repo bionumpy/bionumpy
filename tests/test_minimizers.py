@@ -1,3 +1,4 @@
+import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.sequence.minimizers import Minimizers, get_minimizers
@@ -63,7 +64,7 @@ def test_full_roll(sequences, encoding, kmer_encoding):
 
 
 def test_get_minimizer_string_to_string():
-    sequences = bionumpy.encoded_array_functions.as_encoded_array([
+    sequences = bionumpy.encoded_array.as_encoded_array([
         "CCCAAACCCC",
         "TTTTCCCTTT"
     ], DNAEncoding)

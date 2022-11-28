@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.typing import ArrayLike
-from bionumpy import EncodedRaggedArray
+from bionumpy.encoded_array import EncodedRaggedArray
 from functools import reduce
 
 from bionumpy.kmer_index import KmerLookup

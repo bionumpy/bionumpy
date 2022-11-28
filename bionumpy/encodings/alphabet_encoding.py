@@ -1,5 +1,5 @@
 import numpy as np
-from .base_encoding import OneToOneEncoding
+from ..encoded_array import OneToOneEncoding
 
 
 class AlphabetEncoding(OneToOneEncoding):

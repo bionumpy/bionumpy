@@ -1,6 +1,6 @@
 import numpy as np
 from .strops import ints_to_strings, join
-from ..encoded_array_functions import as_encoded_array
+from ..encoded_array import as_encoded_array
 
 
 def matrix_to_csv(matrix, header=None, sep=",", row_names=None):

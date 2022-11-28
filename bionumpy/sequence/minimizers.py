@@ -39,7 +39,7 @@ def get_minimizers(sequence: EncodedRaggedArray, k: int, window_size: int) -> En
     Examples
     --------
 import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
-    >>> sequences = bionumpy.encoded_array_functions.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+import bionumpy.encoded_array    >>> sequences = bionumpy.encoded_array.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     >>> bnp.sequence.get_minimizers(sequences, 2, 4)
     encoded_ragged_array([[AC],
                           [],

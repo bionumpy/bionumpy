@@ -51,7 +51,7 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     Examples
     --------
 import bionumpy.encoded_array_functions    >>> import bionumpy as bnp
-    >>> sequences = bionumpy.encoded_array_functions.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+import bionumpy.encoded_array    >>> sequences = bionumpy.encoded_array.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     >>> bnp.sequence.get_kmers(sequences, 3)
     encoded_ragged_array([[ACT, CTG],
                           [AAA],

@@ -1,6 +1,7 @@
 import numpy as np
 
 import bionumpy as bnp
+import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
 
@@ -23,7 +24,7 @@ def test_vcf_matrix_buffer():
 
 
 def test_phased_genotype_encoding():
-    data = bionumpy.encoded_array_functions.as_encoded_array([
+    data = bionumpy.encoded_array.as_encoded_array([
         "0|0\t0|1\t1|0\t",
         "0|0\t0|1\t1|1\t"
     ])
@@ -42,7 +43,7 @@ def test_genotype_encoding():
         "0/0\t./0\t0/.\t",
         "1/1\t./0\t0/.\t",
     ]
-    data = bionumpy.encoded_array_functions.as_encoded_array(raw_data)
+    data = bionumpy.encoded_array.as_encoded_array(raw_data)
     encoded = bnp.EncodedArray(GenotypeRowEncoding.encode(data), bnp.encodings.BaseEncoding)
     decoded = GenotypeRowEncoding.decode(encoded)
     decoded_string = [

@@ -1,6 +1,6 @@
 from .datatypes import Interval
 from .encoded_array import EncodedArray, EncodedRaggedArray
-from . import as_encoded_array
+from .encoded_array import as_encoded_array
 from .lookup import Lookup
 import numpy as np
 

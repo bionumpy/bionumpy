@@ -1,5 +1,5 @@
 import numpy as np
-from .base_encoding import BaseEncoding, Encoding, NumericEncoding
+from ..encoded_array import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)

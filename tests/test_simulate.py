@@ -1,7 +1,8 @@
 import pytest
 
+import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
-from bionumpy import EncodedArray, as_encoded_array
+from bionumpy.encoded_array import EncodedArray, as_encoded_array
 from bionumpy.dna import reverse_compliment
 from bionumpy.encodings import StrandEncoding
 from bionumpy.io.motifs import Motif, read_motif
@@ -27,7 +28,7 @@ def motif():
 
 @pytest.fixture
 def sequence():
-    return bionumpy.encoded_array_functions.as_encoded_array("acgtgcgtagctggctagctgcttagctgatggcttcgaa")
+    return bionumpy.encoded_array.as_encoded_array("acgtgcgtagctggctagctgcttagctgatggcttcgaa")
 
 
 def test_simulate_chipseq(sequence, motif):
@@ -39,7 +40,7 @@ def test_simulate_chipseq(sequence, motif):
 
 @pytest.fixture
 def sequences():
-    return bionumpy.encoded_array_functions.as_encoded_array(["ACGT", "GCTA", "GTAAAT"], bnp.DNAEncoding)
+    return bionumpy.encoded_array.as_encoded_array(["ACGT", "GCTA", "GTAAAT"], bnp.DNAEncoding)
 
 
 @pytest.fixture
@@ -54,7 +55,7 @@ def rnaseq_simulation_settings(sequence_counts):
 
 def test_get_transcript_copies(sequences, sequence_counts):
     print("SEQUENCES: %s" % repr(sequences[0].to_string()))
-    truth = bionumpy.encoded_array_functions.as_encoded_array(
+    truth = bionumpy.encoded_array.as_encoded_array(
         list(chain(*[[sequence.to_string()] * count for sequence, count in zip(sequences, sequence_counts)])),
         bnp.DNAEncoding)
     result = get_transcript_copies(sequences, sequence_counts)
@@ -68,7 +69,7 @@ def test_fragment_transcript_copies(sequences, fragment_size=2):
             truth.append(sequence[i:i + fragment_size])
     result = fragment_transcript_copies(sequences, fragment_size)
     bnp.testing.assert_encoded_raggedarray_equal(
-        bionumpy.encoded_array_functions.as_encoded_array(truth, sequences.encoding), bionumpy.encoded_array_functions.as_encoded_array(result, sequences.encoding))
+        bionumpy.encoded_array.as_encoded_array(truth, sequences.encoding), bionumpy.encoded_array.as_encoded_array(result, sequences.encoding))
 
 
 def test_sample_transcript_fragments(sequences, sampling_rate=0.9):
@@ -76,7 +77,7 @@ def test_sample_transcript_fragments(sequences, sampling_rate=0.9):
     mask = np.random.choice(a=[True, False], size=len(sequences), p=[sampling_rate, 1 - sampling_rate])
     truth = sequences[mask]
     result = sample_transcript_fragments(sequences, sampling_rate=0.9)
-    bnp.testing.assert_encoded_raggedarray_equal(bionumpy.encoded_array_functions.as_encoded_array(truth), bionumpy.encoded_array_functions.as_encoded_array(result))
+    bnp.testing.assert_encoded_raggedarray_equal(bionumpy.encoded_array.as_encoded_array(truth), bionumpy.encoded_array.as_encoded_array(result))
 
 
 def test_get_rnaseq_reads(sequences, read_length=3):

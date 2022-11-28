@@ -1,5 +1,5 @@
 from . import AlphabetEncoding
-from .base_encoding import Encoding
+from ..encoded_array import Encoding
 from ..encoded_array import EncodedArray
 from ..util import is_subclass_or_instance
 import numpy as np

@@ -1,6 +1,6 @@
 import scipy.stats
 import bionumpy as bnp
-from bionumpy import EncodedRaggedArray, count_encoded, as_encoded_array
+from bionumpy.encoded_array import EncodedRaggedArray, count_encoded, as_encoded_array
 from bionumpy.dna import reverse_compliment
 from bionumpy.sequence import get_kmers
 from bionumpy.simulate import rnaseq

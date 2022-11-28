@@ -6,33 +6,32 @@ from npstructures import RaggedArray
 import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
-from bionumpy import FastQBuffer
+from bionumpy import FastQBuffer, as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.datatypes import SequenceEntryWithQuality
 from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding, DigitEncodingFactory
-from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding, BaseEncoding
-from bionumpy.encoded_array_functions import as_encoded_array
+from bionumpy.encoded_array import NumericEncoding, OneToOneEncoding, BaseEncoding
 
 
-#from bionumpy.encodings.base_encoding import OneToOneEncoding
+#from bionumpy.encoded_array import OneToOneEncoding
 
 
 def test_change_encoding_on_encoded_array():
-    a = bionumpy.encoded_array_functions.as_encoded_array("ACTG", bnp.encodings.alphabet_encoding.ACTGEncoding)
-    b = bionumpy.encoded_array_functions.change_encoding(a, bnp.encodings.DNAEncoding)
+    a = bionumpy.encoded_array.as_encoded_array("ACTG", bnp.encodings.alphabet_encoding.ACTGEncoding)
+    b = bionumpy.encoded_array.change_encoding(a, bnp.encodings.DNAEncoding)
 
     assert np.all(a.encoding.decode(a) == b.encoding.decode(b))
 
 
 def test_change_encoding_on_encoded_ragged_array():
-    a = bionumpy.encoded_array_functions.as_encoded_array(["ACTG", "AC"], bnp.encodings.alphabet_encoding.ACTGEncoding)
-    b = bionumpy.encoded_array_functions.change_encoding(a, bnp.encodings.DNAEncoding)
+    a = bionumpy.encoded_array.as_encoded_array(["ACTG", "AC"], bnp.encodings.alphabet_encoding.ACTGEncoding)
+    b = bionumpy.encoded_array.change_encoding(a, bnp.encodings.DNAEncoding)
 
     assert_raggedarray_equal(a.encoding.decode(a.ravel()), b.encoding.decode(b.ravel()))
 
 
 def test_as_encoded_on_already_encoded():
-    a = bionumpy.encoded_array_functions.as_encoded_array(["ACTG"], bnp.encodings.DNAEncoding)
+    a = bionumpy.encoded_array.as_encoded_array(["ACTG"], bnp.encodings.DNAEncoding)
 
 
 class CustomEncoding(OneToOneEncoding):

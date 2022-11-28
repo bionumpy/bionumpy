@@ -2,7 +2,7 @@ import dataclasses
 from itertools import chain
 import numpy as np
 from numpy.random import default_rng
-from bionumpy import EncodedArray, as_encoded_array
+from bionumpy.encoded_array import EncodedArray, as_encoded_array
 from bionumpy.dna import reverse_compliment
 from bionumpy.encodings import StrandEncoding
 

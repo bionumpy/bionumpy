@@ -1,3 +1,4 @@
+import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.datatypes import Interval
@@ -22,7 +23,7 @@ a b c d... e f
     )
 
     result = buffer.get_column_range_as_text(2, 5)
-    correct = bionumpy.encoded_array_functions.as_encoded_array([
+    correct = bionumpy.encoded_array.as_encoded_array([
         [c for c in "\t".join(row.split("\t")[2:5])]
          for row in data.split("\n")
     ][:-1])
