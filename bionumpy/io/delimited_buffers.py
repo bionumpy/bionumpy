@@ -3,13 +3,14 @@ import logging
 import dataclasses
 from typing import List
 from npstructures import RaggedArray, ragged_slice
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
                          GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
+from ..encodings.exceptions import EncodingError
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
 from ..encoded_array import get_base_encodings, BaseEncoding
@@ -71,8 +72,10 @@ class DelimitedBuffer(FileBuffer):
         n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
         if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-            raise
+            raise 
         new_lines = delimiters[(n_fields - 1)::n_fields]
+        #if not all(chunk[new_lines] == "\n"):
+        #     raise FormatException("Irregular number of columns in file")
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
@@ -204,13 +207,12 @@ class DelimitedBuffer(FileBuffer):
 
     def _extract_integers(self, integer_starts, integer_ends):
         rows = self._data[integer_starts:integer_ends]
-        return str_to_int(rows)
-        digit_chars = self._move_intervals_to_2d_array(
-            integer_starts, integer_ends, "0"  # DigitEncoding.MIN_CODE
-        )
-        n_digits = digit_chars.shape[-1]
-        powers = np.uint32(10) ** np.arange(n_digits)[::-1]
-        return DigitEncoding.encode(digit_chars) @ powers
+        try:
+            strs = str_to_int(rows)
+        except EncodingError as e:
+            row_number = np.searchsorted(rows.shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
+        return strs
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
@@ -225,15 +227,10 @@ class DelimitedBuffer(FileBuffer):
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
         self._n_cols = n_delimiters_per_line
-        last_new_line = next(
-            i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
-        )
-        delimiters = delimiters[: delimiters.size - last_new_line]
-        if delimiters.size % n_delimiters_per_line != 0:
-            raise FormatException(f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
-        delimiters = delimiters.reshape(-1, n_delimiters_per_line)
-        if not np.all(chunk[delimiters[:, -1]] == NEWLINE):
-            raise FormatException(f"irregular number of delimiters per line: {chunk}")
+        should_be_new_lines = chunk[delimiters[n_delimiters_per_line-1::n_delimiters_per_line]]
+        if delimiters.size % n_delimiters_per_line != 0 or np.any(should_be_new_lines != "\n"):
+            offending_line = np.flatnonzero(should_be_new_lines != "\n")[0]
+            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})", line_number=offending_line)
         self._validated = True
 
     @classmethod
@@ -266,16 +263,6 @@ class DelimitedBuffer(FileBuffer):
                 return dynamic
             else:
                 return funcs[datatype]
-
-        #funcs.update({encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings})
-        # print(funcs)
-
-        #for field in dataclasses.fields(data):
-        #    print(field)
-
-        #funcs = {**funcs, **{encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings}}
         columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
                    for field in dataclasses.fields(data)]
 
@@ -303,7 +290,7 @@ class DelimitedBuffer(FileBuffer):
         """makes a header from field names separated by delimiter"""
         return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
-    def get_data(self) -> bnpdataclass:
+    def get_data(self) -> BNPDataClass:
         """Parse the data in the buffer according to the fields in _dataclass
 
         Returns
