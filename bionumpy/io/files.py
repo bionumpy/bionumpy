@@ -9,7 +9,7 @@ from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 NarrowPeakBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
 from ..streams import NpDataclassStream
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import BNPDataClass, bnpdataclass
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class NpDataclassReader:
     for instance if the a file name is not available (stdin), or you want more control over
     the reading.
     """
-    def __init__(self, numpyfilereader):
+    def __init__(self, numpyfilereader: NumpyFileReader):
         self._reader = numpyfilereader
 
     def __enter__(self):
@@ -35,7 +35,7 @@ class NpDataclassReader:
     def close(self):
         self._reader.close()
 
-    def read(self) -> bnpdataclass:
+    def read(self) -> BNPDataClass:
         """Read the whole file into a dataclass
 
         Use this for small files that can be held in memory
@@ -52,7 +52,7 @@ class NpDataclassReader:
         """
         return self._reader.read().get_data()
 
-    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> bnpdataclass:
+    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
         """Read a single chunk into memory
 
         Read all complete entries in the next `chunk_size` bytes
@@ -77,9 +77,7 @@ class NpDataclassReader:
         """
         chunk = self._reader.read_chunk(min_chunk_size, max_chunk_size)
         if chunk is None:
-            # return an empty dataclass
-            dataclass = self._reader._buffer_type.dataclass
-            return dataclass(*[[] for field in dataclasses.fields(dataclass)])
+            return  self._reader._buffer_type.dataclass.empty()
 
         return chunk.get_data()
 
