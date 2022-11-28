@@ -81,14 +81,15 @@ def test_bed_raises_format_exception(data):
     # assert e.value.line_number == error_line
 
 
-def test_npdataclass_raises_format_exception():
+@pytest.mark.parametrize("data", malformed_fastqs)
+def test_npdataclass_raises_format_exception(data):
     valid_fastq = """\
 @header
 acgtt
 +
 !!!!!
 """
-    malformed, line_number = malformed_fastqs[0]
+    malformed, line_number = data
     fobj = BytesIO(bytes(valid_fastq*100+malformed, encoding="ascii"))
     npfilereader = NumpyFileReader(fobj, buffer_type=FastQBuffer)
     reader = NpDataclassReader(npfilereader)

@@ -3,7 +3,7 @@ import logging
 import dataclasses
 from typing import List
 from npstructures import RaggedArray, ragged_slice
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
                          GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
@@ -73,8 +73,8 @@ class DelimitedBuffer(FileBuffer):
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise 
         new_lines = delimiters[(n_fields - 1)::n_fields]
-        if not all(chunk[new_lines] == "\n"):
-            raise FormatException("Irregular number of columns in file")
+        #if not all(chunk[new_lines] == "\n"):
+        #     raise FormatException("Irregular number of columns in file")
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
@@ -225,9 +225,9 @@ class DelimitedBuffer(FileBuffer):
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
         self._n_cols = n_delimiters_per_line
-        last_new_line = next(
-            i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
-        )
+        last_new_line = 0 # next(
+        # i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
+        # )
         delimiters = delimiters[: delimiters.size - last_new_line]
         if delimiters.size % n_delimiters_per_line != 0:
             raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
@@ -293,7 +293,7 @@ class DelimitedBuffer(FileBuffer):
         """makes a header from field names separated by delimiter"""
         return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
-    def get_data(self) -> bnpdataclass:
+    def get_data(self) -> BNPDataClass:
         """Parse the data in the buffer according to the fields in _dataclass
 
         Returns
