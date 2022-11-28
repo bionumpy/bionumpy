@@ -220,8 +220,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         assert isinstance(value, str) or isinstance(value, EncodedArray)
 
         if isinstance(value, str):
-            from .encoded_array_functions import encode_string
-            value = encode_string(value, self.encoding)
+            value = self.encoding.encode(value)
 
         self.data.__setitem__(idx, value.data)
 
@@ -279,14 +278,16 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
 
 def _parse_ufunc_inputs(inputs, target_encoding):
-    from .encoded_array_functions import encode_string, encode_list_of_strings
     for a in inputs:
         assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), repr(a)
         if isinstance(a, str):
-            a = encode_string(a, target_encoding)
+            a = target_encoding.encode(a)
         elif isinstance(a, list):
-            a = encode_list_of_strings(a, target_encoding)
-        yield a.raw()
+            a = target_encoding.encode(a)
+        else:
+            # already encoded
+            pass
 
+        yield a.raw()
 
 

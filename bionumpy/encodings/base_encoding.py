@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import numpy as np
 from npstructures import RaggedArray
-
+from ..encoded_array import EncodedArray, EncodedRaggedArray
 from bionumpy.encodings.identity_encoding import IdentityEncoding
 
 
@@ -27,8 +27,6 @@ class Encoding:
 class OneToOneEncoding(Encoding):
 
     def encode(self, data):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
-        from ..encoded_array_functions import list_of_encoded_arrays_as_encoded_ragged_array
         assert hasattr(self, "_encode"), "Missing implementation of _encode for %s" % self
 
         if isinstance(data, (EncodedArray, EncodedRaggedArray)):
@@ -38,8 +36,6 @@ class OneToOneEncoding(Encoding):
 
         if isinstance(data, str):
             out = self._encode_string(data)
-        elif isinstance(data, list) and len(data) > 0 and isinstance(data[0], EncodedArray):
-            out = list_of_encoded_arrays_as_encoded_ragged_array(data)
         elif isinstance(data, list):
             out = self._encode_list_of_strings(data)
         elif isinstance(data, RaggedArray):
@@ -48,7 +44,6 @@ class OneToOneEncoding(Encoding):
             return r
         elif isinstance(data, np.ndarray):
             if isinstance(self, NumericEncoding):
-                #out = data
                 out = self._encode(data)
             else:
                 out = EncodedArray(self._encode(data), self)
@@ -58,43 +53,24 @@ class OneToOneEncoding(Encoding):
         return out
 
     def _encode_list_of_strings(self, s: str):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
         s = EncodedRaggedArray(
             EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding()),
             [len(ss) for ss in s])
         return self._ragged_array_as_encoded_array(s)
 
     def _ragged_array_as_encoded_array(self, s):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
-
         data = self.encode(s.ravel())
         if isinstance(data, EncodedArray):
             return EncodedRaggedArray(data, s.shape)
 
         return RaggedArray(data, s.shape)
 
-        """
-        if isinstance(s, EncodedRaggedArray):
-            s = s.raw()
-
-        if isinstance(self, NumericEncoding):
-            data = self._encode(s.ravel())
-            out_class = RaggedArray
-        else:
-            out_class = EncodedRaggedArray
-            data = EncodedArray(self._encode(s.ravel()), self)
-
-        return out_class(data, s.shape)
-        """
-
     def _encode_string(self, string: str):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
         s = EncodedArray([ord(c) for c in string], IdentityEncoding())
         s = self._encode_base_encoded_array(s)
         return s
 
     def _encode_base_encoded_array(self, encoded_array):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
         assert encoded_array.encoding.is_base_encoding()
         encoded_array = self._encode(encoded_array.data)
         if self.is_numeric():
@@ -104,7 +80,6 @@ class OneToOneEncoding(Encoding):
         return encoded_array
 
     def decode(self, data):
-        from ..encoded_array import EncodedArray, EncodedRaggedArray
         if not hasattr(self, "_decode"):
             raise Exception("Missing implementation of _decode for %s" % self)
 
@@ -123,7 +98,6 @@ class OneToOneEncoding(Encoding):
             return EncodedArray(self._decode(data.raw()), BaseEncoding)
         else:
             raise Exception("Not able to decode %s with %s" % (data, self))
-
 
     def is_one_to_one_encoding(self):
         return True
