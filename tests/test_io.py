@@ -5,12 +5,25 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
-from bionumpy import BedBuffer
-from bionumpy.io.files import NumpyFileReader, NpDataclassReader
-from bionumpy.io.exceptions import FormatException
+from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
 from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal
+
+
+@pytest.mark.parametrize("file_format", ["fastq"])
+def test_read_write_roundtrip(file_format):
+    _, _, buf_type = combos[file_format]
+    buffer_text = buffer_texts[file_format]*100
+    input_buffer = bytes(buffer_text, encoding="utf8")
+    in_obj = BytesIO(input_buffer)
+    out_buffer = bytes()
+    out_obj = BytesIO(out_buffer)
+    reader = NpDataclassReader(NumpyFileReader(in_obj, buffer_type=buf_type))
+    writer = NpBufferedWriter(out_obj, buf_type)
+    for chunk in reader.read_chunks():
+        writer.write(chunk)
+    assert out_obj.getvalue() == input_buffer
 
 
 def test_matrix_to_csv():
