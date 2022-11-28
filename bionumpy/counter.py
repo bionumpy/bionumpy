@@ -2,7 +2,7 @@ import numpy as np
 from numbers import Number
 import dataclasses
 
-from bionumpy import EncodedArray
+from bionumpy.encoded_array import EncodedArray
 
 
 @dataclasses.dataclass

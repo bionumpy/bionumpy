@@ -7,11 +7,12 @@ from ..bnpdataclass import bnpdataclass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
                          GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
-from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
-from ..encodings.base_encoding import get_base_encodings, BaseEncoding
+from ..encoded_array import get_base_encodings, BaseEncoding
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
@@ -259,7 +260,7 @@ class DelimitedBuffer(FileBuffer):
                 encoding = datatype
                 def dynamic(x):
                     if isinstance(x, EncodedRaggedArray):
-                        print(repr(x.ravel()))
+                        # print(repr(x.ravel()))
                         return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
                     return EncodedArray(encoding.decode(x), BaseEncoding)
                 return dynamic

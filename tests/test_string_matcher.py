@@ -2,6 +2,9 @@ import re
 
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
+
+import bionumpy.encoded_array
+import bionumpy.encoded_array_functions
 from bionumpy.sequence.string_matcher import RegexMatcher, FixedLenRegexMatcher, StringMatcher
 import bionumpy as bnp
 
@@ -9,7 +12,7 @@ import bionumpy as bnp
 def test_plain_string_matching():
     # Would probably reuse code for checking matches, but have different given, and different matcher class
     matcher = StringMatcher('V1-1', encoding=bnp.encodings.BaseEncoding)
-    seq_array = bnp.as_encoded_array(['V1-1', 'V2-1', 'V1-1*2'])
+    seq_array = bionumpy.encoded_array.as_encoded_array(['V1-1', 'V2-1', 'V1-1*2'])
     matches = matcher.rolling_window(seq_array)
     assert_raggedarray_equal(matches, RaggedArray([[True], [False], [True, False, False]]))
 
@@ -28,7 +31,7 @@ def test_fixedlen_regex_matching():
                    for offset in range(len(seq) - pattern_len + 1)]
                   for seq in sequences]
 
-    sequence_array = bnp.as_encoded_array(sequences, target_encoding=bnp.encodings.DNAEncoding)
+    sequence_array = bionumpy.encoded_array.as_encoded_array(sequences, target_encoding=bnp.encodings.DNAEncoding)
     matcher = FixedLenRegexMatcher(pattern, encoding=bnp.encodings.DNAEncoding)
     matches = matcher.rolling_window(sequence_array)
     assert_raggedarray_equal(matches, RaggedArray(re_matches))  # TODO: switch to correct assertion..
@@ -41,7 +44,7 @@ def test_flexible_len_regex_matching():
     re_matches = [[False for _ in range(7)],
                   [True, False, False, False, True, True, False, False]]
 
-    sequence_array = bnp.as_encoded_array(sequences, target_encoding=bnp.encodings.DNAEncoding)
+    sequence_array = bionumpy.encoded_array.as_encoded_array(sequences, target_encoding=bnp.encodings.DNAEncoding)
     matcher = RegexMatcher(pattern, encoding=bnp.encodings.DNAEncoding)
     matches = matcher.rolling_window(sequence_array)
     assert_raggedarray_equal(matches, RaggedArray(re_matches))  # TODO: switch to correct assertion..

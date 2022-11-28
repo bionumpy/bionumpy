@@ -28,7 +28,7 @@ SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
-__all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
+__all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "VCFBuffer", "PhasedVCFMatrixBuffer", "VCFMatrixBuffer",

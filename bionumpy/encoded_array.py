@@ -1,11 +1,146 @@
+"""
+NB: This file contains EncodedArray, EncodedRaggedArray, as_encoded_array and BaseEncoding/Encoding classes.
+For now, all these are depending on each other and needs to be in the same file in order to
+avoid circular imports.
+Should be refactored later.
+"""
+
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
-from .encodings.identity_encoding import IdentityEncoding
 from typing import Tuple, List
-from .encodings.base_encoding import BaseEncoding, Encoding, NumericEncoding
-from .util import is_subclass_or_instance
 import numpy as np
+from abc import abstractmethod
 
+
+class Encoding:
+    @abstractmethod
+    def encode(self, *args, **kwargs):
+        return NotImplemented
+
+    @abstractmethod
+    def get_labels(self):
+        pass
+
+    def is_base_encoding(self):
+        return False
+
+    def is_one_to_one_encoding(self):
+        return False
+
+    def is_numeric(self):
+        return False
+
+
+class OneToOneEncoding(Encoding):
+
+    def encode(self, data):
+        assert hasattr(self, "_encode"), "Missing implementation of _encode for %s" % self
+
+        if isinstance(data, (EncodedArray, EncodedRaggedArray)):
+            assert data.encoding.is_base_encoding(), "Data is already encoded. " \
+                                                     "Can only encode already encoded data if it is base encoded."
+            data = data.raw()  # input from here is always "raw"
+
+        if isinstance(data, str):
+            out = self._encode_string(data)
+        elif isinstance(data, list):
+            out = self._encode_list_of_strings(data)
+        elif isinstance(data, RaggedArray):
+            r = self._ragged_array_as_encoded_array(data)
+            assert isinstance(r, (EncodedRaggedArray, RaggedArray))
+            return r
+        elif isinstance(data, np.ndarray):
+            if isinstance(self, NumericEncoding):
+                out = self._encode(data)
+            else:
+                out = EncodedArray(self._encode(data), self)
+        else:
+            assert False
+
+        return out
+
+    def _encode_list_of_strings(self, s: str):
+        s = EncodedRaggedArray(
+            EncodedArray([ord(c) for ss in s for c in ss], BaseEncoding),
+            [len(ss) for ss in s])
+        return self._ragged_array_as_encoded_array(s)
+
+    def _ragged_array_as_encoded_array(self, s):
+        data = self.encode(s.ravel())
+        if isinstance(data, EncodedArray):
+            return EncodedRaggedArray(data, s.shape)
+
+        return RaggedArray(data, s.shape)
+
+    def _encode_string(self, string: str):
+        s = EncodedArray([ord(c) for c in string], BaseEncoding)
+        s = self._encode_base_encoded_array(s)
+        return s
+
+    def _encode_base_encoded_array(self, encoded_array):
+        assert encoded_array.encoding.is_base_encoding()
+        encoded_array = self._encode(encoded_array.data)
+        if self.is_numeric():
+            encoded_array = encoded_array
+        else:
+            encoded_array = EncodedArray(encoded_array, self)
+        return encoded_array
+
+    def decode(self, data):
+        if not hasattr(self, "_decode"):
+            raise Exception("Missing implementation of _decode for %s" % self)
+
+        if isinstance(data, int):
+            return EncodedArray(self._decode(np.atleast_1d(data)), self)
+        elif isinstance(data, np.ndarray):
+            assert isinstance(self, NumericEncoding), "%s" % data
+            return self._decode(data)
+        elif isinstance(data, EncodedRaggedArray):
+            return EncodedRaggedArray(
+                EncodedArray(self._decode(data.raw().ravel()), BaseEncoding), data.shape)
+        elif isinstance(data, RaggedArray):
+            assert isinstance(self, NumericEncoding), "%s" % data
+            return RaggedArray(self._decode(data.ravel()), data.shape)
+        elif isinstance(data, EncodedArray):
+            return EncodedArray(self._decode(data.raw()), BaseEncoding)
+        else:
+            raise Exception("Not able to decode %s with %s" % (data, self))
+
+    def is_one_to_one_encoding(self):
+        return True
+
+
+class ASCIIEncoding(OneToOneEncoding):
+    def _encode(self, ascii_codes):
+        return ascii_codes
+
+    def _decode(self, encoded):
+        return encoded
+
+    def __repr__(self):
+        return "ASCIIEncoding()"
+
+    def __hash__(self):
+        return hash(repr(self))
+
+    def is_base_encoding(self):
+        return True
+
+    def __eq__(self, other):
+        return isinstance(other, ASCIIEncoding)
+
+
+
+class NumericEncoding(OneToOneEncoding):
+    def is_numeric(self):
+        return True
+
+
+BaseEncoding = ASCIIEncoding()
+
+
+def get_base_encodings():
+    return [BaseEncoding]  # TODO: add other encodings
 
 class EncodingException(Exception):
     pass
@@ -49,6 +184,7 @@ class EncodedRaggedArray(RaggedArray):
         """ Convert any data to `EncodedArray` before calling the `ufunc` on them """
         assert isinstance(self._data, EncodedArray), self._data
         inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
+        #inputs = _parse_ufunc_inputs(inputs, self._data.encoding)
         kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
 
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
@@ -58,6 +194,7 @@ class EncodedRaggedArray(RaggedArray):
 
     def tolist(self):
         return [row.to_string() for row in self]
+
 
 def get_NPSArray(array):
     return array.view(NPSArray)
@@ -103,7 +240,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
-        return "".join([chr(c) for c in self.encoding.decode(self.data)])
+        if hasattr(self.encoding, "_decode"):
+            # new system, can be used in all cases after refactoring
+            data = self
+            return "".join([chr(c) for c in self.encoding.decode(data).raw()])
+        else:
+            data = self.data
+            return "".join([chr(c) for c in self.encoding.decode(data)])
 
     def reshape(self, *args, **kwargs) -> "EncodedArray":
         return self.__class__(self.data.reshape(*args, **kwargs), self.encoding)
@@ -159,7 +302,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return text
 
         else:
-            text = self.encoding.decode(self.data)
+            data = self.data
+            if hasattr(self.encoding, "_decode"):
+                data = self  # todo: Default after encoding refactoring
+                text = self.encoding.decode(data).raw()
+            else:
+                text = self.encoding.decode(data)
 
             if len(self.data.shape) == 0:
                 return chr(int(text))
@@ -209,7 +357,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         assert isinstance(value, str) or isinstance(value, EncodedArray)
 
         if isinstance(value, str):
-            value = encode_string(value, self.encoding)
+            value = self.encoding.encode(value)
 
         self.data.__setitem__(idx, value.data)
 
@@ -222,9 +370,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         Only support euqality checks for now. Numeric operations must be performed
         directly on the underlying data.
         """
-        #if method == "__call__" and ufunc in (np.equal, np.not_equal):
+
         if method == "__call__" and ufunc.__name__ in ("equal", "not_equal"):
-            return ufunc(*(as_encoded_array(a, self.encoding).raw() for a in inputs))
+            inputs = _parse_ufunc_inputs(inputs, self.encoding)
+            return ufunc(*inputs)
         return NotImplemented
 
     def __array_function__(self, func, types, args, kwargs):
@@ -265,42 +414,34 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(np.lib.stride_tricks.as_strided(self.data, *args, **kwargs), self.encoding)
 
 
-def str_or_list_as_encoded_array(s, target_encoding):
-    if isinstance(s, (EncodedArray, EncodedRaggedArray)):
-        assert s.encoding == target_encoding
-    elif isinstance(s, str):
-        s = encode_string(s, target_encoding)
-    elif isinstance(s, list):
-        s = encode_list_of_strings(s, target_encoding)
-    else:
-        raise EncodingException("Tried encoding str or list of strings but got %s" % type(s))
+def _parse_ufunc_inputs(inputs, target_encoding):
+    for a in inputs:
+        assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), repr(a)
+        if isinstance(a, str):
+            a = target_encoding.encode(a)
+        elif isinstance(a, list):
+            a = target_encoding.encode(a)
+        else:
+            # already encoded
+            pass
 
-    return s
-
-
-def encode_string(s: str, target_encoding):
-    s = EncodedArray([ord(c) for c in s], IdentityEncoding)
-    s = _encode_base_encoded_array(s, target_encoding)
-    return s
+        yield a.raw()
 
 
-def list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArray]):
+def _list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArray]):
     assert all(isinstance(a, EncodedArray) for a in array_list)
     encoding = array_list[0].encoding
     assert all(a.encoding == encoding for a in array_list)
     data = np.concatenate([a.data for a in array_list])
     shape = [len(a) for a in array_list]
     return EncodedRaggedArray(EncodedArray(data, encoding), shape)
-    
-
-def encode_list_of_strings(s: str, target_encoding):
-    s = EncodedRaggedArray(
-        EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding),
-        [len(ss) for ss in s])
-    return ragged_array_as_encoded_array(s, target_encoding)
 
 
-def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
+def _is_encoded(data):
+    return isinstance(data, (EncodedArray, EncodedRaggedArray))
+
+
+def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
     Can be called with already encoded arrays, and will then do nothing.
 
@@ -342,60 +483,14 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
     elif target_encoding is None:
         target_encoding = BaseEncoding
 
-    if isinstance(s, str):
-        return encode_string(s, target_encoding)
+    # if numeric encoding and already np-array, this is already encoded
+    if target_encoding.is_numeric() and type(s) in (np.ndarray, RaggedArray):
+        return s
+    # is already encoded if list and elements are encoded
     elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
-        return list_of_encoded_arrays_as_encoded_ragged_array(s)
-    elif isinstance(s, list):
-        return encode_list_of_strings(s, target_encoding)
-    elif isinstance(s, (RaggedArray, EncodedRaggedArray)):
-        return ragged_array_as_encoded_array(s, target_encoding)
-    elif isinstance(s, np.ndarray):
-        return np_array_as_encoded_array(s, target_encoding)
-    else:
-        assert isinstance(s, EncodedArray)
-        return _encode_encoded_array(s, target_encoding)
+        return _list_of_encoded_arrays_as_encoded_ragged_array(s)
 
-
-def _encode_encoded_array(encoded_array, target_encoding):
-    """Encode an encoded array with a new encoding.
-    Encoded array should either be BaseEncoded or have target_encoding"""
-    assert isinstance(encoded_array, EncodedArray), (encoded_array, repr(encoded_array), type(encoded_array))
-    if encoded_array.encoding == target_encoding:
-        return encoded_array
-
-    if encoded_array.encoding.is_base_encoding():
-        encoded_array = _encode_base_encoded_array(encoded_array, target_encoding)
-    elif target_encoding.is_base_encoding():
-        encoded_array = EncodedArray(encoded_array.encoding.decode(encoded_array.data), BaseEncoding)
-    else:
-        raise IncompatibleEncodingsException("Can only encode EncodedArray with BaseEncoding or target encoding. "
-                                             "Base encoding is %s, target encoding is %s"
-                                            % (str(encoded_array.encoding), str(target_encoding)))
-    return encoded_array
-
-
-def _encode_base_encoded_array(encoded_array, target_encoding):
-    assert encoded_array.encoding.is_base_encoding()
-    encoded_array = target_encoding.encode(encoded_array.data)
-    if hasattr(target_encoding, "is_numeric"):
-        encoded_array = encoded_array
-    else:
-        encoded_array = EncodedArray(encoded_array, target_encoding)
-    return encoded_array
-
-
-def np_array_as_encoded_array(s, target_encoding):
-    assert is_subclass_or_instance(target_encoding, NumericEncoding), s
-    return s
-
-
-def ragged_array_as_encoded_array(s, target_encoding):
-    data = as_encoded_array(s.ravel(), target_encoding)
-    if isinstance(data, EncodedArray):
-        return EncodedRaggedArray(data, s.shape)
-    return RaggedArray(data, s.shape)
-
+    return target_encoding.encode(s)
 
 
 def from_encoded_array(encoded_array: EncodedArray) -> str:
@@ -420,7 +515,7 @@ def from_encoded_array(encoded_array: EncodedArray) -> str:
     if isinstance(encoded_array, EncodedRaggedArray):
         return [from_encoded_array(row) for row in encoded_array]
     else:
-        return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array.data))
+        return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array).raw())
 
 
 def change_encoding(encoded_array, new_encoding):

@@ -1,6 +1,7 @@
 import pytest
-from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from bionumpy.encodings import BaseEncoding
+from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
+from bionumpy import as_encoded_array
+from bionumpy.encodings import BaseEncoding, QualityEncoding
 from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 import bionumpy as bnp
 import numpy as np
@@ -76,8 +77,6 @@ def test_encoded_array_list_to_raggedarray(simple_sequence):
     str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
     assert_encoded_raggedarray_equal(array_list, str_list)
                                 
-    
-
 
 if __name__ == "__main__":
     test_works_with_ragged()

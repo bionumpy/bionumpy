@@ -1,12 +1,13 @@
 import numpy as np
 
-from bionumpy.encodings.kmer_encodings import KmerEncoding
-from bionumpy.rollable import RollableFunction
+from ..encodings.kmer_encodings import KmerEncoding
+from ..rollable import RollableFunction
 from bionumpy.encodings import DNAEncoding
-from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
-from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encodings.alphabet_encoding import AlphabetEncoding
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
 from npstructures.bitarray import BitArray
-from bionumpy.util import as_strided, is_subclass_or_instance
+from ..util import as_strided, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     Examples
     --------
     >>> import bionumpy as bnp
-    >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    >>> sequences = bnp.encoded_array.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     >>> bnp.sequence.get_kmers(sequences, 3)
     encoded_ragged_array([[ACT, CTG],
                           [AAA],

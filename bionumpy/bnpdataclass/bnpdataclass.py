@@ -3,7 +3,8 @@ from typing import List, Type
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
 import numpy as np
-from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
 from ..util import is_subclass_or_instance
 
@@ -39,8 +40,8 @@ class BNPDataClass(NpDataClass):
         ['sequence_aa', 'sequence', 's1']
 
         """
-        name = f"Dynamic{cls.__name__}" if name is None else name
-        return bnpdataclass(dataclasses.make_dataclass(name, bases=(cls,), fields=fields))
+        cls_name = name if name is not None else f"Dynamic{cls.__name__}" if cls.__name__[:7] != 'Dynamic' else cls.__name__
+        return bnpdataclass(dataclasses.make_dataclass(cls_name, bases=(cls,), fields=fields))
 
     def add_fields(self, fields: dict, field_type_map: dict = None) -> 'BNPDataClass':
         """
@@ -157,9 +158,12 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     val = as_encoded_array(pre_val)
                 elif is_subclass_or_instance(field.type, Encoding):
                     if is_subclass_or_instance(field.type, NumericEncoding):
-                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), (field, pre_val)
+                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
+                            (field, pre_val)
                     else:
                         assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
+                    # must do as_encoded and not explicit encode as pre_val might already
+                    # be encoded
                     val = as_encoded_array(pre_val, field.type)
                 elif field.type == List[int] or field.type == List[bool]:
                     if not isinstance(pre_val, RaggedArray):

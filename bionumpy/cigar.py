@@ -1,5 +1,6 @@
 from .encodings.alphabet_encoding import CigarOpEncoding
-from .encoded_array import as_encoded_array, EncodedArray, EncodedRaggedArray
+from .encoded_array import EncodedArray, EncodedRaggedArray
+from .encoded_array import as_encoded_array
 from npstructures import RaggedArray
 import numpy as np
 
