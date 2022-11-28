@@ -8,6 +8,7 @@ from sklearn.decomposition import NMF
 from scipy.optimize import minimize
 import numpy as np
 import plotly.express as px
+from bionumpy.cli import run_as_commandline
 
 
 def estimate_reference_proportions(reference_sequences: EncodedRaggedArray, query_sequences: EncodedRaggedArray):
@@ -38,7 +39,7 @@ def get_loss_func(reference_counts, query_counts):
     return poisson_loss
 
 
-def _test():
+def test():
     transcriptome = as_encoded_array(["ACGT", "GGGATC", "AAATCG", "TTTTACG"], bnp.DNAEncoding)
     rnaseq_reads = rnaseq.simulate_rnaseq(transcriptome,
                                           rnaseq.RNASeqSimulationSettings(fragment_size=4, read_length=3,
@@ -46,8 +47,12 @@ def _test():
     estimated_reads = estimate_reference_proportions(transcriptome, rnaseq_reads)
     return estimated_reads
 
+xx|x|z|
+def main(re):
+    
 
 if __name__ == '__main__':
-    est_reads = _test()
+    run_as_commandline(estimate_reference_proportions(
+    est_reads = test()
     fig = px.scatter(x=est_reads, y=[9, 18, 27, 36])
     fig.show()

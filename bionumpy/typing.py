@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Union
 from .encoded_array import EncodedArray, EncodedRaggedArray
 
-SingleEncodedArrayLike = str | EncodedArray
-EncodedRaggedArrayLike = List[str] | EncodedRaggedArray | List[EncodedArray]
-EncodedArrayLike = SingleEncodedArrayLike | EncodedRaggedArrayLike
+SingleEncodedArrayLike = Union[str, EncodedArray]
+EncodedRaggedArrayLike = Union[List[str], EncodedRaggedArray, List[EncodedArray]]
+EncodedArrayLike = Union[SingleEncodedArrayLike, EncodedRaggedArrayLike]

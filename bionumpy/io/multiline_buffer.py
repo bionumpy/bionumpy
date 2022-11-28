@@ -68,7 +68,9 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         lines[entry_starts[:-1],1:-1] = entries.name
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
-        lines[idxs,:-1] = RaggedArray(entries.sequence.ravel(), line_lengths[idxs]-1)
+        decoded = EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()),
+                               BaseEncoding)
+        lines[idxs,:-1] = EncodedRaggedArray(decoded, line_lengths[idxs]-1)
         lines[:, -1] = "\n"
         return lines.ravel()
 
