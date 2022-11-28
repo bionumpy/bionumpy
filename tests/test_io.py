@@ -13,7 +13,7 @@ from npstructures.testing import assert_npdataclass_equal
 
 @pytest.mark.parametrize("file_format", combos.keys())
 def test_read_write_roundtrip(file_format):
-    if file_format in ("multiline_fasta", "gfa_sequence", "bed12"):
+    if file_format in ("multiline_fasta", "bed12"):
         return 
     _, _, buf_type = combos[file_format]
     buffer_text = buffer_texts[file_format]

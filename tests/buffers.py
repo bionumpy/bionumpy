@@ -58,8 +58,8 @@ chr1	887560	rs3748595	A	C\t.\t.\t.\t.\t0/0:7,0:7:15:0,15,163	1/1:0,30:30:81:888,
 chr1	887801	rs3828047	A	G\t.\t.\t.\t.\t./.	1/1:0,17:17:39:398,39,0	1/1:0,3:3:9:102,9,0	1/1:0,1:1:3:34,3,0
 """
     , "gfa_sequence": """\
-S\tid1\tAACCTTGG\t.\t.
-S\tid4\tACTG\t*\t*
+S\tid1\tAACCTTGG
+S\tid4\tACTG
 """, "gff_entry": """\
 CHROMOSOME_I	Allele	substitution	10017380	10017380	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=4.49151;public_name=q504;substitution=G/A;variation=WBVar00241143
 CHROMOSOME_I	Allele	substitution	10573196	10573196	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=5.05579;public_name=vc56;substitution=G/A;variation=WBVar00275020
@@ -191,8 +191,8 @@ chr1	887801	rs3828047	A	G\t.\t.\t.\t.\t./.	1/1:0,17:17:39:398,39,0	1/1:0,3:3:9:1
 @pytest.fixture
 def gfa_sequence_buffer():
     t = """\
-S\tid1\tAACCTTGG\t.\t.
-S\tid4\tACTG\t*\t*
+S\tid1\tAACCTTGG
+S\tid4\tACTG
 """
     return chunk_from_text(t)
 

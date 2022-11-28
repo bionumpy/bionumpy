@@ -19,6 +19,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
     ints_to_strings, split, str_to_int, str_to_float,
     int_lists_to_strings, float_to_strings)
+from .dump_csv import dump_csv
 from .exceptions import FormatException
 import numpy as np
 
@@ -242,49 +243,8 @@ class DelimitedBuffer(FileBuffer):
         data : bnpdataclass
             Data
         """
-
-        funcs = {int: ints_to_strings,
-                 str: lambda x: x,
-                 List[int]: int_lists_to_strings,
-                 float: float_to_strings,
-                 List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
-                 }
-
-        all_encodings = get_alphabet_encodings() + get_base_encodings() + [PhasedGenotypeRowEncoding]
-        # TODO: add other base encodings (now they are a mix of classes and objects)
-
-        def get_func_for_datatype(datatype):
-            if is_subclass_or_instance(datatype, Encoding):
-                encoding = datatype
-                def dynamic(x):
-                    if isinstance(x, EncodedRaggedArray):
-                        # print(repr(x.ravel()))
-                        return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
-                    return EncodedArray(encoding.decode(x), BaseEncoding)
-                return dynamic
-            else:
-                return funcs[datatype]
-        columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
-                   for field in dataclasses.fields(data)]
-
-        lengths = np.concatenate([((column.shape.lengths if
-                                    isinstance(column, RaggedArray)
-                                    else np.array([
-                                                column.shape[-1] if len(column.shape) == 2 else 1
-                                                  ]*len(column))) + 1
-                                   )[:, np.newaxis] #Hacking here to accept EncodedArray
-                                  
-                                  for column in columns], axis=-1).ravel()
-        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8), BaseEncoding),
-                                   lengths)
-        n_columns = len(columns)
-        for i, column in enumerate(columns):
-            if (not isinstance(column, RaggedArray)) and len(column.shape)==1:
-                column = EncodedRaggedArray.from_numpy_array(column[:, np.newaxis]) # AND HERE
-            lines[i::n_columns, :-1] = column
-        lines[:, -1] = "\t"
-        lines[(n_columns - 1)::n_columns, -1] = "\n"
-        return lines.ravel()
+        data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
+        return dump_csv(data_dict, cls.DELIMITER)
 
     @classmethod
     def make_header(cls, data: bnpdataclass):
@@ -366,8 +326,11 @@ class GfaSequenceBuffer(DelimitedBuffer):
         sequences = self.get_text(col=2, fixed_length=False)
         return SequenceEntry(ids, sequences)
 
-    def from_data(self):
-        pass
+    @classmethod
+    def from_data(cls, data: SequenceEntry) -> EncodedArray:
+        return dump_csv([(str, as_encoded_array(["S"]*len(data))),
+                         (str, data.name),
+                         (str, data.sequence)])
 
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
