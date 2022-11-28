@@ -39,6 +39,10 @@ class FileBuffer:
         if condition:
             raise FormatException(*args, **kwargs)
 
+    @property
+    def n_lines(self):
+        return len(self._new_lines)
+
     @classmethod
     def read_header(cls, file_object: FileIO):
         """Read the header data from the file
@@ -247,17 +251,11 @@ class OneLineBuffer(FileBuffer):
             + 1
         )
         if np.any(self._data[header_idxs] != self.HEADER) or self._data[0] != self.HEADER:
-            raise FormatException("Invalid header in chunk" % self._data)
-        #     entry_number = np.flatnonzero(self._data[header_idxs] != self.HEADER)[0]
-        #     byte_position = header_idxs[entry_number]
-        #     offending_text = self._data(header_idxs[entry_number]:header_idxs[entry_number+1]))
-        #                             
-        # self.raise_if(np.any(self._data[header_idxs] != self.HEADER),
-        #               "Missing header symbol for header",
-        #               byte_position_number = header_idxs[self._data[header_idxs] != self.HEADER][0])
-        # 
-                      
-        # assert np.all(self._data[header_idxs] == self.HEADER)
+            if self._data[0] != self.HEADER:
+                line_number = 0
+            else:
+                line_number = (np.flatnonzero(self._data[header_idxs] != self.HEADER)[0]+1)*self.n_lines_per_entry
+            raise FormatException(f"Expected header line to start with {self.HEADER}" % self._data, line_number=line_number)
         self._is_validated = True
 
 
@@ -297,8 +295,10 @@ class FastQBuffer(OneLineBuffer):
     def _validate(self):
         super()._validate()
         if np.any(self._data[self._new_lines[1::self.n_lines_per_entry] + 1] != "+"):
-            raise FormatException(f"Expected '+' at third line of entry in {self._data}")
-
+            entry_number = np.flatnonzero(self._data[self._new_lines[1::self.n_lines_per_entry] + 1] != "+")[0]
+            line_number = 2+entry_number*self.n_lines_per_entry
+            raise FormatException(f"Expected '+' at third line of entry in {self._data}", line_number=line_number)
+        
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)
