@@ -14,8 +14,11 @@ def extract_transcriptome(reference_file: str, gtf_file: str, out_file: str):
         outfile.write(result)
 
 
+def test():
+    pass
+
 if __name__ == '__main__':
-    # run_as_commandline(extract_transcriptome)
-    extract_transcriptome(reference_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/GRCh38.p13.genome.fa",
-                          gtf_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/gencode.v38.chr_patch_hapl_scaff.annotation.gtf",
-                          out_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/bnp_extracted_transcriptome.fa")
+    run_as_commandline(extract_transcriptome)
+    #extract_transcriptome(reference_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/GRCh38.p13.genome.fa",
+    #gtf_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/gencode.v38.chr_patch_hapl_scaff.annotation.gtf",
+    # out_file="/Users/kanduric/Documents/Projects/christin_transcriptomics/bnp_extracted_transcriptome.fa")

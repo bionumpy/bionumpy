@@ -2,10 +2,10 @@ import dataclasses
 from itertools import chain
 import numpy as np
 from numpy.random import default_rng
-from bionumpy.encoded_array import EncodedArray, as_encoded_array
+from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from bionumpy.dna import reverse_compliment
-from bionumpy.encodings import StrandEncoding
-
+from bionumpy.encodings import StrandEncoding, DNAEncoding
+from ..datatypes import SequenceEntry, SequenceEntryWithQuality
 rng = default_rng()
 
 
@@ -36,7 +36,7 @@ def sample_transcript_fragments(sequences, sampling_rate):
     return sequences[mask]
 
 
-def get_rnaseq_reads(fragments, read_length, strands=None):
+def get_rnaseq_reads(fragments: SequenceEntry, read_length: int, strands: EncodedArray=None) -> EncodedRaggedArray:
     reverse_fragments = reverse_compliment(fragments)
     if strands is None:
         strands = EncodedArray(rng.choice([0, 1], replace=True, size=len(fragments)), StrandEncoding)
@@ -44,9 +44,13 @@ def get_rnaseq_reads(fragments, read_length, strands=None):
     return reads
 
 
-def simulate_rnaseq(reference_sequences, settings: RNASeqSimulationSettings):
+def simulate_rnaseq(reference_sequences: EncodedRaggedArray, settings: RNASeqSimulationSettings) -> SequenceEntryWithQuality:
+    reference_sequences = as_encoded_array(reference_sequences, DNAEncoding)
     transcript_copies = get_transcript_copies(reference_sequences, settings.transcript_counts)
     fragmented_transcript_copies = fragment_transcript_copies(transcript_copies, settings.fragment_size)
     sampled_transcript_fragments = sample_transcript_fragments(fragmented_transcript_copies, settings.sampling_rate)
     rnaseq_reads = get_rnaseq_reads(sampled_transcript_fragments, settings.read_length)
+    return SequenceEntryWithQuality([f"read_{i}" for i in range(len(rnaseq_reads))],
+                                    rnaseq_reads,
+                                    ["!"*length for length in rnaseq_reads.shape.lengths])
     return rnaseq_reads

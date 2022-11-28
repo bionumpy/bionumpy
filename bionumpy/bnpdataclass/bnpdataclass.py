@@ -40,8 +40,8 @@ class BNPDataClass(NpDataClass):
         ['sequence_aa', 'sequence', 's1']
 
         """
-        name = f"Dynamic{cls.__name__}" if name is None else name
-        return bnpdataclass(dataclasses.make_dataclass(name, bases=(cls,), fields=fields))
+        cls_name = name if name is not None else f"Dynamic{cls.__name__}" if cls.__name__[:7] != 'Dynamic' else cls.__name__
+        return bnpdataclass(dataclasses.make_dataclass(cls_name, bases=(cls,), fields=fields))
 
     def add_fields(self, fields: dict, field_type_map: dict = None) -> 'BNPDataClass':
         """
