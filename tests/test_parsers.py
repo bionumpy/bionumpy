@@ -110,7 +110,7 @@ def test_fastq_buffer(fastq_buffer):
 
 def test_gfa_sequence_buffer(gfa_sequence_buffer):
     buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
-    entries = list(buf.get_sequences())
+    entries = list(buf.get_data())
     true = [
         SequenceEntry.single_entry("id1", "AACCTTGG"),
         SequenceEntry.single_entry("id4", "ACTG")

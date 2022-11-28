@@ -11,18 +11,22 @@ from bionumpy.io.matrix_dump import matrix_to_csv
 from npstructures.testing import assert_npdataclass_equal
 
 
-@pytest.mark.parametrize("file_format", ["fastq"])
+@pytest.mark.parametrize("file_format", combos.keys())
 def test_read_write_roundtrip(file_format):
+    if file_format in ("multiline_fasta", "gfa_sequence", "bed12"):
+        return 
     _, _, buf_type = combos[file_format]
-    buffer_text = buffer_texts[file_format]*100
+    buffer_text = buffer_texts[file_format]
     input_buffer = bytes(buffer_text, encoding="utf8")
     in_obj = BytesIO(input_buffer)
     out_buffer = bytes()
     out_obj = BytesIO(out_buffer)
     reader = NpDataclassReader(NumpyFileReader(in_obj, buffer_type=buf_type))
     writer = NpBufferedWriter(out_obj, buf_type)
-    for chunk in reader.read_chunks():
+    for chunk in reader.read_chunks(200):
         writer.write(chunk)
+    print(out_obj.getvalue())
+    print(input_buffer)
     assert out_obj.getvalue() == input_buffer
 
 
@@ -41,7 +45,7 @@ def test_buffer_read(buffer_name):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
-        print("#####", line, true_line)
+        # print("#####", line, true_line)
         assert_npdataclass_equal(line, true_line)
 
 

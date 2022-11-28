@@ -230,11 +230,12 @@ class DelimitedBuffer(FileBuffer):
         should_be_new_lines = chunk[delimiters[n_delimiters_per_line-1::n_delimiters_per_line]]
         if delimiters.size % n_delimiters_per_line != 0 or np.any(should_be_new_lines != "\n"):
             offending_line = np.flatnonzero(should_be_new_lines != "\n")[0]
-            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})", line_number=offending_line)
+            lines = split(self._data, '\n')
+            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line}): {lines}", line_number=offending_line)
         self._validated = True
 
     @classmethod
-    def from_data(cls, data: bnpdataclass) -> "DelimitedBuffer":
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
         """Put each field of the dataclass into a column in a buffer.
 
         Parameters
@@ -344,7 +345,6 @@ class DelimitedBuffer(FileBuffer):
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + len(sep)
         text = self._data[starts:ends]
-        # text = self._move_intervals_to_ragged_array(starts, ends)
         if len(sep):
             text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
@@ -361,12 +361,13 @@ class DelimitedBuffer(FileBuffer):
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
 
-    def get_sequences(self):
+    def get_data(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)
         return SequenceEntry(ids, sequences)
 
-    get_data = get_sequences
+    def from_data(self):
+        pass
 
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
@@ -486,6 +487,11 @@ class VCFBuffer(DelimitedBuffer):
         data = super().get_data()
         data.position -= 1
         return data
+
+    @classmethod
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
+        data = dataclasses.replace(data, position=data.position+1)
+        return super().from_data(data)
 
 
 class VCFMatrixBuffer(VCFBuffer):
