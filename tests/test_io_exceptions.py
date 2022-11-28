@@ -78,7 +78,7 @@ def test_bed_raises_format_exception(data):
     with pytest.raises(FormatException) as e:
         buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
         buf.get_data()
-    # assert e.value.line_number == error_line
+    assert e.value.line_number == error_line
 
 
 @pytest.mark.parametrize("data", malformed_fastqs)
@@ -97,3 +97,22 @@ acgtt
         for _ in reader.read_chunks(200):
             pass
     assert e.value.line_number == 4*100+line_number
+
+
+@pytest.mark.parametrize("data", malformed_bed_files)
+def test_npdataclass_raises_format_exception_bed(data):
+    valid_bed = """\
+chr1\t10\t20
+chr2\t20\t30
+chr1\t10\t20
+chr2\t20\t30
+"""
+    malformed, line_number = data
+    fobj = BytesIO(bytes(valid_bed*100+malformed, encoding="ascii"))
+    npfilereader = NumpyFileReader(fobj, buffer_type=FastQBuffer)
+    reader = NpDataclassReader(npfilereader)
+    with pytest.raises(FormatException) as e:
+        for _ in reader.read_chunks(200):
+            pass
+    # assert e.value.line_number == 4*100+line_number
+

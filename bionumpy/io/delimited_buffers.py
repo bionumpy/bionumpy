@@ -10,6 +10,7 @@ from ..datatypes import (Interval, VCFGenotypeEntry,
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
+from ..encodings.exceptions import EncodingError
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
 from ..encoded_array import get_base_encodings, BaseEncoding
@@ -208,8 +209,9 @@ class DelimitedBuffer(FileBuffer):
         rows = self._data[integer_starts:integer_ends]
         try:
             strs = str_to_int(rows)
-        except ValueError as e:
-            raise FormatException(e.args[0])
+        except EncodingError as e:
+            row_number = np.searchsorted(rows.shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
         return strs
 
     @staticmethod
@@ -225,15 +227,10 @@ class DelimitedBuffer(FileBuffer):
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
         self._n_cols = n_delimiters_per_line
-        last_new_line = 0 # next(
-        # i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
-        # )
-        delimiters = delimiters[: delimiters.size - last_new_line]
-        if delimiters.size % n_delimiters_per_line != 0:
-            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
-        delimiters = delimiters.reshape(-1, n_delimiters_per_line)
-        if not np.all(chunk[delimiters[:, -1]] == NEWLINE):
-            raise FormatException(f"irregular number of delimiters per line: {chunk}")
+        should_be_new_lines = chunk[delimiters[n_delimiters_per_line-1::n_delimiters_per_line]]
+        if delimiters.size % n_delimiters_per_line != 0 or np.any(should_be_new_lines != "\n"):
+            offending_line = np.flatnonzero(should_be_new_lines != "\n")[0]
+            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})", line_number=offending_line)
         self._validated = True
 
     @classmethod

@@ -1,5 +1,6 @@
 import numpy as np
 from ..encoded_array import OneToOneEncoding
+from .exceptions import EncodingError
 
 
 class AlphabetEncoding(OneToOneEncoding):
@@ -26,9 +27,10 @@ class AlphabetEncoding(OneToOneEncoding):
         self._initialize()
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
-            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} "
-                             f"to {self.__class__.__name__}. Invalid character(s): "
-                             f"{[chr(c) for c in byte_array[ret==255]]}")
+            offset = np.flatnonzero(ret==255)[0]
+            raise EncodingError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} "
+                                f"to {self.__class__.__name__}. Invalid character(s): "
+                                f"{[chr(c) for c in byte_array[ret==255]]}", offset)
         return ret
 
     def _decode(self, encoded):
