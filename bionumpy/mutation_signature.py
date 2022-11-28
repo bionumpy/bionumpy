@@ -67,13 +67,13 @@ class MutationTypeEncoding:
     def decode(self, encoded):
         snp = SNPEncoding.decode(encoded >> (2 * (self.k - 1)))
         chars = (encoded >> (2 * np.arange(self.k - 1))) & 3
-        kmer = "".join(chr(b) for b in self._encoding.decode(chars))
+        kmer = "".join(chr(b) for b in self._encoding._decode(chars))
         return kmer[: self.k // 2] + "[" + snp + "]" + kmer[self.k // 2 :]
 
     def to_string(self, encoded):
         snp = SNPEncoding.to_string(encoded >> (2 * (self.k - 1)))
         chars = (encoded >> (2 * np.arange(self.k - 1))) & 3
-        kmer = "".join(chr(b) for b in self._encoding.decode(chars))[::-1]
+        kmer = "".join(chr(b) for b in self._encoding._decode(chars))[::-1]
         return kmer[: self.k // 2] + "[" + snp + "]" + kmer[self.k // 2 :]
 
     def get_labels(self):

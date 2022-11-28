@@ -21,8 +21,8 @@ These variants and intervals come in chunks, and stream of chunks are not really
 
 The attributes we specify for the multistream are now synched streams that give data corresponding to the seqeunces listed int `reference.get_sequence_lengths()` one at a time. This means we can give these streams to any function with the `streamable` decorator. For example:
 
-import bionumpy.encoded_array_functions    >>> from bionumpy.intervals import get_boolean_mask
-import bionumpy.encoded_array    >>> @bnp.streamable(sum)
+	>>> from bionumpy.intervals import get_boolean_mask
+	>>> @bnp.streamable(sum)
     ... def get_letter_counts_around_variants(reference_sequence, variants, intervals):
     ...     mask = get_boolean_mask(intervals, len(reference_sequence))
     ...     positions = variants.position
@@ -34,7 +34,7 @@ import bionumpy.encoded_array    >>> @bnp.streamable(sum)
     >>> get_letter_counts_around_variants(multistream.sequence, multistream.variants, multistream.intervals)
     EncodedCounts(alphabet=['A', 'C', 'G', 'T'], counts=array([155, 127, 116, 122]), row_names=None)
 
-import bionumpy.encoded_array_functions    >>> from bionumpy.intervals import get_boolean_mask
+	>>> from bionumpy.intervals import get_boolean_mask
     >>> @bnp.streamable(sum)
     ... def get_letter_counts_around_variants(reference_sequence, variants, intervals):
     ...     mask = get_boolean_mask(intervals, len(reference_sequence))

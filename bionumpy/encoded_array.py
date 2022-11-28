@@ -61,7 +61,7 @@ class OneToOneEncoding(Encoding):
 
     def _encode_list_of_strings(self, s: str):
         s = EncodedRaggedArray(
-            EncodedArray([ord(c) for ss in s for c in ss], IdentityEncoding()),
+            EncodedArray([ord(c) for ss in s for c in ss], BaseEncoding),
             [len(ss) for ss in s])
         return self._ragged_array_as_encoded_array(s)
 
@@ -73,7 +73,7 @@ class OneToOneEncoding(Encoding):
         return RaggedArray(data, s.shape)
 
     def _encode_string(self, string: str):
-        s = EncodedArray([ord(c) for c in string], IdentityEncoding())
+        s = EncodedArray([ord(c) for c in string], BaseEncoding)
         s = self._encode_base_encoded_array(s)
         return s
 
@@ -530,21 +530,3 @@ def change_encoding(encoded_array, new_encoding):
         return EncodedArray(new_data, new_encoding)
     elif isinstance(encoded_array, EncodedRaggedArray):
         return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array.shape)
-
-
-class IdentityEncoding:
-    """Used internally as an empty temp encoding when encodings stuff."""
-    @classmethod
-    def is_base_encoding(cls):
-        return True
-
-    def is_one_to_one_encoding(self):
-        return True
-
-    @classmethod
-    def encode(cls, s):
-        return s
-
-    @classmethod
-    def decode(cls, s):
-        return s
