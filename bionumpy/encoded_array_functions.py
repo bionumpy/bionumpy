@@ -77,17 +77,21 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
     elif target_encoding is None:
         target_encoding = BaseEncoding
 
+    # if numeric encoding and already np-array, this is already encoded
+    if target_encoding.is_numeric() and isinstance(s, (np.ndarray, RaggedArray)):
+        return s
+
     if isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return list_of_encoded_arrays_as_encoded_ragged_array(s)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):
         #assert hasattr(target_encoding, "_encode"), target_encoding
-        #new = target_encoding.encode(s)
+        new = target_encoding.encode(s)
         #assert isinstance(new, RaggedArray), "%s, %s" % (type(new), type(s))
-        old = ragged_array_as_encoded_array(s, target_encoding)
+        #old = ragged_array_as_encoded_array(s, target_encoding)
         #assert np.all(old.ravel() == new.ravel()), "%s, %s != %s, %s, %s, %s, %s" % (target_encoding, old, new, type(old), type(new), repr(old), repr(new))
         #assert old.shape == new.shape, "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
         #assert_raggedarray_equal(old, new), "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
-        return old
+        return new
     elif isinstance(s, np.ndarray):
         return np_array_as_encoded_array(s, target_encoding)
     else:
@@ -118,7 +122,7 @@ def _encode_encoded_array(encoded_array, target_encoding):
 def _encode_base_encoded_array(encoded_array, target_encoding):
     assert encoded_array.encoding.is_base_encoding()
     encoded_array = target_encoding.encode(encoded_array.data)
-    if hasattr(target_encoding, "is_numeric"):
+    if target_encoding.is_numeric():
         encoded_array = encoded_array
     else:
         encoded_array = EncodedArray(encoded_array, target_encoding)
@@ -127,8 +131,7 @@ def _encode_base_encoded_array(encoded_array, target_encoding):
 
 def np_array_as_encoded_array(s, target_encoding):
     assert hasattr(target_encoding, "is_numeric")
-    return s
-    #return target_encoding.encode(s)
+    return target_encoding.encode(s)
 
 
 def ragged_array_as_encoded_array(s, target_encoding):

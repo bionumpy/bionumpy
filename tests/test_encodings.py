@@ -7,8 +7,9 @@ import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
 import bionumpy as bnp
 from bionumpy import FastQBuffer
+from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.datatypes import SequenceEntryWithQuality
-from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding
+from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding, DigitEncodingFactory
 from bionumpy.encodings.base_encoding import NumericEncoding, OneToOneEncoding, BaseEncoding
 from bionumpy.encoded_array_functions import as_encoded_array
 
@@ -59,7 +60,7 @@ def test_public_encode_decode_string(data):
     assert np.all(encoded == encoded2)
 
 
-@pytest.mark.parametrize("data", [np.array([1, 2, 3]), np.array([[1, 10], [1]])])
+@pytest.mark.parametrize("data", [np.array([1, 2, 3]), RaggedArray([[1, 10], [1]])])
 def test_encode_numeric(data):
     custom_encoding = CustomNumericEncoding()
     encoded = custom_encoding.encode(data)
@@ -102,15 +103,49 @@ def test1():
     assert True
 
 
+TestDigitEncoding = DigitEncodingFactory("1")
+
+@bnpdataclass
+class TestEntry:
+    a: TestDigitEncoding
+
+
+def test_numeric_entry():
+    encoding = TestDigitEncoding
+    a = TestEntry.single_entry("1234")
+    assert np.all(encoding.decode(a.a) == 48 + np.array([1, 2, 3, 4]))
+
+
+def test_quality_encoding():
+    print(repr(QualityEncoding.encode("!#!#!")))
+    encoded = as_encoded_array("!#!#!", QualityEncoding)
+    print(repr(encoded))
+    #assert False
+
+
+
 def test_encoding_sequence_entry():
+
+    qual = as_encoded_array(["!#!#!#!#"], QualityEncoding)
+    print(qual)
+
     s = SequenceEntryWithQuality(
         name=as_encoded_array(['headerishere'], BaseEncoding),
         sequence=as_encoded_array(['CTTGTTGA'], BaseEncoding),
-        quality=np.array([[223, 223, 223, 223, 223, 223, 223, 223]], dtype=np.uint8))
+        quality=as_encoded_array(['!#!#!#!#'], BaseEncoding),
+    )
 
+
+    print("Entry")
+    print(s)
+    print(repr(s.quality.ravel()))
     data = FastQBuffer.dataclass.stack_with_ragged(s)
     print("DATA")
-    #print(data)
+    print(repr(data))
+    print("QUal")
+    print(repr(data.quality))
+    print(type(data.quality))
+    #assert False
     #buf = FastQBuffer.from_data(data)
     #print(buf.raw())
 
@@ -145,7 +180,7 @@ class TestNumericEncoding(NumericEncoding):
 def test_custom_numeric_encoding():
     encoding = QualityEncoding
     string = "!#!#"
-    array = np.array([33, 35, 33, 35])
+    array = bnp.EncodedArray(np.array([33, 35, 33, 35]), BaseEncoding)
     encoded = encoding.encode(string)
     encoded_old = as_encoded_array(string, encoding)
     print("ENcoded new")

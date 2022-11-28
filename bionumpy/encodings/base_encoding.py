@@ -20,12 +20,17 @@ class Encoding:
     def is_one_to_one_encoding(self):
         return False
 
+    def is_numeric(self):
+        return False
+
 
 class OneToOneEncoding(Encoding):
+
     def encode(self, data):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
         from ..encoded_array_functions import list_of_encoded_arrays_as_encoded_ragged_array
         assert hasattr(self, "_encode"), "Missing implementation of _encode for %s" % self
+
         if isinstance(data, (EncodedArray, EncodedRaggedArray)):
             assert data.encoding.is_base_encoding(), "Data is already encoded. " \
                                                      "Can only encode already encoded data if it is base encoded."
@@ -67,9 +72,6 @@ class OneToOneEncoding(Encoding):
         if isinstance(data, EncodedArray):
             return EncodedRaggedArray(data, s.shape)
 
-        print("_ragged array as encoded array")
-        print(s)
-
         return RaggedArray(data, s.shape)
 
         """
@@ -96,7 +98,7 @@ class OneToOneEncoding(Encoding):
         from ..encoded_array import EncodedArray, EncodedRaggedArray
         assert encoded_array.encoding.is_base_encoding()
         encoded_array = self._encode(encoded_array.data)
-        if hasattr(self, "is_numeric"):
+        if self.is_numeric():
             encoded_array = encoded_array
         else:
             encoded_array = EncodedArray(encoded_array, self)
@@ -146,7 +148,8 @@ class ASCIIEncoding(OneToOneEncoding):
 
 
 class NumericEncoding(OneToOneEncoding):
-    is_numeric = True
+    def is_numeric(self):
+        return True
 
 
 """

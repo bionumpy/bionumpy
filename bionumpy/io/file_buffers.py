@@ -264,7 +264,9 @@ class FastQBuffer(OneLineBuffer):
         seq_entry = super().get_data()
         quality = self.lines[3 :: self.n_lines_per_entry, :-1]
         return SequenceEntryWithQuality(
-            seq_entry.name, seq_entry.sequence, quality)
+            seq_entry.name, seq_entry.sequence,
+            #quality)
+            QualityEncoding.encode(quality))
 
     @classmethod
     def _get_line_lens(cls, entries):
