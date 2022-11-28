@@ -13,16 +13,19 @@ actg
                     """\
 header
 actg
--
++
 !!!!
 """,
                     """\
 @header
 actg
--
++
 @header
 actg
--
++
+@header
+actg
++
 """]
 
 malformed_two_line_fastas = ["""\

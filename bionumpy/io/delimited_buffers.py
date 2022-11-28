@@ -229,7 +229,7 @@ class DelimitedBuffer(FileBuffer):
         )
         delimiters = delimiters[: delimiters.size - last_new_line]
         if delimiters.size % n_delimiters_per_line != 0:
-            raise FormatException(f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
+            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})")
         delimiters = delimiters.reshape(-1, n_delimiters_per_line)
         if not np.all(chunk[delimiters[:, -1]] == NEWLINE):
             raise FormatException(f"irregular number of delimiters per line: {chunk}")

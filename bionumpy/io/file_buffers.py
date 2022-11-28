@@ -246,7 +246,7 @@ class OneLineBuffer(FileBuffer):
             self._new_lines[self.n_lines_per_entry - 1 : -1 : self.n_lines_per_entry]
             + 1
         )
-        if np.any(self._data[header_idxs] != self.HEADER):
+        if np.any(self._data[header_idxs] != self.HEADER) or self._data[0] != self.HEADER:
             raise FormatException("Invalid header in chunk" % self._data)
         #     entry_number = np.flatnonzero(self._data[header_idxs] != self.HEADER)[0]
         #     byte_position = header_idxs[entry_number]
