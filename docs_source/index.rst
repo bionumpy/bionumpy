@@ -119,6 +119,7 @@ Documentation
    source/supported_file_formats.rst
    source/sequences.rst
    source/intervals.rst
+   source/encoding.rst
    source/multiple_data_sources.rst
    source/broadcastable_functions.rst
    source/rollable_functions.rst
@@ -143,3 +144,4 @@ Documentation
    developer_guide/making_examples.rst
    developer_guide/writing_documentation.rst
    developer_guide/design_principles.rst
+   developer_guide/encodings.rst
