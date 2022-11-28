@@ -14,9 +14,9 @@ from npstructures.testing import assert_npdataclass_equal
 @pytest.mark.parametrize("file_format", combos.keys())
 def test_read_write_roundtrip(file_format):
     if file_format in ("multiline_fasta", "bed12"):
-        return 
+        return
     _, _, buf_type = combos[file_format]
-    buffer_text = buffer_texts[file_format]
+    buffer_text = buffer_texts[file_format]*100
     input_buffer = bytes(buffer_text, encoding="utf8")
     in_obj = BytesIO(input_buffer)
     out_buffer = bytes()
