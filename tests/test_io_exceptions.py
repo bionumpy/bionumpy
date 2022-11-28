@@ -1,6 +1,10 @@
+from io import BytesIO
+
 from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
+from bionumpy.io.parser import NumpyFileReader
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.io.exceptions import FormatException
+from bionumpy.io.files import NpDataclassReader
 import bionumpy as bnp
 import pytest
 
@@ -75,3 +79,20 @@ def test_bed_raises_format_exception(data):
         buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
         buf.get_data()
     # assert e.value.line_number == error_line
+
+
+def test_npdataclass_raises_format_exception():
+    valid_fastq = """\
+@header
+acgtt
++
+!!!!!
+"""
+    malformed, line_number = malformed_fastqs[0]
+    fobj = BytesIO(bytes(valid_fastq*100+malformed, encoding="ascii"))
+    npfilereader = NumpyFileReader(fobj, buffer_type=FastQBuffer)
+    reader = NpDataclassReader(npfilereader)
+    with pytest.raises(FormatException) as e:
+        for _ in reader.read_chunks(200):
+            pass
+    assert e.value.line_number == 4*100+line_number
