@@ -45,10 +45,10 @@ class CustomEncoding(OneToOneEncoding):
 
 class CustomNumericEncoding(NumericEncoding):
     def _decode(self, data):
-        return data
+        return data + 10
 
     def _encode(self, data):
-        return data
+        return data - 10
 
 
 @pytest.mark.parametrize("data", ["test", ["test1", "test2"]])
@@ -86,24 +86,13 @@ def test_digit_encoding(data):
 def test_base_quality_encoding(data):
     encoding = QualityEncoding
     encoded = encoding.encode(data)
-    print(type(encoded))
-    print(encoded)
     decoded = encoding.decode(encoded)
-    print(type(decoded))
-    print(decoded)
     encoded2 = encoding.encode(decoded)
     assert np.all(encoded2 == encoded)
 
 
-def test1():
-    seq = as_encoded_array(["ACTG", "AC"])
-    print(seq)
-    for s in seq:
-        print("SEQ: ", s.to_string())
-    assert True
-
-
 TestDigitEncoding = DigitEncodingFactory("1")
+
 
 @bnpdataclass
 class TestEntry:
@@ -116,38 +105,27 @@ def test_numeric_entry():
     assert np.all(encoding.decode(a.a) == 48 + np.array([1, 2, 3, 4]))
 
 
-def test_quality_encoding():
-    print(repr(QualityEncoding.encode("!#!#!")))
-    encoded = as_encoded_array("!#!#!", QualityEncoding)
-    print(repr(encoded))
-    #assert False
 
+@pytest.mark.parametrize("data", ["!#", ["!#"]])
+def test_quality_encoding(data):
+    data = as_encoded_array(data, BaseEncoding)
+    encoded_data = as_encoded_array(data, QualityEncoding)
+    assert np.all(encoded_data.ravel() == [0, 2])
 
 
 def test_encoding_sequence_entry():
-
-    qual = as_encoded_array(["!#!#!#!#"], QualityEncoding)
-    print(qual)
-
     s = SequenceEntryWithQuality(
         name=as_encoded_array(['headerishere'], BaseEncoding),
         sequence=as_encoded_array(['CTTGTTGA'], BaseEncoding),
         quality=as_encoded_array(['!#!#!#!#'], BaseEncoding),
     )
+    correct = [0, 2, 0, 2, 0, 2, 0, 2]
 
+    assert type(s.quality) == RaggedArray
+    assert np.all(s.quality.ravel() == correct)
 
-    print("Entry")
-    print(s)
-    print(repr(s.quality.ravel()))
     data = FastQBuffer.dataclass.stack_with_ragged(s)
-    print("DATA")
-    print(repr(data))
-    print("QUal")
-    print(repr(data.quality))
-    print(type(data.quality))
-    #assert False
-    #buf = FastQBuffer.from_data(data)
-    #print(buf.raw())
+    assert np.all(data.quality == correct)
 
 
 @pytest.mark.parametrize("data", ["!!@-^", ["!!@@", "!+"]])

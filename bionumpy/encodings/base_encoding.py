@@ -43,7 +43,6 @@ class OneToOneEncoding(Encoding):
         elif isinstance(data, list):
             out = self._encode_list_of_strings(data)
         elif isinstance(data, RaggedArray):
-            print("IS RAGGED ARRAY")
             r = self._ragged_array_as_encoded_array(data)
             assert isinstance(r, (EncodedRaggedArray, RaggedArray))
             return r

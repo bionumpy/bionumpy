@@ -78,27 +78,23 @@ def as_encoded_array(s, target_encoding: Encoding = None) -> EncodedArray:
         target_encoding = BaseEncoding
 
     # if numeric encoding and already np-array, this is already encoded
-    if target_encoding.is_numeric() and isinstance(s, (np.ndarray, RaggedArray)):
+    if target_encoding.is_numeric() and type(s) in (np.ndarray, RaggedArray):
         return s
 
     if isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
-        return list_of_encoded_arrays_as_encoded_ragged_array(s)
+        return target_encoding.encode(s)
+        #return list_of_encoded_arrays_as_encoded_ragged_array(s)
     elif isinstance(s, (RaggedArray, EncodedRaggedArray)):
-        #assert hasattr(target_encoding, "_encode"), target_encoding
-        new = target_encoding.encode(s)
-        #assert isinstance(new, RaggedArray), "%s, %s" % (type(new), type(s))
-        #old = ragged_array_as_encoded_array(s, target_encoding)
-        #assert np.all(old.ravel() == new.ravel()), "%s, %s != %s, %s, %s, %s, %s" % (target_encoding, old, new, type(old), type(new), repr(old), repr(new))
-        #assert old.shape == new.shape, "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
-        #assert_raggedarray_equal(old, new), "%s != %s, %s, %s, %s, %s" % (old, new, type(old), type(new), repr(old), repr(new))
-        return new
+        return target_encoding.encode(s)
     elif isinstance(s, np.ndarray):
-        return np_array_as_encoded_array(s, target_encoding)
+        return target_encoding.encode(s)
+        #return np_array_as_encoded_array(s, target_encoding)
     else:
-        if _is_encoded(s) and target_encoding == s.encoding:
-            return s
-        else:
-            return target_encoding.encode(s)
+        return target_encoding.encode(s)
+        #if _is_encoded(s) and target_encoding == s.encoding:
+        #    return s
+        #else:
+        #    return target_encoding.encode(s)
 
 
 def _encode_encoded_array(encoded_array, target_encoding):
