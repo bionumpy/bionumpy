@@ -31,6 +31,9 @@ class DigitEncodingFactory(NumericEncoding):
     def _decode(self, digits):
         return digits + self._min_code
 
+    def __repr__(self):
+        return "DigitEncoding(min_code=%d)" % self._min_code
+
 
 DigitEncoding = DigitEncodingFactory("0")
 QualityEncoding = DigitEncodingFactory("!")
