@@ -30,12 +30,12 @@ def plot_gc_content(reads):
 
 
 @bnp.streamable()
-def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
-    return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
+def get_quality_scores(reads):
+    return reads.quality
 
 
 def plot_averege_quality_scores_per_base(reads):
-    scores = bnp.mean(get_quality_scores_as_matrix(reads), axis=0)
+    scores = bnp.mean(get_quality_scores(reads), axis=0)
     return scores
 
 
