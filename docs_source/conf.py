@@ -21,6 +21,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+import doctest
 import bionumpy
 
 # -- General configuration ---------------------------------------------
@@ -40,6 +41,13 @@ import os
 if os.getcwd().endswith("docs_source"):
     os.chdir("../")
 """
+
+doctest_default_flags = (
+    doctest.ELLIPSIS
+    | doctest.IGNORE_EXCEPTION_DETAIL
+    | doctest.DONT_ACCEPT_TRUE_FOR_1
+    | doctest.NORMALIZE_WHITESPACE)
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -50,7 +58,7 @@ source_suffix = ['.rst', '.md']
 #source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'menu'
 
 # General information about the project.
 project = 'bionumpy'
