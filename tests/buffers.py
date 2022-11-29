@@ -1,7 +1,7 @@
 import pytest
 from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry, Bed12
-from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry, Bed12, Bed6
+from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer, Bed6Buffer
 from bionumpy.io.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.encoded_array import EncodedArray
 from bionumpy.encodings import BaseEncoding
@@ -38,9 +38,9 @@ GGGCCC
 TTT
 """
     , "bed": """\
-chr1\t1\t3\t.\t.\t-
-chr1\t40\t60\t.\t.\t+
-chr20\t400\t600\t.\t.\t+
+chr1\t1\t3\t.\t0\t-
+chr1\t40\t60\t.\t1\t+
+chr20\t400\t600\t.\t2\t+
 """
     , "vcf": """\
 chr1	88362	rs4970378	A	G	.	.	.
@@ -58,8 +58,8 @@ chr1	887560	rs3748595	A	C\t.\t.\t.\t.\t0/0:7,0:7:15:0,15,163	1/1:0,30:30:81:888,
 chr1	887801	rs3828047	A	G\t.\t.\t.\t.\t./.	1/1:0,17:17:39:398,39,0	1/1:0,3:3:9:102,9,0	1/1:0,1:1:3:34,3,0
 """
     , "gfa_sequence": """\
-S\tid1\tAACCTTGG\t.\t.
-S\tid4\tACTG\t*\t*
+S\tid1\tAACCTTGG
+S\tid4\tACTG
 """, "gff_entry": """\
 CHROMOSOME_I	Allele	substitution	10017380	10017380	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=4.49151;public_name=q504;substitution=G/A;variation=WBVar00241143
 CHROMOSOME_I	Allele	substitution	10573196	10573196	.	+.	aachange=A to T;consequence=Missense;interpolated_map_position=5.05579;public_name=vc56;substitution=G/A;variation=WBVar00275020
@@ -82,9 +82,9 @@ buffers = {key: chunk_from_text(val) for key, val in buffer_texts.items()}
 
 data = {
     "bed": [
-        Interval.single_entry("chr1", 1, 3),
-        Interval.single_entry("chr1", 40, 60),
-        Interval.single_entry("chr20",  400, 600)],
+        Bed6.single_entry("chr1", 1, 3, ".", 0, "-"),
+        Bed6.single_entry("chr1", 40, 60, ".", 1, "+"),
+        Bed6.single_entry("chr20",  400, 600, ".", 2, "+")],
     "vcf2": [
         VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
         VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"CAA", ".", ".", "."),
@@ -114,7 +114,7 @@ data = {
 }
 
 
-buffer_type = {"bed": BedBuffer,
+buffer_type = {"bed": Bed6Buffer,
                "vcf2": VCFBuffer,
                "vcf": VCFBuffer,
                "fastq": FastQBuffer,
@@ -191,8 +191,8 @@ chr1	887801	rs3828047	A	G\t.\t.\t.\t.\t./.	1/1:0,17:17:39:398,39,0	1/1:0,3:3:9:1
 @pytest.fixture
 def gfa_sequence_buffer():
     t = """\
-S\tid1\tAACCTTGG\t.\t.
-S\tid4\tACTG\t*\t*
+S\tid1\tAACCTTGG
+S\tid4\tACTG
 """
     return chunk_from_text(t)
 

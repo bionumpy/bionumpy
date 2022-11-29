@@ -109,10 +109,10 @@ chr2\t20\t30
 """
     malformed, line_number = data
     fobj = BytesIO(bytes(valid_bed*100+malformed, encoding="ascii"))
-    npfilereader = NumpyFileReader(fobj, buffer_type=FastQBuffer)
+    npfilereader = NumpyFileReader(fobj, buffer_type=BedBuffer)
     reader = NpDataclassReader(npfilereader)
     with pytest.raises(FormatException) as e:
         for _ in reader.read_chunks(200):
             pass
-    # assert e.value.line_number == 4*100+line_number
+    assert e.value.line_number == 4*100+line_number
 
