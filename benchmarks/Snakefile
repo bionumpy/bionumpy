@@ -1,0 +1,126 @@
+# Main entrypoint of the workflow. 
+# Please follow the best practices: 
+# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
+# in particular regarding the standardized folder structure mentioned there. 
+import bionumpy as bnp
+from bionumpy.intervals import intersect
+
+
+rule all:
+    input:
+        [f"results/{program}/protein_sequences/l150_n1000000.fa"
+         for program in ["bionumpy", "biopython", "biostrings"]],
+        [f"results/{program}/intersect/100000_1000000.bed"
+         for program in ["bionumpy", "bedtools"]],
+
+
+rule simulate_dna:
+    output:
+        "results/dna_sequences/l{length}_n{number}.fa"
+    run:
+        import random
+        with open(output[0], "w") as f:
+            for i in range(int(wildcards.number)):
+                f.write(f">{i}\n")
+                f.write("".join(random.choices("ACGT", k=int(wildcards.length)))+ "\n")
+
+
+rule translate_bionumpy:
+    input:
+        "results/dna_sequences/{name}.fa"
+    output:
+        "results/bionumpy/protein_sequences/{name}.fa"
+    benchmark:
+        "benchmarks/translate/bionumpy/{name}.txt"
+    run:
+        from bionumpy.translate import translate_dna_to_protein
+        input_stream = bnp.open(input[0])
+        output_stream = bnp.open(output[0], "w")
+        output_stream.write(translate_dna_to_protein(input_stream))
+        output_stream.close()
+
+rule translate_biopython:
+    input:
+        "results/dna_sequences/{name}.fa"
+    output:
+        "results/biopython/protein_sequences/{name}.fa"
+    benchmark:
+        "benchmarks/translate/biopython/{name}.txt"
+    run:
+        from Bio import SeqIO
+        from Bio.SeqRecord import SeqRecord
+        with open(output[0], 'w') as aa_fa:
+            for dna_record in SeqIO.parse(input[0], 'fasta'):
+                new_record = SeqRecord(
+                    dna_record.seq.translate(),
+                    id=dna_record.id)
+                SeqIO.write(new_record, aa_fa, 'fasta')
+
+
+rule translate_biostrings:
+    input:
+        "results/dna_sequences/{name}.fa"
+    output:
+        "results/biostrings/protein_sequences/{name}.fa"
+    benchmark:
+        "benchmarks/translate/biopython/{name}.txt"
+    script:
+        "scripts/reverse_complement_biostrings.R"
+
+rule simulate_intervals:
+    output:
+        "results/intevals/{n_intervals}.bed"
+    run:
+        import random
+        with open(output[0], "w") as f:
+            for chromosome in range(1, 10):
+                start = 1
+                for _ in range(int(wildcards.n_intervals)):
+                    end = start+random.randint(1, 100)
+                    f.write(f"chr{chromosome}\t{start}\t{end}\t.\t.\t+\n")
+                    start= end + random.randint(1, 30)
+
+rule intersect_bionumpy:
+    input:
+        "results/intevals/{b}.bed",
+        "results/intevals/{a}.bed"
+    output:
+        "results/bionumpy/intersect/{a}_{b}.bed"
+    benchmark:
+        "benchmarks/intersect/bionumpy/{a}_{b}.txt"
+    script:
+        "scripts/intersect.py"
+# out_f = bnp.open(output[0], "w")
+# print(out_f)
+# a = bnp.open(input[0])
+# b = bnp.open(input[1], mode="chromosome_stream")
+# print(a, b)
+# for chromosome, result in intersect(a, b):
+#     print("###", chromosome)
+#     out_f.write(result)
+# out_f.close()
+
+rule intersect_bedtools:
+    input:
+        "results/intevals/{b}.bed",
+        "results/intevals/{a}.bed"
+    output:
+        "results/bedtools/intersect/{a}_{b}.bed"
+    benchmark:
+        "benchmarks/intersect/bedtools/{a}_{b}.txt"
+    shell:
+        "bedtools intersect -a {input[0]} -b {input[1]} > {output} -sorted"
+
+rule intersect_check:
+    input:
+        "results/bedtools/intersect/{a}_{b}.bed",
+        "results/bionumpy/intersect/{a}_{b}.bed"
+    output:
+        "results/intersect/{a}_{b}"
+    run:
+        a = (line.strip().split("\t")[:3] for line in open(input[0]))
+        b = (line.strip().split("\t")[:3] for line in open(input[1]))
+        for l, l2 in zip(a, b):
+            assert l==l2, (l, l2)
+        open(output[0], "w").write("1")
+
