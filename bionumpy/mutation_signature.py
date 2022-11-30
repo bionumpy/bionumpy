@@ -6,7 +6,7 @@ from .encoded_array import EncodedArray
 from .encoded_array import as_encoded_array
 from .sequence import get_reverse_complement, count_encoded
 from .streams import streamable
-from .lookup import Lookup
+from .sequence.lookup import Lookup
 import logging
 
 logger = logging.getLogger(__name__)
