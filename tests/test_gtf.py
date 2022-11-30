@@ -2,7 +2,7 @@ import pytest
 import bionumpy as bnp
 import numpy as np
 from bionumpy import as_encoded_array
-from bionumpy.gtf import get_transcript_sequences, get_exons
+from bionumpy.sequence.genes import get_transcript_sequences
 
 
 @pytest.fixture
@@ -26,4 +26,4 @@ def test_get_transcript_sequences(gtf_entries, reference_sequences):
 
 
 def test_get_exons(gtf_entries):
-    assert len(get_exons(gtf_entries)) == 3
+    assert len(gtf_entries.get_exons()) == 3

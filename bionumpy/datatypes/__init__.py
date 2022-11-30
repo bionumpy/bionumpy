@@ -1,10 +1,10 @@
 import numpy as np
 from typing import List
-from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
-                        CigarEncoding, StrandEncoding)
-from .encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
-from .bnpdataclass import bnpdataclass
-
+from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
+                         CigarEncoding, StrandEncoding)
+from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
+from ..bnpdataclass import bnpdataclass
+from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry
 
 
 @bnpdataclass
@@ -13,7 +13,6 @@ class BedGraph:
     start: int
     stop: int
     value: int
-
 
 
 @bnpdataclass
@@ -120,33 +119,6 @@ class SortedIntervals:
 
 
 @bnpdataclass
-class GFFEntry:
-    chromosome: str
-    source: str
-    feature_type: str
-    start: int
-    stop: int
-    score: str
-    strand: StrandEncoding
-    phase: str
-    atributes: str
-
-@bnpdataclass
-class GFFGeneEntry(GFFEntry):
-    gene_id: str
-
-
-@bnpdataclass
-class GFFTranscriptEntry(GFFGeneEntry):
-    transcript_id: str
-
-
-@bnpdataclass
-class GFFExonEntry(GFFTranscriptEntry):
-    exon_id: str
-
-
-@bnpdataclass
 class SAMEntry:
     name: str
     flag: int
@@ -179,10 +151,10 @@ class ChromosomeSize:
     name: str
     size: int
 
+
 @bnpdataclass
 class GfaPath:
     name: str
     node_ids: List[int]
     directions: List[int]
-
 
