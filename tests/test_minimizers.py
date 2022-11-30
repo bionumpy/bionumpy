@@ -1,5 +1,4 @@
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.sequence.minimizers import Minimizers, get_minimizers
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray

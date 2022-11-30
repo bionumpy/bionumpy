@@ -1,7 +1,6 @@
 import pytest
 
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.sequence.kmers import KmerEncoder, _get_dna_kmers
 import numpy as np
