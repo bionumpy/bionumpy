@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from npstructures import npdataclass
-from bionumpy.code_nodes import ComputationNode, LeafNode, consume, NpDataclassStream
+# from bionumpy.code_nodes import LeafNode, consume, NpDataclassStream
 
 
 @npdataclass
@@ -43,6 +43,7 @@ def complicated(a, b, c):
 
 
 @pytest.mark.parametrize("func", [add, two_step, complicated])
+@pytest.mark.skip("legacy")
 def test_equal(whole_data, stream, func):
     a = stream.a
     b = stream.b
@@ -53,6 +54,7 @@ def test_equal(whole_data, stream, func):
     assert np.all(true == ours)
 
 
+@pytest.mark.skip("legacy")
 def test_print(stream):
     a = stream.a
     b = stream.b

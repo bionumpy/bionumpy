@@ -1,7 +1,7 @@
 import pytest
-from bionumpy.intervals import count_overlap, intersect, pileup
-from bionumpy.datatypes import Interval
-from bionumpy.bedgraph import BedGraph
+from bionumpy.arithmetics import count_overlap, intersect, get_pileup
+from bionumpy.datatypes import Interval, BedGraph
+
 
 @pytest.fixture
 def interval_a():

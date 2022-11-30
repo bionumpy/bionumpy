@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 #from bionumpy.util import filter_on_intervals
-from bionumpy.intervals import sort_intervals, merge_intervals
+from bionumpy.arithmetics import sort_intervals, merge_intervals
 from npstructures import npdataclass
 
 

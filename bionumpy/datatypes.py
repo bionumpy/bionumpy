@@ -6,6 +6,16 @@ from .encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncodi
 from .bnpdataclass import bnpdataclass
 
 
+
+@bnpdataclass
+class BedGraph:
+    chromosome: str
+    start: int
+    stop: int
+    value: int
+
+
+
 @bnpdataclass
 class RawSeqeuence:
     sequence: str
@@ -121,6 +131,20 @@ class GFFEntry:
     phase: str
     atributes: str
 
+@bnpdataclass
+class GFFGeneEntry(GFFEntry):
+    gene_id: str
+
+
+@bnpdataclass
+class GFFTranscriptEntry(GFFGeneEntry):
+    transcript_id: str
+
+
+@bnpdataclass
+class GFFExonEntry(GFFTranscriptEntry):
+    exon_id: str
+
 
 @bnpdataclass
 class SAMEntry:
@@ -154,3 +178,11 @@ class BamEntry:
 class ChromosomeSize:
     name: str
     size: int
+
+@bnpdataclass
+class GfaPath:
+    name: str
+    node_ids: List[int]
+    directions: List[int]
+
+

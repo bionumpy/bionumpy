@@ -1,5 +1,5 @@
-from . import EncodedRaggedArray, as_encoded_array
-from .sequence import get_kmers
+from ...encoded_array import EncodedRaggedArray, as_encoded_array
+from .. import get_kmers
 import numpy as np
 from collections import defaultdict
 

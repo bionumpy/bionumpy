@@ -2,10 +2,9 @@ import pytest
 
 import bionumpy.encoded_array
 import bionumpy.encoded_array_functions
-from bionumpy.encoded_array import EncodedArray, as_encoded_array
-from bionumpy.dna import reverse_compliment
+from bionumpy.encoded_array import as_encoded_array
 from bionumpy.encodings import StrandEncoding
-from bionumpy.io.motifs import Motif, read_motif
+from bionumpy.io.motifs import Motif
 from bionumpy.simulate.chipseq import simulate_chip_seq_fragments, simulate_read_fragments
 from bionumpy.simulate.rnaseq import get_transcript_copies, fragment_transcript_copies, sample_transcript_fragments, \
     get_rnaseq_reads, RNASeqSimulationSettings, simulate_rnaseq

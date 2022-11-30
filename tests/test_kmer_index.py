@@ -1,5 +1,5 @@
 from bionumpy import as_encoded_array, DNAEncoding
-from bionumpy.kmer_index import KmerIndex, KmerLookup
+from bionumpy.sequence.indexing import KmerIndex, KmerLookup
 import pytest
 import numpy as np
 

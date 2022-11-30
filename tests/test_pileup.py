@@ -1,5 +1,5 @@
 from bionumpy.datatypes import Interval
-from bionumpy.bedgraph import get_pileup
+from bionumpy.arithmetics import get_pileup
 from numpy.testing import assert_array_equal
 import numpy as np
 import pytest

@@ -4,7 +4,7 @@ from .variants import is_snp
 from .datatypes import Variant
 from .encoded_array import EncodedArray
 from .encoded_array import as_encoded_array
-from .dna import reverse_compliment
+from .sequence import get_reverse_complement
 from .streams import streamable
 from .counter import count_encoded, EncodedCounts
 from .lookup import Lookup
@@ -57,7 +57,7 @@ class MutationTypeEncoding:
         assert kmer.shape[-1] == self.k, (kmer.shape, self.k)
         assert np.all(kmer[..., self.k//2] == snp.ref_seq), (kmer, snp.ref_seq)
         forward_mask = (snp.ref_seq == "C") | (snp.ref_seq == "T")
-        kmer = np.where(forward_mask[:, None], kmer, reverse_compliment(kmer))
+        kmer = np.where(forward_mask[:, None], kmer, get_reverse_complement(kmer))
         kmer = kmer.raw()
         kmer_hashes = np.dot(kmer, self.h)
         snp_hashes = SNPEncoding.encode(snp).raw()

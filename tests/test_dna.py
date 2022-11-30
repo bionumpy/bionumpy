@@ -1,7 +1,7 @@
 import pytest
 import bionumpy as bnp
 from bionumpy import as_encoded_array
-from bionumpy.dna import get_strand_specific_sequences
+from bionumpy.sequence import get_strand_specific_sequences
 
 
 @pytest.fixture

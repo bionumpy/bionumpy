@@ -1,5 +1,6 @@
 import bionumpy as bnp
-from bionumpy.intervals import get_boolean_mask
+from bionumpy.arithmetics import get_boolean_mask
+
 
 def analyze_within_chromosome(seq_fn, genes_fn):
     chr1 = bnp.open(seq_fn).read()[0]
@@ -9,10 +10,12 @@ def analyze_within_chromosome(seq_fn, genes_fn):
     gc_inside, gc_outside = gc_inside_and_outside(chr1.sequence, genes)
     print(f"GC inside: {gc_inside:.2f}, GC outside: {gc_outside:.2f}")
 
+
 def gc_inside_and_outside(chr1_sequence, genes):
     gc_inside = get_gc_content(chr1_sequence, genes)
     gc_outside = get_gc_content(chr1_sequence, ~get_boolean_mask(genes, len(chr1_sequence)))
     return gc_inside, gc_outside
+
 
 def get_gc_content(sequence, intervals):
     selected_seq = sequence[intervals]

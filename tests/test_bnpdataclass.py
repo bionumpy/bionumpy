@@ -1,8 +1,10 @@
 import dataclasses
-
+import pytest
 from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass
+from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
+from numpy.testing import assert_equal
 
 
 def test_add_fields():
@@ -38,3 +40,19 @@ def test_make_dataclass():
     assert issubclass(new_cls, BNPDataClass)
     assert new_cls.__name__ == "DynamicDC"
     assert all(field.name in ['sequence', 'signal1'] for field in dataclasses.fields(new_cls))
+
+
+def add(a, b):
+    return a+b
+
+
+@bnpdataclass
+class MyClass:
+    a: int
+    b: int
+
+
+@pytest.mark.skip("not implemented")
+def test_bnpdataclassfunction():
+    bnp_add = bnpdataclassfunction("a", "b", (add))
+    assert_equal(bnp_add(MyClass([10], [20])), [30])

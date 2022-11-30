@@ -1,7 +1,7 @@
-from .datatypes import Interval
-from .encoded_array import EncodedArray, EncodedRaggedArray
-from .encoded_array import as_encoded_array
-from .lookup import Lookup
+from ..datatypes import Interval
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
+from ..lookup import Lookup
 import numpy as np
 
 
@@ -25,12 +25,13 @@ def complement(_array):
     return new_data
 
 
-def reverse_compliment(array):
+def get_reverse_complement(array):
     return complement(array)[..., ::-1]
 
 
 def get_strand_specific_sequences(encoded_array: EncodedArray, stranded_intervals: Interval):
     relevant_sequences = encoded_array[stranded_intervals.start:stranded_intervals.stop]
-    rev_complimnet_seqs = reverse_compliment(relevant_sequences)
-    return np.where((stranded_intervals.strand.ravel() == "-")[:, np.newaxis], rev_complimnet_seqs, relevant_sequences)
+    rev_complimnet_seqs = get_reverse_complement(relevant_sequences)
+    return np.where((stranded_intervals.strand.ravel() == "-")[:, np.newaxis],
+                    rev_complimnet_seqs, relevant_sequences)
 
