@@ -26,6 +26,7 @@ API documentation
 ===================
 
 .. currentmodule:: bionumpy.sequence
+
 .. autofunction:: get_kmers
 .. autofunction:: get_minimizers
 .. autofunction:: get_motif_scores

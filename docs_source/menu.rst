@@ -34,20 +34,11 @@
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: API documentation
    :glob:
 
    modules/*
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API documentation
-   :glob:
-
-   autoapi/*
-
 
 .. toctree::
    :maxdepth: 0

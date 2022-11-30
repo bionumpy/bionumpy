@@ -1,6 +1,6 @@
 Summarization
 ~~~~~~~~~~~~~
-A key application of BioNumPy is to extract features from sequence data sets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weight Matrix scores (sequence->float). BioNumPy provides functionality to apply such functions to rolling windows across large sequence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
+A key application of BioNumPy is to extract features from sequence datasets. A large set of interesting features can be computed as functions from sequences to scalar values. Examples are kmer-hashing (kmer->hash-value), minimizers(window->hash-value), string/motif-matching (sequence->bool), Position Weight Matrix scores (sequence->float). BioNumPy provides functionality to apply such functions to rolling windows across large sequence sets, through the `RollableFunction` class. By specifying a broadcastable function in the `__call__` method, the `rolling_window` method will apply the function to all windows in a sequence set. Take the `PositionWeightMatrix` class for instance::
 
 
     class PositionWeightMatrix(RollableFunction):
@@ -15,7 +15,7 @@ A key application of BioNumPy is to extract features from sequence data sets. A 
             scores = self._matrix[sequence, self._indices]
             return scores.sum(axis=-1)
 
-It's `__call__` method specifies how to calculate the score of a sequence. Calling it's rolling_window function will calculate the scores for all windows in a data set::
+It's `__call__` method specifies how to calculate the score of a sequence. Calling it's rolling_window function will calculate the scores for all windows in a dataset::
 
     >>> import numpy as np
     >>> sequences = bnp.as_sequence_array(["acgttgta", "gcttca", "gttattc"], encoding=bnp.encodings.ACTGEncoding)

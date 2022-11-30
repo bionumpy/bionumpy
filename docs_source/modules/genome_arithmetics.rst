@@ -4,9 +4,10 @@ Genome arithmetics
 Some text explaining.
 
 
+API documentation
+===================
 
-.. currentmodule:: bionumpy.sequence
+.. currentmodule:: bionumpy.arithmetics
 
-.. autoclass:: get_kmers
-
+.. autofunction:: get_pileup
 

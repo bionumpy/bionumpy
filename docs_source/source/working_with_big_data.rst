@@ -4,7 +4,7 @@ Working with big data
 ---------------------
 Before following this guide we assume you have read how to read a big file under Method3 in :ref:`reading_files`.
 
-The recommended way of working with big data sets (bigger than what you can fit in memory) in BioNumPy is to use the `read_chunks()` method when reading your data.
+The recommended way of working with big datasets (bigger than what you can fit in memory) in BioNumPy is to use the `read_chunks()` method when reading your data.
 
     >>> import bionumpy as bnp
     >>> data = bnp.open("filename").read_chunks() # doctest: +SKIP
@@ -13,7 +13,7 @@ The recommended way of working with big data sets (bigger than what you can fit 
 
 One way of working with chunks is thus to create a for-loop iterating over the chunks. However, BioNumPy makes it possible to write code as if you only had a single chunk, and can handle the tecnhicalities of making your code work on multiple chunks.
 
-Thus, to avoid writing for-loops and having to think about multiple chunks, BioNumPy includes utility function for many common operations, which can lead to more readable code. Examples of such operations includes taking mean, making a histogram or getting a bincount of your whole data set. For instance, if you want to take the mean of all the base qualities across all chunks, you can simply write:
+Thus, to avoid writing for-loops and having to think about multiple chunks, BioNumPy includes utility function for many common operations, which can lead to more readable code. Examples of such operations includes taking mean, making a histogram or getting a bincount of your whole dataset. For instance, if you want to take the mean of all the base qualities across all chunks, you can simply write:
 
     >>> chunks = bnp.open("example_data/big.fq.gz").read_chunks()
     >>> mean = bnp.mean(chunks.quality)

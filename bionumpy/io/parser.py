@@ -209,7 +209,7 @@ class NpBufferedWriter:
         Parameters
         ----------
         data : npdataclass
-            Data set containing entries
+            dataset containing entries
 
         """
         if hasattr(self._buffer_type, 'make_header') and (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab') and getattr(self._buffer_type, 'INCLUDE_HEADER', False):

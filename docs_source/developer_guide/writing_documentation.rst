@@ -23,6 +23,7 @@ Alternatively, you can run `make html` inside the docs_source directory to have 
 Structure of documentation
 ------------------------------
 * `source`: Put documentation of BioNumPy concepts in this directory. You will need to manually add a link from `index.rst` to new files created.
+* `modules`: This is the API-documentation. Each module (e.g. io, sequences, etc) have their own file. Each such file should briefly describe the module, and include relevant functions/classes with `.. autofunction:: functionname` or `.. autoclass:: ClassName`. Module files are automatically indexed in the menu.
 * `tutorials`: Put tutorials here. These will automatically be indexed.
 * `developer_guide`: Put developer guides here. You will need to manually add a link from `index.rst` to new files created.
 
