@@ -3,15 +3,16 @@ from npstructures import RaggedArray
 from bionumpy.streams import streamable
 from bionumpy.encodings import BaseEncoding, AlphabetEncoding
 from bionumpy.sequence.kmers import KmerEncoder
-from bionumpy.encoded_array import EncodedArray, as_encoded_array
-from bionumpy.util import apply_to_npdataclass
-
+from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from bionumpy.bnpdataclass.bnpdataclassfunction import apply_to_npdataclass
+from bionumpy.util.typing import EncodedArrayLike, EncodedRaggedArrayLike
 
 class DNAToProtein:
     amino_acids = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
     from_encoding = AlphabetEncoding("TCAG") # AlphabetEncoding("TCAG")
     to_encoding = BaseEncoding
-    _lookup = np.array([ord(c) for c in amino_acids], dtype=np.uint8)
+    _lookup = EncodedArray(np.array([ord(c) for c in amino_acids], dtype=np.uint8),
+                           BaseEncoding)
 
     def __getitem__(self, key):
         return self._lookup[key.raw()]
@@ -24,8 +25,8 @@ class WindowFunction:
         tuples = sequences.ravel().reshape(-1, self.window_size)
         tuples.encoding = self._encoding
         new_data = self(tuples)
-        return RaggedArray(EncodedArray(new_data, self._table.to_encoding),
-                           sequences.shape.lengths // self.window_size)
+        return EncodedRaggedArray(EncodedArray(new_data, self._table.to_encoding),
+                                  sequences.shape.lengths // self.window_size)
 
 
 class Translate(WindowFunction):
@@ -37,7 +38,7 @@ class Translate(WindowFunction):
     def window_size(self):
         return 3# np.log(self._table._lookup.size, self._table.from_encoding.alphabet_size)
 
-    def __call__(self, sequence):
+    def __call__(self, sequence: EncodedArrayLike):
         e = sequence.encoding
         sequence = sequence[..., ::-1]
         sequence.encoding = e
@@ -45,7 +46,7 @@ class Translate(WindowFunction):
         return self._table[kmer]
 
 
-@streamable
+@streamable()
 @apply_to_npdataclass("sequence")
 def translate_dna_to_protein(sequence):
-    return Translate().windowed(sequence_entries.sequence)
+    return Translate().windowed(sequence)

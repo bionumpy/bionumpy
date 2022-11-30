@@ -1,15 +1,16 @@
 import bionumpy as bnp
 
+
 rule translate_bionumpy:
     input:
-        "results/dna_sequences/{name}.fa"
+        "results/dna_sequences/{filename}.fa"
     output:
-        "results/bionumpy/protein_sequences/{name}.fa"
+        "results/bionumpy/protein_sequences/{filename}.fa"
     benchmark:
-        "benchmarks/translate/bionumpy/{name}.txt"
+        "benchmarks/translate/bionumpy/{filename}.txt"
     run:
-        from bionumpy.translate import translate_dna_to_protein
-        input_stream = bnp.open(input[0])
+        from bionumpy.sequence import translate_dna_to_protein
+        input_stream = bnp.open(input[0]).read_chunks()
         output_stream = bnp.open(output[0], "w")
         output_stream.write(translate_dna_to_protein(input_stream))
         output_stream.close()

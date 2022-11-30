@@ -59,16 +59,6 @@ def plot(obj):
         logger.warning(f"{obj} has no __plot__ method")
 
 
-def apply_to_npdataclass(attribute_name):
-    def decorator(func):
-        def new_func(np_dataclass, *args, **kwargs):
-            if not isinstance(np_dataclass, NpDataclass):
-                return func(np_dataclass)
-            
-            return dataclasses.replace(**{attribute_name: func(getattr(np_dataclass, attribute_name), *args, **kwargs)})
-        return new_func
-    return decorator
-
 def is_subclass_or_instance(obj, c):
     return (isinstance(obj, type) and issubclass(obj, c)) or isinstance(obj, c)
 

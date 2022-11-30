@@ -8,8 +8,8 @@ include: "rules/translate.smk"
 
 rule all:
     input:
-        #[f"results/{program}/protein_sequences/l150_n1000000.fa"
-        # for program in ["bionumpy", "biopython", "biostrings"]],
+        [f"results/{program}/protein_sequences/l150_n1000000.fa"
+         for program in ["bionumpy", "biopython"]],
         [f"results/{program}/intersect/1000_1000.bed"
          for program in ["bionumpy", "bedtools"]],
 
