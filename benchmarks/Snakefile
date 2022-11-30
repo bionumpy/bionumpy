@@ -9,17 +9,17 @@ import bionumpy as bnp
 from bionumpy.arithmetics import intersect
 include: "rules/translate.smk"
 include: "rules/kmer_counting.smk"
+include: "rules/interval_intersection.smk"
 
 
 rule all:
     input:
         [f"results/{program}/protein_sequences/l150_n1000000.fa"
          for program in ["bionumpy", "biopython"]],
-        [f"results/{program}/intersect/1000_1000.bed"
+        [f"results/{program}/intersect/10000_20000.bed"
          for program in ["bionumpy", "bedtools"]],
         ["results/jellyfish/kmer_counts/l50_n1000000.dump",
          "results/bionumpy/kmer_counts/l50_n1000000.csv"]
-
 
 
 rule simulate_dna:
@@ -58,50 +58,4 @@ rule simulate_intervals:
                     end = start+random.randint(1, 100)
                     f.write(f"{chromosome_name}\t{start}\t{end}\t.\t0\t+\n")
                     start = end + random.randint(1, 10)
-
-
-rule intersect_bionumpy:
-    input:
-        a="results/intervals/{b}.bed",
-        b="results/intervals/{a}.bed",
-        chrom_sizes="results/chrom.sizes"
-    output:
-        "results/bionumpy/intersect/{a}_{b}.bed"
-    benchmark:
-        "benchmarks/intersect/bionumpy/{a}_{b}.txt"
-    run:
-        chrom_sizes = bnp.open(input.chrom_sizes).read()
-        a = bnp.open(input[0], buffer_type=bnp.Bed6Buffer).read_chunks()
-        b = bnp.open(input[1], buffer_type=bnp.Bed6Buffer).read_chunks()
-        ms = bnp.streams.MultiStream(chrom_sizes, a=a, b=b)
-        result = bnp.arithmetics.intersect(ms.a, ms.b)
-        with bnp.open(output[0], "w", buffer_type=bnp.Bed6Buffer) as f:
-            f.write(result)
-
-
-
-rule intersect_bedtools:
-    input:
-        "results/intervals/{b}.bed",
-        "results/intervals/{a}.bed"
-    output:
-        "results/bedtools/intersect/{a,\d+}_{b,\d+}.bed"
-    benchmark:
-        "benchmarks/intersect/bedtools/{a}_{b}.txt"
-    shell:
-        "bedtools intersect -a {input[0]} -b {input[1]} > {output} -sorted"
-
-
-rule intersect_check:
-    input:
-        "results/bedtools/intersect/{a}_{b}.bed",
-        "results/bionumpy/intersect/{a}_{b}.bed"
-    output:
-        "results/intersect/{a\d+}_{b\d+}.check"
-    run:
-        a = (line.strip().split("\t")[:3] for line in open(input[0]))
-        b = (line.strip().split("\t")[:3] for line in open(input[1]))
-        for l, l2 in zip(a, b):
-            assert l==l2, (l, l2)
-        open(output[0], "w").write("1")
 
