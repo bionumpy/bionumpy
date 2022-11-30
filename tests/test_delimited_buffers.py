@@ -1,5 +1,4 @@
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.datatypes import Interval
 import numpy as np

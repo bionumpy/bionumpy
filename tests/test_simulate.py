@@ -1,7 +1,6 @@
 import pytest
 
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.encoded_array import as_encoded_array
 from bionumpy.encodings import StrandEncoding
 from bionumpy.io.motifs import Motif

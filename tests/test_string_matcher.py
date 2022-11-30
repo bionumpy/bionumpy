@@ -4,7 +4,6 @@ from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.sequence.string_matcher import RegexMatcher, FixedLenRegexMatcher, StringMatcher
 import bionumpy as bnp
 

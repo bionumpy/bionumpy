@@ -4,9 +4,8 @@ from .variants import is_snp
 from .datatypes import Variant
 from .encoded_array import EncodedArray
 from .encoded_array import as_encoded_array
-from .sequence import get_reverse_complement
+from .sequence import get_reverse_complement, count_encoded
 from .streams import streamable
-from .counter import count_encoded, EncodedCounts
 from .lookup import Lookup
 import logging
 

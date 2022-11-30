@@ -2,7 +2,6 @@ import numpy as np
 
 import bionumpy as bnp
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
 
 

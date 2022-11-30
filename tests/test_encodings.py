@@ -4,7 +4,6 @@ import bionumpy as bnp
 from npstructures.testing import assert_raggedarray_equal
 from npstructures import RaggedArray
 import bionumpy.encoded_array
-import bionumpy.encoded_array_functions
 import bionumpy as bnp
 from bionumpy import FastQBuffer, as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
