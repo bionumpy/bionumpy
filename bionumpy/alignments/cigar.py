@@ -1,8 +1,8 @@
-from .encodings.alphabet_encoding import CigarOpEncoding
-from .encoded_array import EncodedArray, EncodedRaggedArray
-from .encoded_array import as_encoded_array
 from npstructures import RaggedArray
 import numpy as np
+
+from ..encodings.alphabet_encoding import CigarOpEncoding
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 
 
 def split_cigar(cigars):
@@ -22,8 +22,3 @@ def count_reference_length(symbol, lengths):
         mask = mask | (symbol == consuming_symbol)
 
     return np.sum(mask*lengths, axis=-1).astype(int)
-
-        
-    
-
-        
