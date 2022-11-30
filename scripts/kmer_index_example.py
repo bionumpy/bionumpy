@@ -1,7 +1,7 @@
 from bionumpy.io.delimited_buffers import DelimitedBuffer, get_bufferclass_for_datatype
 from bionumpy.bnpdataclass import bnpdataclass
 import bionumpy as bnp
-from bionumpy.kmer_index import KmerLookup
+from bionumpy.sequence.indexing import KmerLookup
 
 
 @bnpdataclass

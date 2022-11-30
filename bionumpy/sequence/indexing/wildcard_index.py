@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.typing import ArrayLike
-from bionumpy.encoded_array import EncodedRaggedArray
+from ...encoded_array import EncodedRaggedArray
 from functools import reduce
 
-from bionumpy.kmer_index import KmerLookup
+from .kmer_indexing import KmerLookup
 
 
 class WildCardIndex:
