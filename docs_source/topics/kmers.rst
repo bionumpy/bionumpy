@@ -27,9 +27,9 @@ The same functionality works for minimizers:
 Note that the kmer hashes and minimizers are numerical internally, and how they are computed will depend on the encoding of the sequences. If your sequences is encoded with an encoding with alphabet size **4** (e.g. `bnp.DNAEncoding`) `get_kmers` is optimized to run a lot faster by performing bit-operations.
 
 
-Analysing kmers and minimizers in big data sets
+Analysing kmers and minimizers in big datasets
 -------------------------------------------------
-BioNumPy is able to quite efficiently find all kmers or minimizers in large sequence data sets. Since the resulting kmers are stored numerically in NumPy arrays, NumPy functionality can be used to do analysis.
+BioNumPy is able to quite efficiently find all kmers or minimizers in large sequence datasets. Since the resulting kmers are stored numerically in NumPy arrays, NumPy functionality can be used to do analysis.
 
 Below in an example of finding all 31-mers in a fastq file and
 

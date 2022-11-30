@@ -19,7 +19,7 @@ BioNumPy is a toolkit, built on top of NumPy, for enabling array programming on 
 
 Why BioNumPy?
 -------------
-* There are no existing packages in Python for getting biological data sets efficiently into NumPy-like data structures.
+* There are no existing packages in Python for getting biological datasets efficiently into NumPy-like data structures.
 * Current packages for working with biological data do not use NumPy in an efficient way (e.g. individual sequences are stored as separate NumPy arrays, not together in shared arrays).
 
 

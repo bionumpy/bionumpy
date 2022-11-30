@@ -5,7 +5,7 @@ BioNumPy is a Python library for easy and efficient representation and analysis 
 Since BioNumPy builds on the interface of NumPy, people already used to NumPy or array programming should find BioNumPy very easy to get started with.
 
 ..
-    With BioNumPy, our goal is that everyone should be able to write simple, clean code that scales well to large biological data sets.
+    With BioNumPy, our goal is that everyone should be able to write simple, clean code that scales well to large biological datasets.
 **Getting started with BioNumpy takes only a minute:**
 
 1) Install:
