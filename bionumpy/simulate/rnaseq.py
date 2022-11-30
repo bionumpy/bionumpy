@@ -3,7 +3,7 @@ from itertools import chain
 import numpy as np
 from numpy.random import default_rng
 from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
-from bionumpy.dna import reverse_compliment
+from bionumpy.sequence import get_reverse_complement
 from bionumpy.encodings import StrandEncoding, DNAEncoding
 from ..datatypes import SequenceEntry, SequenceEntryWithQuality
 rng = default_rng()
@@ -37,7 +37,7 @@ def sample_transcript_fragments(sequences, sampling_rate):
 
 
 def get_rnaseq_reads(fragments: SequenceEntry, read_length: int, strands: EncodedArray=None) -> EncodedRaggedArray:
-    reverse_fragments = reverse_compliment(fragments)
+    reverse_fragments = get_reverse_complement(fragments)
     if strands is None:
         strands = EncodedArray(rng.choice([0, 1], replace=True, size=len(fragments)), StrandEncoding)
     reads = np.where(strands[:, np.newaxis] == "+", fragments[:, 0:read_length], reverse_fragments[:, 0:read_length])

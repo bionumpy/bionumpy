@@ -7,7 +7,7 @@ from .encoded_array import change_encoding
 from .encodings import BaseEncoding
 from .io.strops import str_equal, split
 from . import streamable, EncodedRaggedArray, as_encoded_array
-from .dna import reverse_compliment
+from .sequence import get_reverse_complement
 from .datatypes import SequenceEntry
 
 
@@ -76,7 +76,7 @@ def get_transcript_sequences(gtf_entries, reference_sequence):
         infos.append((transcript_id, strand, seq_length))
     names, strands, lengths = zip(*infos)
     transcript_sequences = EncodedRaggedArray(flat_exon_seqeunece, list(lengths))
-    transcript_sequences = np.where((as_encoded_array(''.join(strands)) == "-")[:, np.newaxis], reverse_compliment(transcript_sequences), transcript_sequences)
+    transcript_sequences = np.where((as_encoded_array(''.join(strands)) == "-")[:, np.newaxis], get_reverse_complement(transcript_sequences), transcript_sequences)
 
     # convert transcript encoding to BaseEncoding so that we can create a
     # SequenceEntry.
