@@ -17,4 +17,4 @@ def stranded_intervals():
 def test_strand_specific_sequences(dna_sequence, stranded_intervals):
     truth = as_encoded_array(['CG', 'CGT'], bnp.DNAEncoding)
     result = get_strand_specific_sequences(dna_sequence, stranded_intervals)
-    bnp.testing.assert_encoded_raggedarray_equal(truth, result)
+    bnp.util.testing.assert_encoded_raggedarray_equal(truth, result)

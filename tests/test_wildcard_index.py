@@ -5,7 +5,7 @@ import numpy as np
 import bionumpy.encoded_array
 from bionumpy import as_encoded_array
 from bionumpy.sequence.indexing import WildCardIndex, WildCardLookup
-from bionumpy.testing import assert_encoded_raggedarray_equal
+from bionumpy.util.testing import assert_encoded_raggedarray_equal
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ import bionumpy as bnp
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
 from bionumpy.io.matrix_dump import matrix_to_csv
-from bionumpy.testing import assert_bnpdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
 

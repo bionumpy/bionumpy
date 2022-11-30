@@ -8,7 +8,7 @@ from npstructures import RaggedArray
 import numpy as np
 import pytest
 import bionumpy as bnp
-from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
+from bionumpy.util.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 
 @pytest.fixture
 def sequence():
