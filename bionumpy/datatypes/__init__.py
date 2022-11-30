@@ -1,10 +1,9 @@
 import numpy as np
 from typing import List
-from .encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
-                        CigarEncoding, StrandEncoding)
-from .encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
-from .bnpdataclass import bnpdataclass
-
+from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
+                         CigarEncoding, StrandEncoding)
+from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
+from ..bnpdataclass import bnpdataclass
 
 
 @bnpdataclass
@@ -13,7 +12,6 @@ class BedGraph:
     start: int
     stop: int
     value: int
-
 
 
 @bnpdataclass
@@ -184,5 +182,4 @@ class GfaPath:
     name: str
     node_ids: List[int]
     directions: List[int]
-
 
