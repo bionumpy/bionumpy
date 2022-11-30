@@ -3,14 +3,14 @@
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
 # in particular regarding the standardized folder structure mentioned there. 
 import bionumpy as bnp
-from bionumpy.intervals import intersect
+from bionumpy.arithmetics import intersect
 include: "rules/translate.smk"
 
 rule all:
     input:
-        [f"results/{program}/protein_sequences/l150_n1000000.fa"
-         for program in ["bionumpy", "biopython", "biostrings"]],
-        [f"results/{program}/intersect/100000_1000000.bed"
+        #[f"results/{program}/protein_sequences/l150_n1000000.fa"
+        # for program in ["bionumpy", "biopython", "biostrings"]],
+        [f"results/{program}/intersect/1000_1000.bed"
          for program in ["bionumpy", "bedtools"]],
 
 
@@ -48,7 +48,7 @@ rule simulate_intervals:
                 start = 1
                 for _ in range(int(wildcards.n_intervals)):
                     end = start+random.randint(1, 100)
-                    f.write(f"{chromosome_name}\t{start}\t{end}\t.\t.\t+\n")
+                    f.write(f"{chromosome_name}\t{start}\t{end}\t.\t0\t+\n")
                     start = end + random.randint(1, 10)
 
 
@@ -63,11 +63,13 @@ rule intersect_bionumpy:
         "benchmarks/intersect/bionumpy/{a}_{b}.txt"
     run:
         chrom_sizes = bnp.open(input.chrom_sizes).read()
-        a = bnp.open(input[0]).read_chunks()
-        b = bnp.open(input[1]).read_chunks()
+        a = bnp.open(input[0], buffer_type=bnp.Bed6Buffer).read_chunks()
+        b = bnp.open(input[1], buffer_type=bnp.Bed6Buffer).read_chunks()
         ms = bnp.streams.MultiStream(chrom_sizes, a=a, b=b)
-        result = bnp.intervals.intersect(ms.a, ms.b)
-        print(result)
+        result = bnp.arithmetics.intersect(ms.a, ms.b)
+        with bnp.open(output[0], "w", buffer_type=bnp.Bed6Buffer) as f:
+            f.write(result)
+
 
 
 rule intersect_bedtools:
