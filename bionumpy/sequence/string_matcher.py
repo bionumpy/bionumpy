@@ -3,14 +3,14 @@ import itertools
 import numpy as np
 import re
 from ..rollable import RollableFunction
-from ..encoded_array import EncodedArray, as_encoded_array
+from ..encoded_array import EncodedArray, as_encoded_array, Encoding
 from ..util import as_strided
 from npstructures import RaggedArray
 from ..encodings import AlphabetEncoding
 
 
 class StringMatcher(RollableFunction):
-    def __init__(self, matching_sequence, encoding):
+    def __init__(self, matching_sequence, encoding:Encoding):
         self._encoding = encoding
         self._matching_sequence_array = as_encoded_array(matching_sequence, target_encoding=encoding)
 
