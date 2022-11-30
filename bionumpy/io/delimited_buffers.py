@@ -6,7 +6,8 @@ from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
+                         GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
@@ -331,6 +332,23 @@ class GfaSequenceBuffer(DelimitedBuffer):
         return dump_csv([(str, as_encoded_array(["S"]*len(data))),
                          (str, data.name),
                          (str, data.sequence)])
+
+
+class GfaPathBuffer(DelimitedBuffer):
+    def get_data(self):
+        name = self.get_text(1, fixed_length=False)
+        nodes_lists = self.get_text(2, keep_sep=True, fixed_length=False)
+        nodes_lists[:, -1] = ","
+        lengths = np.sum(nodes_lists == ",", axis=-1)
+        all_node_texts = split(nodes_lists.ravel()[:-1], ",")
+        int_text = all_node_texts[:, :-1]
+        node_ids = str_to_int(int_text)
+        directions = np.where(all_node_texts[:, -1]=="+", 1, -1)
+        node_ids = RaggedArray(node_ids, lengths)
+        directions = RaggedArray(directions, lengths)
+        data =  GfaPath(name, node_ids, directions)
+        return data
+
 
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",

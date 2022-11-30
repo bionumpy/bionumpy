@@ -178,3 +178,11 @@ class BamEntry:
 class ChromosomeSize:
     name: str
     size: int
+
+@bnpdataclass
+class GfaPath:
+    name: str
+    node_ids: List[int]
+    directions: List[int]
+
+
