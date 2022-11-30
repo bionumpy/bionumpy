@@ -1,5 +1,5 @@
 import numpy as np
-from ..rollable import RollableFunction
+from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import AlphabetEncoding
 from npstructures import RaggedArray

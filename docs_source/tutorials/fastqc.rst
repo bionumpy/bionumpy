@@ -10,7 +10,7 @@ We start by importing all we need:
 
     >>> import numpy as np
     >>> import bionumpy as bnp
-    >>> import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt # doctest: +SKIP
 
 
 We will be using the `big.fq.gz` file in the example_data folder, but feel free to use any fastq file you like.

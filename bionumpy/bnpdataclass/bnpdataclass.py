@@ -1,5 +1,6 @@
 import dataclasses
-from typing import List, Type
+from typing import List, Type, Dict
+from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
 import numpy as np
@@ -43,7 +44,7 @@ class BNPDataClass(NpDataClass):
         cls_name = name if name is not None else f"Dynamic{cls.__name__}" if cls.__name__[:7] != 'Dynamic' else cls.__name__
         return bnpdataclass(dataclasses.make_dataclass(cls_name, bases=(cls,), fields=fields))
 
-    def add_fields(self, fields: dict, field_type_map: dict = None) -> 'BNPDataClass':
+    def add_fields(self, fields: Dict[str, ArrayLike], field_type_map: dict = None) -> 'BNPDataClass':
         """
         Parameters
         ----------
@@ -76,6 +77,9 @@ class BNPDataClass(NpDataClass):
                               EEA                      ACT
 
         """
+        for name in fields.keys():
+            if not name.isidentifier():
+                raise TypeError(f"Field name must be a valid identifier (No whitespace or dots and such): {name}")
         fields_with_types = _extract_field_types(fields, field_type_map)
         new_class = self.__class__.extend(tuple(fields_with_types.items()))
         return new_class(**{**vars(self), **fields})

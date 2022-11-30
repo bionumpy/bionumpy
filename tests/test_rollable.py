@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from bionumpy.rollable import RollableFunction
+from bionumpy.sequence.rollable import RollableFunction
 from bionumpy.encodings import BaseEncoding
 from npstructures import RaggedArray
 

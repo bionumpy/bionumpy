@@ -1,10 +1,9 @@
-import numpy as np
-from .encoded_array import EncodedArray, EncodedRaggedArray
-from .encoded_array import as_encoded_array
-from .util import as_strided
-from npstructures import RaggedArray
-
 from abc import abstractmethod
+import numpy as np
+from npstructures import RaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..util import as_strided
+
 
 
 class RollableFunction:

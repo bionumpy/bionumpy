@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..encodings.kmer_encodings import KmerEncoding
-from ..rollable import RollableFunction
+from .rollable import RollableFunction
 from bionumpy.encodings import DNAEncoding
 from ..encodings.alphabet_encoding import AlphabetEncoding
 from ..encoded_array import EncodedArray, EncodedRaggedArray
