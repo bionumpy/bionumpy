@@ -1,3 +1,6 @@
+## Bacterial
+## 
+
 # Main entrypoint of the workflow. 
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
@@ -5,6 +8,8 @@
 import bionumpy as bnp
 from bionumpy.arithmetics import intersect
 include: "rules/translate.smk"
+include: "rules/kmer_counting.smk"
+
 
 rule all:
     input:
@@ -12,6 +17,9 @@ rule all:
          for program in ["bionumpy", "biopython"]],
         [f"results/{program}/intersect/1000_1000.bed"
          for program in ["bionumpy", "bedtools"]],
+        ["results/jellyfish/kmer_counts/l50_n1000000.dump",
+         "results/bionumpy/kmer_counts/l50_n1000000.csv"]
+
 
 
 rule simulate_dna:
