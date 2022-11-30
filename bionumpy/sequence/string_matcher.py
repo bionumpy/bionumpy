@@ -1,15 +1,12 @@
 import logging
-
-import bionumpy.encodings
-from bionumpy.rollable import RollableFunction
-from bionumpy.encoded_array import EncodedArray
-from bionumpy import as_encoded_array
-from bionumpy.util import as_strided
 import itertools
 import numpy as np
 import re
+from ..rollable import RollableFunction
+from ..encoded_array import EncodedArray, as_encoded_array
+from ..util import as_strided
 from npstructures import RaggedArray
-from bionumpy.encodings import AlphabetEncoding
+from ..encodings import AlphabetEncoding
 
 
 class StringMatcher(RollableFunction):
