@@ -1,3 +1,5 @@
+.. _supported_file_formats:
+
 Supported file formats
 -----------------------------------
 

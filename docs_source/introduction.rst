@@ -31,7 +31,7 @@ Note that when you install BioNumPy, NumPy is also automatically installed.
 
 Read and analyse some data
 =============================
-In this very short tutorial, we will read a biological dataset and play around with it. We will download a fastq file from the BioNumPy example data, but feel free to use any dataset you want to play around with (see `supported file formats<supported_file_formats>`).
+In this very short tutorial, we will read a biological dataset and play around with it. We will download a fastq file from the BioNumPy example data, but feel free to use any dataset you want to play around with (see :ref:`supported file formats<supported_file_formats>`).
 
 We start by downloading a fastq file:
 
@@ -53,7 +53,7 @@ All BioNumPy programs typically start by importing both NumPy and BioNumPy. As a
     data = f.read()  # reads the whole file into memory
     print(data)
 
-The output from this tells us that we have a `SequenceEntryWithQuality` with 421 entries (sequences). This is is the data type that BioNumPy automatically chooses to use when we read a fastq-file. If you instead read a vcf, bam or another format, you will get a different entry type:
+The output from this tells us that we have a `SequenceEntryWithQuality` with 1000 entries (sequences). This is is the data type that BioNumPy automatically chooses to use when we read a fastq-file. If you instead read a vcf, bam or another format, you will get a different entry type:
 
 .. testoutput::
     :options: +NORMALIZE_WHITESPACE
@@ -84,7 +84,7 @@ As with NumPy, you can also take the mean and other operations over various axis
     array([5.194, 4.599, 5.591, ..., 5.   , 6.   , 6.   ])
 
 
-BioNumPy data can also be indexed exactly as you would index NumPy arrays. This means that if you e.g. want to get all the entries with more than 30% G's, you could use NumPy-syntax like this:
+BioNumPy data can also be indexed exactly as you would index NumPy arrays. This means that if you e.g. want to get all the sequence entries with more than 30% G's, you could use NumPy-syntax like this:
 
     >>> mask = np.mean(data.sequence == "G", axis=-1) >= 0.3
     >>> data[mask]
