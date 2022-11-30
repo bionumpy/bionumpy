@@ -1,3 +1,8 @@
+
+
+# convert_fastq_to_fasta
+# strip_starts_and_ends
+
 ## Bacterial
 ## 
 
@@ -13,6 +18,7 @@ include: "rules/reports.smk"
 include: "rules/simulation.smk"
 include: "rules/translate.smk"
 include: "rules/kmer_counting.smk"
+include: "rules/reverse_complement.smk"
 include: "rules/interval_intersection.smk"
 
 
@@ -26,6 +32,7 @@ rule main_report:
     input:
         "results/reports/translate/{run_size}.png",
         "results/reports/intersect/{run_size}.png",
+        "results/reports/reverse_complement/{run_size}.png",
     output:
         "report_{run_size}.md"
     run:

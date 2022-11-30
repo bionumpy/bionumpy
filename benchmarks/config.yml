@@ -14,4 +14,11 @@ analysis:
     output_file_ending: ".fa"
     runs:
       small: "length=150_nreads=100"
-      big: "length=150_nreads=10000"
+      big: "length=150_nreads=100000"
+
+  reverse_complement:
+    tools: ["bionumpy", "python", "biopython", "seqtk"]
+    output_file_ending: ".fa"
+    runs:
+      small: "length=150_nreads=100"
+      big: "length=150_nreads=1000000"

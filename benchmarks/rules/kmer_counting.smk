@@ -41,7 +41,7 @@ rule binoumpy_count:
         def count_kmers(sequence_entries):
             sequence = bnp.change_encoding(sequence_entries.sequence, bnp.DNAEncoding)
             kmers = get_kmers(sequence, k=8)
-            return count_encoded(kmers)
+            return count_encoded(kmers, axis=None)
 
         stream = bnp.open(input[0]).read_chunks()
         output_stream = open(output[0], "wb")
