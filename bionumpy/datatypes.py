@@ -131,6 +131,20 @@ class GFFEntry:
     phase: str
     atributes: str
 
+@bnpdataclass
+class GFFGeneEntry(GFFEntry):
+    gene_id: str
+
+
+@bnpdataclass
+class GFFTranscriptEntry(GFFGeneEntry):
+    transcript_id: str
+
+
+@bnpdataclass
+class GFFExonEntry(GFFTranscriptEntry):
+    exon_id: str
+
 
 @bnpdataclass
 class SAMEntry:

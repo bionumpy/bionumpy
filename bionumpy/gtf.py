@@ -1,7 +1,7 @@
 import itertools
 import numpy as np
 import bionumpy as bnp
-from .datatypes import GFFEntry
+from .datatypes import GFFEntry, GFFExonEntry, GFFTranscriptEntry, GFFTranscriptEntry
 from .bnpdataclass import bnpdataclass
 from .encoded_array import change_encoding
 from .encodings import BaseEncoding
@@ -9,21 +9,6 @@ from .io.strops import str_equal, split
 from . import streamable, EncodedRaggedArray, as_encoded_array
 from .sequence import get_reverse_complement
 from .datatypes import SequenceEntry
-
-
-@bnpdataclass
-class GFFGeneEntry(GFFEntry):
-    gene_id: str
-
-
-@bnpdataclass
-class GFFTranscriptEntry(GFFGeneEntry):
-    transcript_id: str
-
-
-@bnpdataclass
-class GFFExonEntry(GFFTranscriptEntry):
-    exon_id: str
 
 def get_attributes(gtf_entries, attribute_names):
     gtf_entries.atributes[:, -1] = " "
