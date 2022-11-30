@@ -6,6 +6,16 @@ from .encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncodi
 from .bnpdataclass import bnpdataclass
 
 
+
+@bnpdataclass
+class BedGraph:
+    chromosome: str
+    start: int
+    stop: int
+    value: int
+
+
+
 @bnpdataclass
 class RawSeqeuence:
     sequence: str

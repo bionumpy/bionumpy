@@ -1,5 +1,5 @@
 import bionumpy as bnp
-from bionumpy.intervals import get_boolean_mask
+from bionumpy.arithmetics import get_boolean_mask
 
 def analyze_within_chromosome(seq_fn, genes_fn):
     chr1 = bnp.open(seq_fn).read()[0]

@@ -4,9 +4,9 @@ import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
 
 from .bedgraph import BedGraph
-from .streams.grouped import chromosome_map
-from .datatypes import Interval
-from .bnpdataclass import bnpdataclass
+from ..streams.grouped import chromosome_map
+from ..datatypes import Interval
+from ..bnpdataclass import bnpdataclass
 
 
 @bnpdataclass

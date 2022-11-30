@@ -9,5 +9,5 @@ from .dna import get_reverse_complement, get_strand_specific_sequences
 
 
 __all__ = ["get_kmers", "get_minimizers", "translate_dna_to_protein",
-           "get_motif_scores", "pwm_from_counts","get_reverse_complement", 
+           "get_motif_scores", "pwm_from_counts", "get_reverse_complement", 
            "get_strand_specific_sequences"]

@@ -1,7 +1,7 @@
 from functools import reduce
 import numpy as np
-from npstructures import npdataclass
 from npstructures.runlengtharray import RunLengthArray
+from ..datatypes import BedGraph
 
 
 def sum_largest(stream):
@@ -12,14 +12,6 @@ def sum_largest(stream):
 def value_hist(graph):
     weights = graph.stop-graph.start
     return np.bincount(graph.value, weights=weights)
-
-
-@npdataclass
-class BedGraph:
-    chromosome: str
-    start: int
-    stop: int
-    value: int
 
 
 def from_runlength_array(chromosome_name, rle_array):
