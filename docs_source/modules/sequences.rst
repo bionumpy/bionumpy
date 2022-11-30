@@ -30,5 +30,4 @@ API documentation
 .. autofunction:: get_kmers
 .. autofunction:: get_minimizers
 .. autofunction:: get_motif_scores
-.. autofunction:: pwm_from_counts
 

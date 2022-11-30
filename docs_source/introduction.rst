@@ -13,7 +13,7 @@ To follow this guide, you will need to know some Python and should also ideally 
 The core concepts of BioNumPy
 ==============================
 
-The main philosophy behind BioNumPy is that you should be able to efficiently read biological data sets into NumPy-like data structure, and then analyse the data using NumPy-like methods, such as indexing, slicing, broadcasting and other vectorized operations (sum, mean, etc). Since NumPy arrays are used to store the data, BioNumPy has a very low memory footprint and operations are very efficient, meaning that BioNumPy is suitable for working with large data sets and can be an alternative to using libraries and tools written in more low-level languages such as C and C++.
+The main philosophy behind BioNumPy is that you should be able to efficiently read biological datasets into NumPy-like data structure, and then analyse the data using NumPy-like methods, such as indexing, slicing, broadcasting and other vectorized operations (sum, mean, etc). Since NumPy arrays are used to store the data, BioNumPy has a very low memory footprint and operations are very efficient, meaning that BioNumPy is suitable for working with large datasets and can be an alternative to using libraries and tools written in more low-level languages such as C and C++.
 
 
 Install BioNumPy
@@ -31,7 +31,7 @@ Note that when you install BioNumPy, NumPy is also automatically installed.
 
 Read and analyse some data
 =============================
-In this very short tutorial, we will read a biological data set and play around with it. We will download a fastq file from the BioNumPy example data, but feel free to use any data set you want to play around with (see `supported file formats<supported_file_formats>`).
+In this very short tutorial, we will read a biological dataset and play around with it. We will download a fastq file from the BioNumPy example data, but feel free to use any dataset you want to play around with (see :ref:`supported file formats<supported_file_formats>`).
 
 We start by downloading a fastq file:
 
@@ -53,7 +53,7 @@ All BioNumPy programs typically start by importing both NumPy and BioNumPy. As a
     data = f.read()  # reads the whole file into memory
     print(data)
 
-The output from this tells us that we have a `SequenceEntryWithQuality` with 421 entries (sequences). This is is the data type that BioNumPy automatically chooses to use when we read a fastq-file. If you instead read a vcf, bam or another format, you will get a different entry type:
+The output from this tells us that we have a `SequenceEntryWithQuality` with 1000 entries (sequences). This is is the data type that BioNumPy automatically chooses to use when we read a fastq-file. If you instead read a vcf, bam or another format, you will get a different entry type:
 
 .. testoutput::
     :options: +NORMALIZE_WHITESPACE
@@ -84,7 +84,7 @@ As with NumPy, you can also take the mean and other operations over various axis
     array([5.194, 4.599, 5.591, ..., 5.   , 6.   , 6.   ])
 
 
-BioNumPy data can also be indexed exactly as you would index NumPy arrays. This means that if you e.g. want to get all the entries with more than 30% G's, you could use NumPy-syntax like this:
+BioNumPy data can also be indexed exactly as you would index NumPy arrays. This means that if you e.g. want to get all the sequence entries with more than 30% G's, you could use NumPy-syntax like this:
 
     >>> mask = np.mean(data.sequence == "G", axis=-1) >= 0.3
     >>> data[mask]
@@ -106,7 +106,7 @@ BioNumPy data can also be indexed exactly as you would index NumPy arrays. This 
 Final notes
 ============
 
-The above examples shows how to use BioNumPy for a specific file format and data set, but the concept is the same for all data sets. BioNumPy should be thought of as more of a toolkit rather than a collections of functions/modules. Once you learn how to use the toolkit, you should be able to very efficiently analyse many types of biological data sets.
+The above examples shows how to use BioNumPy for a specific file format and dataset, but the concept is the same for all datasets. BioNumPy should be thought of as more of a toolkit rather than a collections of functions/modules. Once you learn how to use the toolkit, you should be able to very efficiently analyse many types of biological datasets.
 
 Continue to see an overview of :ref:`what you can do with bionumpy<what_can_you_do>`.
 

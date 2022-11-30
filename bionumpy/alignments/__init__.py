@@ -1,6 +1,6 @@
-from .streams import streamable
-from .datatypes import BamEntry, Bed6
-from .encoded_array import EncodedArray
+from ..streams import streamable
+from ..datatypes import BamEntry, Bed6
+from ..encoded_array import EncodedArray
 
 
 @streamable()

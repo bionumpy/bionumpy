@@ -1,6 +1,6 @@
-from .. import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray
 from .kmers import KmerEncoder
-from ..rollable import RollableFunction
+from .rollable import RollableFunction
 from ..encodings import AlphabetEncoding
 from ..util import is_subclass_or_instance
 

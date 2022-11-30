@@ -1,12 +1,11 @@
 import numpy as np
-from .encodings import DNAEncoding, BaseEncoding
-from .variants import is_snp
-from .datatypes import Variant
-from .encoded_array import EncodedArray
-from .encoded_array import as_encoded_array
-from .sequence import get_reverse_complement, count_encoded
-from .streams import streamable
-from .lookup import Lookup
+from ..encodings import DNAEncoding
+from ..datatypes import Variant
+from ..encoded_array import EncodedArray
+from ..encoded_array import as_encoded_array
+from ..sequence import get_reverse_complement, count_encoded
+from ..streams import streamable
+from ..sequence.lookup import Lookup
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def get_kmer_indexes(position, flank=1):
     return np.add.outer(position, np.arange(-flank, flank + 1))
+
 
 class SNPEncoding:
     lookup = Lookup(np.full((4, 4), 255, dtype=np.uint8), DNAEncoding)
@@ -81,7 +81,7 @@ class MutationTypeEncoding:
 
 @streamable(reduction=sum)
 def count_mutation_types(variants, reference, flank=1):
-    snps = variants[is_snp(variants)]
+    snps = variants[variants.is_snp()]
     if len(snps) == 0:
         return 0
     snps = snps[np.argsort(snps.position)]

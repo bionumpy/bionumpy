@@ -100,14 +100,14 @@ class FileBuffer:
 
     @classmethod
     def from_data(cls, data: bnpdataclass) -> "FileBuffer":
-        """Create FileBuffer from a data set
+        """Create FileBuffer from a dataset
 
         Create a FileBuffer that can be written to file
 
         Parameters
         ----------
         data : npdataclass
-            Data set containing the data to be written
+            dataset containing the data to be written
 
         Returns
         -------
@@ -128,7 +128,7 @@ class FileBuffer:
         Returns
         -------
         npdataclass
-            Data set containing the data from the buffer
+            dataset containing the data from the buffer
         """
         return NotImplemented
 
