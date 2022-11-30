@@ -1,5 +1,6 @@
-Computing GC content inside genes: combining sequence data with interval data
------------------
+Computing GC content inside genes
+----------------------------------------------------------------------------------
+
 This example shows how a classic bioinformatics task like computing GC content inside genes
 can be performed intuitively and efficiently using BioNumPy.
 
