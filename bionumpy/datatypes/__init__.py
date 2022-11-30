@@ -71,6 +71,9 @@ class Variant:
     ref_seq: str
     alt_seq: str
 
+    def is_snp(self):
+        return (self.ref_seq.shape.lengths == 1) & (self.alt_seq.shape.lengths == 1)
+
 
 @bnpdataclass
 class VCFEntry:
@@ -83,6 +86,8 @@ class VCFEntry:
     filter: str
     info: str
 
+    def is_snp(self):
+        return (self.ref_seq.shape.lengths == 1) & (self.alt_seq.shape.lengths == 1)
 
 @bnpdataclass
 class VCFGenotypeEntry(VCFEntry):

@@ -1,8 +1,7 @@
-import numpy as np
 import bionumpy as bnp
 from bionumpy.streams.multistream import MultiStream
 from bionumpy.util.cli import run_as_commandline
-from bionumpy.mutation_signature import count_mutation_types
+from bionumpy.variants import count_mutation_types
 from bionumpy.io.delimited_buffers import PhasedVCFMatrixBuffer
 from bionumpy.io.matrix_dump import matrix_to_csv
 import logging
