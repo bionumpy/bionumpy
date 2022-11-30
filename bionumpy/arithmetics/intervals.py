@@ -31,7 +31,7 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
     Examples
     --------
     >>> from bionumpy.datatypes import Interval
-    >>> from bionumpy.arithmetics import get_boolean_mask
+    >>> from bionumpy.arithmetics import get_boolean_mask, get_pileup
     >>> intervals = Interval(["chr1", "chr1", "chr1"], [3, 5, 10], [8, 7, 12])
     >>> pileup = get_pileup(intervals, 20)
     >>> print(pileup)
