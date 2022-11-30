@@ -33,7 +33,8 @@ import bionumpy
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx',
-              'sphinx.ext.autosummary', 'sphinx.ext.doctest', 'sphinx.ext.coverage',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.doctest', 'sphinx.ext.coverage',
               'sphinx_design']
 
 doctest_global_setup = """
@@ -48,8 +49,6 @@ doctest_default_flags = (
     | doctest.DONT_ACCEPT_TRUE_FOR_1
     | doctest.NORMALIZE_WHITESPACE)
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -84,7 +83,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -174,3 +173,15 @@ numpydoc_show_class_members = False
 autodoc_default_flags = ['members', 'imported-member']
 autodoc_mock_imports = ["numpy", "npstructures"]
 autosummary_generate = True
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+
+"""
+extensions.append('autoapi.extension')
+autoapi_type = 'python'
+autoapi_dirs = ['../bionumpy/']
+autoapi_keep_files = True
+autoapi_root = 'autoapi/'
+"""

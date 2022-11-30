@@ -8,7 +8,8 @@ import bionumpy as bnp
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
 from bionumpy.io.matrix_dump import matrix_to_csv
-from npstructures.testing import assert_npdataclass_equal
+from bionumpy.testing import assert_bnpdataclass_equal
+
 
 
 @pytest.mark.parametrize("file_format", combos.keys())
@@ -46,7 +47,7 @@ def test_buffer_read(buffer_name):
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
         # print("#####", line, true_line)
-        assert_npdataclass_equal(line, true_line)
+        assert_bnpdataclass_equal(line, true_line)
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
@@ -57,7 +58,7 @@ def test_buffer_read_chunks(buffer_name, min_chunk_size):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = np.concatenate(list(NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read_chunks(min_chunk_size)))
     for line, true_line in zip(data, true_data):
-        assert_npdataclass_equal(line, true_line)
+        assert_bnpdataclass_equal(line, true_line)
 
 
 def test_read_big_fastq():

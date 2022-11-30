@@ -133,8 +133,6 @@ def construct_flexible_len_regex_matchers(matching_regex: str, encoding):
              for symbol in [str("." * n) for n in range(min_gap, max_gap + 1)]]))
 
 
-
-
 def construct_wildcard_matcher(matching_regex: str, encoding):
     assert isinstance(encoding, AlphabetEncoding)
 

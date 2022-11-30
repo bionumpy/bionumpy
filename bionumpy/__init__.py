@@ -14,7 +14,7 @@ from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .io.delimited_buffers import (BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                                    GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
-from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding
+from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
 from .sequence.kmers import KmerEncoder
 from .sequence.minimizers import Minimizers
 from .sequence.position_weight_matrix import PositionWeightMatrix
