@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.testing import assert_bnpdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
 @bnpdataclass

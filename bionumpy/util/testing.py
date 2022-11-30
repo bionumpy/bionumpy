@@ -2,7 +2,7 @@ import dataclasses
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from npstructures.testing import assert_raggedarray_equal
 from npstructures.npdataclasses import shallow_tuple
-from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from npstructures import RaggedArray
 import numpy as np
 

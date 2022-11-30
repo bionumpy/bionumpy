@@ -57,7 +57,7 @@ def test_get_transcript_copies(sequences, sequence_counts):
         list(chain(*[[sequence.to_string()] * count for sequence, count in zip(sequences, sequence_counts)])),
         bnp.DNAEncoding)
     result = get_transcript_copies(sequences, sequence_counts)
-    bnp.testing.assert_encoded_raggedarray_equal(truth, result)
+    bnp.util.testing.assert_encoded_raggedarray_equal(truth, result)
 
 
 def test_fragment_transcript_copies(sequences, fragment_size=2):
@@ -66,7 +66,7 @@ def test_fragment_transcript_copies(sequences, fragment_size=2):
         for i in range(0, len(sequence) - fragment_size + 1, fragment_size):
             truth.append(sequence[i:i + fragment_size])
     result = fragment_transcript_copies(sequences, fragment_size)
-    bnp.testing.assert_encoded_raggedarray_equal(
+    bnp.util.testing.assert_encoded_raggedarray_equal(
         bionumpy.encoded_array.as_encoded_array(truth, sequences.encoding), bionumpy.encoded_array.as_encoded_array(result, sequences.encoding))
 
 
@@ -75,7 +75,7 @@ def test_sample_transcript_fragments(sequences, sampling_rate=0.9):
     mask = np.random.choice(a=[True, False], size=len(sequences), p=[sampling_rate, 1 - sampling_rate])
     truth = sequences[mask]
     result = sample_transcript_fragments(sequences, sampling_rate=0.9)
-    bnp.testing.assert_encoded_raggedarray_equal(bionumpy.encoded_array.as_encoded_array(truth), bionumpy.encoded_array.as_encoded_array(result))
+    bnp.util.testing.assert_encoded_raggedarray_equal(bionumpy.encoded_array.as_encoded_array(truth), bionumpy.encoded_array.as_encoded_array(result))
 
 
 def test_get_rnaseq_reads(sequences, read_length=3):
@@ -85,8 +85,8 @@ def test_get_rnaseq_reads(sequences, read_length=3):
     neg_truth = as_encoded_array(["ACG", "TAG", "ATT"], sequences.encoding)
     pos_result = get_rnaseq_reads(sequences, read_length, strands=pos_strands)
     neg_result = get_rnaseq_reads(sequences, read_length, strands=neg_strands)
-    bnp.testing.assert_encoded_raggedarray_equal(pos_truth, pos_result)
-    bnp.testing.assert_encoded_raggedarray_equal(neg_truth, neg_result)
+    bnp.util.testing.assert_encoded_raggedarray_equal(pos_truth, pos_result)
+    bnp.util.testing.assert_encoded_raggedarray_equal(neg_truth, neg_result)
 
 
 def test_simualte_rnaseq(sequences, rnaseq_simulation_settings):

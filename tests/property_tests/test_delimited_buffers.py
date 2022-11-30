@@ -1,5 +1,5 @@
 from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.testing import assert_bnpdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
 # from npstructures.testing import assert_bnpdataclass_equal
 from bionumpy.io.delimited_buffers import get_bufferclass_for_datatype
 import bionumpy.datatypes as dt

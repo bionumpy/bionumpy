@@ -3,7 +3,7 @@ from npstructures.testing import assert_raggedarray_equal
 import numpy as np
 
 from bionumpy import as_encoded_array
-from bionumpy.testing import assert_encoded_raggedarray_equal
+from bionumpy.util.testing import assert_encoded_raggedarray_equal
 from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float, float_to_strings)
 
 
