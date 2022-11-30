@@ -4,7 +4,7 @@
 # in particular regarding the standardized folder structure mentioned there. 
 import bionumpy as bnp
 from bionumpy.intervals import intersect
-include: "rules/translate"
+include: "rules/translate.smk"
 
 rule all:
     input:
@@ -24,47 +24,70 @@ rule simulate_dna:
                 f.write(f">{i}\n")
                 f.write("".join(random.choices("ACGT", k=int(wildcards.length)))+ "\n")
 
-rule simulate_intervals:
+
+rule make_chrom_sizes:
     output:
-        "results/intevals/{n_intervals}.bed"
+        "results/chrom.sizes"
+    run:
+        out = ""
+        for chrom in range(1, 11):
+            out += f"{chrom}\t1000000\n"
+        open(output[0], "w").write(out)
+
+
+rule simulate_intervals:
+    input:
+        "results/chrom.sizes"
+    output:
+        "results/intervals/{n_intervals}.bed"
     run:
         import random
+        chrom_sizes = [(str(l.split()[0]), int(l.split()[1])) for l in open(input[0])]
         with open(output[0], "w") as f:
-            for chromosome in range(1, 10):
+            for chromosome_name, size in chrom_sizes:
                 start = 1
                 for _ in range(int(wildcards.n_intervals)):
                     end = start+random.randint(1, 100)
-                    f.write(f"chr{chromosome}\t{start}\t{end}\t.\t.\t+\n")
-                    start= end + random.randint(1, 30)
+                    f.write(f"{chromosome_name}\t{start}\t{end}\t.\t.\t+\n")
+                    start = end + random.randint(1, 10)
+
 
 rule intersect_bionumpy:
     input:
-        "results/intevals/{b}.bed",
-        "results/intevals/{a}.bed"
+        a="results/intervals/{b}.bed",
+        b="results/intervals/{a}.bed",
+        chrom_sizes="results/chrom.sizes"
     output:
         "results/bionumpy/intersect/{a}_{b}.bed"
     benchmark:
         "benchmarks/intersect/bionumpy/{a}_{b}.txt"
-    script:
-        "scripts/intersect.py"
+    run:
+        chrom_sizes = bnp.open(input.chrom_sizes).read()
+        a = bnp.open(input[0]).read_chunks()
+        b = bnp.open(input[1]).read_chunks()
+        ms = bnp.streams.MultiStream(chrom_sizes, a=a, b=b)
+        result = bnp.intervals.intersect(ms.a, ms.b)
+        print(result)
+
 
 rule intersect_bedtools:
     input:
-        "results/intevals/{b}.bed",
-        "results/intevals/{a}.bed"
+        "results/intervals/{b}.bed",
+        "results/intervals/{a}.bed"
     output:
-        "results/bedtools/intersect/{a}_{b}.bed"
+        "results/bedtools/intersect/{a,\d+}_{b,\d+}.bed"
     benchmark:
         "benchmarks/intersect/bedtools/{a}_{b}.txt"
     shell:
         "bedtools intersect -a {input[0]} -b {input[1]} > {output} -sorted"
+
 
 rule intersect_check:
     input:
         "results/bedtools/intersect/{a}_{b}.bed",
         "results/bionumpy/intersect/{a}_{b}.bed"
     output:
-        "results/intersect/{a}_{b}"
+        "results/intersect/{a\d+}_{b\d+}.check"
     run:
         a = (line.strip().split("\t")[:3] for line in open(input[0]))
         b = (line.strip().split("\t")[:3] for line in open(input[1]))
