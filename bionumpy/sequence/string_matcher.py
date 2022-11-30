@@ -2,12 +2,11 @@ import logging
 import itertools
 import numpy as np
 import re
-from ..rollable import RollableFunction
+from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, as_encoded_array
 from ..util import as_strided
 from npstructures import RaggedArray
 from ..encodings import AlphabetEncoding
-
 
 class StringMatcher(RollableFunction):
     def __init__(self, matching_sequence, encoding):
@@ -21,7 +20,7 @@ class StringMatcher(RollableFunction):
     def __call__(self, sequence):
         return np.all(sequence == self._matching_sequence_array, axis=-1)
 
-
+    
 class RegexMatcher(RollableFunction):
     """
     Matches regexes of various lengths across a RaggedArray of sequences by constructing a list of FixedLenRegexMatcher objects from the original
