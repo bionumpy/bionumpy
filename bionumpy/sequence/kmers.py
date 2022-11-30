@@ -35,6 +35,7 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     """
     Get kmers for sequences.
     Sequences should be encoded with an AlphabetEncoding (e.g. DNAEncoding).
+    Use bnp.change_encoding if your sequences do not have a suitable encoding.
 
     Parameters
     ----------
@@ -56,6 +57,11 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     encoded_ragged_array([[ACT, CTG],
                           [AAA],
                           [TTG, TGG, GGC]], 3merEncoding(AlphabetEncoding('ACGT')))
+
+    >>> sequences = bnp.open("example_data/big.fq.gz").read().sequence
+    >>> sequences = bnp.change_encoding(sequences, bnp.DNAEncoding)
+    >>> bnp.sequence.get_kmers(sequences, 31)[0, 0:3]  # first three kmers of first sequence
+    encoded_array([CGGTAGCCAGCTGCGTTCAGTATGGAAGATT, GGTAGCCAGCTGCGTTCAGTATGGAAGATTT, GTAGCCAGCTGCGTTCAGTATGGAAGATTTG], 31merEncoding(AlphabetEncoding('ACGT')))
     """
 
     assert 0 < k < 32, "k must be larger than 0 and smaller than 32"

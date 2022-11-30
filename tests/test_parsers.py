@@ -2,11 +2,11 @@ import os
 from itertools import chain
 import pytest
 import numpy as np
-from npstructures.testing import assert_npdataclass_equal 
 from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
 from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
 from bionumpy.io.files import bnp_open
+from bionumpy.testing import assert_bnpdataclass_equal
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
 from bionumpy.io.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
@@ -26,7 +26,7 @@ def test_buffer_read(buffer_name):
     buf, true_data, buf_type = combos[buffer_name]
     data = buf_type.from_raw_buffer(buf).get_data()
     for line, true_line in zip(data, true_data):
-        assert_npdataclass_equal(line, true_line)
+        assert_bnpdataclass_equal(line, true_line)
 
 
 #@pytest.mark.parametrize("buffer_name", ["fastq", "fasta", "multiline_fasta"])  # "bed", "vcf2", "vcf", "fastq", "fasta"])
@@ -116,7 +116,7 @@ def test_gfa_sequence_buffer(gfa_sequence_buffer):
         SequenceEntry.single_entry("id4", "ACTG")
     ]
     for entry, t in zip(entries, true):
-        assert_npdataclass_equal(entry, t)
+        assert_bnpdataclass_equal(entry, t)
 
 @pytest.mark.skip("Replaced")
 def test_vcf_buffer(vcf_buffer):
@@ -144,7 +144,7 @@ def test_line_chunker(vcf_buffer2):
     lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
     true = data["vcf2"]
     for line, t in zip(lines, true):
-        assert_npdataclass_equal(line, t)
+        assert_bnpdataclass_equal(line, t)
 
 
 def test_read_chunk_after_read_chunks_returns_empty_dataclass():
