@@ -39,6 +39,6 @@ rule translate_biostrings:
     output:
         "results/biostrings/protein_sequences/{name}.fa"
     benchmark:
-        "benchmarks/translate/biopython/{name}.txt"
+        "benchmarks/translate/biostrings/{name}.txt"
     script:
         "scripts/reverse_complement_biostrings.R"

@@ -1,0 +1,17 @@
+
+
+
+analysis:
+  intersect:
+    tools: ["bionumpy", "bedtools"]
+    output_file_ending: ".bed"
+    runs:
+      small: "nintervals=100_nintervals=101"
+      big: "nintervals=10000_nintervals=1000"
+
+  translate:
+    tools: ["bionumpy", "biopython"]
+    output_file_ending: ".fa"
+    runs:
+      small: "length=150_nreads=100"
+      big: "length=150_nreads=10000"
