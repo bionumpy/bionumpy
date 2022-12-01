@@ -1,6 +1,7 @@
 import bionumpy as bnp
 import dataclasses
 
+
 rule bionumpy_reverse_complement:
     # todo: Not giving correct results now
     input:
@@ -10,18 +11,10 @@ rule bionumpy_reverse_complement:
     benchmark:
         "benchmarks/reverse_complement/bionumpy/{filename}.txt"
     run:
-        file = bnp.open(input[0])
-        outfile = bnp.open(output[0], "w")
-        for chunk in file:
-            sequence = bnp.change_encoding(chunk.sequence, bnp.DNAEncoding)
-            reverse_complement = bnp.sequence.get_reverse_complement(sequence)
-            # ?
-            reverse_complement = bnp.change_encoding(reverse_complement, bnp.DNAEncoding)
-            dataclasses.replace(chunk, sequence=reverse_complement)
-            outfile.write(chunk)
-
-        outfile.close()
-
+        sequence_entries = bnp.open(input[0], buffer_type=bnp.TwoLineFastaBuffer).read_chunks()
+        reversed_entries = bnp.sequence.get_reverse_complement(sequence_entries)
+        with bnp.open(output[0], "w") as outfile:
+            outfile.write(reversed_entries)
 
 
 rule seqtk_reverse_complement:

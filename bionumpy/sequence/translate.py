@@ -1,11 +1,11 @@
 import numpy as np
-from npstructures import RaggedArray
-from bionumpy.streams import streamable
-from bionumpy.encodings import BaseEncoding, AlphabetEncoding
-from bionumpy.sequence.kmers import KmerEncoder
-from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
-from bionumpy.bnpdataclass.bnpdataclassfunction import apply_to_npdataclass
-from bionumpy.util.typing import EncodedArrayLike, EncodedRaggedArrayLike
+from ..streams import streamable
+from ..encodings import BaseEncoding, AlphabetEncoding
+from ..sequence.kmers import KmerEncoder
+from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..bnpdataclass.bnpdataclassfunction import apply_to_npdataclass
+from ..util.typing import EncodedArrayLike
+
 
 class DNAToProtein:
     amino_acids = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
