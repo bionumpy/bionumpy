@@ -6,19 +6,26 @@ analysis:
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
     runs:
-      small: "nintervals=100_nintervals=101"
-      big: "nintervals=10000_nintervals=1000"
+      small: "nintervals100_nintervals101"
+      big: "nintervals100000_nintervals110000"
 
   translate:
-    tools: ["bionumpy", "biopython"]
+    tools: ["bionumpy", "biopython", "python", "biotite"]
     output_file_ending: ".fa"
     runs:
-      small: "length=150_nreads=100"
-      big: "length=150_nreads=100000"
+      small: "length150_nreads100"
+      big: "length150_nreads1000000"
 
   reverse_complement:
-    tools: ["bionumpy", "python", "biopython", "seqtk"]
+    tools: ["bionumpy", "python", "biopython", "seqtk", "biotite"]
     output_file_ending: ".fa"
     runs:
-      small: "length=150_nreads=100"
-      big: "length=150_nreads=1000000"
+      small: "length150_nreads100"
+      big: "length150_nreads1000000"
+
+
+  subsample:
+    tools: ["python", "bionumpy", "seqtk"]
+    runs:
+      small: "length150_nreads200"
+      big: "length150_nreads5000000"
