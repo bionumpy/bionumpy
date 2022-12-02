@@ -66,6 +66,7 @@ class RegexMatcher(RollableFunction):
 class FixedLenRegexMatcher(RollableFunction):
     def __init__(self, matching_regex, encoding):
         self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
+        self._encoding = encoding
 
     @property
     def window_size(self):

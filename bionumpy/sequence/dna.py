@@ -67,9 +67,14 @@ def get_reverse_complement(sequence: EncodedArrayLike) -> EncodedArrayLike:
     return complement(sequence)[..., ::-1]
 
 
+@streamable()
 def get_strand_specific_sequences(encoded_array: EncodedArray, stranded_intervals: Interval):
     relevant_sequences = encoded_array[stranded_intervals.start:stranded_intervals.stop]
     rev_complimnet_seqs = get_reverse_complement(relevant_sequences)
     return np.where((stranded_intervals.strand.ravel() == "-")[:, np.newaxis],
                     rev_complimnet_seqs, relevant_sequences)
 
+
+@streamable()
+def get_sequences(sequence: EncodedArray, intervals: Interval):
+    return sequence[intervals.start:intervals.stop]
