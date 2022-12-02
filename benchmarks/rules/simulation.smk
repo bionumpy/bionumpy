@@ -2,7 +2,7 @@
 
 rule simulate_dna:
     output:
-        "results/dna_sequences/length={length}_nreads={number}.fa"
+        "results/dna_sequences/length{length}_nreads{number}.fa"
     run:
         import random
         with open(output[0], "w") as f:
@@ -25,7 +25,7 @@ rule simulate_intervals:
     input:
         "results/chrom.sizes"
     output:
-        "results/intervals/nintervals={n_intervals}.bed"
+        "results/intervals/nintervals{n_intervals}.bed"
     run:
         import random
         chrom_sizes = [(str(l.split()[0]), int(l.split()[1])) for l in open(input[0])]

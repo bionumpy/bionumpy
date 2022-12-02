@@ -3,7 +3,6 @@ import dataclasses
 
 
 rule bionumpy_reverse_complement:
-    # todo: Not giving correct results now
     input:
         "results/dna_sequences/{filename}.fa"
     output:
@@ -73,3 +72,24 @@ rule python_reverse_complement:
                     else:
                         outfile.write(reverse_complement(line.strip()) + "\n")
 
+
+rule biotite_reverse_complement:
+    input:
+        "results/dna_sequences/{name}.fa"
+    output:
+        "results/biotite/reverse_complement/{name}.fa"
+    benchmark:
+        "benchmarks/reverse_complement/biotite/{name}.txt"
+
+    run:
+        import biotite.sequence.io.fasta as fasta
+
+        fasta_file = fasta.FastaFile.read(input[0])
+        out_fasta_file = fasta.FastaFile()
+
+        for header, dna in fasta_file.items():
+            dna = biotite.sequence.NucleotideSequence(dna)
+            revcomp = dna.reverse().complement()
+            fasta.set_sequence(out_fasta_file, revcomp, header=header)
+
+        out_fasta_file.write(output[0])
