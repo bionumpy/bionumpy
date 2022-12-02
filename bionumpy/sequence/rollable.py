@@ -44,19 +44,14 @@ class RollableFunction:
         """
         if window_size is None:
             window_size = self.window_size
-            
-        # if not isinstance(_sequence, (np.ndarray, EncodedArray)):
-        #     if hasattr(self, "_encoding") and self._encoding is not None:
-        #         _sequence = as_encoded_array(_sequence, target_encoding=self._encoding)
-        #     elif not isinstance(_sequence, RaggedArray):
-        #         _sequence = RaggedArray(_sequence)
+
         _sequence = as_encoded_array(_sequence, self._encoding)
         shape, sequence = (_sequence.shape, _sequence.ravel())
         if mode == "valid":
             windows = np.lib.stride_tricks.sliding_window_view(sequence, window_size, subok=True)
         elif mode == "same":
             windows = as_strided(sequence, strides=sequence.strides + sequence.strides, shape=sequence.shape + (window_size,),
-                                                      writeable=False)
+                                 writeable=False)
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
             if isinstance(convoluted, EncodedArray):

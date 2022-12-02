@@ -1,4 +1,5 @@
 import numpy as np
+import typing
 from ..io.motifs import Motif
 from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
@@ -51,7 +52,7 @@ class PWM:
     @classmethod
     def from_dict(cls, dictionary: dict):
         alphabet = "".join(dictionary.keys())
-        matrix = np.array(list(dictionary.values()))
+        matrix = np.log(np.array(list(dictionary.values())))
         return cls(matrix, alphabet)
 
     @classmethod
@@ -59,9 +60,11 @@ class PWM:
         return cls(motif.matrix, motif.alphabet)
 
     @classmethod
-    def from_counts(cls, motif: Motif):
-        return cls(_pwm_from_counts(motif.matrix), motif.alphabet)
-
+    def from_counts(cls, counts: typing.Union[Motif, dict]):
+        if isinstance(counts, Motif):
+            return cls(_pwm_from_counts(counts.matrix), counts.alphabet)
+        else:
+            return cls(_pwm_from_counts(np.array(counts.values()), "".join(counts.keys())))
 
 
 def get_motif_scores(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
