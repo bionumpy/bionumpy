@@ -3,9 +3,10 @@ import numpy as np
 
 import bionumpy as bnp
 from bionumpy.io.jaspar import read_jaspar_matrix
-from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM
+from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM, get_motif_scores
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 from bionumpy import EncodedArray
+
 
 @pytest.fixture
 def matrix():
@@ -25,6 +26,12 @@ def window():
 @pytest.fixture
 def sequence():
     return EncodedArray(np.array([0, 1, 2, 3]), bnp.DNAEncoding)
+
+
+@pytest.fixture
+def sequences():
+    return ["ACGT",
+            "GCT"]
 
 
 def test_window(window, matrix):
@@ -66,6 +73,10 @@ def test_pwm(window, matrix):
     log_prob = pwm.calculate_score(window)
     np.testing.assert_allclose(np.exp(log_prob), 0.4*0.25)
 
+
+def test_encoded_ragged_array(sequences, matrix):
+    pwm = PWM(matrix, "ACGT")
+    get_motif_scores(sequences, pwm)
 
 def test_from_dict(window, matrix):
     dictionary = dict(zip("ACGT", matrix))

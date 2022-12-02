@@ -9,6 +9,7 @@ from npstructures import RaggedArray
 class PositionWeightMatrix(RollableFunction):
     def __init__(self, pwm):
         self._pwm = pwm
+        self._encoding = pwm._encoding
         self.window_size = pwm.window_size
 
     def __call__(self, sequence: EncodedArray) -> float:
