@@ -3,9 +3,9 @@ import numpy as np
 
 import bionumpy as bnp
 from bionumpy.io.jaspar import read_jaspar_matrix
-from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts
+from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
-
+from bionumpy import EncodedArray
 
 @pytest.fixture
 def matrix():
@@ -19,21 +19,23 @@ def matrix():
 
 @pytest.fixture
 def window():
-    return np.array([0, 1])
+    return EncodedArray(np.array([0, 1]), bnp.DNAEncoding)
 
 
 @pytest.fixture
 def sequence():
-    return np.array([0, 1, 2, 3])
+    return EncodedArray(np.array([0, 1, 2, 3]), bnp.DNAEncoding)
 
 
 def test_window(window, matrix):
-    log_prob = PositionWeightMatrix(matrix)(window)
+    pwm = PWM(matrix, "ACGT")
+    log_prob = PositionWeightMatrix(pwm)(window)
     np.testing.assert_allclose(np.exp(log_prob), 0.4*0.25)
 
 
 def test_sequence(sequence, matrix):
-    log_prob = PositionWeightMatrix(matrix).rolling_window(sequence)
+    pwm = PWM(matrix, "ACGT")
+    log_prob = PositionWeightMatrix(pwm).rolling_window(sequence)
     np.testing.assert_allclose(np.exp(log_prob), [0.4*0.25, 0.025, 0.4*0.25])
 
 
@@ -48,11 +50,27 @@ def test_integration():
     encoding = AlphabetEncoding(alphabet)
     
     # Get the motif score function
-    motif_score = PositionWeightMatrix(pwm, encoding)
+    pwm = PWM(pwm, alphabet)
+    motif_score = PositionWeightMatrix(pwm)
     
     #Get reads
     entries = bnp.open("example_data/reads.fq").read()
     
     # Calculate the motif score for each valid window
     scores = motif_score.rolling_window(entries.sequence)
+    
+
+def test_pwm(window, matrix):
+    pwm = PWM(matrix, "ACGT")
+    #window = EncodedArray(window, AlphabetEncoding("ACGT"))
+    log_prob = pwm.calculate_score(window)
+    np.testing.assert_allclose(np.exp(log_prob), 0.4*0.25)
+
+
+def test_from_dict(window, matrix):
+    dictionary = dict(zip("ACGT", matrix))
+    # window = EncodedArray(window, AlphabetEncoding("ACGT"))
+    pwm = PWM.from_dict(dictionary)
+    log_prob = pwm.calculate_score(window)
+    np.testing.assert_allclose(np.exp(log_prob), 0.4*0.25)
     

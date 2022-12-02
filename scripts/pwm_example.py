@@ -1,25 +1,18 @@
 import bionumpy as bnp
-from bionumpy.io.jaspar import read_jaspar_matrix
-from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts
-from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
+from bionumpy.io.motifs import read_motif
+from bionumpy.sequence.position_weight_matrix import PWM, get_motif_scores
 
 # Read the alphabet and counts from jaspar file
-alphabet, matrix = read_jaspar_matrix("example_data/MA0080.1.jaspar")
+motif = read_motif("example_data/MA0080.1.jaspar")
 
 # Convert counts to position weight matrix
-pwm = _pwm_from_counts(matrix)
+pwm = PWM.from_counts(motif)
 
-# Make an array-class for the alphabet
-encoding = AlphabetEncoding(alphabet)
-
-# Get the motif score function
-motif_score = PositionWeightMatrix(pwm, encoding)
-
-#Get reads
+# Get reads
 entries = bnp.open("example_data/big.fq.gz").read()
 
 # Calculate the motif score for each valid window
-scores = motif_score.rolling_window(entries.sequence)
+scores = get_motif_scores(entries.sequence, pwm)
 
 # Get a histogram of the max-score for each read
 bnp.histogram(scores.max(axis=-1))
