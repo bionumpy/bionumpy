@@ -1,74 +1,46 @@
+
+
+# convert_fastq_to_fasta
+# strip_starts_and_ends
+
+## Bacterial
+## 
+
 # Main entrypoint of the workflow. 
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+# in particular regarding the standardized folder structure mentioned there.
+import plotly.express as px
 import bionumpy as bnp
-from bionumpy.intervals import intersect
-include: "rules/translate"
+from bionumpy.arithmetics import intersect
+configfile: "config.yml"
+include: "rules/reports.smk"
+include: "rules/simulation.smk"
+include: "rules/translate.smk"
+include: "rules/kmer_counting.smk"
+include: "rules/reverse_complement.smk"
+include: "rules/interval_intersection.smk"
+include: "rules/subsample_sequences.smk"
+
 
 rule all:
     input:
-        [f"results/{program}/protein_sequences/l150_n1000000.fa"
-         for program in ["bionumpy", "biopython", "biostrings"]],
-        [f"results/{program}/intersect/100000_1000000.bed"
-         for program in ["bionumpy", "bedtools"]],
+        "report_big.md",
+        "report_small.md"
 
 
-rule simulate_dna:
+rule main_report:
+    input:
+        "results/reports/translate/{run_size}.png",
+        "results/reports/intersect/{run_size}.png",
+        "results/reports/reverse_complement/{run_size}.png",
+        "results/reports/subsample/{run_size}.png",
     output:
-        "results/dna_sequences/l{length}_n{number}.fa"
+        "report_{run_size}.md"
     run:
-        import random
+        # make a simple report with the plots
+        out = "# Benchmark report \n\n"
+        out += "\n\n".join("![](" + image + ")" for image in input)
         with open(output[0], "w") as f:
-            for i in range(int(wildcards.number)):
-                f.write(f">{i}\n")
-                f.write("".join(random.choices("ACGT", k=int(wildcards.length)))+ "\n")
-
-rule simulate_intervals:
-    output:
-        "results/intevals/{n_intervals}.bed"
-    run:
-        import random
-        with open(output[0], "w") as f:
-            for chromosome in range(1, 10):
-                start = 1
-                for _ in range(int(wildcards.n_intervals)):
-                    end = start+random.randint(1, 100)
-                    f.write(f"chr{chromosome}\t{start}\t{end}\t.\t.\t+\n")
-                    start= end + random.randint(1, 30)
-
-rule intersect_bionumpy:
-    input:
-        "results/intevals/{b}.bed",
-        "results/intevals/{a}.bed"
-    output:
-        "results/bionumpy/intersect/{a}_{b}.bed"
-    benchmark:
-        "benchmarks/intersect/bionumpy/{a}_{b}.txt"
-    script:
-        "scripts/intersect.py"
-
-rule intersect_bedtools:
-    input:
-        "results/intevals/{b}.bed",
-        "results/intevals/{a}.bed"
-    output:
-        "results/bedtools/intersect/{a}_{b}.bed"
-    benchmark:
-        "benchmarks/intersect/bedtools/{a}_{b}.txt"
-    shell:
-        "bedtools intersect -a {input[0]} -b {input[1]} > {output} -sorted"
-
-rule intersect_check:
-    input:
-        "results/bedtools/intersect/{a}_{b}.bed",
-        "results/bionumpy/intersect/{a}_{b}.bed"
-    output:
-        "results/intersect/{a}_{b}"
-    run:
-        a = (line.strip().split("\t")[:3] for line in open(input[0]))
-        b = (line.strip().split("\t")[:3] for line in open(input[1]))
-        for l, l2 in zip(a, b):
-            assert l==l2, (l, l2)
-        open(output[0], "w").write("1")
+            f.write(out)
 

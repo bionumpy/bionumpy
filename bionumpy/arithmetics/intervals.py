@@ -4,6 +4,7 @@ import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
 
 from .bedgraph import BedGraph
+from .. import streamable
 from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
@@ -145,7 +146,7 @@ def count_overlap(intervals_a, intervals_b):
     return np.sum(np.maximum(stops[:-1]-starts[1:], 0))
 
 
-@chromosome_map()
+@streamable()
 def intersect(intervals_a, intervals_b):
     all_intervals = np.concatenate([intervals_a, intervals_b])
     all_intervals = all_intervals[np.argsort(all_intervals.start, kind="mergesort")]

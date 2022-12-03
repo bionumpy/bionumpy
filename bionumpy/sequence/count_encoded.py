@@ -45,7 +45,7 @@ class EncodedCounts:
         if row_names is not None:
             ret.row_names = [count.row_names for count in counts]
         return ret
-            
+
 
 def count_encoded(values, weights=None, axis=-1):
     if axis is None:

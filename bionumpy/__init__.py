@@ -22,6 +22,7 @@ from .sequence import count_encoded
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from . import simulate
+from . import arithmetics
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)

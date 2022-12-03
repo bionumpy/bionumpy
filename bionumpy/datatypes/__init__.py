@@ -46,6 +46,7 @@ class Bed6(Interval):
     score: int
     strand: StrandEncoding
 
+
 @bnpdataclass
 class NarrowPeak(Bed6):
     signal_value: str

@@ -55,7 +55,7 @@ class OneToOneEncoding(Encoding):
             else:
                 out = EncodedArray(self._encode(data), self)
         else:
-            assert False
+            assert False, f"Wrong input type for encode: {type(data)} {data}"
 
         return out
 

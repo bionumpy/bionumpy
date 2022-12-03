@@ -3,12 +3,13 @@ import dataclasses
 from numpy.random import default_rng
 
 from ..io.motifs import Motif
-from ..sequence.position_weight_matrix import get_motif_scores
+from ..sequence.position_weight_matrix import get_motif_scores, PWM
 from ..datatypes import Interval, Bed6
 from .. import streamable, EncodedArray
 from ..encodings import AlphabetEncoding, StrandEncoding
 
 rng = default_rng()
+
 
 @dataclasses.dataclass
 class ChipSeqSimulationSettings:
@@ -22,9 +23,10 @@ def simulate_sequence(alphabet, length):
     numbers = rng.choice(np.arange(len(alphabet)), size=length)
     return EncodedArray(numbers, AlphabetEncoding(alphabet))
 
+
 @streamable()
 def simulate_chip_seq_fragments(reference_sequence, motif, n_fragments=1000, fragment_size=100):
-    log_prob = get_motif_scores(reference_sequence, motif)
+    log_prob = get_motif_scores(reference_sequence, PWM.from_counts(motif))
     prob = np.exp(log_prob)
     prob /= prob.sum()
     points = rng.choice(np.arange(prob.size), size=n_fragments, replace=True, p=prob)
@@ -33,6 +35,7 @@ def simulate_chip_seq_fragments(reference_sequence, motif, n_fragments=1000, fra
     start = np.maximum(points-left_extend, 0)
     stop = np.minimum(points+right_extend+1, log_prob.size)
     return Interval(["."]*len(start), start, stop)
+
 
 @streamable()
 def simulate_read_fragments(fragments: Interval, read_length: int):
@@ -55,6 +58,7 @@ def simulate_read_fragments(fragments: Interval, read_length: int):
                 ["."]*len(stops),
                 [0]*len(stops),
                 strands)
+
 
 @streamable()
 def simulate_chip_seq_reads(reference_sequence, settings):

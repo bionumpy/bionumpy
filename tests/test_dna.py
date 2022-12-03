@@ -1,12 +1,23 @@
 import pytest
 import bionumpy as bnp
 from bionumpy import as_encoded_array
-from bionumpy.sequence import get_strand_specific_sequences
+from bionumpy.util.testing import assert_encoded_array_equal
+from bionumpy.sequence import get_strand_specific_sequences, get_reverse_complement
 
 
 @pytest.fixture
 def dna_sequence():
     return as_encoded_array('ACGTACGTACGT', bnp.DNAEncoding)
+
+
+@pytest.fixture
+def ascii_sequence():
+    return as_encoded_array('ACGTG')
+
+
+def test_reverse_ascii_complement(ascii_sequence):
+    reverse_complement = get_reverse_complement(ascii_sequence)
+    assert_encoded_array_equal(reverse_complement, "CACGT")
 
 
 @pytest.fixture
