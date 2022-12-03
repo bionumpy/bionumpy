@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import re
 
-from numpy._typing import ArrayLike
+from numpy.typing import ArrayLike
 
 from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, as_encoded_array, Encoding
