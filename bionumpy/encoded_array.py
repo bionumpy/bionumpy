@@ -155,7 +155,7 @@ class EncodedRaggedArray(RaggedArray):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert isinstance(self._data, EncodedArray)
+        assert isinstance(self.ravel(), EncodedArray)
 
     def __repr__(self) -> str:
         if self.size>1000:
@@ -175,21 +175,21 @@ class EncodedRaggedArray(RaggedArray):
     @property
     def encoding(self):
         """Make the encoding of the underlying data avaible"""
-        return self._data.encoding
+        return self.ravel().encoding
 
     def raw(self):
-        return RaggedArray(self._data.raw(), self._shape)
+        return RaggedArray(self.ravel().raw(), self._shape)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """ Convert any data to `EncodedArray` before calling the `ufunc` on them """
-        assert isinstance(self._data, EncodedArray), self._data
-        inputs = [as_encoded_array(i, self._data.encoding).raw() for i in inputs]
-        #inputs = _parse_ufunc_inputs(inputs, self._data.encoding)
-        kwargs = {key: as_encoded_array(val, self._data.encoding).raw() for key, val in kwargs.items()}
+        assert isinstance(self.ravel(), EncodedArray), self.ravel()
+        inputs = [as_encoded_array(i, self.ravel().encoding).raw() for i in inputs]
+        #inputs = _parse_ufunc_inputs(inputs, self.ravel().encoding)
+        kwargs = {key: as_encoded_array(val, self.ravel().encoding).raw() for key, val in kwargs.items()}
 
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
-        if isinstance(ret._data, EncodedArray):
-            return EncodedRaggedArray(ret._data, ret._shape)
+        if isinstance(ret.ravel(), EncodedArray):
+            return EncodedRaggedArray(ret.ravel(), ret._shape)
         return ret
 
     def tolist(self):

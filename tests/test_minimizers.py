@@ -21,8 +21,8 @@ def sequences():
                      [0, 3, 1, 2, 2, 1],
                      [0, 3, 1, 2, 2],
                      [0, 3, 1, 2]])
-    r._data = EncodedArray(r._data, DNAEncoding)
-    r = EncodedRaggedArray(r._data, r._shape)
+    r = EncodedRaggedArray(
+        EncodedArray(r.ravel(), DNAEncoding), r._shape)
     return r
 
 
