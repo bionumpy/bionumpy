@@ -14,7 +14,7 @@ def get_changes(array):
 
 
 def get_ragged_changes(ragged_array):
-    lengths = ragged_array.shape.lengths
+    lengths = ragged_array.lengths
     changes = lengths[1:] != lengths[:-1]
     data = ragged_array.ravel()
     indices =  np.arange(data.size-lengths[-1])
@@ -98,7 +98,7 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
         keys = getattr(data, column)
     else:
         keys = data
-    if (keys.shape.lengths[-1] == keys.shape.lengths[0]) and np.all(keys[-1] == keys[0]):
+    if (keys.lengths[-1] == keys.lengths[0]) and np.all(keys[-1] == keys[0]):
         return grouped_stream(((key(keys[start]), data[start:]) for start in [0]), column)
                                        
 

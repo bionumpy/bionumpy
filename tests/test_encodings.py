@@ -5,6 +5,7 @@ from npstructures.testing import assert_raggedarray_equal
 from npstructures import RaggedArray
 import bionumpy.encoded_array
 import bionumpy as bnp
+from bionumpy.util.testing import assert_encoded_array_equal, assert_encoded_raggedarray_equal
 from bionumpy import FastQBuffer, as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.datatypes import SequenceEntryWithQuality
@@ -26,7 +27,7 @@ def test_change_encoding_on_encoded_ragged_array():
     a = bionumpy.encoded_array.as_encoded_array(["ACTG", "AC"], bnp.encodings.alphabet_encoding.ACTGEncoding)
     b = bionumpy.encoded_array.change_encoding(a, bnp.encodings.DNAEncoding)
 
-    assert_raggedarray_equal(a.encoding.decode(a.ravel()), b.encoding.decode(b.ravel()))
+    assert_encoded_array_equal(a.encoding.decode(a.ravel()), b.encoding.decode(b.ravel()))
 
 
 def test_as_encoded_on_already_encoded():

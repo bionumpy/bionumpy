@@ -36,7 +36,7 @@ def test_rolling_hash():
     kmers = EncodedArray(np.arange(lengths.sum()) % 4, DNAEncoding)
     ragged = EncodedRaggedArray(kmers, lengths)
     encoded = encoding.rolling_window(ragged)
-    assert encoded.shape == RaggedShape(lengths-3+1)
+    assert encoded._shape == RaggedShape(lengths-3+1)
 
 
 def test_get_kmers():

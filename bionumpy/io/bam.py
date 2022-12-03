@@ -92,7 +92,7 @@ class BamBuffer(FileBuffer):
         cigars = ragged_slice(self._data, self._new_lines+36+l_read_name,
                               self._new_lines+36+l_read_name+n_cigar_bytes)
 
-        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
+        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.lengths//4)
         cigar_cymbol, cigar_length = split_cigar(cigars)
         sequences = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes,
                                  self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
@@ -101,7 +101,7 @@ class BamBuffer(FileBuffer):
             BamEncoding)
         
         new_sequences = EncodedRaggedArray(sequences, n_seq_bytes*2)
-        view = RaggedView(new_sequences.shape.starts, l_seq)
+        view = RaggedView(new_sequences._shape.starts, l_seq)
         new_sequences = new_sequences[view]
         quals = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes,
                              self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes+l_seq)# +33
@@ -127,7 +127,7 @@ class BamIntervalBuffer(BamBuffer):
         cigars = self._move_intervals_to_ragged_array(self._new_lines+36+l_read_name,
                                                       self._new_lines+36+l_read_name+n_cigar_bytes, as_sequence=False)
 
-        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.shape.lengths//4)
+        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.lengths//4)
         cigar_cymbol, cigar_length = split_cigar(cigars)
 
         strand = flag & np.uint16(16)

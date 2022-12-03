@@ -43,7 +43,7 @@ def complement(_array):
     lookup = _get_complement_lookup(array.encoding)
     new_data = lookup[array]
     if isinstance(_array, EncodedRaggedArray):
-        new_data = EncodedRaggedArray(new_data, _array.shape)
+        new_data = EncodedRaggedArray(new_data, _array._shape)
     return new_data
 
 

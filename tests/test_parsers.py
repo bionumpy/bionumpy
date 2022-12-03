@@ -64,7 +64,7 @@ def test_buffered_writer_ctx_manager(file, chunk_size):
     true_stream = bnp_open('example_data/reads.fq').read_chunks()
     fq_stream = bnp_open(file_path)
     for fq_item, true_item in zip(fq_stream, true_stream):
-        assert fq_item == true_item
+        assert_bnpdataclass_equal(fq_item, true_item)
 
     os.remove(file_path)
 

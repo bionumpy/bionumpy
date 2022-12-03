@@ -79,7 +79,7 @@ def convolution(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
         convoluted = func(sequence, window_size, *args, **kwargs)
-        if isinstance(shape, tuple):
+        if not isinstance(shape[-1], np.ndarray):
             out = as_strided(convoluted, shape)
         else:
             out = EncodedRaggedArray(convoluted, shape)

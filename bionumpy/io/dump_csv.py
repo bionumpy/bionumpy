@@ -39,7 +39,7 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     # columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
     # for field in dataclasses.fields(data)]
 
-    lengths = np.concatenate([((column.shape.lengths if
+    lengths = np.concatenate([((column.lengths if
                                 isinstance(column, RaggedArray)
                                 else np.array([
                                             column.shape[-1] if len(column.shape) == 2 else 1

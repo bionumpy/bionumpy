@@ -226,8 +226,8 @@ class OneLineBuffer(FileBuffer):
             A ASCII encoded buffer
         """
 
-        name_lengths = entries.name.shape.lengths
-        sequence_lengths = entries.sequence.shape.lengths
+        name_lengths = entries.name.lengths
+        sequence_lengths = entries.sequence.lengths
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
@@ -280,8 +280,8 @@ class FastQBuffer(OneLineBuffer):
 
     @classmethod
     def _get_line_lens(cls, entries):
-        name_lengths = entries.name.shape.lengths[:, None]
-        sequence_lengths = entries.sequence.shape.lengths[:, None]
+        name_lengths = entries.name.lengths[:, None]
+        sequence_lengths = entries.sequence.lengths[:, None]
         return (
             np.hstack(
                 (

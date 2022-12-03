@@ -9,7 +9,7 @@ def matrix_to_csv(matrix, header=None, sep=",", row_names=None):
     if header is not None:
         entries = np.concatenate((as_encoded_array(header), entries))
 
-    lens = (entries.shape.lengths+1).reshape(-1, matrix.shape[-1])
+    lens = (entries.lengths+1).reshape(-1, matrix.shape[-1])
     line_endings = np.cumsum(lens.sum(axis=-1))
     joined = join(entries, sep, keep_last=True)
     joined[line_endings-1] = "\n"

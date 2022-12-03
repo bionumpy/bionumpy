@@ -1,5 +1,6 @@
 import pytest
 from bionumpy.arithmetics import count_overlap, intersect, get_pileup
+from bionumpy.util.testing import assert_bnpdataclass_equal
 from bionumpy.datatypes import Interval, BedGraph
 
 
@@ -24,10 +25,10 @@ def test_count_overlap(interval_a, interval_b):
 def test_intersect(interval_a, interval_b):
     true = Interval(["chr1"]*3, [10, 22, 30], [15, 28, 35])
     result = intersect(interval_a, interval_b)
-    assert true == result
+    assert_bnpdataclass_equal(true, result)
 
 @pytest.mark.skip("obsolete")
 def test_pileup(interval_c):
     p = pileup(interval_c)
     print("#", p.chromosome)
-    assert p == BedGraph(["chr1"]*3, [10, 28, 29], [28, 29, 36], [1, 0, 1])
+    assert_bnpdataclass_equal(p == BedGraph(["chr1"]*3, [10, 28, 29], [28, 29, 36], [1, 0, 1]))

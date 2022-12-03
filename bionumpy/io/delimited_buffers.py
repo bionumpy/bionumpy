@@ -212,7 +212,7 @@ class DelimitedBuffer(FileBuffer):
         try:
             strs = str_to_int(rows)
         except EncodingError as e:
-            row_number = np.searchsorted(rows.shape.starts, e.offset, side="right")-1
+            row_number = np.searchsorted(rows._shape.starts, e.offset, side="right")-1
             raise FormatException(e.args[0], line_number=row_number)
         return strs
 

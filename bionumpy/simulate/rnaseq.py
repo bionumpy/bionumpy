@@ -52,5 +52,5 @@ def simulate_rnaseq(reference_sequences: EncodedRaggedArray, settings: RNASeqSim
     rnaseq_reads = get_rnaseq_reads(sampled_transcript_fragments, settings.read_length)
     return SequenceEntryWithQuality([f"read_{i}" for i in range(len(rnaseq_reads))],
                                     rnaseq_reads,
-                                    ["!"*length for length in rnaseq_reads.shape.lengths])
+                                    ["!"*length for length in rnaseq_reads.lengths])
     return rnaseq_reads

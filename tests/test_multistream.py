@@ -58,7 +58,7 @@ def test_multistream_wtih_repr(stream, indexed, sequence_sizes):
     true = [(20, SimpleClass(["chr1"]*3), 10),
             (30, SimpleClass(["chr2"]*2), 20),
             (40, SimpleClass(["chr3"]*1), 30)]
-    assert len(output)==len(true)
+    assert len(output) == len(true)
     for o, t in zip(output, true):
         assert o == t
 

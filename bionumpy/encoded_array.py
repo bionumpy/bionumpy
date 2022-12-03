@@ -68,9 +68,9 @@ class OneToOneEncoding(Encoding):
     def _ragged_array_as_encoded_array(self, s):
         data = self.encode(s.ravel())
         if isinstance(data, EncodedArray):
-            return EncodedRaggedArray(data, s.shape)
+            return EncodedRaggedArray(data, s._shape)
 
-        return RaggedArray(data, s.shape)
+        return RaggedArray(data, s._shape)
 
     def _encode_string(self, string: str):
         s = EncodedArray([ord(c) for c in string], BaseEncoding)
@@ -97,10 +97,10 @@ class OneToOneEncoding(Encoding):
             return self._decode(data)
         elif isinstance(data, EncodedRaggedArray):
             return EncodedRaggedArray(
-                EncodedArray(self._decode(data.raw().ravel()), BaseEncoding), data.shape)
+                EncodedArray(self._decode(data.raw().ravel()), BaseEncoding), data._shape)
         elif isinstance(data, RaggedArray):
             assert isinstance(self, NumericEncoding), "%s" % data
-            return RaggedArray(self._decode(data.ravel()), data.shape)
+            return RaggedArray(self._decode(data.ravel()), data._shape)
         elif isinstance(data, EncodedArray):
             return EncodedArray(self._decode(data.raw()), BaseEncoding)
         else:
@@ -178,7 +178,7 @@ class EncodedRaggedArray(RaggedArray):
         return self._data.encoding
 
     def raw(self):
-        return RaggedArray(self._data.raw(), self.shape)
+        return RaggedArray(self._data.raw(), self._shape)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """ Convert any data to `EncodedArray` before calling the `ufunc` on them """
@@ -189,7 +189,7 @@ class EncodedRaggedArray(RaggedArray):
 
         ret = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
         if isinstance(ret._data, EncodedArray):
-            return EncodedRaggedArray(ret._data, ret.shape)
+            return EncodedRaggedArray(ret._data, ret._shape)
         return ret
 
     def tolist(self):
@@ -338,7 +338,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         new_data = self.data.__getitem__(idx)
         if isinstance(new_data, RaggedArray):
             return EncodedRaggedArray(EncodedArray(new_data.ravel(), self.encoding),
-                                      new_data.shape)
+                                      new_data._shape)
         return self.__class__(new_data, self.encoding)
 
     def __setitem__(self, idx, value: "EncodedArray"):
@@ -529,4 +529,4 @@ def change_encoding(encoded_array, new_encoding):
     if isinstance(encoded_array, EncodedArray):
         return EncodedArray(new_data, new_encoding)
     elif isinstance(encoded_array, EncodedRaggedArray):
-        return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array.shape)
+        return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array._shape)

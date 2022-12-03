@@ -13,7 +13,7 @@ class WildCardIndex:
 
     @classmethod
     def create_index(cls, sequences: EncodedRaggedArray) -> "WildCardIndex":
-        shape = sequences.shape
+        shape = sequences._shape
         flat_sequences = sequences.ravel()
         letter_map = {letter: np.flatnonzero(flat_sequences == letter) for letter in sequences.encoding.get_labels()}
         return cls(shape, letter_map)
