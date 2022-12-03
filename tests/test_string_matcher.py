@@ -1,5 +1,6 @@
 import re
 
+from bionumpy.encodings import AlphabetEncoding
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 
@@ -47,3 +48,19 @@ def test_flexible_len_regex_matching():
     matcher = RegexMatcher(pattern, encoding=bnp.encodings.DNAEncoding)
     matches = matcher.rolling_window(sequence_array)
     assert_raggedarray_equal(matches, RaggedArray(re_matches))  # TODO: switch to correct assertion..
+
+
+def test_match_string():
+    sequence_encoding = AlphabetEncoding("ACGT")
+    sequences = bnp.as_encoded_array([
+        "ACA", "TACTAC"
+    ], sequence_encoding)
+
+    correct = RaggedArray([
+        [True, False],
+        [False, True, False, False, True]
+    ])
+    pattern = "AC"
+    matches = bnp.sequence.string_matcher.match_string(sequences, pattern)
+    assert_raggedarray_equal(correct, matches)
+
