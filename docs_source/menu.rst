@@ -1,3 +1,5 @@
+BioNumPy documentation
+------------------------
 
 .. toctree::
    :maxdepth: 0
@@ -23,10 +25,10 @@
 
    source/reading_files.rst
    source/working_with_big_data.rst
+   source/encoding.rst
    source/supported_file_formats.rst
    source/sequences.rst
    source/intervals.rst
-   source/encoding.rst
    source/multiple_data_sources.rst
    source/broadcastable_functions.rst
    source/rollable_functions.rst

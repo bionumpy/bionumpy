@@ -69,7 +69,7 @@ author = "Knut Rand"
 # the built documents.
 #
 # The short X.Y version.
-# version = bionumpy.__version__
+version = bionumpy.__version__
 # The full version, including alpha/beta/rc tags.
 # release = bionumpy.__version__
 
