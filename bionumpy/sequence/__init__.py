@@ -8,6 +8,7 @@ from .position_weight_matrix import get_motif_scores, _pwm_from_counts
 from .dna import get_reverse_complement, get_strand_specific_sequences, get_sequences
 from .translate import translate_dna_to_protein
 from .count_encoded import count_encoded
+from .string_matcher import match_string
 
 
 __all__ = ["get_kmers", 
@@ -17,4 +18,5 @@ __all__ = ["get_kmers",
            "_pwm_from_counts",
            "get_reverse_complement", 
            "get_strand_specific_sequences", 
-           "count_encoded"]
+           "count_encoded",
+           "match_string"]

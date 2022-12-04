@@ -2,14 +2,26 @@ import logging
 import itertools
 import numpy as np
 import re
+
+from numpy.typing import ArrayLike
+
 from .rollable import RollableFunction
-from ..encoded_array import EncodedArray, as_encoded_array
+from ..encoded_array import EncodedArray, as_encoded_array, Encoding
 from ..util import as_strided
 from npstructures import RaggedArray
 from ..encodings import AlphabetEncoding
+from ..util.typing import EncodedArrayLike, SingleEncodedArrayLike
+
+
+def match_string(sequence: EncodedArrayLike, matching_sequence: SingleEncodedArrayLike) -> ArrayLike:
+    sequence = as_encoded_array(sequence)
+    enforced_encoding = sequence.encoding
+    matching_sequence = as_encoded_array(matching_sequence, enforced_encoding)
+    return StringMatcher(matching_sequence, enforced_encoding).rolling_window(sequence)
+
 
 class StringMatcher(RollableFunction):
-    def __init__(self, matching_sequence, encoding):
+    def __init__(self, matching_sequence, encoding:Encoding):
         self._encoding = encoding
         self._matching_sequence_array = as_encoded_array(matching_sequence, target_encoding=encoding)
 
