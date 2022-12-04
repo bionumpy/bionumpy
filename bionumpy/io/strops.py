@@ -318,6 +318,7 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
     """
     L = len(match_string)
     mask = (sequences.lengths == L)
+    sequences.ravel()
     starts = sequences._shape.starts[mask]
     matrix = sequences.ravel()[starts[:, np.newaxis]+np.arange(L)]
     mask[mask] &= np.all(matrix == match_string, axis=-1)

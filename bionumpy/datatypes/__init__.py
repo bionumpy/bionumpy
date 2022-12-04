@@ -38,7 +38,7 @@ class Interval:
     chromosome: str
     start: int
     stop: int
-        
+
 
 @bnpdataclass
 class Bed6(Interval):
@@ -89,6 +89,7 @@ class VCFEntry:
 
     def is_snp(self):
         return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)
+
 
 @bnpdataclass
 class VCFGenotypeEntry(VCFEntry):
