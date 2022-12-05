@@ -169,9 +169,6 @@ class MultiStream:
             A mapping from contig-name to contig-size
         **kwargs : key, value pairs for each data source
     
-        Examples
-        --------
-        FIXME: Add docs.
         """
         if isinstance(sequence_sizes, dict):
             sequence_names = list(sequence_sizes.keys())

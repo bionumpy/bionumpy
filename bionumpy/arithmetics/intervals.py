@@ -1,3 +1,4 @@
+from typing import List
 import dataclasses
 from operator import itemgetter
 import numpy as np
@@ -115,7 +116,7 @@ def human_key_func(chrom_name):
     return (is_numeric, b, c)
 
 
-def sort_all_intervals(intervals: Interval, chromosome_key_function: lambda x: x) -> Interval:
+def sort_all_intervals(intervals: Interval, chromosome_key_function: callable = lambda x: x, sort_order: List[str] = None) -> Interval:
     """Sort intervals on "chromosome", "start", "stop"
 
     Parameters
@@ -129,6 +130,8 @@ def sort_all_intervals(intervals: Interval, chromosome_key_function: lambda x: x
         Sorted intervals
 
     """
+    if sort_order is not None:
+        chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
     s = sorted((chromosome_key_function(interval.chromosome.to_string()), interval.start, interval.stop, i)
                for i, interval in enumerate(intervals))
     indices = list(map(itemgetter(-1), s))
