@@ -38,6 +38,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphi
               'sphinx_design']
 
 doctest_global_setup = """
+import bionumpy as bnp
+import numpy as np
 import os
 if os.getcwd().endswith("docs_source"):
     os.chdir("../")
