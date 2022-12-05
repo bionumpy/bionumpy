@@ -49,6 +49,15 @@ class PWM:
         scores = self._matrix[sequence.raw(), self._indices]
         return scores.sum(axis=-1)
 
+    def calculate_scores(self, sequence: EncodedArray):
+        sequence = as_encoded_array(sequence, self._encoding)
+        assert sequence.encoding == self._encoding
+        scores = np.zeros(sequence.size, dtype=float)
+        m = self._matrix.T.copy()
+        for offset, row in enumerate(m):
+            scores[:scores.size-offset] += row[sequence[offset:].raw()]
+        return scores
+
     @classmethod
     def from_dict(cls, dictionary: dict):
         alphabet = "".join(dictionary.keys())
@@ -65,6 +74,29 @@ class PWM:
             return cls(_pwm_from_counts(counts.matrix), counts.alphabet)
         else:
             return cls(_pwm_from_counts(np.array(counts.values()), "".join(counts.keys())))
+
+
+def get_motif_scores_old(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
+    """Computes motif scores for a motif on a sequence.
+    Returns a RaggedArray with the score at each position in every read.
+
+    Parameters
+    ----------
+    sequence: EncodedRaggedArray
+    motif: PositionWeightMatrix
+
+    Returns
+    -------
+    RaggedArray
+        A numeric RaggedArray. Contains one row for every read
+        with the scores for every position of that read.
+
+    Examples
+    --------
+
+    """
+    pwm = PositionWeightMatrix(pwm)
+    return pwm.rolling_window(sequence)
 
 
 def get_motif_scores(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
@@ -86,5 +118,9 @@ def get_motif_scores(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
     --------
 
     """
-    pwm = PositionWeightMatrix(pwm)
-    return pwm.rolling_window(sequence)
+    sequence = as_encoded_array(sequence)
+    flat_sequence, shape = (sequence.ravel(), sequence.shape)
+    scores = pwm.calculate_scores(flat_sequence)
+    if isinstance(sequence, EncodedRaggedArray):
+        scores = RaggedArray(scores, shape[-1])
+    return scores[..., :(-pwm.window_size+1)]

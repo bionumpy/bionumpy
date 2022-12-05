@@ -52,6 +52,10 @@ class MyClass:
     b: int
 
 
+def test_keyword_init():
+    MyClass(a=[10, 20], b=[100, 200])
+
+
 @pytest.mark.skip("not implemented")
 def test_bnpdataclassfunction():
     bnp_add = bnpdataclassfunction("a", "b", (add))

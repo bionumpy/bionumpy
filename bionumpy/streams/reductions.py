@@ -38,6 +38,19 @@ def _rowmean(array, axis=None):
 
 
 def mean(array, axis=None):
+    """Streamable version of numpy.mean
+
+    Calculates the sum and count of every chunk and sums them up to
+    calculate the mean
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Either ArrayLike or stream of array-likes
+    axis : int
+        The axis to do mean over
+
+    """
     if (axis is not None) and axis != 0:
         return _rowmean(array, axis)
     t = sum_and_n(array, axis=axis)

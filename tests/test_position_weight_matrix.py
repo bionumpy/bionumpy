@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-
+from npstructures.testing import assert_raggedarray_equal
 import bionumpy as bnp
 from bionumpy.io.jaspar import read_jaspar_matrix
-from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM, get_motif_scores
+from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM, get_motif_scores, get_motif_scores_old
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 from bionumpy import EncodedArray
 
@@ -77,6 +77,13 @@ def test_pwm(window, matrix):
 def test_encoded_ragged_array(sequences, matrix):
     pwm = PWM(matrix, "ACGT")
     get_motif_scores(sequences, pwm)
+
+
+def test_encoded_ragged_array_fast(sequences, matrix):
+    pwm = PWM(matrix, "ACGT")
+    s = get_motif_scores_old(sequences, pwm)
+    assert_raggedarray_equal(s,
+                             get_motif_scores(sequences, pwm))
 
 
 @pytest.mark.skip("Failing because under development?")

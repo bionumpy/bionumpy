@@ -84,6 +84,10 @@ class BNPDataClass(NpDataClass):
         new_class = self.__class__.extend(tuple(fields_with_types.items()))
         return new_class(**{**vars(self), **fields})
 
+    @classmethod
+    def from_entry_tuples(cls, tuples):
+        return cls(*(list(c) for c in zip(*tuples)))
+
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
     """Create a `bnpdataclass` from a class with fields specified

@@ -1,7 +1,8 @@
 from typing import Union
 
-from .stream import BnpStream
+from .stream import BnpStream, NpDataclassStream
 from . import groupby
+from ..bnpdataclass import BNPDataClass
 import logging
 import sys
 
@@ -168,9 +169,6 @@ class MultiStream:
             A mapping from contig-name to contig-size
         **kwargs : key, value pairs for each data source
     
-        Examples
-        --------
-        FIXME: Add docs.
         """
         if isinstance(sequence_sizes, dict):
             sequence_names = list(sequence_sizes.keys())
@@ -185,6 +183,8 @@ class MultiStream:
         self._streams = {}
         self.lengths = BnpStream(sequence_lengths)
         for keyword, value in kwargs.items():
+            if isinstance(value, BNPDataClass):
+                value = NpDataclassStream([value], value.__class__)
             if isinstance(value, BnpStream):
                 self.__dict__[keyword] = SynchedStream(value, sequence_names)
             elif hasattr(value, "__getitem__"):

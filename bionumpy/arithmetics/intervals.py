@@ -1,3 +1,4 @@
+from typing import List
 import dataclasses
 from operator import itemgetter
 import numpy as np
@@ -92,7 +93,10 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     >>> print(other_mask[intervals.start])
     [False False  True]
     """
-    rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
+    assert np.all(intervals.stop <= chromosome_size), (np.max(intervals.stop), chromosome_size)
+    rla = RunLength2dArray.from_intervals(intervals.start,
+                                          intervals.stop,
+                                          chromosome_size)
     return rla.any(axis=0)
 
 
@@ -102,7 +106,17 @@ def sort_intervals(intervals):
     return intervals[args]
 
 
-def sort_all_intervals(intervals: Interval) -> Interval:
+def human_key_func(chrom_name):
+    assert chrom_name.startswith("chr"), chrom_name
+    parts = chrom_name[3:].split("_", maxsplit=1)
+    assert len(parts) <= 2, chrom_name
+    is_numeric = 1-parts[0].isdigit()
+    b = parts[0] if is_numeric else int(parts[0])
+    c = parts[-1] if len(parts) == 2 else ""
+    return (is_numeric, b, c)
+
+
+def sort_all_intervals(intervals: Interval, chromosome_key_function: callable = lambda x: x, sort_order: List[str] = None) -> Interval:
     """Sort intervals on "chromosome", "start", "stop"
 
     Parameters
@@ -116,7 +130,9 @@ def sort_all_intervals(intervals: Interval) -> Interval:
         Sorted intervals
 
     """
-    s = sorted((interval.chromosome.to_string(), interval.start, interval.stop, i)
+    if sort_order is not None:
+        chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
+    s = sorted((chromosome_key_function(interval.chromosome.to_string()), interval.start, interval.stop, i)
                for i, interval in enumerate(intervals))
     indices = list(map(itemgetter(-1), s))
     return intervals[indices]
