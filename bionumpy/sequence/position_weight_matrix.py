@@ -75,6 +75,12 @@ class PWM:
         else:
             return cls(_pwm_from_counts(np.array(counts.values()), "".join(counts.keys())))
 
+    def __str__(self):
+        matrix = self._matrix.transpose()
+        return "PWM with alphabet " + self._alphabet + "\n" + \
+            '\n'.join([' '.join([str(round(c, 2)) for c in row]) for row in matrix])
+
+
 
 def get_motif_scores_old(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
     """Computes motif scores for a motif on a sequence.
