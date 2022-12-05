@@ -1,5 +1,5 @@
 import dataclasses
-
+from operator import itemgetter
 import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
 
@@ -100,6 +100,26 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
 def sort_intervals(intervals):
     args = np.lexsort((intervals.stop, intervals.start))
     return intervals[args]
+
+
+def sort_all_intervals(intervals: Interval) -> Interval:
+    """Sort intervals on "chromosome", "start", "stop"
+
+    Parameters
+    ----------
+    intervals : Interval
+        Unsorted intervals
+
+    Returns
+    -------
+    Interval
+        Sorted intervals
+
+    """
+    s = sorted((interval.chromosome.to_string(), interval.start, interval.stop, i)
+               for i, interval in enumerate(intervals))
+    indices = list(map(itemgetter(-1), s))
+    return intervals[indices]
 
 
 @chromosome_map()
@@ -206,3 +226,5 @@ def pileup(intervals):
     stops = np.delete(intervals[:, 1], mask)
     return BedGraph(chroms[:values.size-1],
                     starts, stops, values[:-1])
+
+
