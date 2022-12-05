@@ -34,20 +34,3 @@ plx.scatter(lengths, counts)
 names = [m.name for m in human_motifs]
 args = np.argsort(counts)
 sorted_names = [names[i] for i in args]
-
-
-filenames = {"CREM": "ENCFF324ELP",
-             "ZNF263": "ENCFF295XBK",
-             "FOXA1": "ENCFF954GIJ"
-             "NR3C1": "ENCFF201BGD"}
-
-"""
-P(motif | score) = P(score |motif) P(motif)/P(score)
-X/(X+0.25**l)
-
-log P(motif | score) = log(P(score|motif))-log(P(score|motif) + P(score|not motif))
-log P(motif | score) = log(P(score|motif))-log(P(score|motif) + 0.25**l)
-
-P(score|not motif) 0.25**l
-"""
-    # print(motif_scores)
