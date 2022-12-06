@@ -6,13 +6,10 @@ __version__ = '0.2.7'
 
 import npstructures as nps
 
-from .io.files import bnp_open as open
-from .io.files import count_entries
-from .io.indexed_files import open_indexed
-from .io.multiline_buffer import MultiLineFastaBuffer
-from .io.file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .io.delimited_buffers import (BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
-                                   GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
+                 TwoLineFastaBuffer, FastQBuffer,
+                 BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
+                 GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
 from .sequence.kmers import KmerEncoder
@@ -23,6 +20,7 @@ from .streams import mean, bincount, histogram, streamable, quantile, MultiStrea
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from . import simulate
 from . import arithmetics
+open = bnp_open
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
