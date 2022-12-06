@@ -6,7 +6,8 @@ import time
 import bionumpy as bnp
 import numpy as np
 
-n_to_subsample = 100
+n_to_subsample = 1000000
+
 
 rule bionumpy_subsample:
     input:
@@ -15,13 +16,8 @@ rule bionumpy_subsample:
         "results/bionumpy/subsample/{filename}.fa"
     benchmark:
         "benchmarks/subsample/bionumpy/{filename}.txt"
-    run:
-        t = time.perf_counter()
-        reads = bnp.open(input[0]).read()
-        rows = np.random.choice(np.arange(len(reads.sequence)), n_to_subsample, replace=False)
-        subsample = reads[rows]
-        bnp.open(output[0], "w").write(subsample)
-        print(time.perf_counter()-t)
+    script:
+        "../scripts/bionumpy_subsample.py"
 
 
 rule python_subsample:
@@ -31,16 +27,16 @@ rule python_subsample:
         "results/python/subsample/{filename}.fa"
     benchmark:
         "benchmarks/subsample/python/{filename}.txt"
-    run:
-        row = 0
-
-        lines = open(input[0]).readlines()
-        rows = np.random.choice(np.arange(len(lines)//2), n_to_subsample, replace=False)
-
-        subsample = [lines[row]+lines[row+1] for row in rows]
-        with open(output[0], "w") as f:
-            f.write(''.join(subsample))
-
+    script:
+        "../scripts/python_subsample.py"
+#         from more_itertools import grouper
+#         row = 0
+#         n_entries = sum(1 for line in open(input[0]))
+#         rows = set(np.random.choice(np.arange(n_entries), n_to_subsample, replace=False))
+#         with open(output[0], "w") as f:
+#             for i, entry in enumerate(grouper(open(input[0]), 2)):
+#                 if i in rows:
+#                     f.write(''.join(entry))
 
 rule seqtk_subsample:
     input:
