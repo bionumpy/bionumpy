@@ -1,8 +1,11 @@
 import numpy as np
+from typing import Dict
+from numpy.typing import ArrayLike
 import typing
 from ..io.motifs import Motif
 from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..util.typing import EncodedArrayLike
 from ..encodings import AlphabetEncoding
 from npstructures import RaggedArray
 
@@ -28,6 +31,10 @@ def _pwm_from_counts(count_matrix):
 
 
 class PWM:
+    """
+    Class representing a Position Weight Matrix. Calculates scores based on 
+    the log likelihood ratio between the motif and a background probability
+    """
     def __init__(self, matrix, alphabet):
         self._matrix = matrix
         self._alphabet = alphabet
@@ -45,14 +52,32 @@ class PWM:
     def window_size(self):
         return self._matrix.shape[-1]
 
-    def calculate_score(self, sequence):
+    def calculate_score(self, sequence: EncodedArrayLike) -> float:
+        """Calculates the pwm score for a sequence of the same length as the motif
+
+        Parameters
+        ----------
+        sequence : EncodedArrayLike
+
+        """
         sequence = as_encoded_array(sequence, self._encoding)
         assert sequence.encoding == self._encoding
         assert sequence.shape[-1] == self.window_size
         scores = self._matrix[sequence.raw(), self._indices]
         return scores.sum(axis=-1)
 
-    def calculate_scores(self, sequence: EncodedArray):
+    def calculate_scores(self, sequence: EncodedArrayLike) -> ArrayLike:
+        """Calculate motif scores for an entire sequence
+
+        Parameters
+        ----------
+        sequence : EncodedArrayLike
+
+        Returns
+        -------
+        ArrayLike
+            Motif scores for all valid and invalid windows
+        """
         sequence = as_encoded_array(sequence, self._encoding)
         assert sequence.encoding == self._encoding
         scores = np.zeros(sequence.size, dtype=float)
@@ -62,7 +87,26 @@ class PWM:
         return scores
 
     @classmethod
-    def from_dict(cls, dictionary: dict, background=None):
+    def from_dict(cls, dictionary: Dict[str, ArrayLike], background: Dict[str, float]=None) -> "PWM":
+        """Create a PWM object from a dict of letters to position probabilities
+
+        This takes raw probabilities as input. Not log
+        likelihood(ratios)
+
+        Parameters
+        ----------
+        cls :
+        dictionary : Dict[str, ArrayLike]
+            Mapping of alphabet letters to position probability scores
+        background : Dict[str, float]
+            Background probabilities. By default assume uniform
+            probabilities
+
+        Returns
+        -------
+        "PWM"
+            Position Weight Matrix object with log-likelihood ratios
+        """
         if background is None:
             background = {key: 1/len(dictionary) for key in dictionary}
         alphabet = "".join(dictionary.keys())
