@@ -1,4 +1,4 @@
-.. _intervals:
+.. _multiple_data_sources:
 
 ========================================
 Working with Multiple Files/Data Sources
@@ -21,7 +21,7 @@ These variants and intervals come in chunks, and stream of chunks are not really
 
 The attributes we specify for the multistream are now synched streams that give data corresponding to the seqeunces listed int `reference.get_sequence_lengths()` one at a time. This means we can give these streams to any function with the `streamable` decorator. For example:
 
-    >>> from bionumpy.intervals import get_boolean_mask
+    >>> from bionumpy.arithmetics import get_boolean_mask
     >>> @bnp.streamable(sum)
     ... def get_letter_counts_around_variants(reference_sequence, variants, intervals):
     ...     mask = get_boolean_mask(intervals, len(reference_sequence))
@@ -34,9 +34,9 @@ The attributes we specify for the multistream are now synched streams that give 
     >>> get_letter_counts_around_variants(multistream.sequence, multistream.variants, multistream.intervals)
     EncodedCounts(alphabet=['A', 'C', 'G', 'T'], counts=array([155, 127, 116, 122]), row_names=None)
 
-==========
+
 Sort Order
-==========
+------------
 
 Unindexed files (.bed, .vcf) are read from start to finish. This means that the data for each chromosome comes one at a time in the order they appear in the file. Multistream expects that this order is the same as that specified in the `seqeuence_lengths` parameter, which is unfortunately not always the case. This is usually due to the fact that different programs sorts the files in different ways: `["chr1", "chr2",,, "chr10", "chr11"]` or `["chr1", "chr10", "chr11",,, "chr2"]`. If you're only have one unindexed file, the easiest solution to a sort order discrepancy is to change the sort order of the `sequence_lengths` parameter. This can be done with the `sort_dict_by_key` function, with `human_key_func` or `None` as key.
 
@@ -48,7 +48,7 @@ Unindexed files (.bed, .vcf) are read from start to finish. This means that the 
 
 
 Two Indexed Files
-=================
+------------------
 
 If you have two unindexed files, with conflicting sort order, it is not enough to change the sort order of the `sequence_lenghts`. Hopefully, one of the files is small enough that it can fit into memory, so that we can turn it into a dict with chromosomes as key. Such a dict can be passed into the MultiStream, and is oblivious to the sort-order of the origin file. For instance, a bed file with intervals is usually quite small (unless it represents mapped reads):
 

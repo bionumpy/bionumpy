@@ -1,5 +1,5 @@
-Simple quality checking of fastq files
----------------------------------------
+FastQC-like quality-checking of FASTQ files
+------------------------------------------------
 
 
 In this tutorial we will perform simple quality checking of reads from a fastq file, similarly to what the popular tool FastQC. In addition to BioNumPy, you will also need matplotlib to do some plotting.
@@ -10,7 +10,7 @@ We start by importing all we need:
 
     >>> import numpy as np
     >>> import bionumpy as bnp
-    >>> import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt # doctest: +SKIP
 
 
 We will be using the `big.fq.gz` file in the example_data folder, but feel free to use any fastq file you like.
@@ -76,16 +76,20 @@ If we want to plot a histogram of all the base qualities in all reads, we can us
 ==============================
 Average base quality per base
 ==============================
-In the GC content histogram example, we saw that we can take the mean the rows (axis=-1). If we instead want to find the average base quality for each position in the reads, we can take the mean across the columns (axis=0). Since the reads may have different lengths, we create a padded matrix filled with zeroes. Note that this means that the average base quality is "wrong" after the minimum read length.
+In the GC content histogram example, we saw that we can take the mean the rows (axis=-1). If we instead want to find the average base quality for each position in the reads, we can take the mean across the columns (axis=0).
 
-    >>> @bnp.streamable()
-    ... def get_quality_scores_as_matrix(reads, limit_at_n_bases=150):
-    ...     return reads.quality.as_padded_matrix(side="right", fill_value=0)[:,0:limit_at_n_bases]
+.. code-block:: python
 
-    >>> reads = bnp.open("example_data/big.fq.gz").read_chunks()
-    >>> scores = bnp.mean(get_quality_scores_as_matrix(reads), axis=0)
-    >>> plt.plot(scores) # doctest: +SKIP
-    >>> plt.show() # doctest: +SKIP
+    @bnp.streamable()
+    def get_quality_scores(reads):
+        return reads.quality
+
+    reads = bnp.open("example_data/big.fq.gz").read_chunks()
+    scores = bnp.mean(get_quality_scores(reads), axis=0)
+    print(scores)
+    plt.plot(scores)
+    plt.show()
+
 
 Remember to change the limit_at_n_bases depending on your minimum read length (or how much of the reads you want to plot).
 

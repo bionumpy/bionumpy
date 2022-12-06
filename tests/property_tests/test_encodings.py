@@ -1,6 +1,6 @@
-from bionumpy import as_encoded_array, EncodedArray
+from bionumpy.encoded_array import as_encoded_array, EncodedArray
 import bionumpy.encodings.alphabet_encoding as ae
-from bionumpy.testing import assert_encoded_array_equal
+from bionumpy.util.testing import assert_encoded_array_equal
 import hypothesis.strategies as st
 from hypothesis import given
 import bionumpy as bnp

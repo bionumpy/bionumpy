@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from bionumpy.bnpdataclass import bnpdataclass
-from npstructures.testing import assert_npdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
 @bnpdataclass
@@ -52,7 +52,7 @@ def test_chromosome_stream(buffers):
                           ("chr4", DummyClass(["chr4"], [5])),
                           ("chr5", DummyClass(["\x00chr5"]*2, [6, 7])),
                           ("chr16", DummyClass(["chr16"], [8]))]):
-        assert assert_npdataclass_equal(val, true)
+        assert assert_bnpdataclass_equal(val, true)
 
 
 @pytest.mark.skip("Needs refactor")

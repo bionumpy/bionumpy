@@ -1,11 +1,11 @@
-BioNumPy
+Geting started with BioNumPy
 ======================================
 
 BioNumPy is a Python library for easy and efficient representation and analysis of biological data.
 Since BioNumPy builds on the interface of NumPy, people already used to NumPy or array programming should find BioNumPy very easy to get started with.
 
 ..
-    With BioNumPy, our goal is that everyone should be able to write simple, clean code that scales well to large biological data sets.
+    With BioNumPy, our goal is that everyone should be able to write simple, clean code that scales well to large biological datasets.
 **Getting started with BioNumpy takes only a minute:**
 
 1) Install:
@@ -26,13 +26,15 @@ Since BioNumPy builds on the interface of NumPy, people already used to NumPy or
                         read2  AACACTTGGGGGGGGGGGGG...
                         read3  AACTGGACTAGCGACGTACT...
 
-3) Analyse it:
+3) Analyse it like you would do with NumPy:
 
     >>> gc_content = np.mean((reads.sequence == "C") | (reads.sequence == "G"))
     >>> gc_content
     0.5526315789473685
 
 BioNumpy can be used to analyse a wide range of data. Follow one of the guides below:
+
+.. _what_can_you_do:
 
 What can you do with BioNumpy?
 ----------------------------------
@@ -95,51 +97,11 @@ What can you do with BioNumpy?
 
 
 
-If you are interested in learning more, learn more about BioNumPy (todo: link to source/concepts), check out the tutorials (TODO: LINK), how to work with different file formats, or check out the API documentation.
 
+Read next
+----------
 
-Documentation
-=================
+ * :ref:`A 10 minute introduction to BioNumPy<introduction>`
+ * :ref:`Learn how to efficiently read large data files with BioNumPy<reading_files>`
+ * :ref:`Check out the various tutorials<tutorials_menu>`
 
-.. toctree::
-   :maxdepth: 0
-   :glob:
-   :titlesonly:
-   :caption: Tutorials
-
-   tutorials/*
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   :caption: BioNumPy Concepts
-
-   source/reading_files.rst
-   source/working_with_big_data.rst
-   source/supported_file_formats.rst
-   source/sequences.rst
-   source/intervals.rst
-   source/multiple_data_sources.rst
-   source/broadcastable_functions.rst
-   source/rollable_functions.rst
-   source/summarization.rst
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API documentation
-   :glob:
-
-   modules
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Developer Guide
-
-   developer_guide/getting_started.rst
-   developer_guide/setting_up_development_environment.rst
-   developer_guide/testing.rst
-   developer_guide/making_examples.rst
-   developer_guide/writing_documentation.rst
-   developer_guide/design_principles.rst

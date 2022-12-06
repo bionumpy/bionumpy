@@ -4,7 +4,7 @@ from npstructures import RaggedArray, RaggedShape
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
 
-from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray, change_encoding
+from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, change_encoding, as_encoded_array
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encodings import BaseEncoding
 
@@ -89,8 +89,8 @@ def str_to_int(number_text: EncodedArray) -> np.ndarray:
     number_text[is_negative, 0] = "0"
     number_text[is_positive, 0] = "0"
     number_text = as_encoded_array(number_text, DigitEncoding)
-    number_digits = RaggedArray(number_text.ravel().data, number_text.shape)
-    powers = 10**_build_power_array(number_text.shape)
+    number_digits = RaggedArray(number_text.ravel().data, number_text._shape)
+    powers = 10**_build_power_array(number_text._shape)
     signs = np.where(is_negative, -1, +1)
     return (number_digits*powers).sum(axis=-1)*signs
 
@@ -102,13 +102,13 @@ def _decimal_str_to_float(number_text: EncodedArray) -> np.ndarray:
     dots = np.nonzero(number_text == ".")
     number_text[dots] = "0"
     number_text = as_encoded_array(number_text, DigitEncoding)
-    power_array = _build_power_array(number_text.shape, dots=dots)
+    power_array = _build_power_array(number_text._shape, dots=dots)
     powers = 10.**power_array
     number_digits = number_text.raw()
     base_numbers = (number_digits*powers).sum(axis=-1)
     row_indices, col_indices = dots
-    exponents = np.zeros_like(number_text.shape.lengths)
-    exponents[row_indices] = number_text.shape.lengths[row_indices] - col_indices-1
+    exponents = np.zeros_like(number_text.lengths)
+    exponents[row_indices] = number_text.lengths[row_indices] - col_indices-1
     powers = (10.**(exponents))
     signs = np.where(is_negative, -1, +1)
     return signs*base_numbers / powers
@@ -177,7 +177,7 @@ def ints_to_strings(number: np.ndarray) -> EncodedRaggedArray:
     ragged_index = _build_power_array(shape)
     digits = np.abs(number)[:, np.newaxis] // 10**ragged_index % 10
     digits = EncodedRaggedArray(
-        EncodedArray(digits.ravel(), DigitEncoding), digits.shape)
+        EncodedArray(digits.ravel(), DigitEncoding), digits._shape)
     digits = change_encoding(digits, BaseEncoding)
     #digits = as_encoded_array(digits, target_encoding=BaseEncoding)
     digits[is_negative, 0] = "-"
@@ -230,11 +230,11 @@ def int_lists_to_strings(int_lists: RaggedArray, sep: str = ",", keep_last: bool
 
     """
     if len(sep) == 0:
-        return EncodedRaggedArray(EncodedArray(int_lists.ravel(), DigitEncoding), int_lists.shape)
+        return EncodedRaggedArray(EncodedArray(int_lists.ravel(), DigitEncoding), int_lists._shape)
     int_strings = ints_to_strings(int_lists.ravel())
-    lengths = RaggedArray(int_strings.shape.lengths, int_lists.shape)
+    lengths = RaggedArray(int_strings.lengths, int_lists._shape)
     joined = join(int_strings, sep=sep, keep_last=True)
-    row_lens = lengths.sum(axis=-1)+int_lists.shape.lengths
+    row_lens = lengths.sum(axis=-1)+int_lists.lengths
     ra = EncodedRaggedArray(joined, row_lens)
     if not keep_last:
         ra = ra[:, :-1]
@@ -262,7 +262,7 @@ def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False
     --------
 
     """
-    new_lengths = sequences.shape.lengths+1
+    new_lengths = sequences.lengths+1
     new_array = sequences.__class__(
         EncodedArray(np.empty(shape=np.sum(new_lengths), dtype=np.uint8), sequences.encoding), new_lengths)
     new_array[:, :-1] = sequences
@@ -316,9 +316,13 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
         Boolean array of which sequences matches the `match_string`
 
     """
+    sequences = as_encoded_array(sequences)
+    if isinstance(sequences, EncodedArray):
+        return (len(sequences) == len(match_string)) and np.all(sequences==match_string)
     L = len(match_string)
-    mask = (sequences.shape.lengths == L)
-    starts = sequences.shape.starts[mask]
+    mask = (sequences.lengths == L)
+    sequences.ravel()
+    starts = sequences._shape.starts[mask]
     matrix = sequences.ravel()[starts[:, np.newaxis]+np.arange(L)]
     mask[mask] &= np.all(matrix == match_string, axis=-1)
     return mask

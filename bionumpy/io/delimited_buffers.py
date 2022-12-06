@@ -3,20 +3,25 @@ import logging
 import dataclasses
 from typing import List
 from npstructures import RaggedArray, ragged_slice
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry)
-from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
+                         GfaPath)
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
 from ..encodings import (Encoding, DigitEncoding)
+from ..encodings.exceptions import EncodingError
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings
-from ..encodings.base_encoding import get_base_encodings, BaseEncoding
+from ..encoded_array import get_base_encodings, BaseEncoding
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
     ints_to_strings, split, str_to_int, str_to_float,
     int_lists_to_strings, float_to_strings)
+from .dump_csv import dump_csv
+from .exceptions import FormatException
 import numpy as np
 
 
@@ -69,8 +74,10 @@ class DelimitedBuffer(FileBuffer):
         n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
         if n_fields is None:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-            raise
+            raise 
         new_lines = delimiters[(n_fields - 1)::n_fields]
+        #if not all(chunk[new_lines] == "\n"):
+        #     raise FormatException("Irregular number of columns in file")
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
 
@@ -202,13 +209,12 @@ class DelimitedBuffer(FileBuffer):
 
     def _extract_integers(self, integer_starts, integer_ends):
         rows = self._data[integer_starts:integer_ends]
-        return str_to_int(rows)
-        digit_chars = self._move_intervals_to_2d_array(
-            integer_starts, integer_ends, "0"  # DigitEncoding.MIN_CODE
-        )
-        n_digits = digit_chars.shape[-1]
-        powers = np.uint32(10) ** np.arange(n_digits)[::-1]
-        return DigitEncoding.encode(digit_chars) @ powers
+        try:
+            strs = str_to_int(rows)
+        except EncodingError as e:
+            row_number = np.searchsorted(rows._shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
+        return strs
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
@@ -223,85 +229,30 @@ class DelimitedBuffer(FileBuffer):
             next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
         self._n_cols = n_delimiters_per_line
-        last_new_line = next(
-            i for i, d in enumerate(delimiters[::-1]) if chunk[d] == NEWLINE
-        )
-        delimiters = delimiters[: delimiters.size - last_new_line]
-        assert (
-            delimiters.size % n_delimiters_per_line == 0
-        ), f"irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line})"
-        delimiters = delimiters.reshape(-1, n_delimiters_per_line)
-        assert np.all(chunk[delimiters[:, -1]] == NEWLINE), chunk
+        should_be_new_lines = chunk[delimiters[n_delimiters_per_line-1::n_delimiters_per_line]]
+        if delimiters.size % n_delimiters_per_line != 0 or np.any(should_be_new_lines != "\n"):
+            offending_line = np.flatnonzero(should_be_new_lines != "\n")[0]
+            lines = split(self._data, '\n')
+            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line}): {lines}", line_number=offending_line)
         self._validated = True
 
     @classmethod
-    def from_data(cls, data: bnpdataclass) -> "DelimitedBuffer":
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
         """Put each field of the dataclass into a column in a buffer.
 
         Parameters
         data : bnpdataclass
             Data
         """
-
-        funcs = {int: ints_to_strings,
-                 str: lambda x: x,
-                 List[int]: int_lists_to_strings,
-                 float: float_to_strings,
-                 List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
-                 }
-
-        all_encodings = get_alphabet_encodings() + get_base_encodings() + [PhasedGenotypeRowEncoding]
-        # TODO: add other base encodings (now they are a mix of classes and objects)
-
-        def get_func_for_datatype(datatype):
-            if is_subclass_or_instance(datatype, Encoding):
-                encoding = datatype
-                def dynamic(x):
-                    if isinstance(x, EncodedRaggedArray):
-                        print(repr(x.ravel()))
-                        return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
-                    return EncodedArray(encoding.decode(x), BaseEncoding)
-                return dynamic
-            else:
-                return funcs[datatype]
-
-        #funcs.update({encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings})
-        print(funcs)
-
-        #for field in dataclasses.fields(data):
-        #    print(field)
-
-        #funcs = {**funcs, **{encoding: lambda x: EncodedArray(encoding.decode(x))
-        #                     for encoding in all_encodings}}
-        columns = [get_func_for_datatype(field.type)(getattr(data, field.name))
-                   for field in dataclasses.fields(data)]
-
-        lengths = np.concatenate([((column.shape.lengths if
-                                    isinstance(column, RaggedArray)
-                                    else np.array([
-                                                column.shape[-1] if len(column.shape) == 2 else 1
-                                                  ]*len(column))) + 1
-                                   )[:, np.newaxis] #Hacking here to accept EncodedArray
-                                  
-                                  for column in columns], axis=-1).ravel()
-        lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8), BaseEncoding),
-                                   lengths)
-        n_columns = len(columns)
-        for i, column in enumerate(columns):
-            if (not isinstance(column, RaggedArray)) and len(column.shape)==1:
-                column = EncodedRaggedArray.from_numpy_array(column[:, np.newaxis]) # AND HERE
-            lines[i::n_columns, :-1] = column
-        lines[:, -1] = "\t"
-        lines[(n_columns - 1)::n_columns, -1] = "\n"
-        return lines.ravel()
+        data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
+        return dump_csv(data_dict, cls.DELIMITER)
 
     @classmethod
     def make_header(cls, data: bnpdataclass):
         """makes a header from field names separated by delimiter"""
         return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
-    def get_data(self) -> bnpdataclass:
+    def get_data(self) -> BNPDataClass:
         """Parse the data in the buffer according to the fields in _dataclass
 
         Returns
@@ -355,7 +306,6 @@ class DelimitedBuffer(FileBuffer):
         starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
         ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + len(sep)
         text = self._data[starts:ends]
-        # text = self._move_intervals_to_ragged_array(starts, ends)
         if len(sep):
             text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
@@ -372,12 +322,33 @@ class DelimitedBuffer(FileBuffer):
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
 
-    def get_sequences(self):
+    def get_data(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)
         return SequenceEntry(ids, sequences)
 
-    get_data = get_sequences
+    @classmethod
+    def from_data(cls, data: SequenceEntry) -> EncodedArray:
+        return dump_csv([(str, as_encoded_array(["S"]*len(data))),
+                         (str, data.name),
+                         (str, data.sequence)])
+
+
+class GfaPathBuffer(DelimitedBuffer):
+    def get_data(self):
+        name = self.get_text(1, fixed_length=False)
+        nodes_lists = self.get_text(2, keep_sep=True, fixed_length=False)
+        nodes_lists[:, -1] = ","
+        lengths = np.sum(nodes_lists == ",", axis=-1)
+        all_node_texts = split(nodes_lists.ravel()[:-1], ",")
+        int_text = all_node_texts[:, :-1]
+        node_ids = str_to_int(int_text)
+        directions = np.where(all_node_texts[:, -1]=="+", 1, -1)
+        node_ids = RaggedArray(node_ids, lengths)
+        directions = RaggedArray(directions, lengths)
+        data =  GfaPath(name, node_ids, directions)
+        return data
+
 
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
@@ -497,6 +468,11 @@ class VCFBuffer(DelimitedBuffer):
         data = super().get_data()
         data.position -= 1
         return data
+
+    @classmethod
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
+        data = dataclasses.replace(data, position=data.position+1)
+        return super().from_data(data)
 
 
 class VCFMatrixBuffer(VCFBuffer):

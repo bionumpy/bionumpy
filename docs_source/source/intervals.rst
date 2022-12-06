@@ -26,7 +26,7 @@ Operations with dependencies
 Some queries cannot be answered just by looking at intervals as independent entries. For instance: "All regions" covered by at least two intervals". In order to answer such questions, we need to look at the intervals as a coherent set. In BioNumPy, such queries are by reducing all the relevant information from the intervals into a  `npstructures.RunLengthArray`. The two main ways of doing this is to do make a pileup, i.e. counting how many intevals overlap with each position in the genome, or to make a boolean mask indicating which positions are covered by any interval.
 
     >>> from bionumpy.datatypes import Interval
-    >>> from bionumpy.intervals import get_boolean_mask, get_pileup
+    >>> from bionumpy.arithmetics import get_boolean_mask, get_pileup
     >>> intervals = Interval(["chr1"]*3, [10, 15, 20], [13, 22, 21])
     >>> get_boolean_mask(intervals, 23)
     array([False, False, False, False, False, False, False, False, False,

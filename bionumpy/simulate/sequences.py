@@ -7,9 +7,8 @@ from ..datatypes import SequenceEntry
 from .. import EncodedRaggedArray, EncodedArray
 from ..encodings.alphabet_encoding import AlphabetEncoding
 
-rng = default_rng()
 
-def simulate_sequence(alphabet, length):
+def simulate_sequence(alphabet, length, rng=default_rng()):
     """Simulate a sequence from the given `alphabet` and of given `length`
 
     Parameters
@@ -24,7 +23,7 @@ def simulate_sequence(alphabet, length):
     return EncodedArray(numbers, AlphabetEncoding(alphabet))
 
 
-def simulate_sequences(alphabet: str, lengths: Dict[str, int]) -> SequenceEntry:
+def simulate_sequences(alphabet: str, lengths: Dict[str, int], rng=default_rng()) -> SequenceEntry:
     """Simulate a set of sequences with the name and lengths of `lengths`
 
     Parameters
@@ -41,7 +40,7 @@ def simulate_sequences(alphabet: str, lengths: Dict[str, int]) -> SequenceEntry:
 
     """
     total_length = sum(lengths.values())
-    flat_sequence = simulate_sequence(alphabet, total_length)
+    flat_sequence = simulate_sequence(alphabet, total_length, rng=rng)
     names = list(lengths.keys())
     sequences = EncodedRaggedArray(flat_sequence, list(lengths.values()))
     se = SequenceEntry(names, sequences)

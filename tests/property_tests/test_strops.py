@@ -6,7 +6,7 @@ from bionumpy.io.strops import (join, split, ints_to_strings, str_to_float,
                                 str_to_int, str_equal, int_lists_to_strings,
                                 float_to_strings)
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from bionumpy.testing import assert_encoded_array_equal, assert_encoded_raggedarray_equal
+from bionumpy.util.testing import assert_encoded_array_equal, assert_encoded_raggedarray_equal
 from bionumpy import as_encoded_array
 from numpy import array
 from npstructures import RaggedArray

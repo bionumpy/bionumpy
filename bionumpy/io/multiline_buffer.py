@@ -46,7 +46,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         mask  = np.ones(len(data), dtype=bool)
         mask[new_entries] = False
         sequence_lines = data[mask]
-        seq_lens = sequence_lines.shape.ends[line_offsets[1:]-1]-sequence_lines.shape.starts[line_offsets[:-1]]
+        seq_lens = sequence_lines._shape.ends[line_offsets[1:]-1]-sequence_lines._shape.starts[line_offsets[:-1]]
         sequences = RaggedArray(sequence_lines.ravel(), seq_lens)
         return SequenceEntry(headers, sequences)
 
@@ -55,8 +55,8 @@ class MultiLineFastaBuffer(MultiLineBuffer):
 
     @classmethod
     def from_data(cls, entries):
-        name_lengths = entries.name.shape.lengths
-        sequence_lengths = entries.sequence.shape.lengths
+        name_lengths = entries.name.lengths
+        sequence_lengths = entries.sequence.lengths
         n_lines = (sequence_lengths-1) // (cls.n_characters_per_line) + 1
         last_length = (sequence_lengths-1) % cls.n_characters_per_line + 1
         line_lengths = np.full(np.sum(n_lines) + n_lines.size, cls.n_characters_per_line + 1, dtype=int)
@@ -119,14 +119,14 @@ class FastaIdxBuffer(MultiLineFastaBuffer):
         mask = np.ones(len(data), dtype=bool)
         mask[new_entries] = False
         sequence_lines = data[mask]
-        seq_lens = sequence_lines.shape.ends[line_offsets[1:]-1]-sequence_lines.shape.starts[line_offsets[:-1]]
+        seq_lens = sequence_lines._shape.ends[line_offsets[1:]-1]-sequence_lines._shape.starts[line_offsets[:-1]]
         sequences = RaggedArray(sequence_lines.ravel(), seq_lens)
 
         seq_starts = line_starts[new_entries+1]
         seq_line_ends = line_ends[new_entries+1]
         chars_per_line = seq_line_ends-seq_starts
         return FastaIdxBuilder(headers,
-                               sequences.shape.lengths,
+                               sequences.lengths,
                                seq_starts,
                                chars_per_line,
                                chars_per_line+1,

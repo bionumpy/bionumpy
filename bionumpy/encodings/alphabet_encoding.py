@@ -1,5 +1,6 @@
 import numpy as np
-from .base_encoding import Encoding, OneToOneEncoding
+from ..encoded_array import OneToOneEncoding
+from .exceptions import EncodingError
 
 
 class AlphabetEncoding(OneToOneEncoding):
@@ -22,19 +23,18 @@ class AlphabetEncoding(OneToOneEncoding):
         self._mask[lower_alphabet] = True
         self._is_initialized = True
 
-    def encode(self, byte_array):
+    def _encode(self, byte_array):
         self._initialize()
-        if hasattr(byte_array, "raw"):
-            byte_array = byte_array.raw()
         ret = self._lookup[byte_array]
         if np.any(ret == 255):
-            raise ValueError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} to {self.__class__.__name__}. Invalid character(s): {[chr(c) for c in byte_array[ret==255]]}")
+            offset = np.flatnonzero(ret==255)[0]
+            raise EncodingError(f"Error when encoding {''.join(chr(c) for c in byte_array[0:100])} "
+                                f"to {self.__class__.__name__}. Invalid character(s): "
+                                f"{[chr(c) for c in byte_array[ret==255]]}", offset)
         return ret
 
-    def decode(self, encoded):
+    def _decode(self, encoded):
         self._initialize()
-        if hasattr(encoded, "encoding"):
-            encoded = encoded.raw()
         return self._alphabet[np.asarray(encoded)]
 
     @property

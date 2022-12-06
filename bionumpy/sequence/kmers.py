@@ -1,12 +1,13 @@
 import numpy as np
 
-from bionumpy.encodings.kmer_encodings import KmerEncoding
-from bionumpy.rollable import RollableFunction
+from ..encodings.kmer_encodings import KmerEncoding
+from .rollable import RollableFunction
 from bionumpy.encodings import DNAEncoding
-from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
-from bionumpy.encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
+from ..encodings.alphabet_encoding import AlphabetEncoding
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import as_encoded_array
 from npstructures.bitarray import BitArray
-from bionumpy.util import as_strided, is_subclass_or_instance
+from ..util import as_strided, is_subclass_or_instance
 import logging
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     """
     Get kmers for sequences.
     Sequences should be encoded with an AlphabetEncoding (e.g. DNAEncoding).
+    Use bnp.change_encoding if your sequences do not have a suitable encoding.
 
     Parameters
     ----------
@@ -50,11 +52,16 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     Examples
     --------
     >>> import bionumpy as bnp
-    >>> sequences = bnp.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
+    >>> sequences = bnp.encoded_array.as_encoded_array(["ACTG", "AAA", "TTGGC"], bnp.DNAEncoding)
     >>> bnp.sequence.get_kmers(sequences, 3)
     encoded_ragged_array([[ACT, CTG],
                           [AAA],
                           [TTG, TGG, GGC]], 3merEncoding(AlphabetEncoding('ACGT')))
+
+    >>> sequences = bnp.open("example_data/big.fq.gz").read().sequence
+    >>> sequences = bnp.change_encoding(sequences, bnp.DNAEncoding)
+    >>> bnp.sequence.get_kmers(sequences, 31)[0, 0:3]  # first three kmers of first sequence
+    encoded_array([CGGTAGCCAGCTGCGTTCAGTATGGAAGATT, GGTAGCCAGCTGCGTTCAGTATGGAAGATTT, GTAGCCAGCTGCGTTCAGTATGGAAGATTTG], 31merEncoding(AlphabetEncoding('ACGT')))
     """
 
     assert 0 < k < 32, "k must be larger than 0 and smaller than 32"
@@ -72,7 +79,7 @@ def convolution(func):
     def new_func(_sequence, window_size, *args, **kwargs):
         shape, sequence = (_sequence.shape, _sequence.ravel())
         convoluted = func(sequence, window_size, *args, **kwargs)
-        if isinstance(shape, tuple):
+        if not isinstance(shape[-1], np.ndarray):
             out = as_strided(convoluted, shape)
         else:
             out = EncodedRaggedArray(convoluted, shape)

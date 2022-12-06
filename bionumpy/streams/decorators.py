@@ -9,7 +9,7 @@ class streamable:
 
     Examples
     --------
-
+    >>> from bionumpy.streams import streamable, BnpStream
     >>> @streamable(list)
     ... def add(a, b):
     ...       return a + b

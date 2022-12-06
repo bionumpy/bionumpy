@@ -1,5 +1,6 @@
 import pytest
 
+from bionumpy.datatypes import ChromosomeSize
 from bionumpy.streams.multistream import MultiStream, SequenceSizes, StreamError
 from bionumpy.streams import BnpStream, NpDataclassStream
 from bionumpy.bnpdataclass import bnpdataclass
@@ -26,9 +27,17 @@ def sequence_sizes():
     return SequenceSizes([("chr1", 20), ("chr2", 30), ("chr3", 40)])
 
 
-def test_multistream(stream, indexed, sequence_sizes):
-    multistream = MultiStream(sequence_sizes, names=stream, values=indexed)
-    output = list(zip(multistream.lengths,
+def sequence_sizes_as_chromosome_size():
+    return ChromosomeSize(["chr1", "chr2", "chr3"], [20, 30, 40])
+
+
+@pytest.mark.parametrize("sizes", [
+    sequence_sizes_as_chromosome_size(),
+    SequenceSizes([("chr1", 20), ("chr2", 30), ("chr3", 40)])
+])
+def test_multistream(stream, indexed, sizes):
+    multistream = MultiStream(sizes, names=stream, values=indexed)
+    output = list(zip(list(multistream.lengths),
                       multistream.names,
                       multistream.values))
     true = [(20, SimpleClass(["chr1"]*3), 10),
@@ -49,7 +58,7 @@ def test_multistream_wtih_repr(stream, indexed, sequence_sizes):
     true = [(20, SimpleClass(["chr1"]*3), 10),
             (30, SimpleClass(["chr2"]*2), 20),
             (40, SimpleClass(["chr3"]*1), 30)]
-    assert len(output)==len(true)
+    assert len(output) == len(true)
     for o, t in zip(output, true):
         assert o == t
 

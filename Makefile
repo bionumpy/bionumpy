@@ -46,6 +46,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	rm -rf docs_source/stubs/
 
 lint/flake8: ## check style with flake8
 	flake8 bionumpy tests

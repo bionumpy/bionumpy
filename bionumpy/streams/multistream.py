@@ -1,7 +1,13 @@
-from .stream import BnpStream
+from typing import Union
+
+from .stream import BnpStream, NpDataclassStream
 from . import groupby
+from ..bnpdataclass import BNPDataClass
 import logging
 import sys
+
+from ..datatypes import ChromosomeSize
+
 logger = logging.getLogger(__name__)
 
 
@@ -151,7 +157,7 @@ class MultiStream:
                    chromosome                    start                     stop
                          chr2                        2                       13
     """
-    def __init__(self, sequence_sizes: SequenceSizes, **kwargs):
+    def __init__(self, sequence_sizes: Union[SequenceSizes, ChromosomeSize], **kwargs):
         """Synch different data streams with data on the same reference
     
         Take streams or dict-like objects and return a stream that gives
@@ -163,17 +169,26 @@ class MultiStream:
             A mapping from contig-name to contig-size
         **kwargs : key, value pairs for each data source
     
-        Examples
-        --------
-        FIXME: Add docs.
         """
+        if isinstance(sequence_sizes, dict):
+            sequence_names = list(sequence_sizes.keys())
+            sequence_lengths = list(sequence_sizes.values())
+        elif isinstance(sequence_sizes, ChromosomeSize):
+            sequence_names = sequence_sizes.name.tolist()
+            sequence_lengths = sequence_sizes.size.tolist()
+        else:
+            raise Exception("MultiStream needs sequence_sizes as either a "
+                            "dict-like object or a ChromosomeSize object, not %s" % sequence_sizes)
+
         self._streams = {}
-        self.lengths = BnpStream(sequence_sizes.values())
+        self.lengths = BnpStream(sequence_lengths)
         for keyword, value in kwargs.items():
+            if isinstance(value, BNPDataClass):
+                value = NpDataclassStream([value], value.__class__)
             if isinstance(value, BnpStream):
-                self.__dict__[keyword] = SynchedStream(value, list(sequence_sizes.keys()))
+                self.__dict__[keyword] = SynchedStream(value, sequence_names)
             elif hasattr(value, "__getitem__"):
-                self.__dict__[keyword] = IndexedStream(value, list(sequence_sizes.keys()))
+                self.__dict__[keyword] = IndexedStream(value, sequence_names)
             else:
                 raise ValueError(f"Only streams and dict-like objects can be used in MultiStream. {keyword}:{value}")
 

@@ -7,7 +7,7 @@ There are three main ways of getting your data into memory in BioNumPy. Which wa
 
 Method 1: Reading all your data at once
 =======================================
-If you are working with data sets that are small enough to fit into memory, you can read the whole file. The benefit of this approach is that you don't need to take into account that the data has been split into chunks (next methods):
+If you are working with datasets that are small enough to fit into memory, you can read the whole file. The benefit of this approach is that you don't need to take into account that the data has been split into chunks (next methods):
 
     >>> import bionumpy as bnp
     >>> data = bnp.open("example_data/test.bed").read()

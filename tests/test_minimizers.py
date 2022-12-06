@@ -1,3 +1,4 @@
+import bionumpy.encoded_array
 from bionumpy.encodings.kmer_encodings import KmerEncoding
 from bionumpy.sequence.minimizers import Minimizers, get_minimizers
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray
@@ -7,7 +8,7 @@ from npstructures import RaggedArray
 import numpy as np
 import pytest
 import bionumpy as bnp
-from bionumpy.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
+from bionumpy.util.testing import assert_encoded_raggedarray_equal, assert_encoded_array_equal
 
 @pytest.fixture
 def sequence():
@@ -20,8 +21,8 @@ def sequences():
                      [0, 3, 1, 2, 2, 1],
                      [0, 3, 1, 2, 2],
                      [0, 3, 1, 2]])
-    r._data = EncodedArray(r._data, DNAEncoding)
-    r = EncodedRaggedArray(r._data, r.shape)
+    r = EncodedRaggedArray(
+        EncodedArray(r.ravel(), DNAEncoding), r._shape)
     return r
 
 
@@ -57,12 +58,12 @@ def test_full_roll(sequences, encoding, kmer_encoding):
     w = 4
     minimizers = get_minimizers(sequences, k, w)
     ra = RaggedArray([[7, 7, 6, 1], [7, 7, 6], [7, 7], [7]])
-    true = EncodedRaggedArray(EncodedArray(ra.ravel(), kmer_encoding), ra.shape)
+    true = EncodedRaggedArray(EncodedArray(ra.ravel(), kmer_encoding), ra._shape)
     assert_encoded_raggedarray_equal(true, minimizers)
 
 
 def test_get_minimizer_string_to_string():
-    sequences = bnp.as_encoded_array([
+    sequences = bionumpy.encoded_array.as_encoded_array([
         "CCCAAACCCC",
         "TTTTCCCTTT"
     ], DNAEncoding)

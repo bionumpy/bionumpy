@@ -1,5 +1,6 @@
 from . import AlphabetEncoding
-from .base_encoding import Encoding
+from ..encoded_array import Encoding
+from ..encoded_array import EncodedArray
 from ..util import is_subclass_or_instance
 import numpy as np
 
@@ -19,12 +20,12 @@ class KmerEncoding(Encoding):
         Returns a human-readable string representation
         of an encoded kmer.
         """
-        chars = (kmer >> (2 * np.arange(self._k))) & 3
-        kmer = "".join(chr(b) for b in self._alphabet_encoding.decode(chars))
+        chars = EncodedArray((kmer >> (2 * np.arange(self._k))) & 3, self._alphabet_encoding)
+        kmer = "".join(chr(b) for b in chars.encoding.decode(chars).raw())
         return kmer
 
     def get_labels(self):
-        assert self._k <= 5, "Only supported for k <= 5"
+        assert self._k <= 8, "Only supported for k <= 5"
         return [self.to_string(kmer) for kmer in range(self._alphabet_encoding.alphabet_size**self._k)]
 
     def __str__(self):

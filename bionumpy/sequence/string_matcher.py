@@ -1,16 +1,27 @@
 import logging
-
-from bionumpy.rollable import RollableFunction
-from bionumpy.encoded_array import as_encoded_array, EncodedArray
-from bionumpy.util import as_strided
 import itertools
 import numpy as np
 import re
+
+from numpy.typing import ArrayLike
+
+from .rollable import RollableFunction
+from ..encoded_array import EncodedArray, as_encoded_array, Encoding
+from ..util import as_strided
 from npstructures import RaggedArray
+from ..encodings import AlphabetEncoding
+from ..util.typing import EncodedArrayLike, SingleEncodedArrayLike
+
+
+def match_string(sequence: EncodedArrayLike, matching_sequence: SingleEncodedArrayLike) -> ArrayLike:
+    sequence = as_encoded_array(sequence)
+    enforced_encoding = sequence.encoding
+    matching_sequence = as_encoded_array(matching_sequence, enforced_encoding)
+    return StringMatcher(matching_sequence, enforced_encoding).rolling_window(sequence)
 
 
 class StringMatcher(RollableFunction):
-    def __init__(self, matching_sequence, encoding):
+    def __init__(self, matching_sequence, encoding:Encoding):
         self._encoding = encoding
         self._matching_sequence_array = as_encoded_array(matching_sequence, target_encoding=encoding)
 
@@ -21,7 +32,7 @@ class StringMatcher(RollableFunction):
     def __call__(self, sequence):
         return np.all(sequence == self._matching_sequence_array, axis=-1)
 
-
+    
 class RegexMatcher(RollableFunction):
     """
     Matches regexes of various lengths across a RaggedArray of sequences by constructing a list of FixedLenRegexMatcher objects from the original
@@ -67,6 +78,7 @@ class RegexMatcher(RollableFunction):
 class FixedLenRegexMatcher(RollableFunction):
     def __init__(self, matching_regex, encoding):
         self._sub_matchers = construct_fixed_len_regex_matchers(matching_regex, encoding)
+        self._encoding = encoding
 
     @property
     def window_size(self):
@@ -131,8 +143,13 @@ def construct_flexible_len_regex_matchers(matching_regex: str, encoding):
 
 
 def construct_wildcard_matcher(matching_regex: str, encoding):
+    assert isinstance(encoding, AlphabetEncoding)
+
     mask = np.array([symbol == '.' for symbol in matching_regex])
-    replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") else chr(encoding.decode(0))
-    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)), target_encoding=encoding)
+    #replacement = encoding.encoding.decode(0) if hasattr(encoding, "encoding") \
+    #    else chr(encoding.decode(0))
+    replacement = encoding._raw_alphabet[0]
+    base_seq = as_encoded_array(matching_regex.replace('.', str(replacement)),
+                                target_encoding=encoding)
 
     return MaskedStringMatcher(base_seq, mask)

@@ -5,12 +5,30 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
-from bionumpy import BedBuffer
-from bionumpy.io.files import NumpyFileReader, NpDataclassReader
-from bionumpy.io.exceptions import FormatException
+from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
 from bionumpy.io.matrix_dump import matrix_to_csv
-from npstructures.testing import assert_npdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
+
+
+
+@pytest.mark.parametrize("file_format", combos.keys())
+def test_read_write_roundtrip(file_format):
+    if file_format in ("multiline_fasta", "bed12"):
+        return
+    _, _, buf_type = combos[file_format]
+    buffer_text = buffer_texts[file_format]*100
+    input_buffer = bytes(buffer_text, encoding="utf8")
+    in_obj = BytesIO(input_buffer)
+    out_buffer = bytes()
+    out_obj = BytesIO(out_buffer)
+    reader = NpDataclassReader(NumpyFileReader(in_obj, buffer_type=buf_type))
+    writer = NpBufferedWriter(out_obj, buf_type)
+    for chunk in reader.read_chunks(200):
+        writer.write(chunk)
+    print(out_obj.getvalue())
+    print(input_buffer)
+    assert out_obj.getvalue() == input_buffer
 
 
 def test_matrix_to_csv():
@@ -28,8 +46,8 @@ def test_buffer_read(buffer_name):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
-        print("#####", line, true_line)
-        assert_npdataclass_equal(line, true_line)
+        # print("#####", line, true_line)
+        assert_bnpdataclass_equal(line, true_line)
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
@@ -40,7 +58,7 @@ def test_buffer_read_chunks(buffer_name, min_chunk_size):
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = np.concatenate(list(NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read_chunks(min_chunk_size)))
     for line, true_line in zip(data, true_data):
-        assert_npdataclass_equal(line, true_line)
+        assert_bnpdataclass_equal(line, true_line)
 
 
 def test_read_big_fastq():
@@ -95,17 +113,3 @@ def test_write_dna_fastq():
     print(result)
     assert np.all(entry.sequence == result.sequence)
 
-
-@pytest.mark.skip("unimplemented")
-def test_fastq_raises_format_exception():
-    _, _, buf_type = combos["fastq"]
-    text = """\
-@header
-actg
--
-!!!!
-"""
-    with pytest.raises(FormatException):
-        buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
-        buf.get_data()
-        

@@ -1,11 +1,11 @@
-import dataclasses
 import logging
 import numpy as np
+from typing.io import IO
 from npstructures import npdataclass
 from ..streams import BnpStream
 from ..encoded_array import EncodedArray
 from ..streams.grouped import grouped_stream
-
+from .file_buffers import FileBuffer
 logger = logging.getLogger(__name__)
 
 
@@ -28,9 +28,7 @@ class NumpyFileReader:
     Class that handles the main task of reading in chunks of data
     from file that corresponds to full entries.
     """
-    def __init__(self, file_obj, buffer_type, has_header=False):
-
-        self._file_obj = file_obj
+    def __init__(self, file_obj: IO, buffer_type: FileBuffer, has_header: bool = False):
         """Inits the file reader with an opened file object, and a class of the buffer type used to parse it
 
         Parameters
@@ -47,6 +45,8 @@ class NumpyFileReader:
         FIXME: Add docs.
 
         """
+
+        self._file_obj = file_obj
         self._is_finished = False
         self._buffer_type = buffer_type
         self._has_header = has_header
@@ -59,6 +59,9 @@ class NumpyFileReader:
         self._total_bytes_read = 0
         self._do_prepend = False
         self._prepend = []
+        self.n_bytes_read = 0
+        self.n_lines_read = 0
+
 
     def __enter__(self):
         return self
@@ -73,13 +76,11 @@ class NumpyFileReader:
         self._do_prepend = True
 
     def read(self):
-        # self._remove_initial_comments()
-        # self._header_data = self._buffer_type.read_header(self._file_obj)
         chunk = np.frombuffer(self._file_obj.read(), dtype=np.uint8)
         chunk, _  = self.__add_newline_to_end(chunk, chunk.size)
         return self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
 
-    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> np.ndarray:
+    def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> FileBuffer:
         """Read buffers of size `min_chunk_size` until at least one complete entry is found` Stop at `max_chunk_size`
 
         Read buffers from the file object. If the `from_raw_buffer`
@@ -106,6 +107,8 @@ class NumpyFileReader:
         """
         complete_entry_found = False
         temp_chunks = []
+        local_bytes_read = 0
+        local_lines_read = 0
         if len(self._prepend):
             temp_chunks.append(self._prepend)
         while not complete_entry_found:
@@ -115,7 +118,8 @@ class NumpyFileReader:
             temp_chunks.append(chunk)
             if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
-            self._total_bytes_read += chunk.size
+            local_bytes_read += chunk.size
+            #local_lines_read += chunk.n_lines
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
             
         chunk = np.concatenate(temp_chunks)
@@ -127,11 +131,11 @@ class NumpyFileReader:
             else:
                 self._prepend = chunk[buff.size:]
         if chunk is not None and chunk.size:
+            self.n_bytes_read += buff.size
+            self.n_lines_read += buff.n_lines
             return wrapper(buff)
 
     def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
-        #self._remove_initial_comments()
-        #self._header_data = self._buffer_type.read_header(self._file_obj)
         while not self._is_finished:
             chunk = self.read_chunk(min_chunk_size, max_chunk_size)
             if chunk is None:
@@ -205,10 +209,10 @@ class NpBufferedWriter:
         Parameters
         ----------
         data : npdataclass
-            Data set containing entries
+            dataset containing entries
 
         """
-        if hasattr(self._buffer_type, 'make_header') and self._file_obj.mode != 'ab' and getattr(self._buffer_type, 'INCLUDE_HEADER', False):
+        if hasattr(self._buffer_type, 'make_header') and (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab') and getattr(self._buffer_type, 'INCLUDE_HEADER', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 
