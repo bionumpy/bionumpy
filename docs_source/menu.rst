@@ -11,12 +11,19 @@ BioNumPy documentation
    introduction
 
 .. toctree::
-   :maxdepth: 0
-   :glob:
-   :titlesonly:
-   :caption: Tutorials
+    :maxdepth: 0
+    :glob:
+    :titlesonly:
+    :caption: Tutorials
 
-   tutorials/*
+    tutorials/fastq_filtering.rst
+    tutorials/bam_handling.rst
+    tutorials/fastqc.rst
+    tutorials/gc_content.rst
+    tutorials/numpy_operations.rst
+    tutorials/position_weight_matrix.rst
+    tutorials/set_of_sequences.rst
+
 
 .. toctree::
    :maxdepth: 2
