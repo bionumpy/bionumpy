@@ -67,7 +67,7 @@ When reading a reference genome, we often can't read in the whole file (using `.
 
     >>> reference_sequence = bnp.open_indexed("example_data/small_genome.fa")
     >>> reference_sequence["2"][10:20]
-    encoded_array('ATATTAGCCA')
+    encoded_array('atattagcca')
 
 Functions workin on sequences
 =============================

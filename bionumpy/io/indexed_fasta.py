@@ -1,6 +1,7 @@
 import numpy as np
-from ..encoded_array import EncodedArray
+from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from .multiline_buffer import FastaIdxBuffer, FastaIdx
+from ..datatypes import Interval
 from .files import bnp_open
 from ..encodings import BaseEncoding
 
@@ -116,4 +117,41 @@ class IndexedFasta:
             ret.size - idx["rlen"],
             data.shape,
         )
+        return EncodedArray(ret, BaseEncoding)
         return EncodedArray(((ret - ord("A")) % 32) + ord("A"), BaseEncoding)
+
+    def get_interval_sequences(self, intervals: Interval) -> EncodedRaggedArray:
+        """Get the seqeunces for a set of genomic intervals
+
+        Parameters
+        ----------
+        intervals : Interval
+            Intervals
+
+        Returns
+        -------
+        EncodedRaggedArray
+            Sequences
+        """
+        sequences = []
+        lengths = []
+        delete_indices = []
+        cur_offset = 0
+        for interval in intervals:
+            chromosome = interval.chromosome.to_string()
+            idx = self._index[chromosome]
+            lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
+            assert interval.stop <= rlen
+            start_row = interval.start//lenc
+            start_mod = interval.start % lenc
+            start_offset = start_row*lenb+start_mod
+            stop_row = interval.stop // lenc
+            stop_offset = stop_row*lenb+interval.stop % lenc
+            self._f_obj.seek(idx["offset"] + start_offset)
+            lengths.append(stop_offset-start_offset-(stop_row-start_row))
+            sequences.extend(self._f_obj.read(stop_offset-start_offset))
+            delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod for j in range(stop_row-start_row))
+            cur_offset += stop_offset-start_offset
+        s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
+        a = EncodedArray(s, BaseEncoding)
+        return EncodedRaggedArray(a, lengths)
