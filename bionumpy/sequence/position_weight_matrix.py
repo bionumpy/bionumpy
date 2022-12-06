@@ -38,6 +38,9 @@ class PWM:
     def alphabet(self):
         return self._alphabet
 
+    def __str__(self):
+        return "\n".join(["\t".join(self._alphabet), str(self._matrix)])
+
     @property
     def window_size(self):
         return self._matrix.shape[-1]
@@ -59,10 +62,12 @@ class PWM:
         return scores
 
     @classmethod
-    def from_dict(cls, dictionary: dict):
+    def from_dict(cls, dictionary: dict, background=None):
+        if background is None:
+            background = {key: 1/len(dictionary) for key in dictionary}
         alphabet = "".join(dictionary.keys())
         with np.errstate(divide="ignore"):
-            matrix = np.log(np.array(list(dictionary.values())))
+            matrix = np.log(np.array(list(dictionary.values())))-np.log([background[key] for key in dictionary])[:, np.newaxis]
         return cls(matrix, alphabet)
 
     @classmethod
