@@ -61,7 +61,8 @@ class PWM:
     @classmethod
     def from_dict(cls, dictionary: dict):
         alphabet = "".join(dictionary.keys())
-        matrix = np.log(np.array(list(dictionary.values())))
+        with np.errstate(divide="ignore"):
+            matrix = np.log(np.array(list(dictionary.values())))
         return cls(matrix, alphabet)
 
     @classmethod
