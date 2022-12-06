@@ -1,3 +1,5 @@
+.. _arithmetics_api:
+
 Genome arithmetics
 --------------------
 

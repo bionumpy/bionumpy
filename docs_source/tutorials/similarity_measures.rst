@@ -1,3 +1,5 @@
+.. _similarity_measures_tutorial:
+
 Computing the similarity between two BED-files
 -----------------------------------------------
 
