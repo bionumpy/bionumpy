@@ -1,7 +1,8 @@
 import numpy as np
+from numpy.typing import ArrayLike
 from numbers import Number
 import dataclasses
-
+from ..util.typing import EncodedArrayLike
 from ..encoded_array import EncodedArray
 
 
@@ -47,13 +48,22 @@ class EncodedCounts:
         return ret
 
 
-def count_encoded(values, weights=None, axis=-1):
+def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int = -1) -> EncodedCounts:
+    """Count the occurances of encoded entries. Works on any encoding with finite alphabet
+
+    Parameters
+    ----------
+    values : EncodedArrayLike
+    weights : ArrayLike
+    axis : int
+
+    Returns
+    -------
+    EncodedCounts
+
+    """
     if axis is None:
         values = values.ravel()
-
-    #assert np.issubdtype(values.dtype, np.signedinteger), \
-    #    "dtype is %s. Count encoded needs signed integers to do bincount" % values.dtype
-
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:
