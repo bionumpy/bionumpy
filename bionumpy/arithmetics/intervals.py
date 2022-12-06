@@ -100,12 +100,6 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     return rla.any(axis=0)
 
 
-@chromosome_map()
-def sort_intervals(intervals):
-    args = np.lexsort((intervals.stop, intervals.start))
-    return intervals[args]
-
-
 def human_key_func(chrom_name):
     assert chrom_name.startswith("chr"), chrom_name
     parts = chrom_name[3:].split("_", maxsplit=1)
@@ -116,7 +110,7 @@ def human_key_func(chrom_name):
     return (is_numeric, b, c)
 
 
-def sort_all_intervals(intervals: Interval, chromosome_key_function: callable = lambda x: x, sort_order: List[str] = None) -> Interval:
+def sort_intervals(intervals: Interval, chromosome_key_function: callable = lambda x: x, sort_order: List[str] = None) -> Interval:
     """Sort intervals on "chromosome", "start", "stop"
 
     Parameters
