@@ -20,3 +20,4 @@ API documentation
 .. autoclass:: MultilineFastaBuffer
 .. autoclass:: TwoLineFastaBuffer
 .. autoclass:: IndexedFasta
+   :members: 

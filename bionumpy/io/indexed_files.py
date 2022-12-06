@@ -29,6 +29,7 @@ def open_indexed(filename: str) -> IndexedFasta:
 
     Examples
     --------
+    >>> from bionumpy import open_indexed
     >>> reference = open_indexed("example_data/small_genome.fa")
     >>> reference
     Indexed Fasta File with chromosome sizes: {'0': 80, '1': 80, '2': 80, '3': 80}
