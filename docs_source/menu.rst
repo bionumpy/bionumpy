@@ -23,6 +23,7 @@ BioNumPy documentation
     tutorials/numpy_operations.rst
     tutorials/position_weight_matrix.rst
     tutorials/set_of_sequences.rst
+    tutorials/similarity_measures.rst
 
 
 .. toctree::
