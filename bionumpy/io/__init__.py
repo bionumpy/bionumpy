@@ -4,3 +4,4 @@ from .multiline_buffer import MultiLineFastaBuffer
 from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
 from .delimited_buffers import (BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                                 GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .indexed_fasta import IndexedFasta
