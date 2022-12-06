@@ -316,6 +316,9 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
         Boolean array of which sequences matches the `match_string`
 
     """
+    sequences = as_encoded_array(sequences)
+    if isinstance(sequences, EncodedArray):
+        return (len(sequences) == len(match_string)) and np.all(sequences==match_string)
     L = len(match_string)
     mask = (sequences.lengths == L)
     sequences.ravel()

@@ -1,11 +1,26 @@
 import pytest
 import numpy as np
 from npstructures.testing import assert_raggedarray_equal
+from numpy.testing import assert_array_equal
 import bionumpy as bnp
 from bionumpy.io.jaspar import read_jaspar_matrix
 from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM, get_motif_scores, get_motif_scores_old
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 from bionumpy import EncodedArray
+
+@pytest.fixture
+def neutral_ppm_dict():
+    return {"A": [0.25, 0.25],
+            "C": [0.25, 0.25],
+            "G": [0.25, 0.25],
+            "T": [0.25, 0.25]}
+
+@pytest.fixture
+def a_ppm_dict():
+    return {"A": [1, 1],
+            "C": [0, 0],
+            "G": [0, 0],
+            "T": [0, 0]}
 
 
 @pytest.fixture
@@ -84,6 +99,18 @@ def test_encoded_ragged_array_fast(sequences, matrix):
     s = get_motif_scores_old(sequences, pwm)
     assert_raggedarray_equal(s,
                              get_motif_scores(sequences, pwm))
+
+
+def test_sanity_motifs(sequence, neutral_ppm_dict):
+    pwm = PWM.from_dict(neutral_ppm_dict)
+    scores = pwm.calculate_scores(sequence)
+    assert np.all(scores == 0)
+
+
+def test_a_motifs(a_ppm_dict):
+    pwm = PWM.from_dict(a_ppm_dict)
+    scores = pwm.calculate_scores("AAC")
+    assert_array_equal(scores, [np.log(4**2), -np.inf, -np.inf])
 
 
 @pytest.mark.skip("Failing because under development?")

@@ -15,6 +15,7 @@ from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, O
 from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded)
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
+from .io.strops import str_equal
 from . import simulate
 from . import arithmetics
 open = bnp_open
