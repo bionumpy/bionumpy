@@ -31,5 +31,5 @@ rule make_runtime_report:
         y_axis = [result[1] for result in results]
         fig = px.bar(x=x_axis, y=y_axis, title=wildcards.analysis)
         fig.write_html(output.figure)
-        fig.write_image(output.png)
+        fig.write_image(output.png, scale=4)
 
