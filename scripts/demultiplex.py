@@ -1,6 +1,6 @@
 import bionumpy as bnp
 from pathlib import Path
-""" 
+"""
 DEMULTIPLEX-ing
 ===============
 
@@ -31,8 +31,8 @@ Output:
 
 directory = Path("example_data", "demultiplex")
 
-file_sample_r1 = 'example_1_R1_001.fastq'
-file_sample_r2 = 'example_1_R2_001.fastq'
+file_sample_r1 = 'small_1_R1_001.fastq'
+file_sample_r2 = 'small_1_R2_001.fastq'
 
 filename_out = 'out'
 
