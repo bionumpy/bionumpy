@@ -21,6 +21,8 @@ include: "rules/kmer_counting.smk"
 include: "rules/reverse_complement.smk"
 include: "rules/interval_intersection.smk"
 include: "rules/subsample_sequences.smk"
+include: "rules/encode.smk"
+include: "rules/jaccard.smk"
 
 
 rule all:
@@ -35,6 +37,7 @@ rule main_report:
         "results/reports/intersect/{run_size}.png",
         "results/reports/reverse_complement/{run_size}.png",
         "results/reports/subsample/{run_size}.png",
+        "results/reports/jaccard_all_vs_all/{run_size}.png",
     output:
         "report_{run_size}.md"
     run:
