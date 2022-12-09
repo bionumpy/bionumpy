@@ -6,8 +6,7 @@ Example: compute GC content inside genes
 ----------------------------------------
 The following code computes the GC content of selected parts of a DNA sequence:
     >>> chromosome = bnp.as_encoded_array("ACGTT")
-    >>> genes = bnp.datatypes.Interval(chromosome=["chr1","chr1"], start=[0,3], stop=[2,5])
-    >>> #genes = bnp.datatypes.Interval([ ("chr1",0,2), ("chr1",3,5) ])
+    >>> genes = bnp.datatypes.Interval.from_entry_tuples([ ("chr1",0,2), ("chr1",3,5) ])
     >>> np.mean((chromosome[genes]=="C") | (chromosome[genes]=="G"))
     0.25
 
