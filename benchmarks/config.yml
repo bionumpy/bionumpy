@@ -15,7 +15,7 @@ analysis:
     name: "Intersection of two BED-files"
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
-    validate_equal: true
+    validate_equal: true  # if true, it is asserted that all methods produce identical output
     runs:
       small: "nintervals100_nintervals101"
       big: "nintervals100000_nintervals110000"
