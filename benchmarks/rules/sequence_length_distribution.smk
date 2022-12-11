@@ -1,5 +1,4 @@
 
-
 rule bionumpy_sequence_length_distribution:
     input:
         "results/dna_sequences/{filename}.fq.gz"
@@ -46,8 +45,8 @@ rule python_sequence_length_distribution:
 
         with open(output[0], "w") as f:
             f.write("\n".join(
-                ["%d\t%d" % (c, counts[c]) for c in sorted_counts]
-            ))
+                ["%d %d" % (c, counts[c]) for c in sorted_counts]
+            ) + "\n")
 
 
 

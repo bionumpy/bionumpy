@@ -21,7 +21,7 @@ rule jellyfish_dump:
     input:
         "results/jellyfish/kmer_counts/{prefix}.jf",
     output:
-        "results/jellyfish/kmer_counts/{prefix}.dump",
+        "results/jellyfish/kmer_counts/{prefix}.csv",
     log:
         "results/jellyfish/kmer_counts/{prefix}.log",
     params:

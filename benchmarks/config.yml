@@ -15,6 +15,7 @@ analysis:
     name: "Intersection of two BED-files"
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
+    validate_equal: true
     runs:
       small: "nintervals100_nintervals101"
       big: "nintervals100000_nintervals110000"
@@ -23,6 +24,7 @@ analysis:
     name: "Translating DNA protein"
     tools: ["bionumpy", "biopython", "python", "biotite"]
     output_file_ending: ".fa"
+    validate_equal: true
     runs:
       small: "length150_nreads100"
       big: "length150_nreads1000000"
@@ -31,6 +33,7 @@ analysis:
     name: "Reverse-complement"
     tools: ["bionumpy", "python", "biopython", "seqtk", "biotite"]
     output_file_ending: ".fa"
+    validate_equal: false
     runs:
       small: "length150_nreads100"
       big: "length150_nreads1000000"
@@ -38,6 +41,8 @@ analysis:
   subsample:
     name: "Subsampling a FASTA-file"
     tools: ["python", "bionumpy", "seqtk"]
+    validate_equal: false
+    output_file_ending: ".fa"
     runs:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
@@ -45,6 +50,8 @@ analysis:
   jaccard_all_vs_all:
     name: "Jaccard on BED-files (all vs all)"
     tools: ["bionumpy", "bedtools"]
+    validate_equal: false
+    output_file_ending: ".csv"
     runs:
       # number of transcription factors from encode
       small: "ntfs5"
@@ -53,9 +60,11 @@ analysis:
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
     tools: ["bionumpy", "jellyfish"]
+    validate_equal: false
     runs:
       small: "length150_nreads10000"
       big: "length150_nreads10000000"
+    output_file_ending: ".csv"
     benchmark_report_prefixes:
       jellyfish:
         ["count-", "dump-"]  # jellyfish has two benchmark files
@@ -63,6 +72,8 @@ analysis:
   sequence_length_distribution:
     name: "Get histogram of sequence lengths in a FASTQ-file"
     tools: ["bionumpy", "python", "awk"]
+    validate_equal: true
+    output_file_ending: ".csv"
     runs:
       small: "ENCFF689IPX"  # encode id of fastq file
       big: "ENCFF689IPX"

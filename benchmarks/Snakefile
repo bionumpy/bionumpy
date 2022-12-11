@@ -1,18 +1,5 @@
+import itertools
 
-
-# convert_fastq_to_fasta
-# strip_starts_and_ends
-
-## Bacterial
-## 
-
-# Main entrypoint of the workflow. 
-# Please follow the best practices: 
-# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there.
-import plotly.express as px
-import bionumpy as bnp
-from bionumpy.arithmetics import intersect
 configfile: "config.yml"
 include: "rules/reports.smk"
 include: "rules/simulation.smk"
@@ -24,6 +11,7 @@ include: "rules/subsample_sequences.smk"
 include: "rules/encode.smk"
 include: "rules/jaccard.smk"
 include: "rules/sequence_length_distribution.smk"
+include: "rules/validation.smk"
 
 
 rule _all:
