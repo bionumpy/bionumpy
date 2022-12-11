@@ -34,16 +34,16 @@ def get_ascii_hash(encoded_array, mod):
 
 
 class AsciiHashTable:
-    def __init__(self, hash_table, modulo):
+    big_mod = 2**31-1
+    def __init__(self, hash_table):
         self._hash_table = hash_table
-        self._modulo = modulo
 
     @classmethod
-    def from_sequences(cls, encoded_ragged_array, modulo=2**31-1):
-        ascii_hashes = get_ascii_hash(encoded_ragged_array, modulo)
-        hash_table = HashTable(ascii_hashes, np.arange(len(encoded_ragged_array)), mod=103)
-        return cls(hash_table, modulo)
+    def from_sequences(cls, encoded_ragged_array, modulo=103):
+        ascii_hashes = get_ascii_hash(encoded_ragged_array, cls.big_mod)
+        hash_table = HashTable(ascii_hashes, np.arange(len(encoded_ragged_array)), mod=modulo)
+        return cls(hash_table)
 
     def __getitem__(self, encoded_array):
-        hashes = get_ascii_hash(encoded_array, self._modulo)
+        hashes = get_ascii_hash(encoded_array, self.big_mod)
         return self._hash_table[hashes]
