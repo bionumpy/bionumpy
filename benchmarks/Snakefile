@@ -17,6 +17,8 @@ include: "rules/validation.smk"
 rule _all:
     input:
         "report_big.md",
-        "report_small.md"
+        "report_small.md",
+        "validation_report_small.md",
+        "validation_report_big.md"
 
 
