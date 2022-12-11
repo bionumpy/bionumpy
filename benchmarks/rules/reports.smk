@@ -45,7 +45,8 @@ rule make_runtime_report:
         runtimes = defaultdict(float)
         for benchmark_file in input:
             method_name, time = get_runtime_from_benchmark_report(benchmark_file)
-            runtimes[method_name] += time
+            pretty_name = config["method_names"][method_name]
+            runtimes[pretty_name] += time
 
         print(runtimes)
         with open(output.data, "w") as f:
@@ -76,6 +77,10 @@ rule main_report:
             f.write(out)
 
         out = ""
-        out += "\n\n".join("<p><img src='" + image + "' style='width: 50%; height: auto'></p>" for image in input)
+        for i, image in enumerate(input):
+            if i % 2 == 0:
+                out += "<br>";
+            out += "<img src='" + image + "' style='width: 50%; height: auto'>"
+
         with open(output.html, "w") as f:
             f.write(out)

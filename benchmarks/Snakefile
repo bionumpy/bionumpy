@@ -23,6 +23,7 @@ include: "rules/interval_intersection.smk"
 include: "rules/subsample_sequences.smk"
 include: "rules/encode.smk"
 include: "rules/jaccard.smk"
+include: "rules/sequence_length_distribution.smk"
 
 
 rule _all:

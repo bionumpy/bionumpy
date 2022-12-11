@@ -1,4 +1,13 @@
 
+method_names:
+  bionumpy: "BioNumPy"
+  bedtools: "BEDTools"
+  seqtk: "Seqtk"
+  biopython: "Biopython"
+  biotite: "Biotite"
+  python: "Python"
+  jellyfish: "Jellyfish"
+  awk: "AWK (one-liner)"
 
 
 analysis:
@@ -50,3 +59,10 @@ analysis:
     benchmark_report_prefixes:
       jellyfish:
         ["count-", "dump-"]  # jellyfish has two benchmark files
+  
+  sequence_length_distribution:
+    name: "Get histogram of sequence lengths in a FASTQ-file"
+    tools: ["bionumpy", "python", "awk"]
+    runs:
+      small: "ENCFF689IPX"  # encode id of fastq file
+      big: "ENCFF689IPX"
