@@ -73,7 +73,7 @@ class OneToOneEncoding(Encoding):
         return RaggedArray(data, s._shape)
 
     def _encode_string(self, string: str):
-        s = EncodedArray([ord(c) for c in string], BaseEncoding)
+        s = EncodedArray(np.frombuffer(bytes(string, encoding="ascii"), dtype=np.uint8), BaseEncoding)
         s = self._encode_base_encoded_array(s)
         return s
 
