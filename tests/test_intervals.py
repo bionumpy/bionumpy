@@ -1,5 +1,5 @@
 import pytest
-from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_all_intervals
+from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_intervals
 from bionumpy.util.testing import assert_bnpdataclass_equal
 from bionumpy.datatypes import Interval, BedGraph
 
@@ -41,7 +41,7 @@ def test_pileup(interval_c):
 
 
 def test_sort_intervals(interval_d):
-    sorted_intervals = sort_all_intervals(interval_d)
+    sorted_intervals = sort_intervals(interval_d)
     assert_bnpdataclass_equal(sorted_intervals,
                               interval_d[[3, 2, 1, 0]])
     

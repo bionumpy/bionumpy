@@ -3,6 +3,7 @@
 
 analysis:
   intersect:
+    name: "Intersection of two BED-files"
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
     runs:
@@ -10,6 +11,7 @@ analysis:
       big: "nintervals100000_nintervals110000"
 
   translate:
+    name: "Translating DNA protein"
     tools: ["bionumpy", "biopython", "python", "biotite"]
     output_file_ending: ".fa"
     runs:
@@ -17,15 +19,34 @@ analysis:
       big: "length150_nreads1000000"
 
   reverse_complement:
+    name: "Reverse-complement"
     tools: ["bionumpy", "python", "biopython", "seqtk", "biotite"]
     output_file_ending: ".fa"
     runs:
       small: "length150_nreads100"
       big: "length150_nreads1000000"
 
-
   subsample:
+    name: "Subsampling a FASTA-file"
     tools: ["python", "bionumpy", "seqtk"]
     runs:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
+
+  jaccard_all_vs_all:
+    name: "Jaccard on BED-files (all vs all)"
+    tools: ["bionumpy", "bedtools"]
+    runs:
+      # number of transcription factors from encode
+      small: "ntfs5"
+      big: "ntfs10"
+
+  kmer_counts:
+    name: "Counting all kmers in a FASTA-file"
+    tools: ["bionumpy", "jellyfish"]
+    runs:
+      small: "length150_nreads10000"
+      big: "length150_nreads10000000"
+    benchmark_report_prefixes:
+      jellyfish:
+        ["count-", "dump-"]  # jellyfish has two benchmark files

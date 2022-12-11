@@ -28,7 +28,7 @@ jobs:
     - name: Install npstructures dev
       if: github.ref != 'refs/heads/master'
       run: |
-        pip install git+https://github.com/knutdrand/npstructures.git/@dev
+        pip install git+https://github.com/bionumpy/npstructures.git/@dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

@@ -1,4 +1,4 @@
-.. _intervals:
+.. _multiple_data_sources:
 
 ========================================
 Working with Multiple Files/Data Sources

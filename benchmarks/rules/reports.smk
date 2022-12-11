@@ -6,13 +6,28 @@ def get_analysis_benchmark_reports(wildcards):
 
     dataset_size = analysis_config["runs"][wildcards.dataset_size]
     tools = analysis_config["tools"]
-    return [f"benchmarks/" + wildcards.analysis + "/" + tool + "/" + dataset_size + ".txt" for tool in tools]
+    
+    files = []
+    for tool in tools:
+        benchmark_prefixes = [""]
+        if "benchmark_report_prefixes" in config["analysis"][analysis_type]:
+            if tool in config["analysis"][analysis_type]["benchmark_report_prefixes"]:
+                benchmark_prefixes = config["analysis"][analysis_type]["benchmark_report_prefixes"][tool]
+
+        for prefix in benchmark_prefixes:
+            files.append("benchmarks/" + wildcards.analysis + "/" + tool + "/" + prefix + dataset_size + ".txt")
+
+    return files
 
 
 def get_runtime_from_benchmark_report(file_name):
     tool_name = file_name.split("/")[2]
     time = float(open(file_name).readlines()[1].split()[0])
     return tool_name, time
+
+
+def get_report_name(wildcards):
+    return config["analysis"][wildcards.analysis]["name"]
 
 
 rule make_runtime_report:
@@ -22,14 +37,45 @@ rule make_runtime_report:
         data="results/reports/{analysis}/{dataset_size}.data",
         figure="results/reports/{analysis}/{dataset_size}.html",
         png="results/reports/{analysis}/{dataset_size}.png"
+    params:
+        report_name=get_report_name
     run:
-        results = [get_runtime_from_benchmark_report(i) for i in input]
+        print(input)
+        from collections import defaultdict
+        runtimes = defaultdict(float)
+        for benchmark_file in input:
+            method_name, time = get_runtime_from_benchmark_report(benchmark_file)
+            runtimes[method_name] += time
+
+        print(runtimes)
         with open(output.data, "w") as f:
-            f.write("\n".join(["\t".join(map(str, result)) for result in results]))
+            f.write("\n".join(["\t".join(map(str, result)) for result in runtimes.items()]))
 
-        x_axis = [result[0] for result in results]
-        y_axis = [result[1] for result in results]
-        fig = px.bar(x=x_axis, y=y_axis, title=wildcards.analysis)
+        x_axis = runtimes.keys()  # [r for result in results]
+        y_axis = runtimes.values()  # [result[1] for result in results]
+        fig = px.bar(x=x_axis, y=y_axis, title=params.report_name,
+            labels={"x": "Method",
+                    "y": "Time in seconds"
+                    }
+        )
         fig.write_html(output.figure)
-        fig.write_image(output.png)
+        fig.write_image(output.png, scale=4)
 
+
+rule main_report:
+    input:
+        ["results/reports/" + analysis + "/{run_size}.png" for analysis in config["analysis"]]
+    output:
+        md="report_{run_size}.md",
+        html="report_{run_size}.html"
+    run:
+        # markdown
+        out = "# Benchmark report \n\n"
+        out += "\n\n".join("![](" + image + ")" for image in input)
+        with open(output.md, "w") as f:
+            f.write(out)
+
+        out = ""
+        out += "\n\n".join("<p><img src='" + image + "' style='width: 50%; height: auto'></p>" for image in input)
+        with open(output.html, "w") as f:
+            f.write(out)

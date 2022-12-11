@@ -19,3 +19,4 @@ sphinx_rtd_theme
 #matplotlib
 kaleido
 biotite
+nbsphinx

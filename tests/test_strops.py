@@ -86,6 +86,10 @@ def test_str_equal(strings):
     mask = str_equal(s, "12")
     np.testing.assert_array_equal(mask, [False, False, True, False]*2)
 
+def test_str_equal_single(strings):
+    assert str_equal(strings[2], "12")
+    assert not str_equal(strings[3], "12")
+
 
 if __name__ == "__main__":
     test_split(["1", "12", "123"])

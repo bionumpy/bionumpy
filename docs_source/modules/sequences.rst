@@ -30,4 +30,7 @@ API documentation
 .. autofunction:: get_kmers
 .. autofunction:: get_minimizers
 .. autofunction:: get_motif_scores
-
+.. autofunction:: count_encoded
+.. autofunction:: match_string
+.. autoclass:: PWM
+   :members:

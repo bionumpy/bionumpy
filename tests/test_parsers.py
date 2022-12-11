@@ -166,6 +166,9 @@ def test_read_example_data(file_name):
         # broken data should not pass tests
         return
 
+    if file_name.endswith(".txt"):
+        return
+
     if file_name.endswith(".sam"):
         return
 
@@ -176,6 +179,9 @@ def test_read_example_data(file_name):
         return
 
     if file_name.endswith(".tsv"):
+        return
+
+    if file_name.startswith("demultiplex"):
         return
 
     file = bnp.open(file_name)
