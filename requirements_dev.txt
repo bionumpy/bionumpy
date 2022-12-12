@@ -17,6 +17,7 @@ coverage-badge
 sphinx-design
 sphinx_rtd_theme
 #matplotlib
+plotly
 kaleido
 biotite
 nbsphinx
