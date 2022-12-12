@@ -78,6 +78,8 @@ class _GenotypeRowEncoding(Encoding):
 
         return ''.join(chr(c) for c in self.decode(e))
 
+    def __repr__(self):
+        return "GenotypeRowEncoding"
 
 class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
     """Encoding that can be used when all records are phased
@@ -100,6 +102,9 @@ class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
         encoded = (data[:, 0] == "1") * 2 + (data[:, 2] == "1")
         encoded = encoded.reshape(n_rows, len(encoded)//n_rows).astype(np.int8)
         return encoded
+
+    def __repr__(self):
+        return "PhasedGenotypeRowEncoding"
 
 
 PhasedGenotypeRowEncoding = _PhasedGenotypeRowEncoding()

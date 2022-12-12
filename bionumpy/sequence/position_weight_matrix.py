@@ -173,7 +173,7 @@ def get_motif_scores(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
     Examples
     --------
     >>> import bionumpy as bnp
-    >>> pwm = PWM.from_dict({"A": [5, 1], "C": [1, 5], "G": [0, 0], "T": [0, 0]})
+    >>> pwm = bnp.sequence.position_weight_matrix.PWM.from_dict({"A": [5, 1], "C": [1, 5], "G": [0, 0], "T": [0, 0]})
     >>> sequences = bnp.as_encoded_array(["ACTGAC", "CA", "GG"])
     >>> bnp.get_motif_scores(sequences, pwm)
     ragged_array([5.99146455       -inf       -inf       -inf 5.99146455]
