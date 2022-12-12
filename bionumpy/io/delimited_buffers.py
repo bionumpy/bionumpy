@@ -496,7 +496,7 @@ class VCFMatrixBuffer(VCFBuffer):
         return sample_names
 
     def get_data(self):
-        data = VCFBuffer.get_data(self)
+        data = super().get_data()
         genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
         genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
         return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
