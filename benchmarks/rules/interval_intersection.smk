@@ -30,6 +30,9 @@ rule intersect_bedtools:
         "benchmarks/intersect/bedtools/{a}_{b}.txt"
     log:
         "logs/bedtools/intersect/{a}_{b}.log"
+    params:
+        # bedtools intersect is faster when it knows input is sorted
+        extra="-sorted"
     wrapper:
         "v1.19.2/bio/bedtools/intersect"
 

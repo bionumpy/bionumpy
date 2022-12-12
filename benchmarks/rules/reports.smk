@@ -1,3 +1,4 @@
+import plotly.express as px
 
 def get_analysis_benchmark_reports(wildcards):
     analysis_type = wildcards.analysis

@@ -1,7 +1,7 @@
 from bionumpy.sequence import get_kmers, count_encoded
 from bionumpy.streams import streamable
-from bionumpy.io.dump_csv import dump_csv
 import bionumpy as bnp
+import numpy as np
 
 
 @streamable(sum)
@@ -27,7 +27,10 @@ class ResultBuffer(DelimitedBuffer):
 stream = bnp.open(snakemake.input[0]).read_chunks()
 output_stream = bnp.open(snakemake.output[0], "wb", buffer_type=ResultBuffer)
 kmers = count_kmers(stream)
-
-result = Result(kmers.alphabet, kmers.counts)
+alphabet = np.array(kmers.alphabet)
+# sort kmers, so that output is identical to jellyfish
+sorting = np.argsort(alphabet)
+print(alphabet, sorting, kmers.counts[sorting])
+result = Result(list(alphabet[sorting]), kmers.counts[sorting])
 print(result)
 output_stream.write(result)
