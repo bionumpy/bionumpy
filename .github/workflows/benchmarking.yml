@@ -26,8 +26,6 @@ jobs:
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements_dev.txt
-          pip install .
 
       - name: Run benchmarks
         uses: snakemake/snakemake-github-action@v1
@@ -35,7 +33,11 @@ jobs:
           directory: '.'
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
-          stagein: 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+          stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+            pip install -r requirements_dev.txt
+            pip install .
+            cd benchmarks
+            
 
       - name: Save benchmarks results
         run: |
