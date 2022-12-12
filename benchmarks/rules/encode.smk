@@ -1,8 +1,15 @@
 
 
+rule sample_fq:
+    output:
+        "results/dna_sequences/small.fq.gz"
+    shell:
+        "cp ../example_data/big.fq.gz {output}"
+
+
 rule download_encode_fastq_file:
     output:
-        fq="results/dna_sequences/{id}.fq.gz",
+        fq="results/dna_sequences/{id,ENCFF[A-Z0-9]+}.fq.gz",
     shell:
         """
         wget -O {output.fq} https://www.encodeproject.org/files/{wildcards.id}/@@download/{wildcards.id}.fastq.gz

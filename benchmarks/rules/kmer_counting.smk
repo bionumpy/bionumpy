@@ -42,3 +42,20 @@ rule bionumpy_count:
     script:
         "../scripts/bionumpy_count_kmers.py"
 
+
+rule python_count:
+    input:
+        "results/dna_sequences/{filename}.fa"
+    output:
+        "results/python/kmer_counts/{filename}.csv"
+    benchmark:
+        "benchmarks/kmer_counts/python/{filename}.txt"
+    script:
+        "../scripts/python_kmer_counting.py"
+
+
+
+
+
+
+

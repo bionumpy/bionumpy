@@ -33,7 +33,7 @@ analysis:
     name: "Reverse-complement"
     tools: ["bionumpy", "python", "biopython", "seqtk", "biotite"]
     output_file_ending: ".fa"
-    validate_equal: false
+    validate_equal: true
     runs:
       small: "length150_nreads100"
       big: "length150_nreads1000000"
@@ -59,8 +59,8 @@ analysis:
 
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
-    tools: ["bionumpy", "jellyfish"]
-    validate_equal: false
+    tools: ["bionumpy", "jellyfish", "python"]
+    validate_equal: true
     runs:
       small: "length150_nreads10000"
       big: "length150_nreads10000000"
@@ -75,5 +75,5 @@ analysis:
     validate_equal: true
     output_file_ending: ".csv"
     runs:
-      small: "ENCFF689IPX"  # encode id of fastq file
-      big: "ENCFF689IPX"
+      small: "small"  # small.fq.gz
+      big: "ENCFF689IPX"  # encode id of fastq file

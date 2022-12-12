@@ -14,11 +14,11 @@ include: "rules/sequence_length_distribution.smk"
 include: "rules/validation.smk"
 
 
-rule _all:
-    input:
-        "report_big.md",
-        "report_small.md",
-        "validation_report_small.md",
-        "validation_report_big.md"
+#rule _all:
+#    input:
+#        "report_big.md",
+#        "report_small.md",
+#        "validation_report_small.md",
+#        "validation_report_big.md"
 
 
