@@ -32,7 +32,7 @@ jobs:
       - name: Run benchmarks
         uses: snakemake/snakemake-github-action@v1
         with:
-          directory: 'benchmarks'
+          directory: '.'
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
           stagein: 'cd benchmarks' # additional preliminary commands to run (can be multiline)
