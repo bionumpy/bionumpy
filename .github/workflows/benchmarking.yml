@@ -35,7 +35,7 @@ jobs:
           directory: 'benchmarks'
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
-          stagein: '' # additional preliminary commands to run (can be multiline)
+          stagein: 'cd benchmarks' # additional preliminary commands to run (can be multiline)
 
       - name: Save benchmarks results
         run: |
