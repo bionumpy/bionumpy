@@ -19,7 +19,10 @@ rule assert_method_output_is_equal:
         "../envs/diff.yml"
     shell:
         # diff return nonzero exit code on diff
-        "diff --ignore-space-change {input} > {output}"
+        """
+        diff --ignore-space-change {input}
+        touch {output}
+        """
 
 
 def get_validation_files_for_analysis(wildcards):
