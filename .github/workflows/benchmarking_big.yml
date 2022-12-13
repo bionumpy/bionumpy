@@ -2,12 +2,11 @@
 name: Benchmarks
 
 on:
-  # small benchmark on push and pull request
-  push:
-    branches: [ "dev", "master", "dev-benchmarking"]
+  schedule:
+    - cron: "0 4 1/1 * *"  # every night at 4
 
-  pull_request:
-    branches: [ "master", "dev" ]
+  # big behchmark on manual run
+  workflow_dispatch:
 
 
 jobs:
@@ -20,14 +19,6 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: install npstructures dev
-        if: github.ref != 'refs/heads/master'
-        run: |
-          pip install git+https://github.com/bionumpy/npstructures.git/@dev
-      - name: install dependencies
-        run: |
-          python -m pip install --upgrade pip
-
       - name: Run benchmarks
         uses: snakemake/snakemake-github-action@v1
         with:
@@ -36,6 +27,7 @@ jobs:
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
            
+            pip install git+https://github.com/bionumpy/npstructures.git/@dev
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
