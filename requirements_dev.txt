@@ -22,3 +22,4 @@ kaleido
 biotite
 biopython
 nbsphinx
+more_itertools
