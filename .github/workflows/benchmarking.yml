@@ -6,21 +6,21 @@ on:
   push:
     branches: [ "dev", "master", "dev-benchmarking"]
     env:
-      benchmark_type: "small"
+      snakemake_command: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
   pull_request:
     branches: [ "master", "dev" ]
     env:
-      benchmark_type: "small"
+      snakemake_command: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
   # big behchmark every night
   schedule:
     - cron: "0 4 1/1 * *"
       env:
-        benchmark_type: "big"
+        snakemake_command: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_big.md validation_report_big.md'
 
   # big behchmark on manual run
   workflow_dispatch:
     env:
-      benchmark_type: "big"
+      snakemake_command: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_big.md validation_report_big.md'
 
 
 jobs:
@@ -46,10 +46,9 @@ jobs:
         with:
           directory: '.'
           snakefile: 'Snakefile'
-          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_$TYPE.md validation_report_$TYPE.md'
+          args: ${{env.snakemake_command}}
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
            
-            TYPE=${{env.benchmark_type}} 
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
