@@ -20,4 +20,5 @@ sphinx_rtd_theme
 plotly
 kaleido
 biotite
+biopython
 nbsphinx
