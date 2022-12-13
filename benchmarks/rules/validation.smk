@@ -15,6 +15,8 @@ rule assert_method_output_is_equal:
         get_result_files_for_two_methods
     output:
         "results/validation/{analysis}/{method1}-vs-{method2}.{run_details}.txt"
+    conda:
+        "../envs/diff.yml"
     shell:
         # diff return nonzero exit code on diff
         "diff --ignore-space-change {input} > {output}"
@@ -58,7 +60,6 @@ rule validation_report_all_analysis:
         get_validation_reports
     output:
         "validation_report_{dataset_size}.md"
-
     shell:
         """
         cat {input} > {output}
