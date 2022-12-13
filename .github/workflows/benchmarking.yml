@@ -2,10 +2,25 @@
 name: Benchmarks
 
 on:
+  # small benchmark on push and pull request
   push:
-    branches: [ "dev", "master" ]
+    branches: [ "dev", "master", "dev-benchmarking" ]
+    env:
+      benchmark_type: "small"
   pull_request:
     branches: [ "master", "dev" ]
+    env:
+      benchmark_type: "small"
+  # big behchmark every night
+  schedule:
+    - cron: "0 4 1/1 * *"
+      env:
+        benchmark_type: "big"
+
+  # big behchmark on manual run
+  workflow_dispatch:
+    env:
+      benchmark_type: "big"
 
 
 jobs:
@@ -31,7 +46,7 @@ jobs:
         with:
           directory: '.'
           snakefile: 'Snakefile'
-          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
+          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_${{ env.benchmark_type }}.md validation_report_${{ env.benchmark_type }}.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
             pip install -r requirements_dev.txt
             pip install .
