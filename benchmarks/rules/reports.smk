@@ -61,7 +61,7 @@ rule make_runtime_report:
                     }
         )
         fig.write_html(output.figure)
-        fig.write_image(output.png, scale=4)
+        fig.write_image(output.png, scale=2)
 
 
 rule main_report:
