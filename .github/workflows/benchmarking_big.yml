@@ -1,5 +1,5 @@
 
-name: Benchmarks
+name: Benchmarks (big data)
 
 on:
   schedule:
