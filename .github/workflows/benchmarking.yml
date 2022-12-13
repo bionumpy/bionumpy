@@ -4,7 +4,7 @@ name: Benchmarks
 on:
   # small benchmark on push and pull request
   push:
-    branches: [ "dev", "master", "dev-benchmarking" ]
+    branches: [ "dev", "master", "dev-benchmarking"]
     env:
       benchmark_type: "small"
   pull_request:
