@@ -17,7 +17,7 @@ rule assert_method_output_is_equal:
         "results/validation/{analysis}/{method1}-vs-{method2}.{run_details}.txt"
     shell:
         # diff return nonzero exit code on diff
-        "diff --ignore-space-chang {input} > {output}"
+        "diff --ignore-space-change {input} > {output}"
 
 
 def get_validation_files_for_analysis(wildcards):
