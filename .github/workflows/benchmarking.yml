@@ -34,6 +34,7 @@ jobs:
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+            sudo apt-get install -y gfortran
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
