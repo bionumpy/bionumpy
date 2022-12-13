@@ -46,8 +46,9 @@ jobs:
         with:
           directory: '.'
           snakefile: 'Snakefile'
-          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_${{ env.benchmark_type }}.md validation_report_${{ env.benchmark_type }}.md'
+          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_${BENCHMARK_TYPE}.md validation_report_${BENCHMARK_TYPE}.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+            
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
