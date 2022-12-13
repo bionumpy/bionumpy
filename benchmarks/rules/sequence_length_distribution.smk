@@ -16,6 +16,8 @@ rule awk_sequence_length_distribution:
         "results/awk/sequence_length_distribution/{filename}.csv"
     benchmark:
         "benchmarks/sequence_length_distribution/awk/{filename}.txt"
+    conda:
+        "../envs/awk.yml"
     shell:
         "zcat {input} | awk 'NR%4 == 2 {{lengths[length($0)]++}} END {{for (l in lengths) {{print l, lengths[l]}}}}' > {output}"         
 
