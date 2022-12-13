@@ -13,6 +13,11 @@ BioNumPy
         :target: https://github.com/bionumpy/bionumpy-example-data/actions/
         :alt: Testing on big data
 
+.. image:: https://github.com/bionumpy/bionumpy/actions/workflows/benchmarking.yml/badge.svg
+        :target: https://github.com/bionumpy/bionumpy/blob/benchmarks/benchmarks/report_small.md
+        :alt: Benchmarks
+
+
 Documentation: `https://bionumpy.github.io/bionumpy/ <https://bionumpy.github.io/bionumpy/>`_
 
 

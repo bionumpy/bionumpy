@@ -1,9 +1,11 @@
 
-name: build and test
+name: Benchmarks
 
 on:
   push:
-    branches: [ "dev-benchmarking"]
+    branches: [ "dev", "master" ]
+  pull_request:
+    branches: [ "master", "dev" ]
 
 
 jobs:
