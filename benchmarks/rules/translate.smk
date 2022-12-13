@@ -1,4 +1,3 @@
-import biotite.sequence
 import bionumpy as bnp
 
 
@@ -16,6 +15,7 @@ rule translate_bionumpy:
         output_stream.write(translate_dna_to_protein(input_stream))
         output_stream.close()
 
+
 rule translate_biopython:
     input:
         "results/dna_sequences/{name}.fa"
@@ -26,6 +26,7 @@ rule translate_biopython:
     script:
         "../scripts/biopython_translate.py"
 
+
 rule translate_biostrings:
     input:
         "results/dna_sequences/{name}.fa"
@@ -35,8 +36,6 @@ rule translate_biostrings:
         "benchmarks/translate/biostrings/{name}.txt"
     script:
         "scripts/reverse_complement_biostrings.R"
-
-
 
 
 rule translate_python:
@@ -50,7 +49,6 @@ rule translate_python:
         "../scripts/python_translate.py"
 
 
-
 rule translate_biotite:
     input:
         "results/dna_sequences/{name}.fa"
@@ -58,15 +56,7 @@ rule translate_biotite:
         "results/biotite/translate/{name}.fa"
     benchmark:
         "benchmarks/translate/biotite/{name}.txt"
-
-    run:
-        import biotite.sequence.io.fasta as fasta
-        fasta_file = fasta.FastaFile.read(input[0])
-        out_fasta_file = fasta.FastaFile()
-
-        for header, dna in fasta_file.items():
-            dna = biotite.sequence.NucleotideSequence(dna)
-            protein = dna.translate(complete=True)
-            fasta.set_sequence(out_fasta_file, protein, header=header)
-
-        out_fasta_file.write(output[0])
+    conda:
+        "../envs/biotite.yml"
+    script:
+        "../scripts/biotite_translate.py"

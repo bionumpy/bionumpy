@@ -19,7 +19,6 @@ sphinx_rtd_theme
 #matplotlib
 plotly
 kaleido
-biotite
 biopython
 nbsphinx
 more_itertools
