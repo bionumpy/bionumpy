@@ -25,7 +25,7 @@ rule intersect_bedtools:
         left="results/intervals/{b}.bed",
         right="results/intervals/{a}.bed"
     output:
-        "results/bedtools/intersect/{a,\d+}_{b,\d+}.bed"
+        "results/bedtools/intersect/{a}_{b}.bed"
     benchmark:
         "benchmarks/intersect/bedtools/{a}_{b}.txt"
     log:
@@ -35,18 +35,3 @@ rule intersect_bedtools:
         extra="-sorted"
     wrapper:
         "v1.19.2/bio/bedtools/intersect"
-
-
-rule intersect_check:
-    input:
-        "results/bedtools/intersect/{a}_{b}.bed",
-        "results/bionumpy/intersect/{a}_{b}.bed"
-    output:
-        "results/intersect/{a\d+}_{b\d+}.check"
-    run:
-        a = (line.strip().split("\t")[:3] for line in open(input[0]))
-        b = (line.strip().split("\t")[:3] for line in open(input[1]))
-        for l, l2 in zip(a, b):
-            assert l==l2, (l, l2)
-        open(output[0], "w").write("1")
-
