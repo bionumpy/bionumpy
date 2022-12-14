@@ -391,6 +391,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), encoding=self.encoding)
         if func == np.append:
             return self.__class__(func(args[0].data, args[1].data, *args[2:], **kwargs), encoding=self.encoding)
+        if func == np.lexsort:
+            if not all(issubclass(t, (EncodedArray, np.ndarray)) for t in types):
+                return NotImplemented
+
+            args = [a.raw() if isinstance(a, EncodedArray) else a for a in args[0]]
+            return func(args, *kwargs)
+
         if func == np.insert:
             return self.__class__(func(args[0].data, args[1], args[2].data, *args[3:], **kwargs), encoding = self.encoding)
         elif func in (np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
