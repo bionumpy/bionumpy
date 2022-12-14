@@ -26,6 +26,5 @@ if __name__ == "__main__":
     out_file = sys.argv[2]
 
     sizes, counts = get_sorted_sequence_length_distribution(file_name)
-    print(sizes, counts)
     with open(out_file, "w") as f:
         f.write("\n".join(["%d %d" % (size, count) for size, count in zip(sizes, counts)]) + "\n")

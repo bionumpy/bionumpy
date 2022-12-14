@@ -40,7 +40,7 @@ analysis:
 
   subsample:
     name: "Subsampling a FASTA-file"
-    tools: ["python", "bionumpy", "seqtk"]
+    tools: ["bionumpy", "python", "seqtk"]
     validate_equal: false
     output_file_ending: ".fa"
     runs:

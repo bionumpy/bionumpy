@@ -49,7 +49,6 @@ rule make_runtime_report:
             pretty_name = config["method_names"][method_name]
             runtimes[pretty_name] += time
 
-        print(runtimes)
         with open(output.data, "w") as f:
             f.write("\n".join(["\t".join(map(str, result)) for result in runtimes.items()]))
 
@@ -58,7 +57,13 @@ rule make_runtime_report:
         fig = px.bar(x=x_axis, y=y_axis, title=params.report_name,
             labels={"x": "Method",
                     "y": "Time in seconds"
-                    }
+                    },
+            template="seaborn",
+        )
+        fig.update_layout(
+            font={
+                "size": 19
+            }
         )
         fig.write_html(output.figure)
         fig.write_image(output.png, scale=2)
@@ -79,9 +84,9 @@ rule main_report:
 
         out = ""
         for i, image in enumerate(input):
-            if i % 2 == 0:
+            if i % 3 == 0:
                 out += "<br>";
-            out += "<img src='" + image + "' style='width: 50%; height: auto'>"
+            out += "<img src='" + image + "' style='width: 33%; height: auto'>"
 
         with open(output.html, "w") as f:
             f.write(out)
