@@ -1,5 +1,6 @@
+import numpy as np
 import pytest
-from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_intervals
+from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_intervals, get_boolean_mask
 from bionumpy.util.testing import assert_bnpdataclass_equal
 from bionumpy.datatypes import Interval, BedGraph
 
@@ -8,6 +9,35 @@ from bionumpy.datatypes import Interval, BedGraph
 def interval_a():
     return Interval(["chr1"]*3, [10, 20, 30], [15, 29, 35])
 
+
+@pytest.fixture
+def small_interval():
+    return Interval.from_entry_tuples([
+        ("chr1", 2, 5),
+        ("chr1", 7, 9)])
+
+
+@pytest.fixture
+def small_complicated_interval():
+    return Interval.from_entry_tuples([
+        ("chr1", 2, 5),
+        ("chr1", 5, 7),
+        ("chr1", 10, 12),
+        ("chr1", 11, 13)])
+
+
+def complicated_intervals():
+    return [Interval.from_entry_tuples([
+        ("chr1", 2, 5),
+        ("chr1", 5, 7),
+        ("chr1", 10, 12),
+        ("chr1", 11, 13)]),
+     Interval.from_entry_tuples([
+         ("chr1", 0, 5),
+         ("chr1", 11, 13)]),
+     Interval.from_entry_tuples([
+         ("chr1", 0, 5),
+         ("chr1", 11, 20)])]
 
 @pytest.fixture
 def interval_b():
@@ -44,5 +74,19 @@ def test_sort_intervals(interval_d):
     sorted_intervals = sort_intervals(interval_d)
     assert_bnpdataclass_equal(sorted_intervals,
                               interval_d[[3, 2, 1, 0]])
-    
+
+
+@pytest.mark.parametrize("interval", complicated_intervals())
+def test_get_boolean_mask(interval):
+    print(interval)
+    size = 20
+    starts = np.asanyarray(interval.start)
+    ends = np.asanyarray(interval.stop)
+    row_len = size
+    true = np.zeros((row_len), dtype=bool)
+    for (start, end) in zip(starts, ends):
+        print(start, end)
+        true[start:end] |= True
+    result = get_boolean_mask(interval, size).to_array()
+    np.testing.assert_array_equal(result, true)
 

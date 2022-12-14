@@ -119,6 +119,7 @@ class FileBuffer:
     def validate_if_not(self):
         if not self._is_validated:
             self._validate()
+            self._is_validated = True
 
     def get_data(self) -> bnpdataclass:
         """Extract the data from the buffer

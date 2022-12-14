@@ -240,6 +240,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
+        if not self.encoding.is_one_to_one_encoding():
+            return self.encoding.to_string(self.data)
         if hasattr(self.encoding, "_decode"):
             # new system, can be used in all cases after refactoring
             data = self

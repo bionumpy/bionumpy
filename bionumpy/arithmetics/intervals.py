@@ -94,10 +94,14 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     [False False  True]
     """
     assert np.all(intervals.stop <= chromosome_size), (np.max(intervals.stop), chromosome_size)
-    rla = RunLength2dArray.from_intervals(intervals.start,
-                                          intervals.stop,
-                                          chromosome_size)
-    return rla.any(axis=0)
+    if len(intervals) == 0:
+        return RunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
+    merged = merge_intervals(intervals[np.argsort(intervals.start)])
+    return RunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
+    # rla = RunLength2dArray.from_intervals(intervals.start,
+    #                                      intervals.stop,
+    #                                      chromosome_size)
+    # return rla.any(axis=0)
 
 
 def human_key_func(chrom_name):
@@ -127,7 +131,6 @@ def sort_intervals(intervals: Interval, chromosome_key_function: callable = lamb
     if isinstance(intervals.chromosome.encoding, StringEncoding):
         args = np.lexsort((intervals.start, intervals.chromosome))
         return intervals[args]
-        
 
     if sort_order is not None:
         chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
@@ -162,7 +165,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
         stops += distance
-    valid_start_mask = intervals.start[1:] > intervals[:-1].stop
+    valid_start_mask = intervals.start[1:] > stops[:-1]# intervals[:-1].stop
     start_mask = np.concatenate(([True], valid_start_mask))
     stop_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
@@ -190,6 +193,18 @@ def intersect(intervals_a, intervals_b):
     result = all_intervals[1:][mask]
     result.stop = stops[:-1][mask]
     return result
+
+
+@streamable()
+def gloabal_intersect(intervals_a, intervals_b):
+    all_intervals = np.concatenate([intervals_a, intervals_b])
+    all_intervals = all_intervals[np.lexsort(all_intervals.chromosome, all_intervals.start)]
+    stops = all_intervals.stop[np.lexsort(all_intervals.chromosome, all_intervals.stop)]
+    mask = stops[:-1] > all_intervals.start[1:]
+    result = all_intervals[1:][mask]
+    result.stop = stops[:-1][mask]
+    return result
+
 
 @chromosome_map()
 def extend(intervals, both=None, forward=None, reverse=None, left=None, right=None):

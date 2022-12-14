@@ -55,7 +55,7 @@ analysis:
     runs:
       # number of transcription factors from encode
       small: "ntfs5"
-      big: "ntfs10"
+      big: "ntfs50"
 
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
