@@ -8,12 +8,8 @@ rule translate_bionumpy:
         "results/bionumpy/translate/{filename}.fa"
     benchmark:
         "benchmarks/translate/bionumpy/{filename}.txt"
-    run:
-        from bionumpy.sequence import translate_dna_to_protein
-        input_stream = bnp.open(input[0]).read_chunks()
-        output_stream = bnp.open(output[0], "w")
-        output_stream.write(translate_dna_to_protein(input_stream))
-        output_stream.close()
+    script:
+        "../scripts/biotite_translate.py"
 
 
 rule translate_biopython:

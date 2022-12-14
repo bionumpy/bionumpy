@@ -11,7 +11,6 @@ def column_index_array(shape):
     index_builder = np.ones(size + 1, dtype=int)
     index_builder[np.cumsum(row_lengths)] = 1-row_lengths
     index_builder[0] = 0
-    print(index_builder)
     np.cumsum(index_builder, out=index_builder)
     return RaggedArray(index_builder[:-1], shape)
 
@@ -27,7 +26,6 @@ def get_ascii_hash(encoded_array, mod):
     powers = _get_power_array(np.max(encoded_array.shape[-1]), mod)
     if isinstance(encoded_array, EncodedRaggedArray):
         col_indices = column_index_array(encoded_array.shape)
-        print(col_indices)
         powers = RaggedArray(powers[col_indices.ravel()], encoded_array.shape)
 
     return np.sum((powers*encoded_array.raw()) % mod, axis=-1) % mod

@@ -94,8 +94,8 @@ rule bionumpy_jaccard_all_vs_all:
 
 rule bionumpy_jaccard_two_bed_files:
     input:
-        a="results/bed_files/{a}.bed.gz",
-        b="results/bed_files/{b}.bed.gz"
+        a="results/intervals/{a}.bed",
+        b="results/intervals/{b}.bed"
     output:
         "results/bionumpy/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
@@ -108,8 +108,8 @@ rule bionumpy_jaccard_two_bed_files:
 # also does sorting in this rule so that's included in the benchmark
 rule bedtools_jaccard_two_bed_files:
     input:
-        a="results/bed_files/{a}.bed.gz",
-        b="results/bed_files/{b}.bed.gz"
+        a="results/intervals/{a}.bed",
+        b="results/intervals/{b}.bed"
     output:
         "results/bedtools/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
@@ -118,8 +118,8 @@ rule bedtools_jaccard_two_bed_files:
         "../envs/bedtools.yml"
     shell:
         """
-        zcat {input.a} | sort -k1,1 -k2,2n > {input.a}.sorted.bed.tmp        
-        zcat {input.b} | sort -k1,1 -k2,2n > {input.b}.sorted.bed.tmp        
+        cat {input.a} | sort -k1,1 -k2,2n > {input.a}.sorted.bed.tmp        
+        cat {input.b} | sort -k1,1 -k2,2n > {input.b}.sorted.bed.tmp        
         bedtools jaccard -a {input.a}.sorted.bed.tmp -b {input.b}.sorted.bed.tmp | cut -f 3 | tail -n 1 > {output}
         """
 
@@ -127,8 +127,8 @@ rule bedtools_jaccard_two_bed_files:
 
 rule pyranges_jaccard_two_bed_files:
     input:
-        a="results/bed_files/{a}.bed.gz",
-        b="results/bed_files/{b}.bed.gz"
+        a="results/intervals/{a}.bed",
+        b="results/intervals/{b}.bed"
     output:
         "results/pyranges/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
