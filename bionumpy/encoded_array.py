@@ -392,7 +392,6 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if func == np.append:
             return self.__class__(func(args[0].data, args[1].data, *args[2:], **kwargs), encoding=self.encoding)
         if func == np.lexsort:
-            print(func, types, args,kwargs)
             if not all(issubclass(t, (EncodedArray, np.ndarray)) for t in types):
                 return NotImplemented
 
