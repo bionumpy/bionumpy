@@ -10,6 +10,7 @@ method_names:
   awk: "AWK (one-liner)"
   bcftools: "Bcftools"
   vcfpy: "vcfpy"
+  pyvcf: "pyvcf"
 
 
 analysis:
@@ -83,9 +84,11 @@ analysis:
 
   vcf_filtering:
     name: "Filtering VCF on allele frequency"
-    tools: ["bionumpy", "bcftools", "vcfpy"]
-    validate_equal: aflse
+    tools: ["bionumpy", "bcftools", "pyvcf"]
+    validate_equal: false
     output_file_ending: ".filtered.csv"
     runs:
       small: "small"
       big: "big"
+
+

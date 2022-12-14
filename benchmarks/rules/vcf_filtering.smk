@@ -35,6 +35,7 @@ rule bionumpy_vcf_filtering:
 
 
 
+# not used, similar to pyvcf
 rule vcfpy_vcf_filtering:
     input:
         "results/vcfs/{size}_phased.vcf.gz"
@@ -60,3 +61,16 @@ rule vcfpy_vcf_filtering:
 
             if allele_count >= 10:
                 writer.write_record(record)
+
+
+rule pyvcf_vcf_filtering:
+    input:
+        "results/vcfs/{size}_phased.vcf.gz"
+    output:
+        "results/pyvcf/vcf_filtering/{size}.filtered.vcf"
+    benchmark:
+        "benchmarks/vcf_filtering/pyvcf/{size}.txt"
+    conda:
+        "../envs/pyvcf.yml"
+    script:
+        "../scripts/pyvcf_vcf_filtering.py"
