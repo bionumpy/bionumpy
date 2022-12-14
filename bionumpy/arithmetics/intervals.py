@@ -3,7 +3,7 @@ import dataclasses
 from operator import itemgetter
 import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
-
+from bionumpy.encodings.string_encodings import StringEncoding
 from .bedgraph import BedGraph
 from .. import streamable
 from ..streams.grouped import chromosome_map
@@ -124,6 +124,11 @@ def sort_intervals(intervals: Interval, chromosome_key_function: callable = lamb
         Sorted intervals
 
     """
+    if isinstance(intervals.chromosome.encoding, StringEncoding):
+        args = np.lexsort((intervals.start, intervals.chromosome))
+        return intervals[args]
+        
+
     if sort_order is not None:
         chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
     s = sorted((chromosome_key_function(interval.chromosome.to_string()), interval.start, interval.stop, i)

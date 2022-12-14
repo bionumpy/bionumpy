@@ -94,15 +94,14 @@ TestDigitEncoding = DigitEncodingFactory("1")
 
 
 @bnpdataclass
-class TestEntry:
+class Entry:
     a: TestDigitEncoding
 
 
 def test_numeric_entry():
     encoding = TestDigitEncoding
-    a = TestEntry.single_entry("1234")
+    a = Entry.single_entry("1234")
     assert np.all(encoding.decode(a.a) == 48 + np.array([1, 2, 3, 4]))
-
 
 
 @pytest.mark.parametrize("data", ["!#", ["!#"]])

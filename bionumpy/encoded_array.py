@@ -395,7 +395,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             if not all(issubclass(t, (EncodedArray, np.ndarray)) for t in types):
                 return NotImplemented
 
-            args = [a.raw() if isinstance(a, EncodedArray) else a for a in args[0]]
+            args = [a.raw() if isinstance(a, EncodedArray) else np.asarray(a) for a in args[0]]
             return func(args, *kwargs)
 
         if func == np.insert:
