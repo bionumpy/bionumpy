@@ -8,6 +8,9 @@ method_names:
   python: "Python"
   jellyfish: "Jellyfish"
   awk: "AWK (one-liner)"
+  bcftools: "Bcftools"
+  vcfpy: "vcfpy"
+  pyvcf: "pyvcf"
 
 
 analysis:
@@ -77,3 +80,15 @@ analysis:
     runs:
       small: "small"  # small.fq.gz
       big: "ENCFF689IPX"  # encode id of fastq file
+
+
+  vcf_filtering:
+    name: "Filtering VCF on allele frequency"
+    tools: ["bionumpy", "bcftools", "pyvcf"]
+    validate_equal: false
+    output_file_ending: ".filtered.csv"
+    runs:
+      small: "small"
+      big: "big"
+
+
