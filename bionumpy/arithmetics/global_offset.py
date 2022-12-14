@@ -24,6 +24,17 @@ class GlobalOffset:
     def from_local_coordinates(self, sequence_name, local_offset):
         return self.get_offset(sequence_name) + local_offset
 
+    def to_local_interval(self, global_interval):
+        chromosome_idxs = np.searchsorted(self._offset, global_interval.start, side="right")-1
+        start = global_interval.start-self._offset[chromosome_idxs]
+        stop = global_interval.stop-self._offset[chromosome_idxs]
+        assert stop <= self._sizes[chromosome_idxs]
+        chromosome = EncodedArray(chromosome_idxs, self._old_encoding)
+        return dataclasses.replace(global_interval,
+                                   chromosome=chromosome,
+                                   start=start,
+                                   stop=stop)
+
     def from_local_interval(self, interval, do_clip=False):
         offsets = self.get_offset(interval.chromosome)
         sizes = self.get_size(interval.chromosome)

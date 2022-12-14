@@ -7,7 +7,7 @@ __version__ = '0.2.7'
 import npstructures as nps
 
 from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
-                 TwoLineFastaBuffer, FastQBuffer,
+                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer,
                  BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                  GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
@@ -23,7 +23,7 @@ open = bnp_open
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
-Bed6Buffer = get_bufferclass_for_datatype(Bed6)
+# Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
 __all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",

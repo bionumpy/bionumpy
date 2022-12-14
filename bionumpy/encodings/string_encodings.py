@@ -18,6 +18,13 @@ class StringEncoding(Encoding):
         encoded_ragged_array = as_encoded_array(encoded_ragged_array)
         hashes = self._hash_table[encoded_ragged_array]
         return EncodedArray(hashes, self)
+
+    def decode(self, encoded_array):
+        if isinstance(encoded_array, EncodedArray):
+            data = encoded_array.raw()
+        else:
+            data = encoded_array
+        return self._seqeunces[data]
         # if isinstance(encoded_ragged_array, EncodedArray):
         # 
         # return EncodedRaggedArray(
