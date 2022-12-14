@@ -11,6 +11,7 @@ method_names:
   bcftools: "Bcftools"
   vcfpy: "vcfpy"
   pyvcf: "pyvcf"
+  pyranges: "pyranges"
 
 
 analysis:
@@ -20,11 +21,12 @@ analysis:
     output_file_ending: ".bed"
     validate_equal: true  # if true, it is asserted that all methods produce identical output
     runs:
-      small: "nintervals100_nintervals101"
-      big: "nintervals100000_nintervals110000"
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
+      #big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF227NIG_mapped_reads_1m"
+      big: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
 
   translate:
-    name: "Translating DNA protein"
+    name: "Translating DNA to protein"
     tools: ["bionumpy", "biopython", "python", "biotite"]
     output_file_ending: ".fa"
     validate_equal: true
@@ -50,14 +52,24 @@ analysis:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
 
+
+  jaccard_two_bed_files:
+    name: "Jaccard on two bed-files"
+    tools: ["bionumpy", "pyranges", "bedtools"]
+    validate_equal: false
+    output_file_ending: ".txt"
+    runs:
+      small: "ENCFF405ZPR-vs-ENCFF816AEF"
+      big: "ENCFF405ZPR-vs-ENCFF816AEF"
+
   jaccard_all_vs_all:
-    name: "Jaccard on BED-files (all vs all)"
-    tools: ["bionumpy", "bedtools"]
+    name: "Jaccard on multiple BED-files (all vs all)"
+    tools: ["bionumpy", "pyranges", "bedtools"]
     validate_equal: false
     output_file_ending: ".csv"
     runs:
       # number of transcription factors from encode
-      small: "ntfs5"
+      small: "ntfs10"
       big: "ntfs50"
 
   kmer_counts:

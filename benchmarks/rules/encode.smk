@@ -26,3 +26,10 @@ rule download_encode_bed_file:
         zcat {output.bed} | sort -k1,1 -k2,2n > {output.sorted_bed}
         """
 
+
+
+rule download_mapped_reads_bed_file:
+    output:
+        "results/intervals/ENCFF{id}_mapped_reads_{size}.bed"
+    shell:
+        "wget -O {output} https://github.com/bionumpy/bionumpy-example-data/raw/master/ENCFF{wildcards.id}_mapped_reads_{wildcards.size}.bed"

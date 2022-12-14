@@ -34,8 +34,6 @@ def jaccard_all_vs_all(chrom_sizes, bed_file_names):
             #results[run_id] = intersect(data1, data2)
             results[run_id] = jaccard(global_size, data1, data2)
 
-    print(results)
-    print("Found %d pairs" % len(results))
     # todo: Write results to a file
     return results
 
@@ -45,7 +43,9 @@ if __name__ == "__main__":
     files = sys.argv[2:]
     # chrom_sizes = "example_data/hg38_unix_sorted.chrom.sizes"
     # files = "benchmarks/results/bed_files/ENCFF120PGJ.sorted.bed  benchmarks/results/bed_files/ENCFF405ZPR.sorted.bed  benchmarks/results/bed_files/ENCFF539MIO.sorted.bed  benchmarks/results/bed_files/ENCFF965PER.sorted.bed benchmarks/results/bed_files/ENCFF193LLN.sorted.bed  benchmarks/results/bed_files/ENCFF410SWS.sorted.bed".split()
-    jaccard_all_vs_all(chrom_sizes, files)
+    result = jaccard_all_vs_all(chrom_sizes, files)
+    for r in result:
+        print(r)
 
 # chrom_sizes = "example_data/hg38_unix_sorted.chrom.sizes"
 # #files = "benchmarks/results/bed_files/ENCFF120PGJ.sorted.bed  benchmarks/results/bed_files/ENCFF405ZPR.sorted.bed  benchmarks/results/bed_files/ENCFF539MIO.sorted.bed  benchmarks/results/bed_files/ENCFF965PER.sorted.bed benchmarks/results/bed_files/ENCFF193LLN.sorted.bed  benchmarks/results/bed_files/ENCFF410SWS.sorted.bed".split()
