@@ -52,11 +52,14 @@ class _GenotypeRowEncoding(Encoding):
     def _preprocess_data_for_encoding(self, genotype_rows):
         # split the row of genotype data
         from ..io.strops import split, replace_inplace
-        data = genotype_rows
+        data = genotype_rows.ravel()
         # hack because the row sometime ends with \n and sometimes with \t
         replace_inplace(data, "\n", "\t")
-        data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
-        return data
+        indices = np.flatnonzero(data == "\t")
+        indices = np.insert(indices, 0, -1)
+        return data[indices[:-1, np.newaxis] + np.array([1, 2, 3])]
+        #data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
+        #return data
 
     def decode(self, genotype):
         if len(genotype.shape) == 0:
