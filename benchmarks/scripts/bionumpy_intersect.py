@@ -7,6 +7,7 @@ b = bnp.open(snakemake.input.b, buffer_type=bnp.Bed6Buffer).read()
 
 
 print("Sorting")
+
 chromosome_encoding = bnp.encodings.string_encodings.StringEncoding(chrom_sizes.name)
 a = dataclasses.replace(a, chromosome=chromosome_encoding.encode(a.chromosome))
 b = dataclasses.replace(b, chromosome=chromosome_encoding.encode(b.chromosome))
