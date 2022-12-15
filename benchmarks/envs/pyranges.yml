@@ -1,0 +1,5 @@
+channels:
+  - bioconda
+
+dependencies:
+  - pyranges==0.0.120

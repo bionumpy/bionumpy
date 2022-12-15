@@ -40,25 +40,10 @@ rule pyranges_jaccard_all_vs_all:
         "results/pyranges/jaccard_all_vs_all/ntfs{n_tfs}.txt"
     benchmark:
         "benchmarks/jaccard_all_vs_all/pyranges/ntfs{n_tfs}.txt"
-    run:
-        import pyranges
-        files = {i: pyranges.read_bed(i) for i in input}
-        results = {}
-        n = 0
-        for a in files:
-            for b in files:
-                run_id = frozenset([a, b])
-                if a == b or run_id in results:
-                    continue
-                j = files[a].stats.jaccard(files[b])
-                results[run_id] = j
-                n += 1
-
-        print("%d pairs compared" % n)
-
-        with open(output[0], "w") as f:
-            f.write(str(list(results.values())) + "\n")
-
+    conda:
+        "../envs/pyranges.yml"
+    script:
+        "../scripts/pyranges_jaccard_all.py"
 
 
 rule bedtools_jaccard_all_vs_all:
@@ -133,10 +118,7 @@ rule pyranges_jaccard_two_bed_files:
         "results/pyranges/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
         "benchmarks/jaccard_two_bed_files/pyranges/{a}-vs-{b}.txt"
-    run:
-        import pyranges
-        a = pyranges.read_bed(input.a)
-        b = pyranges.read_bed(input.b)
-        j = a.stats.jaccard(b)
-        with open(output[0], "w") as f:
-            f.write(str(j) + "\n") 
+    conda:
+        "../envs/pyranges.yml"
+    script:
+        "../scripts/pyranges_jaccard_two_bed_files.py"

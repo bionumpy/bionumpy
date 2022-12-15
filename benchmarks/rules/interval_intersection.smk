@@ -38,5 +38,7 @@ rule intersect_pyranges:
         "results/pyranges/intersect/{a}-vs-{b}.bed"
     benchmark:
         "benchmarks/intersect/pyranges/{a}-vs-{b}.txt"
+    conda:
+        "../envs/pyranges.yml"
     script:
         "../scripts/pyranges_intersect.py"
