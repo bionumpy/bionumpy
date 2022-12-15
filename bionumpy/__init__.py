@@ -16,6 +16,7 @@ from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encode
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .io.strops import str_equal
+from .util.cli import run_as_commandline
 from . import simulate
 from . import arithmetics
 open = bnp_open

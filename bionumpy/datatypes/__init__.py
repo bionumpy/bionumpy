@@ -43,7 +43,7 @@ class Interval:
 @bnpdataclass
 class Bed6(Interval):
     name: str
-    score: int
+    score: str
     strand: StrandEncoding
 
 
@@ -164,4 +164,3 @@ class GfaPath:
     name: str
     node_ids: List[int]
     directions: List[int]
-
