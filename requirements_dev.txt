@@ -22,4 +22,3 @@ kaleido
 biopython
 nbsphinx
 more_itertools
-pyranges
