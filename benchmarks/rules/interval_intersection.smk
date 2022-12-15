@@ -40,5 +40,7 @@ rule intersect_pyranges:
         "benchmarks/intersect/pyranges/{a}-vs-{b}.txt"
     conda:
         "../envs/pyranges.yml"
-    script:
-        "../scripts/pyranges_intersect.py"
+    shell:
+        "time python scripts/pyranges_intersect.py {input} {output}"
+    #script:
+    #    "../scripts/pyranges_intersect.py"

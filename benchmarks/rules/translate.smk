@@ -9,7 +9,7 @@ rule translate_bionumpy:
     benchmark:
         "benchmarks/translate/bionumpy/{filename}.txt"
     script:
-        "../scripts/biotite_translate.py"
+        "../scripts/bionumpy_translate.py"
 
 
 rule translate_biopython:

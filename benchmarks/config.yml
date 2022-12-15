@@ -22,7 +22,7 @@ analysis:
     validate_equal: true  # if true, it is asserted that all methods produce identical output
     runs:
       small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
-      big: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
+      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF227NIG_mapped_reads_1m"
 
   translate:
     name: "Translating DNA to protein"
@@ -31,7 +31,7 @@ analysis:
     validate_equal: true
     runs:
       small: "length150_nreads100"
-      big: "length150_nreads1000000"
+      big: "length150_nreads500000"
 
   reverse_complement:
     name: "Reverse-complement"
@@ -40,7 +40,7 @@ analysis:
     validate_equal: true
     runs:
       small: "length150_nreads100"
-      big: "length150_nreads1000000"
+      big: "length150_nreads500000"
 
   subsample:
     name: "Subsampling a FASTA-file"
