@@ -196,10 +196,10 @@ def intersect(intervals_a, intervals_b):
 
 
 @streamable()
-def global_intersect(intervals_a, intervals_b):
+def global_intersect(intervals_b, intervals_a):
     all_intervals = np.concatenate([intervals_a, intervals_b])
-    all_intervals = all_intervals[np.lexsort((all_intervals.chromosome, all_intervals.start))]
-    stops = all_intervals.stop[np.lexsort((all_intervals.chromosome, all_intervals.stop))]
+    all_intervals = all_intervals[np.lexsort((all_intervals.start, all_intervals.chromosome))]
+    stops = all_intervals.stop[np.lexsort((all_intervals.stop, all_intervals.chromosome))]
     mask = stops[:-1] > all_intervals.start[1:]
     result = all_intervals[1:][mask]
     result.stop = stops[:-1][mask]

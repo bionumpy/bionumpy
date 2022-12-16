@@ -145,8 +145,11 @@ class FileBuffer:
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
             lens = ends - starts
-        indices, shape = RaggedView(starts, lens).get_flat_indices()
-        return EncodedRaggedArray(self._data[indices], shape)
+            # indices, shape = RaggedView(starts, lens).get_flat_indices()
+        e = EncodedRaggedArray(self._data, RaggedView(starts, lens))
+        e.is_contigous = False
+        return e
+        # return EncodedRaggedArray(self._data[indices], shape)
 
     def _move_2d_array_to_intervals(self, array, starts, ends):
         max_chars = array.shape[-1]
