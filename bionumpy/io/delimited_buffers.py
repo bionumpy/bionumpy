@@ -10,10 +10,10 @@ from ..datatypes import (Interval, VCFGenotypeEntry,
                          GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
-from ..encodings import (Encoding, DigitEncoding)
+from ..encodings import Encoding
 from ..encodings.exceptions import EncodingError
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
-from ..encodings.alphabet_encoding import get_alphabet_encodings
+from ..encodings.alphabet_encoding import get_alphabet_encodings, DigitEncoding
 from ..encoded_array import get_base_encodings, BaseEncoding
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
@@ -452,13 +452,40 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
 class BedBuffer(DelimitedBuffer):
     dataclass = Interval
 
+    def get_integers(self, cols: list) -> np.ndarray:
+        """Get integers from integer string
 
-class Bed12Buffer(DelimitedBuffer):
+        Extract integers from the specified columns
+
+        Parameters
+        ----------
+        cols : list
+            list of columns containing integers
+
+        """
+        assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
+        cols = np.asanyarray(cols)
+        integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
+        integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
+        try:
+            digits = as_encoded_array(array, DigitEncoding).raw()
+        except EncodingError as e:
+            row_number = e.offset//array.shape[-1]#  rows._shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
+        powers = 10**np.arange(digits.shape[-1])[::-1]
+        return digits.dot(powers).reshape(-1, cols.size)
+        #integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
+        #return integers.reshape(-1, cols.size)
+
+
+class Bed6Buffer(BedBuffer):
+    dataclass = Bed6
+
+
+class Bed12Buffer(Bed6Buffer):
     dataclass = Bed12
 
-
-class Bed6Buffer(DelimitedBuffer):
-    dataclass = Bed6
 
 
 class VCFBuffer(DelimitedBuffer):
