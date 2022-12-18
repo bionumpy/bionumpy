@@ -1,4 +1,3 @@
-import plotly.express as px
 
 def get_analysis_benchmark_reports(wildcards):
     analysis_type = wildcards.analysis
@@ -21,11 +20,6 @@ def get_analysis_benchmark_reports(wildcards):
     return files
 
 
-def get_runtime_from_benchmark_report(file_name):
-    tool_name = file_name.split("/")[2]
-    time = float(open(file_name).readlines()[1].split()[0])
-    return tool_name, time
-
 
 def get_report_name(wildcards):
     return config["analysis"][wildcards.analysis]["name"]
@@ -37,41 +31,18 @@ rule make_runtime_report:
     output:
         data="results/reports/{analysis}/{dataset_size}.data",
         figure="results/reports/{analysis}/{dataset_size}.html",
-        png="results/reports/{analysis}/{dataset_size}.png"
+        png="results/reports/{analysis}/{dataset_size}.png",
+        json="results/reports/{analysis}/{dataset_size}.json"
     params:
         report_name=get_report_name
-    run:
-        print(input)
-        from collections import defaultdict
-        runtimes = defaultdict(float)
-        for benchmark_file in input:
-            method_name, time = get_runtime_from_benchmark_report(benchmark_file)
-            pretty_name = config["method_names"][method_name]
-            runtimes[pretty_name] += time
-
-        with open(output.data, "w") as f:
-            f.write("\n".join(["\t".join(map(str, result)) for result in runtimes.items()]))
-
-        x_axis = runtimes.keys()  # [r for result in results]
-        y_axis = runtimes.values()  # [result[1] for result in results]
-        fig = px.bar(x=x_axis, y=y_axis, title=params.report_name,
-            labels={"x": "Method",
-                    "y": "Time in seconds"
-                    },
-            template="seaborn",
-        )
-        fig.update_layout(
-            font={
-                "size": 19
-            }
-        )
-        fig.write_html(output.figure)
-        fig.write_image(output.png, scale=2)
+    script:
+        "../scripts/plot_results.py"
 
 
 rule main_report:
     input:
         ["results/reports/" + analysis + "/{run_size}.png" for analysis in config["analysis"]]
+
     output:
         md="report_{run_size}.md",
         html="report_{run_size}.html"
@@ -90,3 +61,43 @@ rule main_report:
 
         with open(output.html, "w") as f:
             f.write(out)
+
+rule main_report_as_png:
+    input:
+        ["results/reports/" + analysis + "/{run_size}.json" for analysis in config["analysis"]]
+    output:
+        png="report_{run_size}.png",
+    run:
+        from plotly.subplots import  make_subplots
+        import plotly.io as pio
+
+        n_rows = len(input) // 3
+
+        subfigures = []
+        titles = []
+        for i, image in enumerate(input):
+            subfig = pio.from_json(open(image).read())
+            analysis = image.split("/")[2]
+            print(analysis)
+            title = config["analysis"][analysis]["name"]
+            titles.append(title)
+            print(type(subfig))
+            subfigures.append(subfig.data[0])
+
+        fig = make_subplots(rows=n_rows, cols=3, subplot_titles=titles, y_title="Time in seconds")
+
+        for i, subfig in enumerate(subfigures):
+            col = i % 3 + 1
+            row = i // 3 + 1
+            print(col, row)
+            fig.add_trace(subfig, row=row, col=col)
+
+        fig.update_layout(
+            font={
+                "size": 12
+            }
+        )
+
+        fig.update_layout(height=1200,width=1500)
+        fig.write_image(output[0])
+        fig.show()

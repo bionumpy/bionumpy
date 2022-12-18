@@ -112,3 +112,13 @@ ENV/
 *#*
 .idea  # pycharm
 
+# latex
+*.aux
+*.out
+*.fls
+*.bat
+
+# profiling
+*.prof
+
+*.tmp
