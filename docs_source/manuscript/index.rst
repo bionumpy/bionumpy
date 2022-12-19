@@ -66,25 +66,50 @@ Example usage
 
 We here show two examples of how BioNumPy can be used.
 
-Example 1: Extracting DNA sequence of gene regions:
+
+Example 1: Using NumPy on sequence data
+*****************************************
+In the following example, we represent a few sequences with BioNumPy and show how basic NumPy functionality works:
+
+
+   >>> import numpy as np
+   >>> import bionumpy as bnp
+   >>> # Normally, you will read sequences from file using bnp.open
+   >>> # but for testing the bnp.as_encoded_array function is useful
+   >>> sequences = bnp.as_encoded_array(["ACTGA", "AACCA", "GA", "AATTTT"])
+   >>> # We remove the first base
+   >>> sequences = sequences[:, 2:]
+   >>> print(sequences)
+   CTGA
+   ACCA
+   A
+   ATTTT
+   >>> # Creating a mask is easy
+   >>> is_A = sequences == "A"
+   >>> print(is_A)
+   [False False False  True]
+   [ True False False  True]
+   [ True]
+   [ True False False False False]
+   >>> # Counting As per sequence using axis=1
+   >>> np.sum(is_A, axis=1)
+   >>> array([1, 2, 1, 1])
+   >>> # Counting ratio of As per base using np.mean with axis=0
+   >>> np.mean(is_A, axis=0)
+   >>> array([0.75      , 0.        , 0.        , 0.66666667, 0.        ])
+
+
+
+Example 2: Analysing motif matches inside transcription factor peaks
 **********************************************************************
 
+.. literalinclude:: ../../scripts/manuscript_code2.py
+   :language: python
 
-repeat_regions = bionumpy.open(“repeats_chr1.bed”)
-reference_sequence = bionumpy.open(“chr1.fa”)
-gene_sequences = reference_genome.get_interval_sequences(gene_regions)
+.. figure:: ../../scripts/manuscript_code2_output.png
+   :width: 100%
 
-Computing GC content per position across sequences:
-Gc_per_position = np.mean(gene_sequences=="G" | gene_sequences== "C", axis=0)
 
-Intersecting two distinct gene region annotations:
-...
-
-Computing the reverse complement of a DNA sequence:
-Reversed_complement = ...
-
-Counting matches for a given kmer across a set of sequences:
-...
 
 Implementation details
 ----------------------------------------------------
