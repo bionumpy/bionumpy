@@ -1,16 +1,9 @@
-.. BioNumPy manuscript documentation master file, created by
-   sphinx-quickstart on Thu Dec 15 18:37:44 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-
-BioNumPy Manuscript
-====================
-
+BioNumPy: Fast and easy processing and analysis of biological data with Python
+==========================================================================
 Abstract
 --------------------
 
-Python is by far the most popular and widespread programming language for scientific computing. This is partly due to the powerful *array programming* library NumPy, which makes it possible to easily write clean, vectorized and efficient code for handling large data sets. In bioinformatics, array programming has been less adopted, and many commonly used bioinformatics tools are instead written in low-level languages like C and C++. This makes the tools less transparent to the average computational biologist - making them harder to understand, modify and contribute to. The main challenge with applying array programming techniques within biology is that the data is often non-numeric and variable-length (such as DNA sequences), inhibiting out-of-the-box use of standard array programming techniques.
+Python is a popular and widespread programming language for scientific computing, in large part due to the powerful *array programming* library NumPy, which makes it easy to write clean, vectorized and efficient code for handling large data sets. A challenge with using array programming for biological data is that the data often is non-numeric and variable-length (such as DNA sequences), inhibiting out-of-the-box use of standard array programming techniques. Thus, a tradition in bioinformatics has been to use low-level languages like C and C++ to write efficient code. This makes the tools less transparent to the average computational biologist - making them harder to understand, modify and contribute to.
 
 We here present a new Python package BioNumPy, which adds a layer on top of NumPy in order to enable intuitive array programming on biological data sets. BioNumPy is able to efficiently load biological data sets (e.g. FASTQ-files, BED-files and BAM-files) into NumPy-like data structures, so that NumPy operations like indexing, vectorized functions and reductions can be applied to the data. We show that BioNumPy is considerably faster than vanilla Python and other Python packages for common bioinformatics tasks, and in many cases as fast as tools written in C/C++. BioNumPy thus bridges a long-lasting gap in bioinformatics, allowing the same programming language (Python) to be used across the full spectrum from quick and simple scripts to computationally efficient processing of large-scale data.
 
@@ -29,7 +22,7 @@ The BioNumPy Library
 ......................
 
 
-BioNumPy is a Python package for efficiently reading, representing and analysing biological datasets. All time-critical operations are implemented in NumPy, meaning that BioNumPy performs comparably to customised low-level language implementations. BioNumPy is designed to have a focused and limited set of features, following the modular software principles :cite:`state_of_devops`. The key features of BioNumPy are:
+BioNumPy is a Python package for efficiently reading, representing and analysing biological datasets. All time-critical operations are implemented in NumPy, meaning that BioNumPy performs comparably to customised low-level language implementations. The key features of BioNumPy are:
 
    1. Reading/writing biological data sets directly to/from NumPy-like data structures, providing easy access to the data through an intuitive and easy-to-use API.
    2. Processing and analysing such biological data efficiently using a NumPy-like interface.
@@ -38,8 +31,7 @@ As an example, reading a FASTQ-file and computing the GC-content is as simple as
 
 .. code-block:: python
 
-   file = bionumpy.open("reads.fq.gz")
-   data = file.read()
+   file = bionumpy.read("reads.fq.gz")
    gc_content = numpy.mean((data.sequence == "G") | (data.sequence == "C"))
 
 In the example above, the `data.sequence` object is a NumPy-like data structure containing all the sequences in our data sets. All common NumPy functions (like `np.mean`) work with this data structure. BioNumPy also supports broadcasting of functions along one and two-dimensional arrays (in the same way as NumPy), allowing to e.g. easily compute GC content per sequence, or per position across all sequences. This makes BioNumPy powerful and flexible, allowing it to perform a wide range of operations on biological data sets.
@@ -137,7 +129,7 @@ Storing multiple elements in shared arrays is trivial if the elements all have t
 Development
 ............................................
 
-BioNumPy has been developed following the principles of continuous integration and distribution :cite:`stateofdevops, continuous_delivery`. The codebase is thoroughly and automatically tested through an extensive collection of unit tests, application tests, integrations tests and property-based tests :cite:`hypothesis`. New code changes are automatically benchmarked and tested before being automatically published, ensuring that updates can be frequent, while high code quality is maintained. This makes it safe and easy to allow contributions from new contributors, which is important for longevity and community adoption of the package.
+BioNumPy has been developed following the principles of continuous integration and distribution :cite:`state_of_devops, continuous_delivery`. The codebase is thoroughly and automatically tested through an extensive collection of unit tests, application tests, integrations tests and property-based tests :cite:`hypothesis`. New code changes are automatically benchmarked and tested before being automatically published, ensuring that updates can be frequent, while high code quality is maintained. This makes it safe and easy to allow contributions from new contributors, which is important for longevity and community adoption of the package.
 
 Discussion
 ---------------------------
@@ -167,5 +159,8 @@ Since BioNumPy is flexible in its input, it works well with existing packages an
 Although Python is user-friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason why a lot of central bioinformatics tools are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - which are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
 
 
+
 .. bibliography::
    :style: unsrt
+
+
