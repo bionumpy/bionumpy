@@ -32,10 +32,18 @@ import bionumpy
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx',
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.intersphinx',
               'sphinx.ext.autosummary',
-              'sphinx.ext.doctest', 'sphinx.ext.coverage',
-              'sphinx_design']
+              'sphinx.ext.doctest',
+              'sphinx.ext.coverage',
+              'sphinx_design',
+              'sphinxcontrib.bibtex']
+
+# for manuscript references
+bibtex_bibfiles = ['manuscript/refs.bib']
+bibtex_reference_style = 'label'
 
 doctest_global_setup = """
 import bionumpy as bnp
@@ -187,3 +195,26 @@ autoapi_dirs = ['../bionumpy/']
 autoapi_keep_files = True
 autoapi_root = 'autoapi/'
 """
+
+
+# Latex manuscript settings
+
+
+latex_documents = [
+    ("manuscript/index", 'bionumpymanuscript.tex',
+     'BioNumPy: Fast and easy processing and analysis of biological data with Python',
+     'Knut Rand', 'howto'),
+]
+
+text_add_secnumbers = False  # no numbering of sections
+
+latex_elements = {
+    "tableofcontents": "",
+    'preamble': r'''
+
+     \setcounter{secnumdepth}{0}
+     % make phantomsection empty inside figures (citation bug: https://github.com/sphinx-doc/sphinx/issues/2134)
+     \usepackage{etoolbox}
+     \AtBeginEnvironment{figure}{\pretocmd{\hyperlink}{\protect}{}{}}
+ '''
+}

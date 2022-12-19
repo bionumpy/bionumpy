@@ -56,3 +56,4 @@ BioNumPy documentation
    :caption: Other
 
    developer_guide.rst
+   manuscript/index
