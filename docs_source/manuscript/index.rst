@@ -100,7 +100,7 @@ Storing multiple elements in shared arrays is trivial if the elements all have t
 
 
 
-.. figure:: ragged_array_figure.png
+.. figure:: ../ragged_array_figure.png
    :width: 60%
 
    **Overview of the RaggedArray data structure**. A RaggedArray is similar to a NumPy array/matrix but can represent a matrix consisting of rows with varying lengths (a). This makes it able to efficiently represent e.g. DNA-sequences with varying lengths in a shared data structure. A RaggedArray supports many of the same operations as NumPy arrays, such as indexing (b), vectorization (c) and reduction (d). This figure is an adopted and modified version of  Figure 1 in :cite:`numpy` and is licensed under a Creative Commons Attribution 4.0 International License (`<http://creativecommons.org/licenses/by/4.0/>`_).
