@@ -15,7 +15,6 @@ method_names:
 
 
 analysis:
-
   reverse_complement:
     name: "Reverse-complement"
     tools: [ "bionumpy", "python", "biopython", "seqtk", "biotite" ]
@@ -43,15 +42,14 @@ analysis:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
 
-  intersect:
+  unique_intersect:
     name: "Intersection of two BED-files"
-    tools: ["bionumpy", "bedtools", "pyranges"]
+    tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
     validate_equal: true  # if true, it is asserted that all methods produce identical output
     runs:
-      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
-      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF227NIG_mapped_reads_1m"
-
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF491EEI"
+      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF491EEI"
 
   jaccard_two_bed_files:
     name: "Jaccard on two bed-files"

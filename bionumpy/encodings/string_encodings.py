@@ -25,8 +25,3 @@ class StringEncoding(Encoding):
         else:
             data = encoded_array
         return self._seqeunces[data]
-        # if isinstance(encoded_ragged_array, EncodedArray):
-        # 
-        # return EncodedRaggedArray(
-        #     EncodedArray(hashes.ravel(), self),
-        #     encoded_ragged_array.shape)

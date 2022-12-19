@@ -41,8 +41,8 @@ rule make_runtime_report:
 
 rule main_report:
     input:
-        ["results/reports/" + analysis + "/{run_size}.png" for analysis in config["analysis"]]
-
+        ["results/reports/" + analysis + "/{run_size}.png" for analysis in config["analysis"]],
+        'validation_report_{run_size}.md'
     output:
         md="report_{run_size}.md",
         html="report_{run_size}.html"
