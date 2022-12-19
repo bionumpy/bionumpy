@@ -24,6 +24,7 @@ jobs:
           stagein: |  # additional preliminary commands to run (can be multiline)
            
             apt-get update && apt-get install make
+            apt-get install libglib2.0-dev
             pip install -r requirements_dev.txt
             pip install .
             cd docs_source
