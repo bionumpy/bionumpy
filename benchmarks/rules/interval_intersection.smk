@@ -10,7 +10,7 @@ rule unique_intersect_bedtools:
         "benchmarks/unique_intersect/bedtools/{a}-vs-{b}.txt"
     params:
         extra="-u"
-    shell:
+    wrapper:
         "v1.19.2/bio/bedtools/intersect"
 
 rule unique_intersect_bionumpy:
@@ -23,7 +23,7 @@ rule unique_intersect_bionumpy:
     benchmark:
         "benchmarks/unique_intersect/bionumpy/{a}-vs-{b}.txt"
     script:
-        "../scripts/bionumpy_unique/intersect.py"
+        "../scripts/bionumpy_unique_intersect.py"
 
 
 rule intersect_bionumpy:

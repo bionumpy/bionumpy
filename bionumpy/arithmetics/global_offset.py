@@ -28,7 +28,7 @@ class GlobalOffset:
         chromosome_idxs = np.searchsorted(self._offset, global_interval.start, side="right")-1
         start = global_interval.start-self._offset[chromosome_idxs]
         stop = global_interval.stop-self._offset[chromosome_idxs]
-        assert stop <= self._sizes[chromosome_idxs]
+        assert np.all(stop <= self._sizes[chromosome_idxs])
         chromosome = EncodedArray(chromosome_idxs, self._old_encoding)
         return dataclasses.replace(global_interval,
                                    chromosome=chromosome,

@@ -42,7 +42,7 @@ analysis:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
 
-  intersect:
+  unique_intersect:
     name: "Intersection of two BED-files"
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
