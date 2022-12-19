@@ -4,8 +4,8 @@
    contain the root `toctree` directive.
 
 
-Abstract
---------------------
+BioNumPy Manuscript
+====================
 
 
 Abstract
@@ -53,7 +53,8 @@ Benchmarks
 We compare the speed of BioNumPy against other existing Python packages and commonly used non-Python tools on a set of typical bioinformatics tasks. As seen in Figure 1, we find that BioNumPy is generally considerably faster than vanilla Python solutions, including the commonly used Python packages BioPython and Biotite which mostly rely on Python for-loops to perform operations on datasets. On problems where designated efficient bioinformatics tools are commonly used (intersection of BED-files, kmer counting and VCF operations), we find that BioNumPy is close to, or as as efficient as, tools written in C/C++ (BEDTools :cite:`bedtools`, Jellyfish :cite:`jellyfish` and BCFTools :cite:`bcftools`). While these benchmarks only cover a very small subset of operations, and we only compare against a small subset of available tools, we believe the results still illustrate that BioNumPy can achieve the same performance as dedicated tools written in low-level languages. A Snakemake pipeline for reproducing the results can be found at https://github.com/bionumpy/bionumpy/tree/master/benchmarks, along with an open invitation to expand the benchmark with additional tools and cases.
 
 .. figure:: ../../benchmarks/report_big.png
-   :scale: 100
+   :width: 100%
+
 
    **Benchmarking BioNumPy against other tools and methods on a various typical bioinformatics tasks.**
 
@@ -100,7 +101,7 @@ Storing multiple elements in shared arrays is trivial if the elements all have t
 
 
 .. figure:: ragged_array_figure.png
-   :scale: 100
+   :width: 60%
 
    **Overview of the RaggedArray data structure**. A RaggedArray is similar to a NumPy array/matrix but can represent a matrix consisting of rows with varying lengths (a). This makes it able to efficiently represent e.g. DNA-sequences with varying lengths in a shared data structure. A RaggedArray supports many of the same operations as NumPy arrays, such as indexing (b), vectorization (c) and reduction (d). This figure is an adopted and modified version of  Figure 1 in :cite:`numpy` and is licensed under a Creative Commons Attribution 4.0 International License (`<http://creativecommons.org/licenses/by/4.0/>`_).
 
@@ -122,6 +123,7 @@ While BioNumPy is fast on basic operations such as kmer counting and getting rev
 Many common bioinformatics tasks, such as e.g. converting from FASTQ to FASTA, are today often performed as a series of bash commands, typically using a combination of sed, AWK, Grep, Perl and/or other native unix utility tools. As an example, consider the following bash-code for converting from FASTQ to FASTA:
 
 .. code-block:: bash
+
    zcat file.fastq.gz | paste - - - - | perl -ane 'print ">$F[0]\n$F[2]\n";' | gzip -c > file.fasta.gz
 
 
@@ -129,26 +131,13 @@ While such commands often yield fast results, there are in our opinion several d
 
 .. code-block:: python
 
-	with bnp.open(“output.fasta”) as out_file:
-		outfile.write(bnp.open(“input.fastq”).read_chunks())
+	with bnp.open("output.fasta") as out_file:
+		outfile.write(bnp.open("input.fastq").read_chunks())
 
 
 Since BioNumPy is flexible in its input, it works well with existing packages and solutions for fetching data from databases, e.g. in combination with the various BioPython modules for downloading data from databases like Encode :cite:`encode` and Jaspar :cite:`jaspar`. This ease of interoperability is also the reason why we have limited the scope of BioNumPy to not including modules for e.g. fetching data from online databases.
 
 Although Python is user-friendlyuser friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason for why a lot of central bioinformatics tools have are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - which are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 .. bibliography::
