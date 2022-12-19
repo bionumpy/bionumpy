@@ -8,7 +8,7 @@ import plotly.express as plx
 peaks = bnp.open("ctcf.bed.gz").read()
 reference_genome = bnp.open_indexed("hg38.fa")
 
-# Change start and end position of peaks (100 bp around center)
+# Change start and end position of peaks (100 bp around centre)
 midpoints = (peaks.start+peaks.stop)//2
 peaks.start = midpoints - 50
 peaks.stop = midpoints + 50
@@ -21,7 +21,7 @@ jaspar_object = jaspardb(release="JASPAR2020")
 ctcf_motif = jaspar_object.fetch_motifs_by_name('CTCF')[0]
 ctcf_pwm = PWM.from_dict(ctcf_motif.pwm)
 
-# Get motif scores and make a boolen mask of likely binding sites
+# Get motif scores and make a boolean mask of likely binding sites
 motif_scores = get_motif_scores(peak_sequences, ctcf_pwm)
 has_motif_match = motif_scores > np.log(4)
 
@@ -30,5 +30,4 @@ fig = plx.line(y=np.mean(has_motif_match, axis=0), template='seaborn',
                labels={"x": "Position in peak",
                        "y": "Ratio of peaks with motif match"},
                )
-fig.update_layout(font={"size": 19})
 fig.write_image("motif_matches.png")

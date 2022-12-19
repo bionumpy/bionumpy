@@ -106,8 +106,10 @@ Example 2: Analysing motif matches inside transcription factor peaks
 .. literalinclude:: ../../scripts/manuscript_code2.py
    :language: python
 
-.. figure:: ../../scripts/manuscript_code2_output.png
+.. figure:: ../../example_data/motif_matches.png
    :width: 100%
+
+   **Plot generated in Example 2.** Showing ratio of peaks with a motif match per base position, with an enrichment at the center of each peak as one would expect.
 
 
 
@@ -124,12 +126,10 @@ Storing multiple elements in shared arrays is trivial if the elements all have t
 
 
 
-
 .. figure:: ../ragged_array_figure.png
-   :width: 60%
+   :width: 100%
 
-   **Overview of the RaggedArray data structure**. A RaggedArray is similar to a NumPy array/matrix but can represent a matrix consisting of rows with varying lengths (a). This makes it able to efficiently represent e.g. DNA-sequences with varying lengths in a shared data structure. A RaggedArray supports many of the same operations as NumPy arrays, such as indexing (b), vectorization (c) and reduction (d). This figure is an adopted and modified version of  Figure 1 in :cite:`numpy` and is licensed under a Creative Commons Attribution 4.0 International License (`<http://creativecommons.org/licenses/by/4.0/>`_).
-
+   **Overview of the RaggedArray and EncodedRaggedArray data structures**. A RaggedArray is similar to a NumPy array/matrix but can represent a matrix consisting of rows with varying lengths (a). This makes it able to efficiently represent data with varying lengths in a shared data structure. A RaggedArray supports many of the same operations as NumPy arrays, such as indexing (b), vectorization (c) and reduction (d). An EncodedRaggedArray is a RaggedArray that supports storing and operating on non-numeric data (e.g. DNA-sequences) by encoding the data and keeping track of the encoding (e). An EncodedRaggedArray supports the same operations as RaggedArrays (f). This figure is an adopted and modified version of  Figure 1 in :cite:`numpy` and is licensed under a Creative Commons Attribution 4.0 International License (`<http://creativecommons.org/licenses/by/4.0/>`_).
 
 
 Development
