@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_intervals, get_boolean_mask
+from bionumpy.arithmetics import count_overlap, intersect, get_pileup, sort_intervals, get_boolean_mask, unique_intersect
 from bionumpy.util.testing import assert_bnpdataclass_equal
 from bionumpy.datatypes import Interval, BedGraph
 
@@ -39,13 +39,16 @@ def complicated_intervals():
          ("chr1", 0, 5),
          ("chr1", 11, 20)])]
 
+
 @pytest.fixture
 def interval_b():
     return Interval(["chr1"]*3, [10, 22, 29], [15, 28, 36])
 
+
 @pytest.fixture
 def interval_c():
     return Interval(["chr1"]*3, [10, 15, 29], [15, 28, 36])
+
 
 @pytest.fixture
 def interval_d():
@@ -61,6 +64,22 @@ def test_count_overlap(interval_a, interval_b):
 def test_intersect(interval_a, interval_b):
     true = Interval(["chr1"]*3, [10, 22, 30], [15, 28, 35])
     result = intersect(interval_a, interval_b)
+    assert_bnpdataclass_equal(true, result)
+
+@pytest.fixture
+def small_complicated_interval():
+    return Interval.from_entry_tuples([
+        ("chr1", 2, 5),
+        ("chr1", 5, 7),
+        ("chr1", 10, 12),
+        ("chr1", 11, 13)])
+
+
+def test_unique_intersect(small_complicated_interval):
+    ref = Interval.from_entry_tuples([('chr1', 7, 11)])
+    true = small_complicated_interval[[2]]
+    result = unique_intersect(small_complicated_interval, ref, 20)
+    print(result)
     assert_bnpdataclass_equal(true, result)
 
 @pytest.mark.skip("obsolete")

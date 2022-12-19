@@ -206,6 +206,12 @@ def global_intersect(intervals_b, intervals_a):
     return result
 
 
+def unique_intersect(intervals_a, intervals_b, genome_size):
+    genome_mask = get_boolean_mask(intervals_b, genome_size)
+    entry_mask = genome_mask[intervals_a].any(axis=-1)
+    return intervals_a[entry_mask]
+
+
 @chromosome_map()
 def extend(intervals, both=None, forward=None, reverse=None, left=None, right=None):
     directed = (forward is not None) or (reverse is not None)

@@ -21,8 +21,8 @@ analysis:
     output_file_ending: ".bed"
     validate_equal: true  # if true, it is asserted that all methods produce identical output
     runs:
-      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
-      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF227NIG_mapped_reads_1m"
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF491EEI"
+      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF491EEI"
 
   translate:
     name: "Translating DNA to protein"
