@@ -7,7 +7,6 @@
 BioNumPy Manuscript
 ====================
 
-
 Abstract
 --------------------
 
@@ -30,7 +29,7 @@ The BioNumPy Library
 ......................
 
 
-BioNumPy is a Python package for efficiently reading, representing and analysing biological datasets. All time-critical operations are implemented in NumPy, meaning that BioNumPy performs comparably to customised low-level language implementations. BioNumPy is designed to have a focused and limited set of features, following the modular software principles cite(state_of_devops). The key features of BioNumPy are:
+BioNumPy is a Python package for efficiently reading, representing and analysing biological datasets. All time-critical operations are implemented in NumPy, meaning that BioNumPy performs comparably to customised low-level language implementations. BioNumPy is designed to have a focused and limited set of features, following the modular software principles :cite:`state_of_devops`. The key features of BioNumPy are:
 
    1. Reading/writing biological data sets directly to/from NumPy-like data structures, providing easy access to the data through an intuitive and easy-to-use API.
    2. Processing and analysing such biological data efficiently using a NumPy-like interface.
@@ -43,20 +42,19 @@ As an example, reading a FASTQ-file and computing the GC-content is as simple as
    data = file.read()
    gc_content = numpy.mean((data.sequence == "G") | (data.sequence == "C"))
 
-In the example above, the `data.sequence` object is a NumPy-like data structure containing all the sequences in our data sets. All common NumPy functions (like np.mean) work with this data structure. BioNumPy also supports broadcasting of functions along one and two-dimensional arrays (in the same way as NumPy), allowing to e.g. easily compute GC content per sequence, or per position across all sequences. This makes BioNumPy powerful and flexible, allowing it to perform a wide range of operations on biological data sets.
+In the example above, the `data.sequence` object is a NumPy-like data structure containing all the sequences in our data sets. All common NumPy functions (like `np.mean`) work with this data structure. BioNumPy also supports broadcasting of functions along one and two-dimensional arrays (in the same way as NumPy), allowing to e.g. easily compute GC content per sequence, or per position across all sequences. This makes BioNumPy powerful and flexible, allowing it to perform a wide range of operations on biological data sets.
 
 BioNumPy comes with extensive documentation, available at https://bionumpy.github.io/bionumpy, showing how to do common tasks for a wide range of data formats and domains.
 
 
 Benchmarks
 ......................
-We compare the speed of BioNumPy against other existing Python packages and commonly used non-Python tools on a set of typical bioinformatics tasks. As seen in Figure 1, we find that BioNumPy is generally considerably faster than vanilla Python solutions, including the commonly used Python packages BioPython and Biotite which mostly rely on Python for-loops to perform operations on datasets. On problems where designated efficient bioinformatics tools are commonly used (intersection of BED-files, kmer counting and VCF operations), we find that BioNumPy is close to, or as as efficient as, tools written in C/C++ (BEDTools :cite:`bedtools`, Jellyfish :cite:`jellyfish` and BCFTools :cite:`bcftools`). While these benchmarks only cover a very small subset of operations, and we only compare against a small subset of available tools, we believe the results still illustrate that BioNumPy can achieve the same performance as dedicated tools written in low-level languages. A Snakemake pipeline for reproducing the results can be found at https://github.com/bionumpy/bionumpy/tree/master/benchmarks, along with an open invitation to expand the benchmark with additional tools and cases.
+We compare the speed of BioNumPy against other existing Python packages and commonly used non-Python tools on a set of typical bioinformatics tasks. As seen in Figure 1, we find that BioNumPy is generally considerably faster than vanilla Python solutions, including the commonly used Python packages BioPython and Biotite which mostly rely on Python for-loops to perform operations on datasets. On problems where designated efficient bioinformatics tools are commonly used (intersection of BED-files, kmer counting and VCF operations), we find that BioNumPy is close to, or as efficient as, tools written in C/C++ (BEDTools :cite:`bedtools`, Jellyfish :cite:`jellyfish` and BCFTools :cite:`bcftools`). While these benchmarks only cover a very small subset of operations, and we only compare against a small subset of available tools, we believe the results still illustrate that BioNumPy can achieve the same performance as dedicated tools written in low-level languages. A Snakemake pipeline for reproducing the results can be found at https://github.com/bionumpy/bionumpy/tree/master/benchmarks, along with an open invitation to expand the benchmark with additional tools and cases.
 
 .. figure:: ../../benchmarks/report_big.png
    :width: 100%
 
-
-   **Benchmarking BioNumPy against other tools and methods on a various typical bioinformatics tasks.**
+   **Benchmarking BioNumPy against other tools and methods on various typical bioinformatics tasks.**
 
 
 
@@ -65,6 +63,7 @@ Example usage
 ......................
 
 We here show two examples of how BioNumPy can be used.
+
 
 
 Example 1: Using NumPy on sequence data
@@ -109,7 +108,8 @@ Example 2: Analysing motif matches inside transcription factor peaks
 .. figure:: ../../example_data/motif_matches.png
    :width: 100%
 
-   **Plot generated in Example 2.** Showing ratio of peaks with a motif match per base position, with an enrichment at the center of each peak as one would expect.
+   **Plot generated in Example 2.** Showing ratio of peaks with a motif match per base position, with an enrichment at the centre of each peak as one would expect.
+
 
 
 
@@ -119,9 +119,10 @@ Implementation details
 Data representation
 ............................................
 
-BioNumPy internally stores sequence data (e.g. nucleotides or amino acids) as numeric values, allowing the use of standard NumPy arrays for data representation and processing. A key way in which BioNumpy achieves high performance is by storing multiple data entries in shared NumPy arrays. To illustrate the benefit of this approach, consider the example where we want to count the number of Gs and Cs in a large set of DNA sequences. With existing Python packages like BioPython and Biotite, this must be done by iterating over all the sequences using Python for-loops, which is slow when the number of sequences is large. BioNumPy, however, stores all sequences in only one or a few shared NumPy arrays (Figure 2a), meaning that vectorized NumPy operations can be used to do the counting in a fraction of the time.
+BioNumPy internally stores sequence data (e.g. nucleotides or amino acids) as numeric values, allowing the use of standard NumPy arrays for data representation and processing. A key way in which BioNumpy achieves high performance is by storing multiple data entries in shared NumPy arrays. To illustrate the benefit of this approach, consider the example where we want to count the number of Gs and Cs in a large set of DNA sequences. With existing Python packages like BioPython and Biotite, this must be done by iterating over all the sequences using Python for-loops, which is slow when the number of sequences is large. BioNumPy, however, stores all sequences in only one or a few shared NumPy arrays (Figure 3a), meaning that vectorized NumPy operations can be used to do the counting in a fraction of the time.
 
-Storing multiple elements in shared arrays is trivial if the elements all have the same size, since matrices can be used. However, for biological data, it is common that data elements vary in size. For instance, sequences in FASTA files are rarely all of the exact same size. BioNumPy uses the RaggedArray data structure from the npstructures package (https://github.com/bionumpy/npstructures, developed in tandem with BioNumPy) to tackle this problem (Figure 2). The RaggedArray can be seen as a matrix where rows can have different lengths. The npstructures RaggedArray implementation is compatible with most common NumPy operations, like vectorized operations (Figure 2d), indexing (Figure 2b) and reductions (Figure 2e). As far as possible, objects in BioNumPy follow the array interoperability protocols defined by NumPy (https://numpy.org/doc/stable/user/basics.interoperability.html)
+Storing multiple elements in shared arrays is trivial if the elements all have the same size, since matrices can be used. However, for biological data, it is common that data elements vary in size. For instance, sequences in FASTA files are rarely all of the exact same size. BioNumPy uses the RaggedArray data structure from the npstructures package (https://github.com/bionumpy/npstructures, developed in tandem with BioNumPy) to tackle this problem (Figure 2). The RaggedArray can be seen as a matrix where rows can have different lengths. The npstructures RaggedArray implementation is compatible with most common NumPy operations, like vectorized operations (Figure 3d), indexing (Figure 3b) and reductions (Figure 3e). As far as possible, objects in BioNumPy follow the array interoperability protocols defined by NumPy (https://numpy.org/doc/stable/user/basics.interoperability.html)
+
 
 
 
@@ -132,11 +133,11 @@ Storing multiple elements in shared arrays is trivial if the elements all have t
    **Overview of the RaggedArray and EncodedRaggedArray data structures**. A RaggedArray is similar to a NumPy array/matrix but can represent a matrix consisting of rows with varying lengths (a). This makes it able to efficiently represent data with varying lengths in a shared data structure. A RaggedArray supports many of the same operations as NumPy arrays, such as indexing (b), vectorization (c) and reduction (d). An EncodedRaggedArray is a RaggedArray that supports storing and operating on non-numeric data (e.g. DNA-sequences) by encoding the data and keeping track of the encoding (e). An EncodedRaggedArray supports the same operations as RaggedArrays (f). This figure is an adopted and modified version of  Figure 1 in :cite:`numpy` and is licensed under a Creative Commons Attribution 4.0 International License (`<http://creativecommons.org/licenses/by/4.0/>`_).
 
 
+
 Development
 ............................................
 
 BioNumPy has been developed following the principles of continuous integration and distribution :cite:`stateofdevops, continuous_delivery`. The codebase is thoroughly and automatically tested through an extensive collection of unit tests, application tests, integrations tests and property-based tests :cite:`hypothesis`. New code changes are automatically benchmarked and tested before being automatically published, ensuring that updates can be frequent, while high code quality is maintained. This makes it safe and easy to allow contributions from new contributors, which is important for longevity and community adoption of the package.
-
 
 Discussion
 ---------------------------
@@ -149,7 +150,7 @@ Many common bioinformatics tasks, such as e.g. converting from FASTQ to FASTA, a
 
 .. code-block:: bash
 
-   zcat file.fastq.gz | paste - - - - | perl -ane 'print ">$F[0]\n$F[2]\n";' | gzip -c > file.fasta.gz
+		zcat file.fastq.gz | paste - - - - | perl -ane 'print ">$F[0]\n$F[2]\n";' | gzip -c > file.fasta.gz
 
 
 While such commands often yield fast results, there are in our opinion several drawbacks to this approach, which a package like BioNumPy addresses. First, bash commands are difficult to read and understand, which increases the chance for errors. Second, since such commands only come in the form of scripts, these are usually not version controlled, not tested and thus not reproducible (each person typically has their own script). Third, it is inconvenient to write unit tests, defensive assertion code or do runtime inspection/debugging on such bash scripts, meaning that logical errors can easily go unnoticed. A better solution is thus to instead use specialised tools, such as e.g. seqtk or BioNumpy. The task of converting from FASTQ to FASTA can be done like this in BioNumPy:
@@ -160,9 +161,10 @@ While such commands often yield fast results, there are in our opinion several d
 		outfile.write(bnp.open("input.fastq").read_chunks())
 
 
+
 Since BioNumPy is flexible in its input, it works well with existing packages and solutions for fetching data from databases, e.g. in combination with the various BioPython modules for downloading data from databases like Encode :cite:`encode` and Jaspar :cite:`jaspar`. This ease of interoperability is also the reason why we have limited the scope of BioNumPy to not including modules for e.g. fetching data from online databases.
 
-Although Python is user-friendlyuser friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason for why a lot of central bioinformatics tools have are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - which are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
+Although Python is user-friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason why a lot of central bioinformatics tools are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - which are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
 
 
 .. bibliography::
