@@ -8,5 +8,5 @@ rule all:
         "_build/latex/bionumpymanuscript.pdf"
     shell:
         """
-        cd ../ && make manuscript
+        ./make_manuscript.sh
         """
