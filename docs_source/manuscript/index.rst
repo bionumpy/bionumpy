@@ -69,7 +69,7 @@ In the following example, we represent a few sequences with BioNumPy and show ho
    >>> # but for testing the bnp.as_encoded_array function is useful
    >>> sequences = bnp.as_encoded_array(["ACTGA", "AACCA", "GA", "AATTTT"])
    >>> # We remove the first base
-   >>> sequences = sequences[:, 2:]
+   >>> sequences = sequences[:, 1:]
    >>> print(sequences)
    CTGA
    ACCA
@@ -84,10 +84,10 @@ In the following example, we represent a few sequences with BioNumPy and show ho
    [ True False False False False]
    >>> # Counting As per sequence using axis=1
    >>> np.sum(is_A, axis=1)
-   >>> array([1, 2, 1, 1])
+   array([1, 2, 1, 1])
    >>> # Counting ratio of As per base using np.mean with axis=0
    >>> np.mean(is_A, axis=0)
-   >>> array([0.75      , 0.        , 0.        , 0.66666667, 0.        ])
+   array([0.75      , 0.        , 0.        , 0.66666667, 0.        ])
 
 
 
