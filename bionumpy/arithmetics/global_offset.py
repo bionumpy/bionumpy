@@ -36,8 +36,9 @@ class GlobalOffset:
                                    stop=stop)
 
     def from_local_interval(self, interval, do_clip=False):
-        offsets = self.get_offset(interval.chromosome)
-        sizes = self.get_size(interval.chromosome)
+        chromosome = as_encoded_array(interval.chromosome, target_encoding=self._old_encoding)
+        offsets = self.get_offset(chromosome)
+        sizes = self.get_size(chromosome)
         assert np.all(interval.start < sizes)
         stop = interval.stop
         if do_clip:
