@@ -94,11 +94,16 @@ In the following example, we represent a few sequences with BioNumPy and show ho
 Example 2: Analysing motif matches inside transcription factor peaks
 **********************************************************************
 
+
+In the following example, we show how BioNumPy can be used to easily combine different type of datasets. We read transcription factor peaks from a bed file, fetch the peak sequences from an indexed reference genome and analyse motif scores within the peaks using PWM data from the Jaspar database :cite:`jaspar`:
+
+
 .. literalinclude:: ../../scripts/manuscript_code2.py
    :language: python
 
 .. figure:: ../../example_data/motif_matches.png
-   :width: 100%
+   :width: 60%
+
 
    **Plot generated in Example 2.** Showing ratio of peaks with a motif match per base position, with an enrichment at the centre of each peak as one would expect.
 
