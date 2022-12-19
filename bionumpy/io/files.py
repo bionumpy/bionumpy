@@ -198,3 +198,10 @@ def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
         file_reader.set_prepend_mode()
     chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks())
     return sum(chunk_counts)
+
+
+def read(filename: str, mode: str = None, buffer_type=None) -> NpDataclassReader:
+    'openes a file, reads it and closes it '
+    with bnp_open(filename, mode, buffer_type) as f:
+        content = f.read()
+    return content
