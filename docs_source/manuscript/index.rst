@@ -31,7 +31,7 @@ As an example, reading a FASTQ-file and computing the GC-content is as simple as
 
 .. code-block:: python
 
-   file = bionumpy.read("reads.fq.gz")
+   data = bionumpy.read("reads.fq.gz")
    gc_content = numpy.mean((data.sequence == "G") | (data.sequence == "C"))
 
 In the example above, the `data.sequence` object is a NumPy-like data structure containing all the sequences in our data sets. All common NumPy functions (like `np.mean`) work with this data structure. BioNumPy also supports broadcasting of functions along one and two-dimensional arrays (in the same way as NumPy), allowing to e.g. easily compute GC content per sequence, or per position across all sequences. This makes BioNumPy powerful and flexible, allowing it to perform a wide range of operations on biological data sets.

@@ -20,10 +20,10 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: install npstructures dev
-        if: github.ref != 'refs/heads/master'
-        run: |
-          pip install git+https://github.com/bionumpy/npstructures.git/@dev
+      #- name: install npstructures dev
+      #  if: github.ref != 'refs/heads/master'
+      #  run: |
+      #    pip install git+https://github.com/bionumpy/npstructures.git/@dev
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -36,6 +36,7 @@ jobs:
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
            
+            pip install git+https://github.com/bionumpy/npstructures.git/@dev
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
