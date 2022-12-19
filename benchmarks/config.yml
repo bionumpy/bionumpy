@@ -5,7 +5,7 @@ method_names:
   seqtk: "Seqtk"
   biopython: "Biopython"
   biotite: "Biotite"
-  python: "Python"
+  python: "Vanilla Python"
   jellyfish: "Jellyfish"
   awk: "AWK (one-liner)"
   bcftools: "Bcftools"
@@ -15,27 +15,18 @@ method_names:
 
 
 analysis:
-  intersect:
-    name: "Intersection of two BED-files"
-    tools: ["bionumpy", "bedtools", "pyranges"]
-    output_file_ending: ".bed"
-    validate_equal: true  # if true, it is asserted that all methods produce identical output
-    runs:
-      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF491EEI"
-      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF491EEI"
-
-  translate:
-    name: "Translating DNA to protein"
-    tools: ["bionumpy", "biopython", "python", "biotite"]
+  reverse_complement:
+    name: "Reverse-complement"
+    tools: [ "bionumpy", "python", "biopython", "seqtk", "biotite" ]
     output_file_ending: ".fa"
     validate_equal: true
     runs:
       small: "length150_nreads100"
       big: "length150_nreads500000"
 
-  reverse_complement:
-    name: "Reverse-complement"
-    tools: ["bionumpy", "python", "biopython", "seqtk", "biotite"]
+  translate:
+    name: "Translating DNA to protein"
+    tools: [ "bionumpy", "biopython", "python", "biotite" ]
     output_file_ending: ".fa"
     validate_equal: true
     runs:
@@ -44,13 +35,21 @@ analysis:
 
   subsample:
     name: "Subsampling a FASTA-file"
-    tools: ["bionumpy", "python", "seqtk"]
+    tools: [ "bionumpy", "python", "seqtk" ]
     validate_equal: false
     output_file_ending: ".fa"
     runs:
       small: "length150_nreads200"
       big: "length150_nreads5000000"
 
+  intersect:
+    name: "Intersection of two BED-files"
+    tools: ["bionumpy", "bedtools"]
+    output_file_ending: ".bed"
+    validate_equal: true  # if true, it is asserted that all methods produce identical output
+    runs:
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF491EEI"
+      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF491EEI"
 
   jaccard_two_bed_files:
     name: "Jaccard on two bed-files"
@@ -73,6 +72,7 @@ analysis:
       small: "ntfs10"
       big: "ntfs50"
 
+
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
     tools: ["bionumpy", "jellyfish", "python"]
@@ -84,16 +84,6 @@ analysis:
     benchmark_report_prefixes:
       jellyfish:
         ["count-", "dump-"]  # jellyfish has two benchmark files
-  
-  sequence_length_distribution:
-    name: "Getting histogram of sequence lengths in a FASTQ-file"
-    tools: ["bionumpy", "python", "awk"]
-    validate_equal: true
-    output_file_ending: ".csv"
-    runs:
-      small: "small"  # small.fq.gz
-      big: "ENCFF689IPX"  # encode id of fastq file
-
 
   vcf_filtering:
     name: "Filtering VCF on allele frequency"
@@ -104,4 +94,11 @@ analysis:
       small: "small"
       big: "big"
 
-
+  sequence_length_distribution:
+    name: "Getting histogram of sequence lengths in a FASTQ-file"
+    tools: ["bionumpy", "python", "awk"]
+    validate_equal: true
+    output_file_ending: ".csv"
+    runs:
+      small: "small"  # small.fq.gz
+      big: "ENCFF689IPX"  # encode id of fastq file
