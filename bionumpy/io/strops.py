@@ -143,6 +143,9 @@ def str_to_float(number_text: EncodedRaggedArray) -> np.ndarray:
 
     """
     number_text = as_encoded_array(number_text)
+    assert number_text.encoding == BaseEncoding
+    return np.array([float(row.to_string()) for row in number_text])
+
     scientific = np.any(number_text == "e", axis=-1)
     numbers = np.empty(len(number_text))
     if np.sum(scientific):
@@ -201,6 +204,7 @@ def float_to_strings(floats: np.ndarray) -> EncodedRaggedArray:
         strings in EncodedRaggedArray
 
     """
+    return as_encoded_array([str(f) for f in floats])
     s = np.array2string(floats, max_line_width=10**15, threshold=10**15, separator=",").replace(" ", "")
     assert " " not in s, s
     b = np.frombuffer(bytes(s, encoding="ascii"), dtype=np.uint8)
