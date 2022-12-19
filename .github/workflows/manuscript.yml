@@ -23,6 +23,7 @@ jobs:
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache'
           stagein: |  # additional preliminary commands to run (can be multiline)
            
+            sudo apt-get update && sudo apt-get install make
             pip install -r requirements_dev.txt
             pip install .
             cd docs_source
