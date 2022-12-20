@@ -97,7 +97,6 @@ def test_sort_intervals(interval_d):
 
 @pytest.mark.parametrize("interval", complicated_intervals())
 def test_get_boolean_mask(interval):
-    print(interval)
     size = 20
     starts = np.asanyarray(interval.start)
     ends = np.asanyarray(interval.stop)
@@ -106,6 +105,7 @@ def test_get_boolean_mask(interval):
     for (start, end) in zip(starts, ends):
         print(start, end)
         true[start:end] |= True
-    result = get_boolean_mask(interval, size).to_array()
+    tmp = get_boolean_mask(interval, size)
+    print(tmp.starts, tmp.ends, tmp.values)
+    result = tmp.to_array()
     np.testing.assert_array_equal(result, true)
-
