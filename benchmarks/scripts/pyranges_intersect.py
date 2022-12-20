@@ -15,7 +15,7 @@ def run(a: str, b: str, outfile: str):
 
 
     t0 = time.perf_counter()
-    intersection = a.intersect(b)
+    intersection = a.intersect(b, how="last")
     print("Intersection took", (time.perf_counter()-t0))
 
 
