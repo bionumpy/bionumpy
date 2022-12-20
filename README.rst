@@ -37,12 +37,12 @@ Getting started
 
 2. Import BioNumPy and read your data, e.g.:
 
-    >>> import bionumpy as bnp
-    >>> import numpy as np
-    >>> f = bnp.open("reads.fq.gz")
-    >>> for chunk in f:
-    >>>     # chunk now contains the sequences of reads and NumPy-functions can be used
-    >>>     print(np.sum(chunk.sequence == "G"))
+    import bionumpy as bnp
+    import numpy as np
+    f = bnp.open("example_data/big.fq.gz")
+    for chunk in f:
+        # chunk now contains the sequences of reads and NumPy-functions can be used
+        print(np.sum(chunk.sequence == "G"))
 
 Check out the getting started guide and various tutorials in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
 
