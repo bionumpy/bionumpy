@@ -107,9 +107,9 @@ def test_get_boolean_mask(interval):
         true[start:end] |= True
     tmp = get_boolean_mask(interval, size)
     print(tmp.starts, tmp.ends, tmp.values)
+    print(tmp._events, tmp._values)
     result = tmp.to_array()
     np.testing.assert_array_equal(result, true)
-
 
 # @pytest.mark.parametrize("interval", complicated_intervals())
 # def test_merge_intervals(interval):
