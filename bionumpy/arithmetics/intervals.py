@@ -11,11 +11,11 @@ from .. import streamable
 from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
-
+from ..util import interleave
 
 class GenomicRunLengthArray(RunLengthArray):
     @classmethod
-    def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int , values: npt.ArrayLike = True, default_value=0) -> 'RunLengthArray':
+    def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int, values: npt.ArrayLike = True, default_value=0) -> 'RunLengthArray':
         """Constuct a runlength array from a set of intervals and values
 
         Parameters
@@ -35,11 +35,13 @@ class GenomicRunLengthArray(RunLengthArray):
         assert np.all(starts[1:] > ends[:-1])
         prefix = [0] if (len(starts) == 0 or starts[0] != 0) else []
         postfix = [size] if (len(ends) == 0 or ends[-1] != size) else []
-        events = np.concatenate([np.array(prefix, dtype=int), np.vstack((starts, ends)).T.ravel(), np.array(postfix, dtype=int)])
+        events = np.concatenate([np.array(prefix, dtype=int),
+                                 interleave(starts, ends),
+                                 np.array(postfix, dtype=int)])
         if isinstance(values, Number):
             values = np.tile([default_value, values], events.size//2+1)
         else:
-            values = np.vstack([np.broadcast(default_value, values.shape), values]).T.ravel()
+            values = interleave([np.broadcast(default_value, values.shape), values])
             if ends[-1] != size:
                 values = np.append(values, default_value)
         if (len(starts) > 0) and starts[0] == 0:
