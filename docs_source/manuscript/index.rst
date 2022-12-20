@@ -1,3 +1,10 @@
+Knut Rand [1]_, Geir Kjetil Sandve [1]_
+
+Correspondence: knutdr@ifi.uio.no
+
+.. [1] Department of Informatics, University of Oslo, Norway
+
+
 BioNumPy: Fast and easy processing and analysis of biological data with Python
 ==========================================================================
 Abstract
