@@ -17,7 +17,7 @@ method_names:
 analysis:
   reverse_complement:
     name: "Reverse-complement"
-    tools: [ "bionumpy", "python", "biopython", "seqtk", "biotite" ]
+    tools: [ "bionumpy", "biopython", "python", "biotite", "seqtk" ]
     output_file_ending: ".fa"
     validate_equal: true
     runs:
