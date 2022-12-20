@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.typing as npt
 import logging
 from npstructures import RaggedArray
 import dataclasses
@@ -62,3 +63,8 @@ def plot(obj):
 def is_subclass_or_instance(obj, c):
     return (isinstance(obj, type) and issubclass(obj, c)) or isinstance(obj, c)
 
+def interleave(array_a: npt.ArrayLike, array_b: npt.ArrayLike) -> npt.ArrayLike:
+    c = np.empty((array_a.size + array_b.size,), dtype=array_a.dtype)
+    c[0::2] = array_a
+    c[1::2] = array_b
+    return c
