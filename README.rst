@@ -42,7 +42,7 @@ Getting started
     >>> f = bnp.open("example_data/big.fq.gz")
     >>> # chunk contains the sequences of reads and NumPy-functions can be used
     >>> for chunk in f:
-    ...      (np.sum(chunk.sequence == "G"))
+    ...      print(np.sum(chunk.sequence == "G"))
     53686
 
 Check out the getting started guide and various tutorials in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
