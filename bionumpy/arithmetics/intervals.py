@@ -13,6 +13,7 @@ from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
 from ..util import interleave
 
+
 class GenomicRunLengthArray(RunLengthArray):
     @classmethod
     def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int, values: npt.ArrayLike = True, default_value=0) -> 'GenomicRunLengthArray':
@@ -46,18 +47,20 @@ class GenomicRunLengthArray(RunLengthArray):
         else:
             events[len(prefix)::2] = starts
             events[len(prefix)+1::2] = ends
+
         tmp = values
         if isinstance(values, Number):
             values = np.empty(2*(events.size//2+1), dtype=np.array(values).dtype)
             values[::2] = default_value
             values[1::2] = tmp
-            # values = np.tile([default_value, values], events.size//2+1)
         else:
             values = interleave([np.broadcast(default_value, values.shape), values])
             if ends[-1] != size:
                 values = np.append(values, default_value)
-        if (len(starts) > 0) and starts[0] == 0:
+
+        if (len(starts) > 0) and (starts[0] == 0):
             values = values[1:]
+
         values = values[:(len(events)-1)]
         return cls(events, values, do_clean=True)
 

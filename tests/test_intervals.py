@@ -109,3 +109,20 @@ def test_get_boolean_mask(interval):
     print(tmp.starts, tmp.ends, tmp.values)
     result = tmp.to_array()
     np.testing.assert_array_equal(result, true)
+
+
+# @pytest.mark.parametrize("interval", complicated_intervals())
+# def test_merge_intervals(interval):
+#     size = 20
+#     starts = np.asanyarray(interval.start)
+#     ends = np.asanyarray(interval.stop)
+#     row_len = size
+#     true = np.zeros((row_len), dtype=bool)
+#     for (start, end) in zip(starts, ends):
+#         print(start, end)
+#         true[start:end] |= True
+#     tmp = get_boolean_mask(interval, size)
+#     print(tmp.starts, tmp.ends, tmp.values)
+#     result = tmp.to_array()
+#     np.testing.assert_array_equal(result, true)
+
