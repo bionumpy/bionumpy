@@ -55,14 +55,14 @@ rule intersect_bedtools:
         "v1.19.2/bio/bedtools/intersect"
 
 
-rule intersect_pyranges:
+rule unique_intersect_pyranges:
     input:
         a = "results/intervals/{a}.bed",
         b = "results/bed_files/{b}.bed.gz",
     output:
-        "results/pyranges/intersect/{a}-vs-{b}.bed"
+        "results/pyranges/unique_intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/intersect/pyranges/{a}-vs-{b}.txt"
+        "benchmarks/unique_intersect/pyranges/{a}-vs-{b}.txt"
     conda:
         "../envs/pyranges.yml"
     shell:

@@ -43,7 +43,7 @@ analysis:
       big: "length150_nreads5000000"
 
   unique_intersect:
-    name: "Intersection of two BED-files"
+    name: "Unique intersection of two BED-files"
     tools: ["bionumpy", "bedtools"]
     output_file_ending: ".bed"
     validate_equal: true  # if true, it is asserted that all methods produce identical output
