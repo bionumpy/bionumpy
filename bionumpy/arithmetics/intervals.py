@@ -15,6 +15,30 @@ from ..util import interleave
 
 
 class GenomicRunLengthArray(RunLengthArray):
+    def to_array(self) -> np.ndarray:
+        """Convert the runlength array to a normal numpy array
+
+        Returns
+        -------
+        np.ndarray
+        """
+        if len(self) == 0:
+            return np.empty_like(self._values, shape=(0,))
+        values = np.asarray(self._values)
+        if values.dtype == np.float64:
+            values = values.view(np.uint64)
+        elif values.dtype == np.float32:
+            values = values.view(np.uint32)
+        elif values.dtype == np.float16:
+            values = values.view(np.uint16)
+        array = np.zeros_like(values, shape=len(self))
+        op = np.logical_xor if array.dtype == bool else np.bitwise_xor
+        diffs = op(values[:-1], values[1:])
+        array[self._starts[1:]] = diffs
+        array[self._starts[0]] = values[0]
+        op.accumulate(array, out=array)
+        return array.view(self._values.dtype)
+
     @classmethod
     def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int, values: npt.ArrayLike = True, default_value=0) -> 'GenomicRunLengthArray':
         """Constuct a runlength array from a set of intervals and values
