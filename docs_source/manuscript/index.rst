@@ -1,12 +1,9 @@
 BioNumPy Manuscript
 ======================
 
-Knut Rand [1]_, Geir Kjetil Sandve [1]_
+Knut Rand [1]_ , Ivar Grytten, Milena Pavlović, Chakravarthi Kanduri and Geir Kjetil Sandve
 
-Correspondence: knutdr@ifi.uio.no
-
-.. [1] Department of Informatics, University of Oslo, Norway
-
+.. [1] Correspondence: knutdr@ifi.uio.no
 
 Abstract
 --------------------
@@ -170,6 +167,26 @@ While such commands often yield fast results, there are in our opinion several d
 Since BioNumPy is flexible in its input, it works well with existing packages and solutions for fetching data from databases, e.g. in combination with the various BioPython modules for downloading data from databases like Encode :cite:`encode` and Jaspar :cite:`jaspar`. This ease of interoperability is also the reason why we have limited the scope of BioNumPy to not including modules for e.g. fetching data from online databases.
 
 Although Python is user-friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason why a lot of central bioinformatics tools are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - which are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
+
+.. raw:: latex
+
+    \newpage
+
+
+**Funding**
+
+This work was supported by the Centre for Computational Inference in Evolutionary Life Science (CELS). We also
+acknowledge generous support by the Research Council of Norway for an IKTPLUSS project (#311341) to KR and
+GKS.
+
+
+**Affiliation**
+
+KD, IG, MP and GK: Biomedical Informatics research group, Department of Informatics, University of Oslo, Oslo, Norway
+
+KD, CK and GK: Centre for Bioinformatics, University of Oslo, Oslo, Norway,
+
+MP, CK and GK: UiORealArt Convergence Environment, University of Oslo, Oslo, Norway
 
 
 

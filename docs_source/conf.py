@@ -208,5 +208,9 @@ latex_elements = {
      % make phantomsection empty inside figures (citation bug: https://github.com/sphinx-doc/sphinx/issues/2134)
      \usepackage{etoolbox}
      \AtBeginEnvironment{figure}{\pretocmd{\hyperlink}{\protect}{}{}}
+     \usepackage[T1]{fontenc}     % default is 'OT1'
+    %\usepackage[utf8]{inputenc} % needed if you have an older TeX distribution
+    \usepackage{lmodern}         % recommended
+    \setlength\parindent{0pt}    % just for this example
  '''
 }
