@@ -13,7 +13,32 @@ from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
 from ..util import interleave
 
+
 class GenomicRunLengthArray(RunLengthArray):
+    def to_array(self) -> np.ndarray:
+        """Convert the runlength array to a normal numpy array
+
+        Returns
+        -------
+        np.ndarray
+        """
+        if len(self) == 0:
+            return np.empty_like(self._values, shape=(0,))
+        values = np.asarray(self._values)
+        if values.dtype == np.float64:
+            values = values.view(np.uint64)
+        elif values.dtype == np.float32:
+            values = values.view(np.uint32)
+        elif values.dtype == np.float16:
+            values = values.view(np.uint16)
+        array = np.zeros_like(values, shape=len(self))
+        op = np.logical_xor if array.dtype == bool else np.bitwise_xor
+        diffs = op(values[:-1], values[1:])
+        array[self._starts[1:]] = diffs
+        array[self._starts[0]] = values[0]
+        op.accumulate(array, out=array)
+        return array.view(self._values.dtype)
+
     @classmethod
     def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int, values: npt.ArrayLike = True, default_value=0) -> 'GenomicRunLengthArray':
         """Constuct a runlength array from a set of intervals and values
@@ -46,18 +71,20 @@ class GenomicRunLengthArray(RunLengthArray):
         else:
             events[len(prefix)::2] = starts
             events[len(prefix)+1::2] = ends
+
         tmp = values
         if isinstance(values, Number):
             values = np.empty(2*(events.size//2+1), dtype=np.array(values).dtype)
             values[::2] = default_value
             values[1::2] = tmp
-            # values = np.tile([default_value, values], events.size//2+1)
         else:
             values = interleave([np.broadcast(default_value, values.shape), values])
             if ends[-1] != size:
                 values = np.append(values, default_value)
-        if (len(starts) > 0) and starts[0] == 0:
+
+        if (len(starts) > 0) and (starts[0] == 0):
             values = values[1:]
+
         values = values[:(len(events)-1)]
         return cls(events, values, do_clean=True)
 
