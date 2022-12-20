@@ -1,4 +1,6 @@
 from typing import List
+from numbers import Number
+import numpy.typing as npt
 import dataclasses
 from operator import itemgetter
 import numpy as np
@@ -130,13 +132,9 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     """
     assert np.all(intervals.stop <= chromosome_size), (np.max(intervals.stop), chromosome_size)
     if len(intervals) == 0:
-        return RunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
+        return GenomicRunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
     merged = merge_intervals(intervals[np.argsort(intervals.start)])
-    return RunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
-    # rla = RunLength2dArray.from_intervals(intervals.start,
-    #                                      intervals.stop,
-    #                                      chromosome_size)
-    # return rla.any(axis=0)
+    return GenomicRunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
 
 
 def human_key_func(chrom_name):
@@ -200,7 +198,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
         stops += distance
-    valid_start_mask = intervals.start[1:] > stops[:-1]# intervals[:-1].stop
+    valid_start_mask = intervals.start[1:] > stops[:-1] # intervals[:-1].stop
     start_mask = np.concatenate(([True], valid_start_mask))
     stop_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
