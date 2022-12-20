@@ -32,10 +32,19 @@ import bionumpy
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx',
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.intersphinx',
               'sphinx.ext.autosummary',
-              'sphinx.ext.doctest', 'sphinx.ext.coverage',
-              'sphinx_design']
+              'sphinx.ext.doctest',
+              'sphinx.ext.coverage',
+              'sphinx_design',
+              'sphinxcontrib.bibtex']
+
+# for manuscript references
+bibtex_bibfiles = ['manuscript/refs.bib']
+bibtex_reference_style = 'label'
+bibtex_encoding = 'latin'
 
 doctest_global_setup = """
 import bionumpy as bnp
@@ -136,15 +145,6 @@ latex_elements = {
     # 'figure_align': 'htbp',
 }
 
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass
-# [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'bionumpy.tex',
-     'bionumpy Documentation',
-     'Knut Rand', 'manual'),
-]
-
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
@@ -187,3 +187,32 @@ autoapi_dirs = ['../bionumpy/']
 autoapi_keep_files = True
 autoapi_root = 'autoapi/'
 """
+
+
+# Latex manuscript settings
+
+
+latex_documents = [
+    ("manuscript/index", 'bionumpymanuscript.tex',
+     'BioNumPy: Fast and easy analysis of biological data with Python',
+     '', 'howto'),
+]
+
+text_add_secnumbers = False  # no numbering of sections
+
+latex_elements = {
+    "maketitle": "{\LARGE BioNumPy: Fast and easy analysis of biological data with Python}",
+    #"maketitle": "\maketitle",
+    "tableofcontents": "",
+    'preamble': r'''
+     \setcounter{secnumdepth}{0}
+     % make phantomsection empty inside figures (citation bug: https://github.com/sphinx-doc/sphinx/issues/2134)
+     \usepackage{etoolbox}
+     \AtBeginEnvironment{figure}{\pretocmd{\hyperlink}{\protect}{}{}}
+     \usepackage[T1]{fontenc}     % default is 'OT1'
+    %\usepackage[utf8]{inputenc} % needed if you have an older TeX distribution
+    \usepackage{lmodern}         % recommended
+    \setlength\parindent{0pt}    % just for this example
+    \usepackage[utf8]{inputenc}
+ '''
+}

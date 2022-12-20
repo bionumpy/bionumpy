@@ -1,3 +1,5 @@
+.. _fastqc_tutorial
+
 FastQC-like quality-checking of FASTQ files
 ------------------------------------------------
 

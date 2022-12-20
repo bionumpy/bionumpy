@@ -12,7 +12,7 @@ rule bionumpy_reverse_complement:
     run:
         sequence_entries = bnp.open(input[0], buffer_type=bnp.TwoLineFastaBuffer).read_chunks()
         reversed_entries = bnp.sequence.get_reverse_complement(sequence_entries)
-        with bnp.open(output[0], "w") as outfile:
+        with bnp.open(output[0], "w", buffer_type=bnp.TwoLineFastaBuffer) as outfile:
             outfile.write(reversed_entries)
 
 
@@ -46,8 +46,8 @@ rule biopython_reverse_complement:
             for dna_record in SeqIO.parse(input[0],'fasta'):
                 new_record = SeqRecord(
                     dna_record.seq.reverse_complement(),
-                    id=dna_record.id)
-                SeqIO.write(new_record,aa_fa,'fasta')
+                    id=dna_record.id, description="")
+                SeqIO.write(new_record,aa_fa,'fasta-2line')
 
 rule python_reverse_complement:
     input:
@@ -80,16 +80,7 @@ rule biotite_reverse_complement:
         "results/biotite/reverse_complement/{name}.fa"
     benchmark:
         "benchmarks/reverse_complement/biotite/{name}.txt"
-
-    run:
-        import biotite.sequence.io.fasta as fasta
-
-        fasta_file = fasta.FastaFile.read(input[0])
-        out_fasta_file = fasta.FastaFile()
-
-        for header, dna in fasta_file.items():
-            dna = biotite.sequence.NucleotideSequence(dna)
-            revcomp = dna.reverse().complement()
-            fasta.set_sequence(out_fasta_file, revcomp, header=header)
-
-        out_fasta_file.write(output[0])
+    conda:
+        "../envs/biotite.yml"
+    script:
+        "../scripts/biotite_reverse_complement.py"

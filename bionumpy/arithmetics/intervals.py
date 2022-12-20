@@ -1,14 +1,92 @@
 from typing import List
+from numbers import Number
+import numpy.typing as npt
 import dataclasses
 from operator import itemgetter
 import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
-
+from bionumpy.encodings.string_encodings import StringEncoding
 from .bedgraph import BedGraph
 from .. import streamable
 from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
+from ..util import interleave
+
+
+class GenomicRunLengthArray(RunLengthArray):
+    def to_array(self) -> np.ndarray:
+        """Convert the runlength array to a normal numpy array
+
+        Returns
+        -------
+        np.ndarray
+        """
+        if len(self) == 0:
+            return np.empty_like(self._values, shape=(0,))
+        values = np.asarray(self._values)
+        if values.dtype == np.float64:
+            values = values.view(np.uint64)
+        elif values.dtype == np.float32:
+            values = values.view(np.uint32)
+        elif values.dtype == np.float16:
+            values = values.view(np.uint16)
+        array = np.zeros_like(values, shape=len(self))
+        op = np.logical_xor if array.dtype == bool else np.bitwise_xor
+        diffs = op(values[:-1], values[1:])
+        array[self._starts[1:]] = diffs
+        array[self._starts[0]] = values[0]
+        op.accumulate(array, out=array)
+        return array.view(self._values.dtype)
+
+    @classmethod
+    def from_intervals(cls, starts: npt.ArrayLike, ends: npt.ArrayLike, size: int, values: npt.ArrayLike = True, default_value=0) -> 'GenomicRunLengthArray':
+        """Constuct a runlength array from a set of intervals and values
+
+        Parameters
+        ----------
+        starts : ArrayLike
+        ends : ArrayLike
+        size : int
+        values : ArrayLike
+        default_value :
+
+        Returns
+        -------
+        'RunLengthArray'
+        """
+        
+        assert np.all(ends > starts)
+        assert np.all(starts[1:] > ends[:-1])
+        prefix = [0] if (len(starts) == 0 or starts[0] != 0) else []
+        postfix = [size] if (len(ends) == 0 or ends[-1] != size) else []
+
+        events = np.empty(len(prefix) + len(postfix) + starts.size + ends.size, dtype=int)
+        if len(prefix):
+            events[0] = prefix[0]
+        if len(postfix):
+            events[len(prefix):-1:2] = starts
+            events[len(prefix)+1:-1:2] = ends
+            events[-1] = postfix[0]
+        else:
+            events[len(prefix)::2] = starts
+            events[len(prefix)+1::2] = ends
+
+        tmp = values
+        if isinstance(values, Number):
+            values = np.empty(2*(events.size//2+1), dtype=np.array(values).dtype)
+            values[::2] = default_value
+            values[1::2] = tmp
+        else:
+            values = interleave([np.broadcast(default_value, values.shape), values])
+            if ends[-1] != size:
+                values = np.append(values, default_value)
+
+        if (len(starts) > 0) and (starts[0] == 0):
+            values = values[1:]
+
+        values = values[:(len(events)-1)]
+        return cls(events, values, do_clean=True)
 
 
 @bnpdataclass
@@ -17,7 +95,7 @@ class RawInterval:
     stop: int
 
 
-def get_pileup(intervals: Interval, chromosome_size: int) -> RunLengthArray:
+def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArray:
     """Get the number of intervals that overlap each position of the chromosome/contig
 
     This uses run length encoded arrays to handle the sparse data that
@@ -94,10 +172,10 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     [False False  True]
     """
     assert np.all(intervals.stop <= chromosome_size), (np.max(intervals.stop), chromosome_size)
-    rla = RunLength2dArray.from_intervals(intervals.start,
-                                          intervals.stop,
-                                          chromosome_size)
-    return rla.any(axis=0)
+    if len(intervals) == 0:
+        return GenomicRunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
+    merged = merge_intervals(intervals[np.argsort(intervals.start)])
+    return GenomicRunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
 
 
 def human_key_func(chrom_name):
@@ -124,6 +202,10 @@ def sort_intervals(intervals: Interval, chromosome_key_function: callable = lamb
         Sorted intervals
 
     """
+    if isinstance(intervals.chromosome.encoding, StringEncoding):
+        args = np.lexsort((intervals.start, intervals.chromosome))
+        return intervals[args]
+
     if sort_order is not None:
         chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
     s = sorted((chromosome_key_function(interval.chromosome.to_string()), interval.start, interval.stop, i)
@@ -157,7 +239,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
         stops += distance
-    valid_start_mask = intervals.start[1:] > intervals[:-1].stop
+    valid_start_mask = intervals.start[1:] > stops[:-1] # intervals[:-1].stop
     start_mask = np.concatenate(([True], valid_start_mask))
     stop_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
@@ -185,6 +267,24 @@ def intersect(intervals_a, intervals_b):
     result = all_intervals[1:][mask]
     result.stop = stops[:-1][mask]
     return result
+
+
+@streamable()
+def global_intersect(intervals_b, intervals_a):
+    all_intervals = np.concatenate([intervals_a, intervals_b])
+    all_intervals = all_intervals[np.lexsort((all_intervals.start, all_intervals.chromosome))]
+    stops = all_intervals.stop[np.lexsort((all_intervals.stop, all_intervals.chromosome))]
+    mask = stops[:-1] > all_intervals.start[1:]
+    result = all_intervals[1:][mask]
+    result.stop = stops[:-1][mask]
+    return result
+
+
+def unique_intersect(intervals_a, intervals_b, genome_size):
+    genome_mask = get_boolean_mask(intervals_b, genome_size)
+    entry_mask = genome_mask[intervals_a].any(axis=-1)
+    return intervals_a[entry_mask]
+
 
 @chromosome_map()
 def extend(intervals, both=None, forward=None, reverse=None, left=None, right=None):

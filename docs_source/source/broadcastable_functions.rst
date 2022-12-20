@@ -1,11 +1,13 @@
 Broadcastable Functions
 =======================
 
-A key element of using bioNumpy efficiently is being able to write broadcastable functions on sequences. This will let numpy and bioNumpy handle the buisnis of applying the function to large sets of sequences. Below is a short description of how normal broadcasting works in numpy, and how this can be utilized to make broadcastable sequence functions.
+A key element of using BioNumPy efficiently is being able to write broadcastable functions on sequences.
+This will let NumPy and BioNumPy handle the business of applying the function to large sets of sequences.
+Below is a short description of how normal broadcasting works in NumPy, and how this can be utilized to make broadcastable sequence functions.
 
-Elementwise broadcasting in numpy
+Elementwise broadcasting in NumPy
 ---------------------------------
-One of the main functionalities of numpy is to apply elementwise operations to large arrays of data. For functions with more that one parameters (such as adding or multiplying) this requires that the arrays are somewhat of the same shape. Of course, if the arrays have exactly the same shape, the elementwise operations is just applied to corresponding elements of the array
+One of the main functionalities of NumPy is to apply elementwise operations to large arrays of data. For functions with more that one parameters (such as adding or multiplying) this requires that the arrays are somewhat of the same shape. Of course, if the arrays have exactly the same shape, the elementwise operations is just applied to corresponding elements of the array
   
     >>> import numpy as np
     >>> a = [[1, 2, 3], [4, 5, 6]]

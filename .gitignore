@@ -70,6 +70,7 @@ instance/
 docs_source/_build/
 docs/*
 docs_source/stubs
+_autosummary
 
 # PyBuilder
 target/
@@ -110,5 +111,22 @@ ENV/
 # IDE settings
 *~*
 *#*
-.idea  # pycharm
+.idea/
 
+# latex
+*.aux
+*.out
+*.fls
+*.bat
+*.fdb_latexmk
+
+# profiling
+*.prof
+
+*.tmp
+
+
+# benchmark results
+benchmarks/*report_*.html
+benchmarks/*report_*.md
+benchmarks/.snakemake

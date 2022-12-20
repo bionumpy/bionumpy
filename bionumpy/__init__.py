@@ -7,7 +7,7 @@ __version__ = '0.2.8'
 import npstructures as nps
 
 from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
-                 TwoLineFastaBuffer, FastQBuffer,
+                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer,
                  BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                  GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
@@ -16,6 +16,7 @@ from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encode
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .io.strops import str_equal
+from .util.cli import run_as_commandline
 from . import simulate
 from . import arithmetics
 open = bnp_open
@@ -23,7 +24,7 @@ open = bnp_open
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
-Bed6Buffer = get_bufferclass_for_datatype(Bed6)
+# Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
 __all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",

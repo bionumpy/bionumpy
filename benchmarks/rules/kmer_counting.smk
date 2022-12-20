@@ -1,3 +1,4 @@
+
 rule jellyfish_count:
     input:
         "results/dna_sequences/{filename}.fa"
@@ -6,47 +7,55 @@ rule jellyfish_count:
     log:
         "{filename}.jf.log",
     params:
-        kmer_length=8,
+        kmer_length=5,
         size="1G",
-        extra="--canonical",
+        #extra="--canonical",
     threads: 1
+    benchmark:
+        "benchmarks/kmer_counts/jellyfish/count-{filename}.txt"
     wrapper:
         "v1.19.2-20-g6055e791/bio/jellyfish/count"
 
+
 rule jellyfish_dump:
     input:
-        "{prefix}.jf",
+        "results/jellyfish/kmer_counts/{prefix}.jf",
     output:
-        "{prefix}.dump",
+        "results/jellyfish/kmer_counts/{prefix}.csv",
     log:
-        "{prefix}.log",
+        "results/jellyfish/kmer_counts/{prefix}.log",
     params:
         extra="-c -t",
+    benchmark:
+        "benchmarks/kmer_counts/jellyfish/dump-{prefix}.txt"
     wrapper:
         "v1.19.2-20-g6055e791/bio/jellyfish/dump"
 
 
-rule binoumpy_count:
+rule bionumpy_count:
     input:
         "results/dna_sequences/{filename}.fa"
     output:
         "results/bionumpy/kmer_counts/{filename}.csv"
-    run:
-        from bionumpy.sequence import get_kmers, count_encoded
-        from bionumpy.streams import streamable
-        from bionumpy.io.dump_csv import dump_csv
-        import bionumpy as bnp
+    benchmark:
+        "benchmarks/kmer_counts/bionumpy/{filename}.txt"
+    script:
+        "../scripts/bionumpy_count_kmers.py"
 
-        @streamable(sum)
-        def count_kmers(sequence_entries):
-            sequence = bnp.change_encoding(sequence_entries.sequence, bnp.DNAEncoding)
-            kmers = get_kmers(sequence, k=8)
-            return count_encoded(kmers, axis=None)
 
-        stream = bnp.open(input[0]).read_chunks()
-        output_stream = open(output[0], "wb")
-        kmers = count_kmers(stream)
-        output.write(bytes(dump_csv([(str, kmers.alphabet),
-                                     (int, kmers.count)])))
-                     
+rule python_count:
+    input:
+        "results/dna_sequences/{filename}.fa"
+    output:
+        "results/python/kmer_counts/{filename}.csv"
+    benchmark:
+        "benchmarks/kmer_counts/python/{filename}.txt"
+    script:
+        "../scripts/python_kmer_counting.py"
+
+
+
+
+
+
 

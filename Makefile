@@ -74,3 +74,6 @@ docs: ## generate Sphinx HTML documentation, including API docs
 
 install: clean ## install the package to the active Python's site-packages
 	pip install -e .
+
+manuscript:
+	cd docs_source && ./make_manuscript.sh

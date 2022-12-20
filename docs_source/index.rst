@@ -39,7 +39,7 @@ BioNumpy can be used to analyse a wide range of data. Follow one of the guides b
 What can you do with BioNumpy?
 ----------------------------------
 
-.. grid:: 3
+.. grid:: 2
 
     .. grid-item-card:: :material-regular:`library_books;3em`
         :text-align: center
@@ -57,6 +57,8 @@ What can you do with BioNumpy?
 
         Analysing sequence patterns such as kmers, minimzers and motifs
 
+.. grid:: 2
+
     .. grid-item-card::  :material-regular:`calculate;3em`
         :text-align: center
         :link: topics/genome_arithmetics.html
@@ -66,8 +68,6 @@ What can you do with BioNumpy?
         Analysing genomic tracks (BED-files, VCFs, GFFs, etc)
 
 
-.. grid:: 3
-
     .. grid-item-card:: :material-regular:`hub;3em`
         :text-align: center
         :link: topics/multiomics.html
@@ -76,6 +76,7 @@ What can you do with BioNumpy?
 
         Combining data-sets from multiple sources/domains
 
+..
     .. grid-item-card:: :material-regular:`rocket_launch;3em`
         :text-align: center
         :link: topics/gpu.html

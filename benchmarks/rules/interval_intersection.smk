@@ -1,49 +1,71 @@
 import bionumpy as bnp
 
+rule unique_intersect_bedtools:
+    input:
+        left="results/intervals/{a}.bed",
+        right="results/bed_files/{b}.bed.gz",
+    output:
+        "results/bedtools/unique_intersect/{a}-vs-{b}.bed"
+    benchmark:
+        "benchmarks/unique_intersect/bedtools/{a}-vs-{b}.txt"
+    params:
+        extra="-u"
+    wrapper:
+        "v1.19.2/bio/bedtools/intersect"
+
+rule unique_intersect_bionumpy:
+    input:
+        a="results/intervals/{a}.bed",
+        b="results/bed_files/{b}.bed.gz",
+        chrom_sizes="../example_data/hg38.chrom.sizes"
+    output:
+        "results/bionumpy/unique_intersect/{a}-vs-{b}.bed"
+    benchmark:
+        "benchmarks/unique_intersect/bionumpy/{a}-vs-{b}.txt"
+    script:
+        "../scripts/bionumpy_unique_intersect.py"
+
 
 rule intersect_bionumpy:
     input:
-        a="results/intervals/{b}.bed",
-        b="results/intervals/{a}.bed",
-        chrom_sizes="results/chrom.sizes"
+        a="results/intervals/{a}.bed",
+        b="results/bed_files/{b}.bed.gz",
+        chrom_sizes="../example_data/hg38.chrom.sizes"
     output:
-        "results/bionumpy/intersect/{a}_{b}.bed"
+        "results/bionumpy/intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/intersect/bionumpy/{a}_{b}.txt"
-    run:
-        chrom_sizes = bnp.open(input.chrom_sizes).read()
-        a = bnp.open(input[0], buffer_type=bnp.Bed6Buffer).read_chunks()
-        b = bnp.open(input[1], buffer_type=bnp.Bed6Buffer).read_chunks()
-        ms = bnp.streams.MultiStream(chrom_sizes, a=a, b=b)
-        result = bnp.arithmetics.intersect(ms.a, ms.b)
-        with bnp.open(output[0], "w", buffer_type=bnp.Bed6Buffer) as f:
-            f.write(result)
+        "benchmarks/intersect/bionumpy/{a}-vs-{b}.txt"
+    script:
+        "../scripts/bionumpy_intersect.py"
 
 
 rule intersect_bedtools:
     input:
-        left="results/intervals/{b}.bed",
-        right="results/intervals/{a}.bed"
+        left="results/intervals/{a}.bed",
+        right="results/bed_files/{b}.bed.gz"
     output:
-        "results/bedtools/intersect/{a,\d+}_{b,\d+}.bed"
+        "results/bedtools/intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/intersect/bedtools/{a}_{b}.txt"
+        "benchmarks/intersect/bedtools/{a}-vs-{b}.txt"
     log:
-        "logs/bedtools/intersect/{a}_{b}.log"
+        "logs/bedtools/intersect/{a}-vs-{b}.log"
+    params:
+        extra=""
     wrapper:
         "v1.19.2/bio/bedtools/intersect"
 
 
-rule intersect_check:
+rule unique_intersect_pyranges:
     input:
-        "results/bedtools/intersect/{a}_{b}.bed",
-        "results/bionumpy/intersect/{a}_{b}.bed"
+        a = "results/intervals/{a}.bed",
+        b = "results/bed_files/{b}.bed.gz",
     output:
-        "results/intersect/{a\d+}_{b\d+}.check"
-    run:
-        a = (line.strip().split("\t")[:3] for line in open(input[0]))
-        b = (line.strip().split("\t")[:3] for line in open(input[1]))
-        for l, l2 in zip(a, b):
-            assert l==l2, (l, l2)
-        open(output[0], "w").write("1")
-
+        "results/pyranges/unique_intersect/{a}-vs-{b}.bed"
+    benchmark:
+        "benchmarks/unique_intersect/pyranges/{a}-vs-{b}.txt"
+    conda:
+        "../envs/pyranges.yml"
+    shell:
+        "time python scripts/pyranges_intersect.py {input} {output}"
+    #script:
+    #    "../scripts/pyranges_intersect.py"

@@ -39,6 +39,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         line_starts = np.insert(self._new_lines + 1, 0, 0)
         line_ends = np.append(self._new_lines, self._data.size-1)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
+        data.ravel()
         new_entries = np.insert(self._new_entries+1, 0, 0)
         n_lines_per_entry = np.diff(np.append(new_entries, self._new_lines.size+1))-1
         line_offsets = np.insert(np.cumsum(n_lines_per_entry),0, 0)

@@ -73,7 +73,7 @@ class OneToOneEncoding(Encoding):
         return RaggedArray(data, s._shape)
 
     def _encode_string(self, string: str):
-        s = EncodedArray([ord(c) for c in string], BaseEncoding)
+        s = EncodedArray(np.frombuffer(bytes(string, encoding="ascii"), dtype=np.uint8), BaseEncoding)
         s = self._encode_base_encoded_array(s)
         return s
 
@@ -240,6 +240,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.view(np.ndarray)
 
     def to_string(self) -> str:
+        if not self.encoding.is_one_to_one_encoding():
+            return self.encoding.to_string(self.data)
         if hasattr(self.encoding, "_decode"):
             # new system, can be used in all cases after refactoring
             data = self
@@ -296,9 +298,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             elif n_dims == 2:
                 # show first columns and rows
                 #raise NotImplemented("Str for n_dims=2 not implemented")
-                return self.encoding.to_string(self.data)[0:40] + "..."
+                return self.encoding.to_string(self.data[0:10, 0:10]) + "...."
                 # data_to_show = None
-            text = "[" + ", ".join(self.encoding.to_string(e) for e in data_to_show) + "]"
+            text = "[" + ", ".join(self.encoding.to_string(e).strip() for e in data_to_show) + "]"
             return text
 
         else:
@@ -391,6 +393,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), encoding=self.encoding)
         if func == np.append:
             return self.__class__(func(args[0].data, args[1].data, *args[2:], **kwargs), encoding=self.encoding)
+        if func == np.lexsort:
+            if not all(issubclass(t, (EncodedArray, np.ndarray)) for t in types):
+                return NotImplemented
+
+            args = [a.raw() if isinstance(a, EncodedArray) else np.asarray(a) for a in args[0]]
+            return func(args, *kwargs)
+
         if func == np.insert:
             return self.__class__(func(args[0].data, args[1], args[2].data, *args[3:], **kwargs), encoding = self.encoding)
         elif func in (np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
@@ -416,7 +425,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
 def _parse_ufunc_inputs(inputs, target_encoding):
     for a in inputs:
-        assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), repr(a)
+        assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), "%s is not str, list, EncodedArray or EncodedRaggedArray" % type(a)
         if isinstance(a, str):
             a = target_encoding.encode(a)
         elif isinstance(a, list):

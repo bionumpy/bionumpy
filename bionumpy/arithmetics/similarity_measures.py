@@ -1,14 +1,17 @@
 from .intervals import get_boolean_mask
-from ..streams import MultiStream, streamable
+from ..streams import MultiStream, streamable, BnpStream
 import numpy as np
 from ..datatypes import ChromosomeSize, Interval
+
 
 @streamable(sum)
 def get_contingency_table(intervals_a, intervals_b, sequence_length):
     boolean_a = get_boolean_mask(intervals_a, sequence_length)
+    not_a = ~boolean_a
     boolean_b = get_boolean_mask(intervals_b, sequence_length)
-    return np.array([[np.sum(boolean_a & boolean_b), np.sum(boolean_a & ~boolean_b)],
-                     [np.sum(~boolean_a & boolean_b), np.sum(~boolean_a & ~boolean_b)]])
+    not_b = ~boolean_b
+    return np.array([[np.sum(boolean_a & boolean_b), np.sum(boolean_a & not_b)],
+                     [np.sum(not_a & boolean_b), np.sum(not_a & not_b)]])
 
 
 def forbes(chromosome_sizes: ChromosomeSize, intervals_a: Interval, intervals_b: Interval) -> float:
