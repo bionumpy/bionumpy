@@ -44,6 +44,7 @@ extensions = ['sphinx.ext.autodoc',
 # for manuscript references
 bibtex_bibfiles = ['manuscript/refs.bib']
 bibtex_reference_style = 'label'
+bibtex_encoding = 'latin'
 
 doctest_global_setup = """
 import bionumpy as bnp
@@ -212,5 +213,6 @@ latex_elements = {
     %\usepackage[utf8]{inputenc} % needed if you have an older TeX distribution
     \usepackage{lmodern}         % recommended
     \setlength\parindent{0pt}    % just for this example
+    \usepackage[utf8]{inputenc}
  '''
 }
