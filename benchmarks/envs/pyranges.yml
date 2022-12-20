@@ -2,4 +2,5 @@ channels:
   - bioconda
 
 dependencies:
+  - numpy==1.20.0
   - pyranges==0.0.120
