@@ -194,14 +194,14 @@ autoapi_root = 'autoapi/'
 
 latex_documents = [
     ("manuscript/index", 'bionumpymanuscript.tex',
-     'BioNumPy: Fast and easy processing and analysis of biological data with Python',
+     'BioNumPy: Fast and easy analysis of biological data with Python',
      '', 'howto'),
 ]
 
 text_add_secnumbers = False  # no numbering of sections
 
 latex_elements = {
-    "maketitle": "{\LARGE BioNumPy: Fast and easy processing and analysis of biological data with Python}",
+    "maketitle": "{\LARGE BioNumPy: Fast and easy analysis of biological data with Python}",
     #"maketitle": "\maketitle",
     "tableofcontents": "",
     'preamble': r'''

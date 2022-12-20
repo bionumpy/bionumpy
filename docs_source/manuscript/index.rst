@@ -1,7 +1,8 @@
 BioNumPy manuscript
 ==========================================================================
 
-Knut Rand [1]_ , Ivar Grytten, Milena Pavlovic, Chakravarthi Kanduri and Geir Kjetil Sandve
+
+Knut Rand [1]_, Ivar Grytten, Milena Pavlović, Chakravarthi Kanduri and Geir Kjetil Sandve
 
 .. [1] Correspondence: knutdr@ifi.uio.no
 
@@ -90,10 +91,12 @@ In the following example, we represent a few sequences with BioNumPy and show ho
    [ True False False False False]
    >>> # Counting As per sequence using axis=1
    >>> np.sum(is_A, axis=1)
-   >>> array([1, 2, 1, 1])
+   array([1, 2, 1, 1])
    >>> # Counting ratio of As per base position using np.mean with axis=0
    >>> np.mean(is_A, axis=0)
-   >>> array([0.75      , 0.        , 0.        , 0.66666667, 0.        ])
+   array([0.75      , 0.        , 0.        , 0.66666667, 0.        ])
+
+
 
 
 
@@ -145,9 +148,11 @@ Discussion
 
 We have presented a new Python package, BioNumPy, for efficient representation and analysis of biological datasets. We have shown that BioNumPy is usually considerably faster than both vanilla Python scripts and commonly used Python packages for performing similar tasks. BioNumPy also has comparable efficiency to commonly used efficient tools written in C/C++.
 
-While BioNumPy is fast on basic operations such as kmer counting and getting reverse complements of reads, we want to emphasise that BioNumPy is not specifically designed for tasks where you only read a file, perform a single simple operation and write the results to file again. For such operations, e.g. reading a FASTQ file and converting it to FASTA, there already exist highly efficient and well tested tools that can be used :cite:`seqtk, bcftools`. BioNumPy is instead meant to be used as a library inside Python, and is useful when one e.g. wants to perform multiple operations on a dataset, explore or play around with datasets , or perform analyses that integrate multiple datasets in novel ways. We also invite the community to develop a broad variety of functionality for dedicated purposes with BioNumPy as an internal workhorse. As shown in Figure 1, BioNumPy is not always faster than vanilla Python code, e.g. for the case where one is only reading a FASTA file, subsampling the sequences and writing the results back to a new FASTA file. The reason is that although BioNumPy reads all data into NumPy-arrays that can be efficiently subsampled, BioNumPy performs operations beyond the vanilla Python implementation, such as validating, encoding and representing the data efficiently. These additional steps come handy when you want to do more operations on the data, such as combining it with other datasets or querying it in different ways. An example of a case where BioNumPy gives considerable speedup over native tools is the problem of computing the Jaccard similarity index between all pairs of a set of bed-files. Since BioNumPy can keep all files in memory, it is considerably faster than dedicated packages like BEDTools, which needs to read each bed-file from disk every time a pair of BED-files are to be compared.
+While BioNumPy is fast on basic operations such as kmer counting and getting reverse complements of reads, we want to emphasise that BioNumPy is not specifically designed for standard tasks where  tailored and highly optimised tools already exists :cite:`seqtk, bcftools`. BioNumPy is instead meant to be used as a library inside Python, and is useful when one e.g. wants to perform multiple operations on a dataset, explore or play around with datasets, or perform analyses that integrate multiple datasets in novel ways. We also invite the community to develop a broad variety of functionality for dedicated purposes with BioNumPy as an internal workhorse.
 
-Many common bioinformatics tasks, such as e.g. converting from FASTQ to FASTA, are today often performed as a series of bash commands, typically using a combination of sed, AWK, Grep, Perl and/or other native unix utility tools. As an example, consider the following bash-code for converting from FASTQ to FASTA:
+As shown in Figure 1, BioNumPy is not always faster than vanilla Python code, e.g. for the case where one is only reading a FASTA file, subsampling the sequences and writing the results back to file. The reason is that although BioNumPy reads all data into NumPy-arrays that can be efficiently subsampled, BioNumPy performs operations beyond the vanilla Python implementation, such as validating, encoding and representing the data efficiently. These additional steps come handy when you want to do more operations on the data, such as combining it with other datasets or querying it in different ways. An example of a case where BioNumPy gives considerable speedup over native tools is the problem of computing the Jaccard similarity index between all pairs of a set of bed-files. Since BioNumPy can keep all files in memory, it is considerably faster than dedicated packages like BEDTools, which needs to read each bed-file from disk every time a pair of BED-files are to be compared.
+
+Many common bioinformatics tasks are today typically performed as a series of bash commands, using a combination of sed, AWK, Grep, Perl and/or other native unix utility tools. As an example, consider the following bash-code for converting from FASTQ to FASTA:
 
 .. code-block:: bash
 
@@ -165,7 +170,7 @@ While such commands often yield fast results, there are in our opinion several d
 
 Since BioNumPy is flexible in its input, it works well with existing packages and solutions for fetching data from databases, e.g. in combination with the various BioPython modules for downloading data from databases like Encode :cite:`encode` and Jaspar :cite:`jaspar`. This ease of interoperability is also the reason why we have limited the scope of BioNumPy to not including modules for e.g. fetching data from online databases.
 
-Although Python is user-friendly and commonly used by bioinformaticians, it can be speculated that the difficulty of writing efficient code for large-scale analyses is an important reason why a lot of central bioinformatics tools are instead written in low-level and harder to learn languages like C or C++ :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - who are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
+It can be speculated that the difficulty of writing efficient code for large-scale analyses in Python is an important reason why a lot of central bioinformatics tools are instead written in low-level and harder to learn languages like C or C++  :cite:`seqtk, bcftools, bedtools, seqtk`. The fact that tools are written in such languages means that the large majority of bioinformaticians and computational biologists - who are typically only familiar with bash, R, and/or Python - are not able to easily contribute to the development of tools or understand/learn the internal workings of the methods they use. This limits transparency of bioinformatics research, and is also a broader problem since the continually growing size of biological data necessitates fast and efficient tools and libraries. Our hope is that BioNumPy is able to bridge this gap by making it possible for anyone to more easily work with large biological datasets in Python.
 
 
 
@@ -193,7 +198,6 @@ MP, CK and GK: UiORealArt Convergence Environment, University of Oslo, Oslo, Nor
 
 .. bibliography::
    :style: unsrt
-
 
 
 
