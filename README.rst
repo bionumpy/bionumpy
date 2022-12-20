@@ -23,13 +23,9 @@ Documentation: `https://bionumpy.github.io/bionumpy/ <https://bionumpy.github.io
 
 What is BioNumPy?
 -----------------
-BioNumPy is a toolkit, built on top of NumPy, for enabling array programming on biological data in Python. BioNumPy aims to make it easy to read common bioinformatics file formats efficiently into NumPy-like data structures that enable efficient operations and analysis of the data. Working in BioNumPy should feel much like working in NumPy.
-
-
-Why BioNumPy?
--------------
-* There are no existing packages in Python for getting biological datasets efficiently into NumPy-like data structures.
-* Current packages for working with biological data do not use NumPy in an efficient way (e.g. individual sequences are stored as separate NumPy arrays, not together in shared arrays).
+BioNumPy is a Python library, built on top of NumPy, for enabling array programming on biological datasets in Python.
+BioNumPy aims to make it easy to read common bioinformatics file formats efficiently into NumPy-like data structures
+that enable efficient operations and analysis of the data. Working in BioNumPy should feel much like working in NumPy.
 
 
 Getting started
@@ -39,5 +35,16 @@ Getting started
 
 	$ pip install bionumpy
 
-2. Check out the tutorials and getting started guide in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
+2. Import BioNumPy and read your data, e.g.:
+
+    >>> import bionumpy as bnp
+    >>> import numpy as np
+    >>> f = bnp.open("reads.fq.gz")
+    >>> for chunk in f:
+    >>>     # chunk now contains the sequences of reads and NumPy-functions can be used
+    >>>     print(np.sum(chunk.sequence == "G"))
+
+Check out the getting started guide and various tutorials in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
+
+
 
