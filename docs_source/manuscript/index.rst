@@ -2,7 +2,7 @@ BioNumPy manuscript
 ==========================================================================
 
 
-Knut Rand [1]_, Ivar Grytten, Milena Pavlović, Chakravarthi Kanduri and Geir Kjetil Sandve
+Knut Rand [1]_, Ivar Grytten, Milena Pavlovic, Chakravarthi Kanduri and Geir Kjetil Sandve
 
 .. [1] Correspondence: knutdr@ifi.uio.no
 
