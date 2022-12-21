@@ -42,6 +42,7 @@ Getting started
     53686
 
 Check out the getting started guide and various tutorials in the `documentation <https://bionumpy.github.io/bionumpy/>`_.
+You can also find the latest version of the `BioNumPy manuscript here <https://github.com/bionumpy/bionumpy/blob/benchmarks/bionumpymanuscript.pdf>`_.
 
 
 
