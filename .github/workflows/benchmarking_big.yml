@@ -1,5 +1,5 @@
 
-name: Benchmarks (big data)
+name: Nightly benchmarks
 
 on:
   schedule:
@@ -27,7 +27,7 @@ jobs:
         with:
           directory: '.'
           snakefile: 'Snakefile'
-          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
+          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_big.md validation_report_big.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
            
             pip install git+https://github.com/bionumpy/npstructures.git/@dev
