@@ -1,5 +1,5 @@
 
-name: Benchmarks (big data)
+name: Nightly benchmarks
 
 on:
   schedule:

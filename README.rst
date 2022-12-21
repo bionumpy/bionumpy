@@ -9,12 +9,8 @@ BioNumPy
         :target: https://github.com/bionumpy/bionumpy/actions/
         :alt: Build and test status
 
-.. image:: https://github.com/bionumpy/bionumpy-example-data/actions/workflows/run_checks.yml/badge.svg
-        :target: https://github.com/bionumpy/bionumpy-example-data/actions/
-        :alt: Testing on big data
-
-.. image:: https://github.com/bionumpy/bionumpy/actions/workflows/benchmarking.yml/badge.svg
-        :target: https://github.com/bionumpy/bionumpy/blob/benchmarks/benchmarks/report_small.md
+.. image:: https://github.com/bionumpy/bionumpy/actions/workflows/benchmarking_big.yml/badge.svg
+        :target: https://github.com/bionumpy/bionumpy/blob/benchmarks/benchmarks/report_big.md
         :alt: Benchmarks
 
 
