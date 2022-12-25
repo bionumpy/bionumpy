@@ -18,6 +18,7 @@ BioNumPy documentation
 
     tutorials/fastq_filtering.rst
     tutorials/bam_handling.rst
+    tutorials/subsetting_bed.rst
     tutorials/fastqc.rst
     tutorials/gc_content.rst
     tutorials/numpy_operations.rst

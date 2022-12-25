@@ -26,6 +26,7 @@ def _test_interval_sort(intervals, chrom_sizes):
     result = sort_func(new_intervals)
     np.testing.assert_array_equal(truth.start, result.start)
 
+
 def test_interval_sort_benchmark(benchmark, intervals, chrom_sizes):
     truth = bnp.arithmetics.sort_intervals(intervals, sort_order=chrom_sizes.name.tolist())
     encoding = StringEncoding(chrom_sizes.name)
