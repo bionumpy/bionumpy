@@ -498,6 +498,8 @@ def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
     # is already encoded if list and elements are encoded
     elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return _list_of_encoded_arrays_as_encoded_ragged_array(s)
+    if isinstance(s, np.ndarray) and (s.dtype == object or np.issubdtype(s.dtype, np.character)):
+        s = s.tolist()
 
     return target_encoding.encode(s)
 

@@ -16,6 +16,11 @@ def simple_sequence():
     return EncodedArray(np.array([1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
 
 
+@pytest.fixture
+def ragged_string_list():
+    return ['a', 'ac', 'acg']
+
+
 def _test_sequence_repr(sequence):
     assert repr(sequence).replace("\n", "") == "EncodedArray([[65, 66] [66 67]])"
 
@@ -77,6 +82,12 @@ def test_encoded_array_list_to_raggedarray(simple_sequence):
     str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
     assert_encoded_raggedarray_equal(array_list, str_list)
                                 
+
+def test_object_array(ragged_string_list):
+    object_array = np.array(ragged_string_list)
+    encoded_array = as_encoded_array(object_array)
+    assert_encoded_raggedarray_equal(encoded_array, ragged_string_list)
+    
 
 if __name__ == "__main__":
     test_works_with_ragged()
