@@ -162,12 +162,12 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                 if field.type in (int, float):
                     val = np.asanyarray(pre_val)
                 elif field.type == str:
-                    assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray)), (field, pre_val)
+                    assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val))
                     val = as_encoded_array(pre_val)
                 elif is_subclass_or_instance(field.type, Encoding):
                     if is_subclass_or_instance(field.type, NumericEncoding):
                         assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
-                            (field, pre_val)
+                            (field, pre_val, type(pre_val))
                     else:
                         assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
                     # must do as_encoded and not explicit encode as pre_val might already

@@ -83,8 +83,9 @@ def test_encoded_array_list_to_raggedarray(simple_sequence):
     assert_encoded_raggedarray_equal(array_list, str_list)
                                 
 
-def test_object_array(ragged_string_list):
-    object_array = np.array(ragged_string_list)
+@pytest.mark.parametrize('dtype', [object, None])
+def test_object_array(ragged_string_list, dtype):
+    object_array = np.array(ragged_string_list, dtype=dtype)
     encoded_array = as_encoded_array(object_array)
     assert_encoded_raggedarray_equal(encoded_array, ragged_string_list)
     

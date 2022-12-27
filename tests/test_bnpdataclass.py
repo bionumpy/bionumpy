@@ -5,6 +5,14 @@ from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass
 from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal
+import pandas as pd
+
+
+@bnpdataclass
+class Person:
+    name: str
+    age: int
 
 
 def test_add_fields():
@@ -44,6 +52,16 @@ def test_make_dataclass():
 
 def add(a, b):
     return a+b
+
+
+def test_from_pandas():
+    persons = {'name': ['knut', 'marit'],
+               'age': [35, 30]}
+    df = pd.DataFrame(persons)
+    obj = Person(df.name, df.age)
+    assert_bnpdataclass_equal(
+        obj,
+        Person(persons['name'], persons['age']))
 
 
 @bnpdataclass
