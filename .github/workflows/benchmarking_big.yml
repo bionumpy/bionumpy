@@ -41,11 +41,11 @@ jobs:
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           git config pull.rebase false
-          git pull --allow-unrelated-histories -Xours origin benchmarks
           git add -f benchmarks/*report*.md
           git add -f benchmarks/results/reports/*/*.png
           git add -f benchmarks/results/reports/*/*.data
           git commit -am 'Benchmark results'
+          git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master

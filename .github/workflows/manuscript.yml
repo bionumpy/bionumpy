@@ -35,9 +35,9 @@ jobs:
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           git config pull.rebase false
-          git pull --allow-unrelated-histories -Xours origin benchmarks
           git add -f bionumpymanuscript.pdf
           git commit -am 'New build of manuscript'
+          git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master
