@@ -34,6 +34,7 @@ jobs:
           cp docs_source/_build/latex/bionumpymanuscript.pdf .
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
+          git pull origin benchmarks
           git add -f bionumpymanuscript.pdf
           git commit -am 'New build of manuscript'
 
