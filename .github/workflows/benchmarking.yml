@@ -47,7 +47,7 @@ jobs:
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           git config pull.rebase false
-          git pull -Xours origin benchmarks
+          git pull --allow-unrelated-histories -Xours origin benchmarks
           git add -f benchmarks/*report*.md
           git add -f benchmarks/results/reports/*/*.png
           git add -f benchmarks/results/reports/*/*.data
