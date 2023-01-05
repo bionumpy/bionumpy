@@ -66,7 +66,8 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
 
     assert 0 < k < 32, "k must be larger than 0 and smaller than 32"
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
-        "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding"
+        "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding. " \
+        "Change encoding of your sequences by using e.g. bnp.change_encoding(sequences, bnp.DNAEncoding)"
 
     if sequence.encoding.alphabet_size == 4:
         # use the faster _get_dna_kmers
