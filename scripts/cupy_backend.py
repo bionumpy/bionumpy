@@ -7,7 +7,7 @@ from bionumpy.io.file_buffers import TwoLineFastaBuffer
 bnp.set_backend(cp)
 
 
-def run(fasta_filename="example_data/small.fa"):
+def run(fasta_filename="../example_data/small.fa"):
     chunk_size = 500000
     chunk_generator = bnp.open(fasta_filename, buffer_type=TwoLineFastaBuffer).read_chunks(min_chunk_size=chunk_size)
     for chunk, _ in zip(chunk_generator, range(5)):
@@ -19,4 +19,4 @@ def run(fasta_filename="example_data/small.fa"):
 
 
 if __name__ == "__main__":
-    run(sys.argv[1])
+    run()

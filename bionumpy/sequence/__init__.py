@@ -16,3 +16,9 @@ __all__ = ["get_kmers",
            "get_strand_specific_sequences", 
            "count_encoded",
            "match_string"]
+
+
+def set_backend(lib):
+    from . import kmers
+    kmers.np = lib
+

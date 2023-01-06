@@ -55,3 +55,5 @@ def set_backend(lib):
     from . import alphabet_encoding
     alphabet_encoding.np = lib
 
+    from . import kmer_encodings
+    kmer_encodings.np = lib

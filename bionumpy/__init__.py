@@ -51,6 +51,9 @@ def set_backend(lib):
     from .encodings import set_backend as set_encoding_backend
     set_encoding_backend(lib)
 
+    from .sequence import set_backend as set_sequence_backend
+    set_sequence_backend(lib)
+
     from bionumpy.cupy_compatible.parser import CupyFileReader
 
     from .io import file_buffers
