@@ -19,6 +19,9 @@ class EncodedCounts:
     def __str__(self):
         return "\n".join(f"{c}: {n}" for c, n in zip(self.alphabet, self.counts.T))
 
+    def __repr__(self):
+        return f'''EncodedCounts(alphabet={repr(self.alphabet)}, counts={repr(self.counts)}, row_names={repr(self.row_names)})'''
+
     def __eq__(self, other):
         if self.alphabet != other.alphabet:
             return False
