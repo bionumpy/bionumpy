@@ -21,4 +21,3 @@ __all__ = ["get_kmers",
 def set_backend(lib):
     from . import kmers
     kmers.np = lib
-

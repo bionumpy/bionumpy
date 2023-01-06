@@ -419,10 +419,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         So don't use it :)
 
         """
-        #assert isinstance(self.data, np.ndarray) and not np.issubdtype(self.data.dtype, np.object_)
-        print(self.data)
-        print(args)
-        print(kwargs)
+        assert isinstance(self.data, np.ndarray) and not np.issubdtype(self.data.dtype, np.object_)
         return self.__class__(np.lib.stride_tricks.as_strided(self.data, *args, **kwargs), self.encoding)
 
 

@@ -48,6 +48,10 @@ def set_backend(lib):
     from npstructures import RaggedArray
     from npstructures import RaggedShape, RaggedView
 
+    if not hasattr(lib, "object_"):
+        # hack for cupy
+        lib.object_ = None
+
     from .encodings import set_backend as set_encoding_backend
     set_encoding_backend(lib)
 
@@ -58,9 +62,6 @@ def set_backend(lib):
 
     from .io import file_buffers
     file_buffers.np = lib
-    file_buffers.RaggedArray = RaggedArray
-    file_buffers.RaggedShape = RaggedShape
-    file_buffers.RaggedView = RaggedView
 
     from .io import parser
     parser.np = lib
@@ -72,16 +73,11 @@ def set_backend(lib):
 
     from . import bnpdataclass
     bnpdataclass.np = lib
-    bnpdataclass.RaggedArray = RaggedArray
 
     from . import encoded_array
     encoded_array.np = lib
-    encoded_array.RaggedArray = RaggedArray
     encoded_array.get_NPSArray = lambda x: x
-
-    from .sequence import kmers
-    kmers.BitArray = BitArray
 
     from . import util
     util.np = lib
-    util.RaggedArray = RaggedArray
+
