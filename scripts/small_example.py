@@ -55,21 +55,13 @@ def plot_mean_base_quality_across_reads():
 
 
 def motif_matching():
-    from bionumpy.io.jaspar import read_jaspar_matrix
-
+    from bionumpy.io.motifs import read_motif
     # Read the alphabet and counts from jaspar file
-    alphabet, matrix = read_jaspar_matrix("example_data/MA0080.1.jaspar")
-
-    # Convert counts to position weight matrix
-    pwm = _pwm_from_counts(matrix)
-
-    # Make an array-class for the alphabet
-    arrayclass = get_alphabet_array_class(alphabet)
-
-    # Get the motif score function
-    motif_score = PositionWeightMatrix(pwm, arrayclass)
-
-    # todo
+    pwm = read_motif("example_data/MA0080.1.jaspar")
+    reads = bnp.open("example_data/reads.fq.gz").read()
+    scores = bnp.get_motif_scores(reads.sequence, pwm)
+    max_scores = scores.max(axis=-1)
+    return px.histogram(max_scores, nbins=15)
 
 
 def forbes():
@@ -95,5 +87,5 @@ def test():
     filter_fastq_reads_on_base_quality()
     sequence_matching()
     plot_mean_base_quality_across_reads()
-    #motif_matching()
+    motif_matching()
     forbes()
