@@ -3,7 +3,7 @@ name: Manuscript
 
 on:
   push:
-    branches: [ "dev", "master"]
+    branches: [ "dev" ]
 
 jobs:
   build:

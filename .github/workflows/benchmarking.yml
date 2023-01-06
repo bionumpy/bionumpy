@@ -4,10 +4,7 @@ name: Benchmarks
 on:
   # small benchmark on push and pull request
   push:
-    branches: [ "dev", "master", "dev-benchmarking"]
-
-  pull_request:
-    branches: [ "master", "dev" ]
+    branches: [ "dev"]
 
 
 jobs:
