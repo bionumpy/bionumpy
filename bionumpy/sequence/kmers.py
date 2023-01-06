@@ -1,10 +1,11 @@
 import numpy as np
 
+from ..encodings.exceptions import EncodingError
 from ..encodings.kmer_encodings import KmerEncoding
 from .rollable import RollableFunction
 from bionumpy.encodings import DNAEncoding
 from ..encodings.alphabet_encoding import AlphabetEncoding
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, BaseEncoding, change_encoding
 from ..encoded_array import as_encoded_array
 from npstructures.bitarray import BitArray
 from ..util import as_strided, is_subclass_or_instance
@@ -65,6 +66,14 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
     """
 
     assert 0 < k < 32, "k must be larger than 0 and smaller than 32"
+    if sequence.encoding == BaseEncoding:
+        try:
+            sequence = change_encoding(sequence, DNAEncoding)
+        except EncodingError:
+            logging.error("Tried to change encoding of sequences to DNAEncoding, but failed. "
+                          "Make sure your sequences are valid DNA, only containing A, C, G, and T")
+            raise
+
     assert is_subclass_or_instance(sequence.encoding, AlphabetEncoding), \
         "Sequence needs to be encoded with an AlphabetEncoding, e.g. DNAEncoding. " \
         "Change encoding of your sequences by using e.g. bnp.change_encoding(sequences, bnp.DNAEncoding)"
