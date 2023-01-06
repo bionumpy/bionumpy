@@ -17,5 +17,5 @@ def read_motif(filename):
     path = PurePath(filename)
     suffix = path.suffixes[-1]
     parser = parsers[suffix]
-    alphabet, matrix = parser(filename)
-    return Motif(alphabet, matrix)
+    return parser(filename)
+# @ return Motif(alphabet, matrix)

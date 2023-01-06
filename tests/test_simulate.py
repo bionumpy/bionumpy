@@ -3,7 +3,7 @@ import pytest
 import bionumpy.encoded_array
 from bionumpy.encoded_array import as_encoded_array
 from bionumpy.encodings import StrandEncoding
-from bionumpy.io.motifs import Motif
+from bionumpy.sequence.position_weight_matrix import PWM
 from bionumpy.simulate.chipseq import simulate_chip_seq_fragments, simulate_read_fragments
 from bionumpy.simulate.rnaseq import get_transcript_copies, fragment_transcript_copies, sample_transcript_fragments, \
     get_rnaseq_reads, RNASeqSimulationSettings, simulate_rnaseq
@@ -17,11 +17,17 @@ rng = default_rng()
 
 @pytest.fixture
 def motif():
-    return Motif("acgt",
-                 np.array([[10, 15, 20, 10],
+    letters = "acgt"
+    values = np.array([[10, 15, 20, 10],
                            [12, 2, 10, 10],
                            [8, 13, 0, 10],
-                           [5, 5, 5, 5]], dtype=int))
+                           [5, 5, 5, 5]], dtype=int)
+    return PWM.from_counts(dict(zip(letters, values)))
+    # return Motif("acgt",
+    #              np.array([[10, 15, 20, 10],
+    #                        [12, 2, 10, 10],
+    #                        [8, 13, 0, 10],
+    #                        [5, 5, 5, 5]], dtype=int))
 
 
 @pytest.fixture

@@ -11,7 +11,7 @@ from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_
 
 def sequence_matching():
     reads = bnp.open("example_data/reads.fq.gz").read()
-    matches = bnp.sequence.string_matcher.match_string(reads.sequence, "AC")
+    matches = bnp.sequence.match_string(reads.sequence, "AC")
     # matches is a boolean RaggedArray, so we can sum over the rows to get
     # number of matches for each read
     matches_per_read = np.sum(matches, axis=1)
@@ -19,7 +19,7 @@ def sequence_matching():
     # .. or take a mean over the columns to see where the matches typically are
     matches_per_base = np.mean(matches, axis=0)
     fig = px.line(matches_per_base[0:150])  # plot first 150 bases
-    #fig.show()
+    # fig.show()
 
 
 def find_kmers_in_reads():

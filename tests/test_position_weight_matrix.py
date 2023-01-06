@@ -63,16 +63,16 @@ def test_sequence(sequence, matrix):
 
 def test_integration():
     # Read the alphabet and counts from jaspar file
-    alphabet, matrix = read_jaspar_matrix("example_data/MA0080.1.jaspar")
+    pwm = read_jaspar_matrix("example_data/MA0080.1.jaspar")
     
     # Convert counts to position weight matrix
-    pwm = _pwm_from_counts(matrix)
+    # pwm = PWM.from_dict(pwm)
     
     # Make an array-class for the alphabet
-    encoding = AlphabetEncoding(alphabet)
+    # encoding = AlphabetEncoding(alphabet)
     
     # Get the motif score function
-    pwm = PWM(pwm, alphabet)
+    # pwm = PWM(pwm, alphabet)
     motif_score = PositionWeightMatrix(pwm)
     
     #Get reads

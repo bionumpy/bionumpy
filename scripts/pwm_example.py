@@ -3,10 +3,10 @@ from bionumpy.io.motifs import read_motif
 from bionumpy.sequence.position_weight_matrix import PWM, get_motif_scores
 
 # Read the alphabet and counts from jaspar file
-motif = read_motif("example_data/MA0080.1.jaspar")
+pwm = read_motif("example_data/MA0080.1.jaspar")
 
 # Convert counts to position weight matrix
-pwm = PWM.from_counts(motif)
+# pwm = PWM.from_counts(motif)
 
 # Get reads
 entries = bnp.open("example_data/big.fq.gz").read()

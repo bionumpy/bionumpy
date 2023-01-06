@@ -1,4 +1,5 @@
 import numpy as np
+from ..sequence.position_weight_matrix import PWM
 
 
 def parse_jaspar_line(line):
@@ -11,7 +12,11 @@ def parse_jaspar_line(line):
 def read_jaspar_matrix(filename):
     f = open(filename)
     _ = f.readline()
-    alphabet, matrix = zip(*(parse_jaspar_line(line) for line in f))
-    alphabet = "".join(alphabet)
-    matrix = np.array(matrix, dtype="float")
-    return alphabet, matrix
+    pwm = dict((parse_jaspar_line(line) for line in f))
+    return PWM.from_dict(pwm)
+    # alphabet, matrix = zip(*(parse_jaspar_line(line) for line in f))
+    # 
+    # alphabet = "".join(alphabet)
+    # matrix = np.array(matrix, dtype="float")
+    # return PWM.from_dict({char: row for
+    # return alphabet, matrix
