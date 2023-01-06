@@ -5,8 +5,9 @@ import bionumpy as bnp
 import numpy as np
 import plotly.express as px
 
-from bionumpy.sequence import PWM
+from bionumpy.sequence import PWM, count_kmers
 from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts
+
 
 
 def sequence_matching():
@@ -24,13 +25,12 @@ def sequence_matching():
 
 def find_kmers_in_reads():
     f = bnp.open("example_data/reads.fq.gz")
-    for chunk in f.read_chunks():
-        # Change encoding for ultra-fast kmer-hashing
-        sequences = bnp.change_encoding(chunk.sequence, bnp.DNAEncoding)
-        kmers = bnp.get_kmers(sequences, 5)
-        # kmers is now a RaggedArray that can be indexed
-        first_kmer_in_each_read = kmers[:, 0]
-        all_kmers_as_np_array = kmers.raw()
+    kmer_counts = sum(
+        count_kmers(chunk.sequence, k=5)
+        for chunk in f.read_chunks())
+    most_common = kmer_counts.most_common(10)
+    return px.bar(x=most_common.labels,
+                  y=most_common.counts)
 
 
 def filter_fastq_reads_on_base_quality():

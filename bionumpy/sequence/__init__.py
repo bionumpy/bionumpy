@@ -1,4 +1,4 @@
-from .kmers import get_kmers
+from .kmers import get_kmers, count_kmers
 from .minimizers import get_minimizers
 from .position_weight_matrix import get_motif_scores, PWM
 from .string_matcher import match_string
