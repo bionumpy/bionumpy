@@ -13,8 +13,8 @@ def sequence_matching():
     reads = bnp.open("example_data/reads.fq.gz").read()
     matches = bnp.sequence.match_string(reads.sequence, "AC")
     # matches is a boolean RaggedArray, so we can sum over the rows to get
-    # number of matches for each read
-    matches_per_read = np.sum(matches, axis=1)
+    # number of matches for each read, e.g:
+    # matches_per_read = np.sum(matches, axis=1)
 
     # .. or take a mean over the columns to see where the matches typically are
     matches_per_base = np.mean(matches, axis=0)
