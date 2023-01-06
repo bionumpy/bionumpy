@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict
 from numpy.typing import ArrayLike
 import typing
-from ..io.motifs import Motif
+# from ..io.motifs import Motif
 from .rollable import RollableFunction
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..util.typing import EncodedArrayLike
@@ -32,7 +32,7 @@ def _pwm_from_counts(count_matrix):
 
 class PWM:
     """
-    Class representing a Position Weight Matrix. Calculates scores based on 
+    Class representing a Position Weight Matrix. Calculates scores based on
     the log likelihood ratio between the motif and a background probability
     """
     def __init__(self, matrix, alphabet):
@@ -114,16 +114,17 @@ class PWM:
             matrix = np.log(np.array(list(dictionary.values())))-np.log([background[key] for key in dictionary])[:, np.newaxis]
         return cls(matrix, alphabet)
 
-    @classmethod
-    def from_motif(cls, motif: Motif):
-        return cls(motif.matrix, motif.alphabet)
+    # @classmethod
+    # def from_motif(cls, motif: Motif):
+    #     return cls(motif.matrix, motif.alphabet)
 
     @classmethod
-    def from_counts(cls, counts: typing.Union[Motif, dict]):
-        if isinstance(counts, Motif):
-            return cls(_pwm_from_counts(counts.matrix), counts.alphabet)
-        else:
-            return cls(_pwm_from_counts(np.array(counts.values()), "".join(counts.keys())))
+    def from_counts(cls, counts: typing.Union[dict]):
+        # if isinstance(counts, Motif):
+        #     return cls(_pwm_from_counts(counts.matrix), counts.alphabet)
+        # else:
+        return cls(_pwm_from_counts(np.array(list(counts.values()))), 
+                   "".join(counts.keys()))
 
     def __str__(self):
         matrix = self._matrix.transpose()

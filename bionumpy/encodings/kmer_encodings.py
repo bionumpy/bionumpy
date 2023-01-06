@@ -21,7 +21,7 @@ class KmerEncoding(Encoding):
         of an encoded kmer.
         """
         chars = EncodedArray((kmer >> (2 * np.arange(self._k))) & 3, self._alphabet_encoding)
-        kmer = "".join(chr(b) for b in chars.encoding.decode(chars).raw())
+        kmer = "".join(chr(int(b)) for b in chars.encoding.decode(chars).raw())
         return kmer
 
     def get_labels(self):

@@ -64,7 +64,7 @@ class SynchedStream(BnpStream):
         used_names = []
         seen_contig_names = set([])
         for name, data in grouped:
-            logger.info(f"handling data for {name}")
+            logger.debug(f"handling data for {name}")
             sys.stdout.flush()
             sys.stderr.flush()
             name = self._key_func(name)

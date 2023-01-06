@@ -1,4 +1,4 @@
-from .kmers import get_kmers
+from .kmers import get_kmers, count_kmers
 from .minimizers import get_minimizers
 from .position_weight_matrix import get_motif_scores, PWM
 from .string_matcher import match_string
@@ -16,3 +16,8 @@ __all__ = ["get_kmers",
            "get_strand_specific_sequences", 
            "count_encoded",
            "match_string"]
+
+
+def set_backend(lib):
+    from . import kmers
+    kmers.np = lib

@@ -26,7 +26,7 @@ def simulate_sequence(alphabet, length):
 
 @streamable()
 def simulate_chip_seq_fragments(reference_sequence, motif, n_fragments=1000, fragment_size=100):
-    log_prob = get_motif_scores(reference_sequence, PWM.from_counts(motif))
+    log_prob = get_motif_scores(reference_sequence, motif)# PWM.from_counts(motif))
     prob = np.exp(log_prob)
     prob /= prob.sum()
     points = rng.choice(np.arange(prob.size), size=n_fragments, replace=True, p=prob)
