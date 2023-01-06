@@ -1,5 +1,6 @@
 import numpy as np
-
+from ..streams import streamable
+from .count_encoded import count_encoded, EncodedCounts
 from ..encodings.exceptions import EncodingError
 from ..encodings.kmer_encodings import KmerEncoding
 from .rollable import RollableFunction
@@ -122,3 +123,8 @@ def _get_dna_kmers(sequence, k):
     output_encoding = KmerEncoding(sequence.encoding, k)
     return EncodedArray(hashes, output_encoding)
 
+
+@streamable(sum)
+def count_kmers(sequence: EncodedRaggedArray, k: int, axis=None) -> EncodedCounts:
+    kmers = get_kmers(sequence, k)
+    return count_encoded(kmers, axis=axis)
