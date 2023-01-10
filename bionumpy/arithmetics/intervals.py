@@ -336,5 +336,3 @@ def pileup(intervals):
     stops = np.delete(intervals[:, 1], mask)
     return BedGraph(chroms[:values.size-1],
                     starts, stops, values[:-1])
-
-

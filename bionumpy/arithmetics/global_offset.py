@@ -8,8 +8,13 @@ global_encoding = StringEncoding(["global"])
 
 class GlobalOffset:
     def __init__(self, sequence_sizes):
-        self._names = sequence_sizes.name
-        self._sizes = sequence_sizes.size
+        if isinstance(sequence_sizes, dict):
+            self._names = as_encoded_array(list(sequence_sizes.keys()))
+            self._sizes = np.array(list(sequence_sizes.values()), dtype=int)
+        else:
+            self._names = sequence_sizes.name
+            self._sizes = sequence_sizes.size
+
         self._offset = np.insert(np.cumsum(self._sizes), 0, 0)
         self._old_encoding = StringEncoding(self._names)
 
