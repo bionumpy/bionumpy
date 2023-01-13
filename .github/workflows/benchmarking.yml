@@ -59,7 +59,8 @@ jobs:
           git add -f benchmarks/results/reports/*/*.png
           git add -f benchmarks/results/reports/*/*.data
           git commit -am 'Benchmark results'
-          git pull origin benchmarks
+          
+          git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master

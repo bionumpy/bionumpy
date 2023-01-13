@@ -48,7 +48,7 @@ jobs:
           
           git add -f bionumpymanuscript.pdf
           git commit -am 'New build of manuscript'
-          git pull origin benchmarks
+          git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master
