@@ -3,12 +3,14 @@ from bionumpy.arithmetics.geometry import Geometry
 from bionumpy.datatypes import Bed6
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
+
 @pytest.fixture
 def stranded_intervals():
     return Bed6.from_entry_tuples([
         ('chr1', 15, 30, '.', '.', '+'),
         ('chr1', 20, 40, '.', '.', '+'),
         ('chr1', 20, 40, '.', '.', '-')])
+
 
 @pytest.fixture
 def extended_intervals():

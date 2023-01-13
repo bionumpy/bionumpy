@@ -110,7 +110,7 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArr
 
     Parameters
     ----------
-    intervals : Interval, 
+    intervals : Interval,
         Intervals on the same chromosome/contig
     chromosome_size : int
         size of the chromsome/contig
