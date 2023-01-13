@@ -13,6 +13,7 @@ import sys
 # prefix = "../"
 prefix = ""
 
+
 def jaccard_all_vs_all(chrom_sizes, bed_file_names):
     chrom_sizes = bnp.open(prefix+chrom_sizes).read()
     global_offset = GlobalOffset(chrom_sizes)
@@ -31,7 +32,6 @@ def jaccard_all_vs_all(chrom_sizes, bed_file_names):
             if run_id in results:
                 continue
 
-            #results[run_id] = intersect(data1, data2)
             results[run_id] = jaccard(global_size, data1, data2)
 
     # todo: Write results to a file

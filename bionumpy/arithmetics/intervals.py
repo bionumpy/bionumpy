@@ -88,6 +88,13 @@ class GenomicRunLengthArray(RunLengthArray):
         values = values[:(len(events)-1)]
         return cls(events, values, do_clean=True)
 
+    def to_bedgraph(self, sequence_name):
+        return BedGraph([sequence_name]*len(self.starts), self.starts,
+                        self.ends, self.values)
+    @classmethod
+    def from_rle(cls, rle):
+        return cls(rle._events, rle._values)
+
 
 @bnpdataclass
 class RawInterval:
@@ -119,7 +126,7 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArr
 
     """
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
-    return rla.sum(axis=0)
+    return GenomicRunLengthArray.from_rle(rla.sum(axis=0))
 
 
 def get_boolean_mask(intervals: Interval, chromosome_size: int):
