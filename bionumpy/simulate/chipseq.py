@@ -3,9 +3,9 @@ import dataclasses
 from numpy.random import default_rng
 
 from ..io.motifs import Motif
-from ..sequence.position_weight_matrix import get_motif_scores, PWM
+from ..sequence.position_weight_matrix import get_motif_scores
 from ..datatypes import Interval, Bed6
-from .. import streamable, EncodedArray
+from .. import streamable, EncodedArray, as_encoded_array
 from ..encodings import AlphabetEncoding, StrandEncoding
 
 rng = default_rng()
@@ -39,7 +39,7 @@ def simulate_chip_seq_fragments(reference_sequence, motif, n_fragments=1000, fra
 
 @streamable()
 def simulate_read_fragments(fragments: Interval, read_length: int):
-    read_length=read_length
+    read_length = read_length
     strands = EncodedArray(rng.choice([0, 1], replace=True, size=len(fragments)), StrandEncoding)
     print(strands)
     starts = np.where(
@@ -61,7 +61,12 @@ def simulate_read_fragments(fragments: Interval, read_length: int):
 
 
 @streamable()
-def simulate_chip_seq_reads(reference_sequence, settings):
-    n_fragments = settings.coverage*len(reference_sequence)//settings.read_length
-    fragments = simulate_chip_seq_fragments(reference_sequence, settings.motif, n_fragments, settings.fragment_length)
-    return simulate_read_fragments(fragments, settings.read_length)
+def simulate_chip_seq_reads(reference_sequence, settings, sequence_name=None):
+    n_fragments = settings.coverage*len(reference_sequence) // settings.read_length
+    fragments = simulate_chip_seq_fragments(reference_sequence, settings.motif,
+                                            n_fragments, settings.fragment_length)
+    reads = simulate_read_fragments(fragments, settings.read_length)
+    if sequence_name is not None:
+        print(repr(sequence_name))
+        reads.chromosome = as_encoded_array([sequence_name]*len(reads))
+    return reads

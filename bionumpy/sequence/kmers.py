@@ -126,5 +126,18 @@ def _get_dna_kmers(sequence, k):
 
 @streamable(sum)
 def count_kmers(sequence: EncodedRaggedArray, k: int, axis=None) -> EncodedCounts:
+    """Count the occurance of each kmer in a set of sequences
+
+    For each possible kmer, count the number of occurances in a (set
+    of) sequence(s)
+
+    Parameters
+    ----------
+    sequence : EncodedRaggedArray
+    k : int
+        Length of the kmer
+    axis : int
+
+    """
     kmers = get_kmers(sequence, k)
     return count_encoded(kmers, axis=axis)

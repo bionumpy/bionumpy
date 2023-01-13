@@ -182,6 +182,7 @@ class MultiStream:
 
         self._streams = {}
         self.lengths = BnpStream(sequence_lengths)
+        self.sequence_names = BnpStream(sequence_names)
         for keyword, value in kwargs.items():
             if isinstance(value, BNPDataClass):
                 value = NpDataclassStream([value], value.__class__)
