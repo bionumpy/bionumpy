@@ -56,11 +56,12 @@ jobs:
           git add -f benchmarks/results/reports/*/*.png
           git add -f benchmarks/results/reports/*/*.data
           git commit -am 'Benchmark results'
+          git pull origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
-          force: true
+          force: false
           branch: benchmarks
