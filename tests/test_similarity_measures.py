@@ -1,6 +1,7 @@
 from bionumpy.streams import MultiStream
 from bionumpy.arithmetics.similarity_measures import forbes, jaccard, get_contingency_table
 from bionumpy.datatypes import Interval
+from bionumpy.arithmetics.geometry import Geometry
 from numpy.testing import assert_array_equal
 import pytest
 
@@ -20,6 +21,11 @@ def chromosome_sizes():
     return {"chr1": 100, "chr2": 50}
 
 
+@pytest.fixture
+def geometry():
+    return Geometry({"chr1": 100, "chr2": 50})
+
+
 def test_contigency_table(interval_a, interval_b, chromosome_sizes):
     ms = MultiStream(chromosome_sizes, a=interval_a, b=interval_b)
     contigency_table = get_contingency_table(ms.a, ms.b, ms.lengths)
@@ -36,3 +42,17 @@ def test_jaccard(interval_a, interval_b, chromosome_sizes):
     f = jaccard(chromosome_sizes, interval_a, interval_b)
     true = 10/(12+15)
     assert f == true
+
+
+def test_jaccard_geom(interval_a, interval_b, geometry):
+    f = geometry.jaccard(interval_a, interval_b)
+    true = 10/(12+15)
+    assert f == true
+
+
+def test_jaccard_all_vs_all(interval_a, interval_b, geometry):
+    f = geometry.jaccard_all_vs_all([interval_a, interval_b])
+    true = 10/(12+15)
+    m = [[0, true],
+         [true, 0]]
+    assert_array_equal(f, m)

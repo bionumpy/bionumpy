@@ -19,9 +19,9 @@ rng = default_rng()
 def motif():
     letters = "acgt"
     values = np.array([[10, 15, 20, 10],
-                           [12, 2, 10, 10],
-                           [8, 13, 0, 10],
-                           [5, 5, 5, 5]], dtype=int)
+                       [12, 2, 10, 10],
+                       [8, 13, 0, 10],
+                       [5, 5, 5, 5]], dtype=int)
     return PWM.from_counts(dict(zip(letters, values)))
     # return Motif("acgt",
     #              np.array([[10, 15, 20, 10],
