@@ -29,22 +29,34 @@ jobs:
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache report_big.md validation_report_big.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
-           
+            
+            # merge dev into benchmark branch, commit changes and push to benchmarks
+            # does not affect or change dev branch
+            
+            git config --global user.email "github@action.com"
+            git config --global user.name "github action"
+            git config pull.rebase false 
+            
+            git fetch
+            git checkout benchmarks
+            git merge dev
+            
             pip install git+https://github.com/bionumpy/npstructures.git/@dev
             pip install -r requirements_dev.txt
             pip install .
             cd benchmarks
-            
 
       - name: Save benchmarks results
         run: |
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           git config pull.rebase false
+          
           git add -f benchmarks/*report*.md
           git add -f benchmarks/results/reports/*/*.png
           git add -f benchmarks/results/reports/*/*.data
           git commit -am 'Benchmark results'
+          
           git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
@@ -52,5 +64,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
-          force: true
+          force: false
           branch: benchmarks

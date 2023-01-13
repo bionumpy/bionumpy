@@ -22,6 +22,16 @@ jobs:
           snakefile: 'Snakefile'
           args: '--cores 1 --use-conda --conda-cleanup-pkgs cache'
           stagein: |  # additional preliminary commands to run (can be multiline)
+            # merge dev into benchmark branch, commit changes and push to benchmarks
+            # does not affect or change dev branch
+            
+            git config --global user.email "github@action.com"
+            git config --global user.name "github action"
+            git config pull.rebase false 
+            
+            git fetch
+            git checkout benchmarks
+            git merge dev
            
             apt-get update && apt-get install make
             apt-get install libglib2.0-dev
@@ -35,6 +45,7 @@ jobs:
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           git config pull.rebase false
+          
           git add -f bionumpymanuscript.pdf
           git commit -am 'New build of manuscript'
           git pull --allow-unrelated-histories -Xours origin benchmarks
@@ -44,5 +55,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
-          force: true
+          force: false
           branch: benchmarks
+
