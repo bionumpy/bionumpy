@@ -45,8 +45,8 @@ setup(
     packages=find_packages(include=['bionumpy', 'bionumpy.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/knutdrand/bionumpy',
-    version='0.2.8',
+    url='https://github.com/bionumpy/bionumpy',
+    version='0.2.15',
     zip_safe=False,
 )
 
