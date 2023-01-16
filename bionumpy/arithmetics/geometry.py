@@ -51,7 +51,7 @@ class GenomicTrack(GenomicData):
         pass
 
 
-class GenomicTrackGlobal(GenomicTrack):
+class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, global_track, global_offset):
         self._global_track = global_track
         self._global_offset = global_offset
@@ -62,10 +62,23 @@ class GenomicTrackGlobal(GenomicTrack):
         sizes = self._global_offset.get_size(names)
         return {name: self._global_track[offset:offset+size].to_array()
                 for name, offset, size in zip(names, offsets, sizes)}
-    
+
+    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+        # TODO: check that global offsets are the same
+        inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
+        r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        if r.dtype == bool:
+            return GenomicMaskGlobal(r, self._global_offset)
+        return self.__class__(r, self._global_offset)
+
 
 class GenomicMask(GenomicTrack):
     pass
+
+
+class GenomicMaskGlobal(GenomicTrackGlobal):
+    def get_intervals(self):
+        pass
 
 
 '''
