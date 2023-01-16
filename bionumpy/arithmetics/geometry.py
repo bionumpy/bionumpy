@@ -158,6 +158,14 @@ class Geometry:
 
         return matrix
 
+    def clip(self, intervals):
+        chrom_sizes = self._global_offset.get_size(intervals.chromosome)
+        return dataclasses.replace(
+            intervals,
+            start=np.maximum(0, intervals.start),
+            stop=np.minimum(chrom_sizes, intervals.stop))
+
+
     def extend_to_size(self, intervals: Interval, fragment_length: int) -> Interval:
         """Extend/shrink intervals to match the given length. Stranded
 
@@ -190,4 +198,6 @@ class Geometry:
 
     def chrom_size(self, chromsome):
         return self._chrom_sizes[chromsome]
-    
+
+    def names(self):
+        return list(self._chrom_sizes.keys())

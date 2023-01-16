@@ -12,7 +12,8 @@ def stranded_intervals():
     return Bed6.from_entry_tuples([
         ('chr1', 15, 30, '.', '.', '+'),
         ('chr1', 20, 40, '.', '.', '+'),
-        ('chr1', 20, 40, '.', '.', '-')])
+        ('chr1', 20, 40, '.', '.', '-'),
+        ('chr2', 10, 20, '.', '.', '+')])
 
 
 @pytest.fixture
@@ -20,13 +21,32 @@ def extended_intervals():
     return Bed6.from_entry_tuples([
         ('chr1', 15, 25, '.', '.', '+'),
         ('chr1', 20, 30, '.', '.', '+'),
-        ('chr1', 30, 40, '.', '.', '-')])
+        ('chr1', 30, 40, '.', '.', '-'),
+        ('chr2', 10, 20, '.', '.', '+')])
 
+@pytest.fixture
+def invalid_intervals():
+    return Bed6.from_entry_tuples([
+        ('chr1', -10, 10, '.', '.', '+'),
+        ('chr1', 90, 110, '.', '.', '+'),
+        ('chr1', 30, 40, '.', '.', '-'),
+        ('chr2', -10, 60, '.', '.', '+')])
+
+@pytest.fixture
+def valid_intervals():
+    return Bed6.from_entry_tuples([
+        ('chr1', 0, 10, '.', '.', '+'),
+        ('chr1', 90, 100, '.', '.', '+'),
+        ('chr1', 30, 40, '.', '.', '-'),
+        ('chr2', 0, 50, '.', '.', '+')])
 
 @pytest.fixture
 def geometry():
     return Geometry({"chr1": 100, "chr2": 50})
 
+def test_clip(geometry, invalid_intervals, valid_intervals):
+    clipped = geometry.clip(invalid_intervals)
+    assert_bnpdataclass_equal(clipped, valid_intervals)
 
 def test_extend_to_size(geometry, stranded_intervals, extended_intervals):
     extended = geometry.extend_to_size(stranded_intervals, 10)
