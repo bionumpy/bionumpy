@@ -18,6 +18,9 @@ class GlobalOffset:
         self._offset = np.insert(np.cumsum(self._sizes), 0, 0)
         self._old_encoding = StringEncoding(self._names)
 
+    def names(self):
+        return self._names.tolist()
+
     def get_offset(self, seq_name):
         seq_name = as_encoded_array(seq_name, target_encoding=self._old_encoding)
         return self._offset[seq_name.raw()]
