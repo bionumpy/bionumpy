@@ -1,6 +1,6 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
-from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup
+from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph
 import numpy as np
@@ -53,6 +53,7 @@ class GenomicTrack(GenomicData):
 
 class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, global_track, global_offset):
+        assert isinstance(global_track, GenomicRunLengthArray)
         self._global_track = global_track
         self._global_offset = global_offset
 
@@ -67,29 +68,33 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         # TODO: check that global offsets are the same
         inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        assert isinstance(r, GenomicRunLengthArray)
         if r.dtype == bool:
             return GenomicMaskGlobal(r, self._global_offset)
         return self.__class__(r, self._global_offset)
 
 
 class GenomicMask(GenomicTrack):
-    pass
+    @classmethod
+    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
+        assert isinstance(global_pileup, GenomicRunLengthArray)
+        return GenomicMaskGlobal(global_pileup, global_offset)
 
 
 class GenomicMaskGlobal(GenomicTrackGlobal):
-    def get_intervals(self):
-        pass
-
-
-'''
-def decorator(func):
-    def new_func(intervals, *args, **kwargs):
-        if intervals is stream:
-            groups = groupby(intervals, 'chromosome')
-            return MultiRLE.from_stream((chrom, func(i, *args, **kwargs)) for chrom, i in groups))
-        return MultiRlE.from_global_offset(chrom, func)
-    return new_func
-'''
+    def to_intervals(self):
+        names = self._global_offset.names()
+        starts = self._global_offset.get_offset(names)
+        stops = starts+self._global_offset.get_size(names)
+        intervals_list = []
+        for name, start, stop in zip(names, starts, stops):
+            assert isinstance(self._global_track, GenomicRunLengthArray)
+            data = self._global_track[start:stop]
+            assert isinstance(data, GenomicRunLengthArray)
+            intervals_list.append(
+                Interval([name]*len(data.starts),
+                         data.starts, data.ends)[data.values])
+        return np.concatenate(intervals_list)
 
 
 class Geometry:
@@ -138,6 +143,9 @@ class Geometry:
         go = self._global_offset.from_local_interval(intervals)
         return get_boolean_mask(go, self._global_size)
 
+    def get_mask(self, intervals: Interval) -> GenomicMask:
+        return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
+
     def get_pileup(self, intervals: Interval) -> GenomicTrack:
         # if intervals is stream:
         #     groups = groupby(intervals, chromosome)
@@ -178,7 +186,6 @@ class Geometry:
             start=np.maximum(0, intervals.start),
             stop=np.minimum(chrom_sizes, intervals.stop))
 
-
     def extend_to_size(self, intervals: Interval, fragment_length: int) -> Interval:
         """Extend/shrink intervals to match the given length. Stranded
 
@@ -209,8 +216,16 @@ class Geometry:
             start=start,
             stop=stop)
 
+    def merge_intervals(self, intervals: Interval, distance: int = 0) -> Interval:
+        global_intervals = self._global_offset.from_local_interval(intervals)
+        global_merged = merge_intervals(global_intervals, distance)
+        return self._global_offset.to_local_interval(global_merged)
+
     def chrom_size(self, chromsome):
         return self._chrom_sizes[chromsome]
 
     def names(self):
         return list(self._chrom_sizes.keys())
+
+    def size(self):
+        return self._global_size
