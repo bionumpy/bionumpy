@@ -56,7 +56,7 @@ def simulate_read_fragments(fragments: Interval, read_length: int):
                 starts,
                 stops,
                 ["."]*len(stops),
-                ["0"]*len(stops),
+                [0]*len(stops),
                 strands)
 
 

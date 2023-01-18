@@ -12,7 +12,7 @@ class BedGraph:
     chromosome: str
     start: int
     stop: int
-    value: int
+    value: float
 
 
 @bnpdataclass
@@ -43,13 +43,13 @@ class Interval:
 @bnpdataclass
 class Bed6(Interval):
     name: str
-    score: str
+    score: int
     strand: StrandEncoding
 
 
 @bnpdataclass
 class NarrowPeak(Bed6):
-    signal_value: str
+    signal_value: float
     p_value: float
     q_value: float
     peak: int

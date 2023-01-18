@@ -5,7 +5,7 @@ from typing import List
 from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
-                         SequenceEntry, VCFEntry, Bed12, Bed6,
+                         SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
                          GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
                          GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -486,6 +486,8 @@ class Bed6Buffer(BedBuffer):
 class Bed12Buffer(Bed6Buffer):
     dataclass = Bed12
 
+class BdgBuffer(BedBuffer):
+    dataclass = BedGraph
 
 
 class VCFBuffer(DelimitedBuffer):

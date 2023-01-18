@@ -6,7 +6,7 @@ from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
-                                NarrowPeakBuffer)
+                                NarrowPeakBuffer, BdgBuffer)
 from .parser import NumpyFileReader, NpBufferedWriter
 from .exceptions import FormatException
 from ..streams import NpDataclassStream
@@ -17,11 +17,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
+    '.bdg': BdgBuffer,
     ".narrowPeak": NarrowPeakBuffer,
     ".fasta": MultiLineFastaBuffer,
     ".fa": MultiLineFastaBuffer,

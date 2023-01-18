@@ -87,6 +87,10 @@ class BNPDataClass(NpDataClass):
     @classmethod
     def from_entry_tuples(cls, tuples):
         return cls(*(list(c) for c in zip(*tuples)))
+    
+
+    def sort_by(self, field_name: str) -> 'BNPDataClass':
+        return self[np.argsort(getattr(self, field_name))]
 
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:

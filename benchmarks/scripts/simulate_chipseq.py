@@ -6,9 +6,9 @@ from bionumpy.simulate.chipseq import simulate_chip_seq_reads, simulate_sequence
 jaspar_object = jaspardb(release="JASPAR2020")
 ctcf_motif = jaspar_object.fetch_motifs_by_name('CTCF')[0]
 motif = PWM.from_dict(ctcf_motif.pwm)
-chromosome_sizes = {"chr1": 1000,
-                    "chr2": 2000,
-                    "chr3": 3000}
+chromosome_sizes = {"chr1": 10000,
+                    "chr2": 20000,
+                    "chr3": 30000}
 chrom_sizes = ChromosomeSize(list(chromosome_sizes.keys()),
                              list(chromosome_sizes.values()))
 

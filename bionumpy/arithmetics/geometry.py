@@ -3,6 +3,7 @@ from typing import List, Union, Iterable, Tuple, Dict
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph
+from npstructures import RunLengthRaggedArray
 import numpy as np
 
 GenomeIndex = Union[str, List[str], Interval, Interval.single_entry]
@@ -54,6 +55,12 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         self._global_track = global_track
         self._global_offset = global_offset
 
+    def sum(self):
+        return self._global_track.sum(axis=None)
+
+    def __str__(self):
+        return str(self._global_track)
+
     def to_dict(self):
         names = self._global_offset.names()
         offsets = self._global_offset.get_offset(names)
@@ -83,6 +90,10 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
                 BedGraph([name]*len(data.starts),
                          data.starts, data.ends, data.values))
         return np.concatenate(intervals_list)
+
+    def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
+        global_intervals = self._global_offset.from_local_interval(intervals)
+        return self._global_track[global_intervals]
 
 
 class GenomicMask(GenomicTrack):
@@ -235,6 +246,10 @@ class Geometry:
         global_intervals = self._global_offset.from_local_interval(intervals)
         global_merged = merge_intervals(global_intervals, distance)
         return self._global_offset.to_local_interval(global_merged)
+
+    def sort(self, intervals: Interval) -> Interval:
+        global_intervals = self._global_offset.from_local_interval(intervals)
+        return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
 
     def chrom_size(self, chromsome):
         return self._chrom_sizes[chromsome]

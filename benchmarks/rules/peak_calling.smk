@@ -17,7 +17,7 @@ rule callpeak:
     log:
         "logs/macs2/callpeak_{a}.log"
     params:
-        "-f BED -g 6000 --nomodel --extsize 200 -p 0.001 --bdg"
+        "-f BED -g 60000 --nomodel --extsize 200 -p 0.001 --bdg --keep-dup all"
     wrapper:
         "v1.21.1-3-g1bd26948/bio/macs2/callpeak"
 
@@ -25,10 +25,12 @@ rule bionumpy_callpeak:
     input:
         treatment="results/intervals/{a}_reads.bed",
         chrom_sizes='results/small.chrom.sizes'        
+    params:
+        prefix='results/bionumpy/callpeak/{a}_'
     output:
-        'results/bionumpy/callpeak/{a}.narrowPeak'
+        'results/bionumpy/callpeak/{a}_peaks.narrowPeak',
     shell:
-        'bnp_macs2 {input.treatment} {input.chrom_sizes} --fragment-length 200 --p-value-cutoff 0.001 --outfilename {output}'
+        'bnp_macs2 {input.treatment} {input.chrom_sizes} --fragment-length 200 --p-value-cutoff 0.001 --outprefix {params.prefix}'
 
 
 rule simulate_chipseq:
