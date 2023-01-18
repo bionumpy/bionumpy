@@ -32,6 +32,7 @@ jobs:
           snakefile: 'Snakefile'
           args: '-F --cores 1 --use-conda --conda-cleanup-pkgs cache report_small.md validation_report_small.md'
           stagein: | # 'cd benchmarks' # additional preliminary commands to run (can be multiline)
+            python -m pip install --upgrade pip
             
             # merge dev into benchmark branch, commit changes and push to benchmarks
             # does not affect or change dev branch
