@@ -18,6 +18,7 @@ jobs:
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install git+https://github.com/bionumpy/npstructures.git/@dev
 
       - name: Make manuscript
         uses: snakemake/snakemake-github-action@v1
@@ -33,6 +34,7 @@ jobs:
             apt-get update && apt-get install make
             apt-get install libglib2.0-dev
             pip install -r requirements_dev.txt
+            pip install --upgrade pip
             pip install .
             cd docs_source
 
