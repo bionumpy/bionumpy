@@ -22,7 +22,7 @@ jobs:
 
       - name: Save some results
         run: |
-          cat "test" > testfile.txt
+          echo "test" > testfile.txt
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
           
