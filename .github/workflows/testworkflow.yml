@@ -27,6 +27,8 @@ jobs:
           git config --global user.name "github action"
           
           git checkout --orphan testworkflow
+          # we only want the files we created
+          git rm -r --cached .
           
           git add -f testfile.txt
           git commit -am 'Results'
