@@ -1,0 +1,43 @@
+
+name: TestWorkflow
+
+on:
+  push:
+    branches: [ "dev"]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Save some results
+        run: |
+          echo "test" > testfile.txt
+          git config --global user.email "github@action.com"
+          git config --global user.name "github action"
+          
+          git checkout --orphan testworkflow
+          # we only want the files we created
+          git rm -r --cached .
+          
+          git add -f testfile.txt
+          git commit -am 'Results'
+          
+      - name: Push results
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
+          force: true
+          branch: testworkflow
+

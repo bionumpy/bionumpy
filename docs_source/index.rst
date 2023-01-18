@@ -1,4 +1,4 @@
-Geting started with BioNumPy
+Getting started with BioNumPy
 ======================================
 
 BioNumPy is a Python library for easy and efficient representation and analysis of biological data.
