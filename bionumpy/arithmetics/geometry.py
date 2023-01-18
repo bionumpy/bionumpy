@@ -33,9 +33,6 @@ class GenomicData:
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
         pass
 
-    @classmethod
-    def to_bedgraph(self) -> BedGraph:
-        pass
 
     def to_dict(self) -> Dict[str, np.ndarray]:
         pass
@@ -72,6 +69,20 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         if r.dtype == bool:
             return GenomicMaskGlobal(r, self._global_offset)
         return self.__class__(r, self._global_offset)
+
+    def to_bedgraph(self) -> BedGraph:
+        names = self._global_offset.names()
+        starts = self._global_offset.get_offset(names)
+        stops = starts+self._global_offset.get_size(names)
+        intervals_list = []
+        for name, start, stop in zip(names, starts, stops):
+            assert isinstance(self._global_track, GenomicRunLengthArray)
+            data = self._global_track[start:stop]
+            assert isinstance(data, GenomicRunLengthArray)
+            intervals_list.append(
+                BedGraph([name]*len(data.starts),
+                         data.starts, data.ends, data.values))
+        return np.concatenate(intervals_list)
 
 
 class GenomicMask(GenomicTrack):
@@ -137,7 +148,6 @@ class Geometry:
             Runlength encoded boolean mask
 
         """
-        
         if isinstance(intervals, GenomicRunLengthArray):
             return intervals
         go = self._global_offset.from_local_interval(intervals)
@@ -215,6 +225,11 @@ class Geometry:
             intervals,
             start=start,
             stop=stop)
+
+    def get_track(self, bedgraph: BedGraph) -> GenomicTrack:
+        gi = self._global_offset.from_local_interval(bedgraph)
+        rle = GenomicRunLengthArray.from_bedgraph(gi)
+        return GenomicTrack.from_global_data(rle, self._global_offset)
 
     def merge_intervals(self, intervals: Interval, distance: int = 0) -> Interval:
         global_intervals = self._global_offset.from_local_interval(intervals)

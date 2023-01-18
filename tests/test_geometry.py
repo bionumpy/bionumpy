@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from bionumpy import str_equal
-from bionumpy.datatypes import Interval
+from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
 from bionumpy.arithmetics.geometry import Geometry
 from bionumpy.datatypes import Bed6
@@ -53,6 +53,15 @@ def disjoint_intervals():
 
 
 @pytest.fixture
+def pileup():
+    return BedGraph.from_entry_tuples([
+        ('chr1', 0, 10, 1),
+        ('chr1', 10, 90, 2),
+        ('chr1', 90, 100, 3),
+        ('chr2', 0, 50, 4)])
+
+
+@pytest.fixture
 def geometry():
     return Geometry({"chr1": 100, "chr2": 50})
 
@@ -81,3 +90,9 @@ def test_to_intervals(geometry, disjoint_intervals):
     mask = geometry.get_mask(disjoint_intervals)
     intervals = mask.to_intervals()
     assert_bnpdataclass_equal(intervals, disjoint_intervals.astype(Interval))
+
+
+def test_to_bedgraph(geometry, pileup):
+    track = geometry.get_track(pileup)
+    new_pileup = track.to_bedgraph()
+    assert_bnpdataclass_equal(pileup, new_pileup)

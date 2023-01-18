@@ -57,7 +57,7 @@ class GenomicRunLengthArray(RunLengthArray):
         """
         
         assert np.all(ends > starts)
-        assert np.all(starts[1:] > ends[:-1])
+        assert np.all(starts[1:] >= ends[:-1])
         prefix = [0] if (len(starts) == 0 or starts[0] != 0) else []
         postfix = [size] if (len(ends) == 0 or ends[-1] != size) else []
 
@@ -78,7 +78,7 @@ class GenomicRunLengthArray(RunLengthArray):
             values[::2] = default_value
             values[1::2] = tmp
         else:
-            values = interleave([np.broadcast(default_value, values.shape), values])
+            values = interleave(np.broadcast(default_value, values.shape), values)
             if ends[-1] != size:
                 values = np.append(values, default_value)
 
@@ -87,6 +87,11 @@ class GenomicRunLengthArray(RunLengthArray):
 
         values = values[:(len(events)-1)]
         return cls(events, values, do_clean=True)
+
+    @classmethod
+    def from_bedgraph(cls, bedgraph):
+        events = np.append(bedgraph.start, bedgraph.stop[-1])
+        return cls(events, bedgraph.value)
 
     def to_bedgraph(self, sequence_name):
         return BedGraph([sequence_name]*len(self.starts), self.starts,
