@@ -29,9 +29,13 @@ jobs:
             git config --global user.name "github action"
             git config pull.rebase false 
             
+            echo "Fetch"
             git fetch
+            echo "Checkout"
             git checkout benchmarks
+            echo "PUll"
             git pull origin benchmarks
+            echo "Merge"
             git merge dev
            
             apt-get update && apt-get install make
