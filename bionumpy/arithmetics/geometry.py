@@ -96,6 +96,44 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return self._global_track[global_intervals]
 
 
+class GenomicTrackStream(GenomicTrack):
+    def __init__(self, track_stream):
+        self._track_stream = track_stream
+
+    def sum(self):
+        return sum(track.sum(axis=None) for name, track in self._track_stream)
+
+    def to_dict(self):
+        return dict(self._track_stream)
+
+    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+        # TODO: check that global offsets are the same
+        inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
+        r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
+        assert isinstance(r, GenomicRunLengthArray)
+        if r.dtype == bool:
+            return GenomicMaskGlobal(r, self._global_offset)
+        return self.__class__(r, self._global_offset)
+
+    def to_bedgraph(self) -> BedGraph:
+        names = self._global_offset.names()
+        starts = self._global_offset.get_offset(names)
+        stops = starts+self._global_offset.get_size(names)
+        intervals_list = []
+        for name, start, stop in zip(names, starts, stops):
+            assert isinstance(self._global_track, GenomicRunLengthArray)
+            data = self._global_track[start:stop]
+            assert isinstance(data, GenomicRunLengthArray)
+            intervals_list.append(
+                BedGraph([name]*len(data.starts),
+                         data.starts, data.ends, data.values))
+        return np.concatenate(intervals_list)
+
+    def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
+        global_intervals = self._global_offset.from_local_interval(intervals)
+        return self._global_track[global_intervals]
+
+
 class GenomicMask(GenomicTrack):
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
