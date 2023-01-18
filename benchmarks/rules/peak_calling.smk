@@ -28,7 +28,8 @@ rule bionumpy_callpeak:
     output:
         'results/bionumpy/callpeak/{a}.narrowPeak'
     shell:
-        'python ../scripts/macs2.py {input.treatment} {input.chrom_sizes} --fragment-length 200 --p-value-cutoff 0.001 --outfilename {output}'
+        'bnp_macs2 {input.treatment} {input.chrom_sizes} --fragment-length 200 --p-value-cutoff 0.001 --outfilename {output}'
+
 
 rule simulate_chipseq:
     output:
