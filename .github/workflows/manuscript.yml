@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v1  # v1 to be compatible with snakemake checkout action (?)
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
