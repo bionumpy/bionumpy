@@ -26,19 +26,6 @@ jobs:
             # does not affect or change dev branch
             python -m pip install --upgrade pip
             
-            git config --global user.email "github@action.com"
-            git config --global user.name "github action"
-            git config pull.rebase false 
-            
-            echo "Fetch"
-            git fetch
-            echo "Checkout"
-            git checkout benchmarks
-            echo "PUll"
-            git pull origin benchmarks
-            echo "Merge"
-            git merge dev
-           
             apt-get update && apt-get install make
             apt-get install libglib2.0-dev
             pip install -r requirements_dev.txt
@@ -48,19 +35,22 @@ jobs:
       - name: Save benchmarks results
         run: |
           cp docs_source/_build/latex/bionumpymanuscript.pdf .
+          
           git config --global user.email "github@action.com"
           git config --global user.name "github action"
-          git config pull.rebase false
           
+          git checkout --orphan manuscript
+          # we only want the files we created
+          git rm -r --cached .
+ 
           git add -f bionumpymanuscript.pdf
           git commit -am 'New build of manuscript'
-          #git pull --allow-unrelated-histories -Xours origin benchmarks
 
       - name: Push results to benchmark branch
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
-          force: false
-          branch: benchmarks
+          force: true
+          branch: manuscript
 
