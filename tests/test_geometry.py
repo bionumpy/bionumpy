@@ -1,9 +1,10 @@
 import pytest
 import numpy as np
 from bionumpy import str_equal
+from bionumpy.streams import groupby
 from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
-from bionumpy.arithmetics.geometry import Geometry
+from bionumpy.arithmetics.geometry import Geometry, GenomicTrack, StreamedGeometry
 from bionumpy.datatypes import Bed6
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
@@ -62,8 +63,16 @@ def pileup():
 
 
 @pytest.fixture
-def geometry():
-    return Geometry({"chr1": 100, "chr2": 50})
+def chrom_sizes():
+    return {"chr1": 100, "chr2": 50}
+
+@pytest.fixture
+def geometry(chrom_sizes):
+    return Geometry(chrom_sizes)
+
+@pytest.fixture
+def streamed_geometry(chrom_sizes):
+    return StreamedGeometry(chrom_sizes)
 
 
 def test_clip(geometry, invalid_intervals, valid_intervals):
@@ -96,3 +105,11 @@ def test_to_bedgraph(geometry, pileup):
     track = geometry.get_track(pileup)
     new_pileup = track.to_bedgraph()
     assert_bnpdataclass_equal(pileup, new_pileup)
+
+
+def test_stream_sum(pileup, geometry, streamed_geometry):
+    track = streamed_geometry.get_track(pileup)
+    # stream = groupby(pileup, 'chromosome')
+    # track = GenomicTrack.from_stream(stream, chrom_sizes)
+    assert track.sum() == geometry.get_track(pileup).sum()
+    

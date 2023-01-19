@@ -1,5 +1,6 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
+from ..streams import groupby
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph
@@ -14,36 +15,50 @@ class GenomicData:
         pass
 
     def __getitem__(self, idx: GenomeIndex):
-        pass
+        return NotImplemented
 
     def get_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
-        pass
+        return NotImplemented
 
     def get_intervals(self, intervals: Interval, stranded: bool = False):
-        pass
+        return NotImplemented
 
     @classmethod
     def from_dict(cls, d: Dict[str, GenomicRunLengthArray]) -> 'GenomicData':
-        pass
+        return NotImplemented
 
     @classmethod
-    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]]) -> 'MultiRLE':
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'MultiRLE':
         pass
 
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
         pass
-
 
     def to_dict(self) -> Dict[str, np.ndarray]:
         pass
 
 
 class GenomicTrack(GenomicData):
+    def sum(self):
+        return NotImplemented
+
+    def to_dict(self):
+        return NotImplemented
+
+    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+        return NotImplemented
+
+    def to_bedgraph(self) -> BedGraph:
+        return NotImplemented
 
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
         return GenomicTrackGlobal(global_pileup, global_offset)
+
+    @classmethod
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'MultiRLE':
+        return GenomicTrackStream(stream)
 
     def to_dict(self):
         pass
@@ -206,7 +221,7 @@ class Geometry:
         return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
     def get_pileup(self, intervals: Interval) -> GenomicTrack:
-        # if intervals is stream:
+        #if isinstance(intervals, BnpStream):
         #     groups = groupby(intervals, chromosome)
         #     return GroupedStream((chromosome_name, self.get_pileup(ints)) 
         #                          for chromosome_name, ints in groups)
@@ -297,3 +312,15 @@ class Geometry:
 
     def size(self):
         return self._global_size
+
+class StreamedGeometry(Geometry):
+    def __init__(self, chrom_sizes: dict):
+        self._chrom_sizes = chrom_sizes
+        self._global_offset = GlobalOffset(chrom_sizes)
+        self._global_size = sum(chrom_sizes.values())
+
+    def get_track(self, bedgraph: BedGraph) -> GenomicTrack:
+        grouped = groupby(bedgraph, 'chromosome')
+        track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
+                        for name, b in grouped)
+        return GenomicTrack.from_stream(track_stream, self._chrom_sizes)
