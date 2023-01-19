@@ -38,6 +38,9 @@ class GenomicData:
     def to_dict(self) -> Dict[str, np.ndarray]:
         pass
 
+    def compute(self):
+        return NotImplemented
+
 
 class GenomicTrack(GenomicData):
     def sum(self):
@@ -57,8 +60,8 @@ class GenomicTrack(GenomicData):
         return GenomicTrackGlobal(global_pileup, global_offset)
 
     @classmethod
-    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'MultiRLE':
-        return GenomicTrackStream(stream)
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> 'MultiRLE':
+        return GenomicTrackStream(stream, global_offset)
 
     def to_dict(self):
         pass
@@ -110,10 +113,14 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_track[global_intervals]
 
+    def compute(self):
+        return self
+
 
 class GenomicTrackStream(GenomicTrack):
-    def __init__(self, track_stream):
+    def __init__(self, track_stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset):
         self._track_stream = track_stream
+        self._global_offset = global_offset
 
     def sum(self):
         return sum(track.sum(axis=None) for name, track in self._track_stream)
@@ -147,6 +154,10 @@ class GenomicTrackStream(GenomicTrack):
     def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_track[global_intervals]
+
+    def compute(self):
+        global_track = np.concatenate([track for _, track in self._track_stream])
+        return GenomicTrackGlobal(global_track, self._global_offset)
 
 
 class GenomicMask(GenomicTrack):
@@ -313,6 +324,7 @@ class Geometry:
     def size(self):
         return self._global_size
 
+
 class StreamedGeometry(Geometry):
     def __init__(self, chrom_sizes: dict):
         self._chrom_sizes = chrom_sizes
@@ -323,4 +335,16 @@ class StreamedGeometry(Geometry):
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
                         for name, b in grouped)
-        return GenomicTrack.from_stream(track_stream, self._chrom_sizes)
+        return GenomicTrack.from_stream(track_stream, self._global_offset)
+
+    def get_pileup(self, intervals: Interval) -> GenomicTrack:
+        grouped = groupby(bedgraph, 'chromosome')
+        get_empty = lambda name: GenomicRunLengthArray(np.array([0, self_chrom_sizes[name]]), [0])
+        names = iter(self._chrom_sizes.keys())
+        for name, intervals in grouped:
+            pileup = get_pileup(intervals, self._chrom_sizes[name])
+
+        go = self._global_offset.from_local_interval(intervals)
+        return GenomicTrack.from_global_data(
+            get_pileup(go, self._global_size),
+            self._global_offset)

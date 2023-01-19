@@ -109,7 +109,9 @@ def test_to_bedgraph(geometry, pileup):
 
 def test_stream_sum(pileup, geometry, streamed_geometry):
     track = streamed_geometry.get_track(pileup)
-    # stream = groupby(pileup, 'chromosome')
-    # track = GenomicTrack.from_stream(stream, chrom_sizes)
     assert track.sum() == geometry.get_track(pileup).sum()
-    
+
+
+def test_compute(pileup, geometry, streamed_geometry):
+    track = streamed_geometry.get_track(pileup).compute()
+    assert_equal(track, geometry.get_track(pileup))
