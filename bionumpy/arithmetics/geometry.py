@@ -43,7 +43,7 @@ class GenomicData:
 
 
 class GenomicTrack(GenomicData):
-    def sum(self) -> Number:
+    def sum(self) -> float:
         return NotImplemented
 
     def to_dict(self) -> Dict[str, GenomicRunLengthArray]:
@@ -56,11 +56,11 @@ class GenomicTrack(GenomicData):
         return NotImplemented
 
     @classmethod
-    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> GenomicTrack:
+    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'GenomicTrack':
         return GenomicTrackGlobal(global_pileup, global_offset)
 
     @classmethod
-    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> GenomicTrack:
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> 'GenomicTrack':
         return GenomicTrackStream(stream, global_offset)
 
 
