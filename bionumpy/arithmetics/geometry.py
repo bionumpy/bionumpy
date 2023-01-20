@@ -3,7 +3,7 @@ from typing import List, Union, Iterable, Tuple, Dict
 from ..streams import groupby
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
-from ..datatypes import Interval, BedGraph
+from ..datatypes import Interval, BedGraph, ChromosomeSize
 from npstructures import RunLengthRaggedArray
 import numpy as np
 
@@ -189,6 +189,11 @@ class Geometry:
         self._global_offset = GlobalOffset(chrom_sizes)
         self._global_size = sum(chrom_sizes.values())
 
+    @classmethod
+    def from_chrom_sizes(cls, chrom_sizes: ChromosomeSize):
+        return cls({chrom_size.name.to_string():chrom_size.size
+                    for chrom_size in chrom_sizes})
+
     def jaccard(self, intervals_a: Interval, intervals_b: Interval) -> float:
         """Calculate the Jaccard similarity score between two sets of intervals
 
@@ -232,10 +237,6 @@ class Geometry:
         return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
     def get_pileup(self, intervals: Interval) -> GenomicTrack:
-        #if isinstance(intervals, BnpStream):
-        #     groups = groupby(intervals, chromosome)
-        #     return GroupedStream((chromosome_name, self.get_pileup(ints)) 
-        #                          for chromosome_name, ints in groups)
         go = self._global_offset.from_local_interval(intervals)
         return GenomicTrack.from_global_data(
             get_pileup(go, self._global_size),

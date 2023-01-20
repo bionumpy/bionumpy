@@ -5,7 +5,7 @@ from bionumpy.streams import groupby
 from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
 from bionumpy.arithmetics.geometry import Geometry, GenomicTrack, StreamedGeometry
-from bionumpy.datatypes import Bed6
+from bionumpy.datatypes import Bed6, ChromosomeSize
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
@@ -74,6 +74,12 @@ def geometry(chrom_sizes):
 def streamed_geometry(chrom_sizes):
     return StreamedGeometry(chrom_sizes)
 
+
+def test_from_chrom_sizes(chrom_sizes):
+    c = ChromosomeSize.from_entry_tuples(
+        list(chrom_sizes.items()))
+    g = Geometry.from_chrom_sizes(c)
+    assert g.chrom_size('chr2') == 50
 
 def test_clip(geometry, invalid_intervals, valid_intervals):
     clipped = geometry.clip(invalid_intervals)
