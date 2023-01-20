@@ -83,11 +83,16 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return {name: self._global_track[offset:offset+size].to_array()
                 for name, offset, size in zip(names, offsets, sizes)}
 
+    def _mask_wrapper(self, output):
+        assert isinstance(r, GenomicRunLengthArray)
+        if r.dtype == bool:
+            return GenomicMaskGlobal(r, self._global_offset)
+    
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         # TODO: check that global offsets are the same
         inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
-        assert isinstance(r, GenomicRunLengthArray)
+        # assert isinstance(r, GenomicRunLengthArray)
         if r.dtype == bool:
             return GenomicMaskGlobal(r, self._global_offset)
         return self.__class__(r, self._global_offset)
@@ -112,6 +117,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
                          data.starts, data.ends, data.values))
         return np.concatenate(intervals_list)
 
+    # extract
     def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
         """Extract the data contained in a set of intervals
 
@@ -266,7 +272,6 @@ class Geometry:
         -------
         GenomicMask
         """
-        
         return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
     def get_pileup(self, intervals: Interval) -> GenomicTrack:
@@ -443,13 +448,13 @@ class StreamedGeometry(Geometry):
         self._global_offset = GlobalOffset(chrom_sizes)
         self._global_size = sum(chrom_sizes.values())
 
-    def get_track(self, bedgraph: BedGraph) -> GenomicTrack:
+    def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicTrack:
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
                         for name, b in grouped)
         return GenomicTrack.from_stream(track_stream, self._global_offset)
 
-    def get_pileup(self, intervals: Interval) -> GenomicTrack:
+    def get_pileup(self, intervals: Iterable[Interval]) -> GenomicTrack:
         grouped = groupby(bedgraph, 'chromosome')
         get_empty = lambda name: GenomicRunLengthArray(np.array([0, self_chrom_sizes[name]]), [0])
         names = iter(self._chrom_sizes.keys())
