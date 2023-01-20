@@ -29,24 +29,24 @@ class GenomicData:
 
     @classmethod
     def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'MultiRLE':
-        pass
+        return NotImplemented
 
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
-        pass
+        return NotImplemented
 
     def to_dict(self) -> Dict[str, np.ndarray]:
-        pass
+        return NotImplemented
 
     def compute(self):
         return NotImplemented
 
 
 class GenomicTrack(GenomicData):
-    def sum(self):
+    def sum(self) -> Number:
         return NotImplemented
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, GenomicRunLengthArray]:
         return NotImplemented
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
@@ -56,30 +56,27 @@ class GenomicTrack(GenomicData):
         return NotImplemented
 
     @classmethod
-    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'MultiRLE':
+    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> GenomicTrack:
         return GenomicTrackGlobal(global_pileup, global_offset)
 
     @classmethod
-    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> 'MultiRLE':
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> GenomicTrack:
         return GenomicTrackStream(stream, global_offset)
-
-    def to_dict(self):
-        pass
 
 
 class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
-    def __init__(self, global_track, global_offset):
+    def __init__(self, global_track: GenomicRunLengthArray, global_offset: GlobalOffset):
         assert isinstance(global_track, GenomicRunLengthArray)
         self._global_track = global_track
         self._global_offset = global_offset
 
-    def sum(self):
+    def sum(self) -> float:
         return self._global_track.sum(axis=None)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._global_track)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, GenomicRunLengthArray]:
         names = self._global_offset.names()
         offsets = self._global_offset.get_offset(names)
         sizes = self._global_offset.get_size(names)
@@ -96,6 +93,12 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(r, self._global_offset)
 
     def to_bedgraph(self) -> BedGraph:
+        """Create a BedGraph object corresponding to this track
+
+        Returns
+        -------
+        BedGraph
+        """
         names = self._global_offset.names()
         starts = self._global_offset.get_offset(names)
         stops = starts+self._global_offset.get_size(names)
@@ -110,10 +113,22 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return np.concatenate(intervals_list)
 
     def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
+        """Extract the data contained in a set of intervals
+
+        Parameters
+        ----------
+        intervals : Interval
+        stranded : bool
+
+        Returns
+        -------
+        RunLengthRaggedArray
+        """
+        
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_track[global_intervals]
 
-    def compute(self):
+    def compute(self) -> GenomicTrack:
         return self
 
 
@@ -191,6 +206,13 @@ class Geometry:
 
     @classmethod
     def from_chrom_sizes(cls, chrom_sizes: ChromosomeSize):
+        """Create a Geometry object from a ChromosomeSizes bnpdataclass object
+
+        Parameters
+        ----------
+        chrom_sizes : ChromosomeSize
+        
+        """
         return cls({chrom_size.name.to_string():chrom_size.size
                     for chrom_size in chrom_sizes})
 
@@ -234,9 +256,30 @@ class Geometry:
         return get_boolean_mask(go, self._global_size)
 
     def get_mask(self, intervals: Interval) -> GenomicMask:
+        """Create a GenomeMask of all areas covered by at least one interval
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        GenomicMask
+        """
+        
         return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
     def get_pileup(self, intervals: Interval) -> GenomicTrack:
+        """Create a GenomicTrack of how many intervals covers each position in the genome
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        GenomicTrack
+        """
         go = self._global_offset.from_local_interval(intervals)
         return GenomicTrack.from_global_data(
             get_pileup(go, self._global_size),
@@ -265,7 +308,17 @@ class Geometry:
 
         return matrix
 
-    def clip(self, intervals):
+    def clip(self, intervals: Interval) -> Interval:
+        """Clip intervals so that all intervals are contained in their corresponding chromosome
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        Interval
+        """
         chrom_sizes = self._global_offset.get_size(intervals.chromosome)
         return dataclasses.replace(
             intervals,
@@ -303,26 +356,84 @@ class Geometry:
             stop=stop)
 
     def get_track(self, bedgraph: BedGraph) -> GenomicTrack:
+        """Create a genomic track from a bedgraph
+
+        Parameters
+        ----------
+        bedgraph : BedGraph
+
+        Returns
+        -------
+        GenomicTrack
+        """
         gi = self._global_offset.from_local_interval(bedgraph)
         rle = GenomicRunLengthArray.from_bedgraph(gi)
         return GenomicTrack.from_global_data(rle, self._global_offset)
 
     def merge_intervals(self, intervals: Interval, distance: int = 0) -> Interval:
+        """Merge all intervals that either overlaps or lie within a given distance
+
+        Parameters
+        ----------
+        intervals : Interval
+        distance : int
+
+        Returns
+        -------
+        Interval
+
+        """
         global_intervals = self._global_offset.from_local_interval(intervals)
         global_merged = merge_intervals(global_intervals, distance)
         return self._global_offset.to_local_interval(global_merged)
 
     def sort(self, intervals: Interval) -> Interval:
+        """Sort a set of intervals according to the chormosome order
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        Interval
+
+        """
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
 
-    def chrom_size(self, chromsome):
+    def chrom_size(self, chromsome: str) -> int:
+        """Return the size of the given chromosome
+
+        Parameters
+        ----------
+        chromsome : str
+
+        Returns
+        -------
+        int
+
+        """
         return self._chrom_sizes[chromsome]
 
-    def names(self):
+    def names(self) -> List[str]:
+        """List the chromosomes in order
+
+        Returns
+        -------
+        List[str]
+
+        """
+
         return list(self._chrom_sizes.keys())
 
-    def size(self):
+    def size(self) -> int:
+        """Return the total size of the genome
+
+        Returns
+        -------
+        int
+        """
         return self._global_size
 
 
