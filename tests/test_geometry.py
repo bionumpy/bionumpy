@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from bionumpy import str_equal
-from bionumpy.streams import groupby
+from bionumpy.streams import groupby, NpDataclassStream
 from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
 from bionumpy.arithmetics.geometry import Geometry, GenomicTrack, StreamedGeometry
@@ -93,6 +93,18 @@ def test_extend_to_size(geometry, stranded_intervals, extended_intervals):
 
 def test_get_pileup(geometry, stranded_intervals):
     genomic_track = geometry.get_pileup(stranded_intervals)
+    for chromosome, track in genomic_track.to_dict().items():
+        true = np.zeros(geometry.chrom_size(chromosome), dtype=int)
+        for interval in stranded_intervals:
+            if str_equal(interval.chromosome, chromosome):
+                true[interval.start:interval.stop] += 1
+        assert_equal(true, track)
+
+
+def test_get_pileup_streamed(streamed_geometry, stranded_intervals):
+    geometry = streamed_geometry
+    stream = NpDataclassStream([stranded_intervals[:2], stranded_intervals[2:]])
+    genomic_track = streamed_geometry.get_pileup(stream)
     for chromosome, track in genomic_track.to_dict().items():
         true = np.zeros(geometry.chrom_size(chromosome), dtype=int)
         for interval in stranded_intervals:

@@ -1,6 +1,7 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
 from ..streams import groupby
+from ..streams.left_join import left_join
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
@@ -204,7 +205,7 @@ class GenomicMaskGlobal(GenomicTrackGlobal):
         return np.concatenate(intervals_list)
 
 
-class Geometry:
+class GeometryBase:
     def __init__(self, chrom_sizes: dict):
         self._chrom_sizes = chrom_sizes
         self._global_offset = GlobalOffset(chrom_sizes)
@@ -217,11 +218,47 @@ class Geometry:
         Parameters
         ----------
         chrom_sizes : ChromosomeSize
-        
         """
         return cls({chrom_size.name.to_string():chrom_size.size
                     for chrom_size in chrom_sizes})
 
+    def chrom_size(self, chromsome: str) -> int:
+        """Return the size of the given chromosome
+
+        Parameters
+        ----------
+        chromsome : str
+
+        Returns
+        -------
+        int
+
+        """
+        return self._chrom_sizes[chromsome]
+
+    def names(self) -> List[str]:
+        """List the chromosomes in order
+
+        Returns
+        -------
+        List[str]
+
+        """
+
+        return list(self._chrom_sizes.keys())
+
+    def size(self) -> int:
+        """Return the total size of the genome
+
+        Returns
+        -------
+        int
+        """
+        return self._global_size
+
+
+
+class Geometry(GeometryBase):
     def jaccard(self, intervals_a: Interval, intervals_b: Interval) -> float:
         """Calculate the Jaccard similarity score between two sets of intervals
 
@@ -407,47 +444,8 @@ class Geometry:
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
 
-    def chrom_size(self, chromsome: str) -> int:
-        """Return the size of the given chromosome
 
-        Parameters
-        ----------
-        chromsome : str
-
-        Returns
-        -------
-        int
-
-        """
-        return self._chrom_sizes[chromsome]
-
-    def names(self) -> List[str]:
-        """List the chromosomes in order
-
-        Returns
-        -------
-        List[str]
-
-        """
-
-        return list(self._chrom_sizes.keys())
-
-    def size(self) -> int:
-        """Return the total size of the genome
-
-        Returns
-        -------
-        int
-        """
-        return self._global_size
-
-
-class StreamedGeometry(Geometry):
-    def __init__(self, chrom_sizes: dict):
-        self._chrom_sizes = chrom_sizes
-        self._global_offset = GlobalOffset(chrom_sizes)
-        self._global_size = sum(chrom_sizes.values())
-
+class StreamedGeometry(GeometryBase):
     def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicTrack:
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
@@ -455,13 +453,39 @@ class StreamedGeometry(Geometry):
         return GenomicTrack.from_stream(track_stream, self._global_offset)
 
     def get_pileup(self, intervals: Iterable[Interval]) -> GenomicTrack:
-        grouped = groupby(bedgraph, 'chromosome')
-        get_empty = lambda name: GenomicRunLengthArray(np.array([0, self_chrom_sizes[name]]), [0])
-        names = iter(self._chrom_sizes.keys())
-        for name, intervals in grouped:
-            pileup = get_pileup(intervals, self._chrom_sizes[name])
+        grouped = groupby(intervals, 'chromosome')
+        pileups = ((name, get_pileup(intervals, size)) if intervals is not None else GenomicRunLengthArray(np.array([0, size]), [0]) for name, size, intervals in left_join(self._chrom_sizes.items(), grouped))
+        return GenomicTrack.from_stream(pileups, self._global_offset)
+            
 
-        go = self._global_offset.from_local_interval(intervals)
-        return GenomicTrack.from_global_data(
-            get_pileup(go, self._global_size),
-            self._global_offset)
+    def extend_to_size(self, intervals: Iterable[Interval], fragment_length: int) -> Iterable[Interval]:
+        """Extend/shrink intervals to match the given length. Stranded
+
+        For intervals on the + strand, keep the start coordinate and
+        adjust the stop coordinate. For - intervals keep the stop
+        coordinate and adjust the start
+
+        Parameters
+        ----------
+        intervals : Interval
+        fragment_length : int
+
+        Returns
+        -------
+        Interval
+        """
+        for interval in intervals:
+            chrom_sizes = self._global_offset.get_size(intervals.chromosome)
+            is_forward = intervals.strand.ravel() == "+"
+            start = np.where(is_forward,
+                             intervals.start,
+                             np.maximum(intervals.stop-fragment_length, 0))
+            stop = np.where(is_forward,
+                            np.minimum(intervals.start+fragment_length, chrom_sizes),
+                            intervals.stop)
+                            
+            yield dataclasses.replace(
+                intervals,
+                start=start,
+                stop=stop)
+
