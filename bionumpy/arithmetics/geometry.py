@@ -1,9 +1,8 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
-
 from bionumpy.util.formating import table
-
-from ..streams import groupby
+from ..streams import groupby, NpDataclassStream
+from ..streams.left_join import left_join
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
@@ -141,7 +140,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return self
 
 
-class GenomicTrackStream(GenomicTrack):
+class GenomicTrackStream(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, track_stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset):
         self._track_stream = track_stream
         self._global_offset = global_offset
@@ -150,10 +149,28 @@ class GenomicTrackStream(GenomicTrack):
         return sum(track.sum(axis=None) for name, track in self._track_stream)
 
     def to_dict(self):
-        return dict(self._track_stream)
+        return {name: track.to_array() for name, track in self._track_stream}
+
+    def _iter(self):
+        return self._track_stream
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
-        # TODO: check that global offsets are the same
+        if not method == '__call__':
+            return NotImplemented
+
+        def _args_stream(args, stream_indices):
+            args = list(args)
+            streams = tuple(args[i]._iter() for i in stream_indices)
+            for stream_args in zip(*streams):
+                new_args = list(args)
+                for i, (name, stream_arg) in zip(stream_indices, stream_args):
+                    new_args[i] = stream_arg
+                yield (name, new_args)
+
+        stream_indices = [i for i, arg in enumerate(inputs) if isinstance(arg, GenomicTrackStream)]
+        new_stream = ((name, ufunc(*new_inputs, **kwargs))
+                      for name, new_inputs in _args_stream(inputs, stream_indices))
+        return self.__class__(new_stream, self._global_offset)
         inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
         assert isinstance(r, GenomicRunLengthArray)
@@ -207,7 +224,7 @@ class GenomicMaskGlobal(GenomicTrackGlobal):
         return np.concatenate(intervals_list)
 
 
-class Geometry:
+class GeometryBase:
     def __init__(self, chrom_sizes: dict):
         self._chrom_sizes = chrom_sizes
         self._global_offset = GlobalOffset(chrom_sizes)
@@ -220,11 +237,47 @@ class Geometry:
         Parameters
         ----------
         chrom_sizes : ChromosomeSize
-        
         """
         return cls({chrom_size.name.to_string():chrom_size.size
                     for chrom_size in chrom_sizes})
 
+    def chrom_size(self, chromsome: str) -> int:
+        """Return the size of the given chromosome
+
+        Parameters
+        ----------
+        chromsome : str
+
+        Returns
+        -------
+        int
+
+        """
+        return self._chrom_sizes[chromsome]
+
+    def names(self) -> List[str]:
+        """List the chromosomes in order
+
+        Returns
+        -------
+        List[str]
+
+        """
+
+        return list(self._chrom_sizes.keys())
+
+    def size(self) -> int:
+        """Return the total size of the genome
+
+        Returns
+        -------
+        int
+        """
+        return self._global_size
+
+
+
+class Geometry(GeometryBase):
     def jaccard(self, intervals_a: Interval, intervals_b: Interval) -> float:
         """Calculate the Jaccard similarity score between two sets of intervals
 
@@ -410,40 +463,6 @@ class Geometry:
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
 
-    def chrom_size(self, chromsome: str) -> int:
-        """Return the size of the given chromosome
-
-        Parameters
-        ----------
-        chromsome : str
-
-        Returns
-        -------
-        int
-
-        """
-        return self._chrom_sizes[chromsome]
-
-    def names(self) -> List[str]:
-        """List the chromosomes in order
-
-        Returns
-        -------
-        List[str]
-
-        """
-
-        return list(self._chrom_sizes.keys())
-
-    def size(self) -> int:
-        """Return the total size of the genome
-
-        Returns
-        -------
-        int
-        """
-        return self._global_size
-
     def __repr__(self):
         return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"
 
@@ -451,12 +470,8 @@ class Geometry:
         return table(zip(self._chrom_sizes.keys(), self._chrom_sizes.values()), headers=["Chromosome", "Size"])
 
 
-class StreamedGeometry(Geometry):
-    def __init__(self, chrom_sizes: dict):
-        self._chrom_sizes = chrom_sizes
-        self._global_offset = GlobalOffset(chrom_sizes)
-        self._global_size = sum(chrom_sizes.values())
 
+class StreamedGeometry(GeometryBase):
     def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicTrack:
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
@@ -464,13 +479,40 @@ class StreamedGeometry(Geometry):
         return GenomicTrack.from_stream(track_stream, self._global_offset)
 
     def get_pileup(self, intervals: Iterable[Interval]) -> GenomicTrack:
-        grouped = groupby(bedgraph, 'chromosome')
-        get_empty = lambda name: GenomicRunLengthArray(np.array([0, self_chrom_sizes[name]]), [0])
-        names = iter(self._chrom_sizes.keys())
-        for name, intervals in grouped:
-            pileup = get_pileup(intervals, self._chrom_sizes[name])
+        grouped = groupby(intervals, 'chromosome')
+        pileups = ((name, get_pileup(intervals, size)) if intervals is not None else GenomicRunLengthArray(np.array([0, size]), [0]) for name, size, intervals in left_join(self._chrom_sizes.items(), grouped))
+        return GenomicTrack.from_stream(pileups, self._global_offset)
+            
+    def extend_to_size(self, intervals: Iterable[Interval], fragment_length: int) -> Iterable[Interval]:
+        """Extend/shrink intervals to match the given length. Stranded
 
-        go = self._global_offset.from_local_interval(intervals)
-        return GenomicTrack.from_global_data(
-            get_pileup(go, self._global_size),
-            self._global_offset)
+        For intervals on the + strand, keep the start coordinate and
+        adjust the stop coordinate. For - intervals keep the stop
+        coordinate and adjust the start
+
+        Parameters
+        ----------
+        intervals : Interval
+        fragment_length : int
+
+        Returns
+        -------
+        Interval
+        """
+        print('Here')
+        return NpDataclassStream(Geometry(self._chrom_sizes).extend_to_size(i, fragment_length)
+                                 for i in intervals)
+
+    def clip(self, intervals: Interval) -> Interval:
+        """Clip intervals so that all intervals are contained in their corresponding chromosome
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        Interval
+        """
+        return self._global_size
+

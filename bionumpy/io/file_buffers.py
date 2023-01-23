@@ -145,7 +145,6 @@ class FileBuffer:
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
             lens = ends - starts
-            # indices, shape = RaggedView(starts, lens).get_flat_indices()
         e = EncodedRaggedArray(self._data, RaggedView(starts, lens))
         e.is_contigous = False
         return e

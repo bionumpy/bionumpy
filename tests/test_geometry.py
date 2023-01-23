@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from bionumpy import str_equal
-from bionumpy.streams import groupby
+from bionumpy.streams import groupby, NpDataclassStream
 from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
 from bionumpy.arithmetics.geometry import Geometry, GenomicTrack, StreamedGeometry
@@ -81,6 +81,7 @@ def test_from_chrom_sizes(chrom_sizes):
     g = Geometry.from_chrom_sizes(c)
     assert g.chrom_size('chr2') == 50
 
+
 def test_clip(geometry, invalid_intervals, valid_intervals):
     clipped = geometry.clip(invalid_intervals)
     assert_bnpdataclass_equal(clipped, valid_intervals)
@@ -93,6 +94,28 @@ def test_extend_to_size(geometry, stranded_intervals, extended_intervals):
 
 def test_get_pileup(geometry, stranded_intervals):
     genomic_track = geometry.get_pileup(stranded_intervals)
+    for chromosome, track in genomic_track.to_dict().items():
+        true = np.zeros(geometry.chrom_size(chromosome), dtype=int)
+        for interval in stranded_intervals:
+            if str_equal(interval.chromosome, chromosome):
+                true[interval.start:interval.stop] += 1
+        assert_equal(true, track)
+
+
+def test_add_pileup(geometry, streamed_geometry, pileup):
+    track = geometry.get_track(pileup)
+    stream_track = streamed_geometry.get_track(pileup)
+    trueish = (track+1).to_dict()
+    streamed = (stream_track+1).to_dict()
+    assert set(trueish.keys()) == set(streamed.keys())
+    for key, value in trueish.items():
+        assert_equal(streamed[key], value)
+
+
+def test_get_pileup_streamed(streamed_geometry, stranded_intervals):
+    geometry = streamed_geometry
+    stream = NpDataclassStream([stranded_intervals[:2], stranded_intervals[2:]])
+    genomic_track = streamed_geometry.get_pileup(stream)
     for chromosome, track in genomic_track.to_dict().items():
         true = np.zeros(geometry.chrom_size(chromosome), dtype=int)
         for interval in stranded_intervals:
