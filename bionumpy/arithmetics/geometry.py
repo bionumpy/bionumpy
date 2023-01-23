@@ -509,6 +509,23 @@ class StreamedGeometry(GeometryBase):
         return NpDataclassStream(Geometry(self._chrom_sizes).clip(i)
                                  for i in intervals)
     
+    def merge_intervals(self, intervals: Iterable[Interval], distance: int = 0) -> Iterable[Interval]:
+        """Merge all intervals that either overlaps or lie within a given distance
+
+        Parameters
+        ----------
+        intervals : Interval
+        distance : int
+
+        Returns
+        -------
+        Interval
+
+        """
+        return NpDataclassStream(merge_intervals(i, distance) for i in intervals)
+    # return self._global_offset.to_local_interval(global_merged)
+
+
         # for interval in intervals:
         #     chrom_sizes = self._global_offset.get_size(intervals.chromosome)
         #     is_forward = intervals.strand.ravel() == "+"
