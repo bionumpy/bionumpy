@@ -56,6 +56,9 @@ class GenomicTrack(GenomicData):
     def to_bedgraph(self) -> BedGraph:
         return NotImplemented
 
+    def to_intervals(self) -> Union[Interval, BedGraph]:
+        pass
+
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'GenomicTrack':
         return GenomicTrackGlobal(global_pileup, global_offset)
@@ -63,6 +66,14 @@ class GenomicTrack(GenomicData):
     @classmethod
     def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> 'GenomicTrack':
         return GenomicTrackStream(stream, global_offset)
+
+    def _get_intervals_from_data(name, data):
+        if data.dtype == bool:
+            return Interval([name]*len(data.starts),
+                            data.starts, data.ends)[data.values]
+        else:
+            return BedGraph([name]*len(data.starts),
+                            data.starts, data.ends, data.values)
 
 
 class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
@@ -97,6 +108,18 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         if r.dtype == bool:
             return GenomicMaskGlobal(r, self._global_offset)
         return self.__class__(r, self._global_offset)
+
+    def to_intervals(self) -> Union[Interval, BedGraph]:
+        names = self._global_offset.names()
+        starts = self._global_offset.get_offset(names)
+        stops = starts+self._global_offset.get_size(names)
+        intervals_list = []
+        for name, start, stop in zip(names, starts, stops):
+            assert isinstance(self._global_track, GenomicRunLengthArray)
+            data = self._global_track[start:stop]
+            assert isinstance(data, GenomicRunLengthArray)
+            intervals_list.append(self._get_intervals_from_data(name, data))
+        return np.concatenate(intervals_list)
 
     def to_bedgraph(self) -> BedGraph:
         """Create a BedGraph object corresponding to this track
@@ -177,19 +200,9 @@ class GenomicTrackStream(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
             return GenomicMaskGlobal(r, self._global_offset)
         return self.__class__(r, self._global_offset)
 
-    def to_bedgraph(self) -> BedGraph:
-        names = self._global_offset.names()
-        starts = self._global_offset.get_offset(names)
-        stops = starts+self._global_offset.get_size(names)
-        intervals_list = []
-        for name, start, stop in zip(names, starts, stops):
-            assert isinstance(self._global_track, GenomicRunLengthArray)
-            data = self._global_track[start:stop]
-            assert isinstance(data, GenomicRunLengthArray)
-            intervals_list.append(
-                BedGraph([name]*len(data.starts),
-                         data.starts, data.ends, data.values))
-        return np.concatenate(intervals_list)
+    def to_intervals(self) -> Union[Interval, BedGraph]:
+        return NpDataclassStream(self._get_intervals_from_data(name, data)
+                                 for name, data in self._track_stream)
 
     def get_intervals(self, intervals: Interval, stranded: bool = True) -> RunLengthRaggedArray:
         global_intervals = self._global_offset.from_local_interval(intervals)
