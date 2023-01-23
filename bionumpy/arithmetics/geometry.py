@@ -1,6 +1,6 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
-from ..streams import groupby
+from ..streams import groupby, NpDataclassStream
 from ..streams.left_join import left_join
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals
 from .global_offset import GlobalOffset
@@ -139,7 +139,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return self
 
 
-class GenomicTrackStream(GenomicTrack):
+class GenomicTrackStream(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, track_stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset):
         self._track_stream = track_stream
         self._global_offset = global_offset
@@ -148,10 +148,28 @@ class GenomicTrackStream(GenomicTrack):
         return sum(track.sum(axis=None) for name, track in self._track_stream)
 
     def to_dict(self):
-        return dict(self._track_stream)
+        return {name: track.to_array() for name, track in self._track_stream}
+
+    def _iter(self):
+        return self._track_stream
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
-        # TODO: check that global offsets are the same
+        if not method == '__call__':
+            return NotImplemented
+
+        def _args_stream(args, stream_indices):
+            args = list(args)
+            streams = tuple(args[i]._iter() for i in stream_indices)
+            for stream_args in zip(*streams):
+                new_args = list(args)
+                for i, (name, stream_arg) in zip(stream_indices, stream_args):
+                    new_args[i] = stream_arg
+                yield (name, new_args)
+
+        stream_indices = [i for i, arg in enumerate(inputs) if isinstance(arg, GenomicTrackStream)]
+        new_stream = ((name, ufunc(*new_inputs, **kwargs))
+                      for name, new_inputs in _args_stream(inputs, stream_indices))
+        return self.__class__(new_stream, self._global_offset)
         inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
         assert isinstance(r, GenomicRunLengthArray)
@@ -457,7 +475,6 @@ class StreamedGeometry(GeometryBase):
         pileups = ((name, get_pileup(intervals, size)) if intervals is not None else GenomicRunLengthArray(np.array([0, size]), [0]) for name, size, intervals in left_join(self._chrom_sizes.items(), grouped))
         return GenomicTrack.from_stream(pileups, self._global_offset)
             
-
     def extend_to_size(self, intervals: Iterable[Interval], fragment_length: int) -> Iterable[Interval]:
         """Extend/shrink intervals to match the given length. Stranded
 
@@ -474,18 +491,36 @@ class StreamedGeometry(GeometryBase):
         -------
         Interval
         """
-        for interval in intervals:
-            chrom_sizes = self._global_offset.get_size(intervals.chromosome)
-            is_forward = intervals.strand.ravel() == "+"
-            start = np.where(is_forward,
-                             intervals.start,
-                             np.maximum(intervals.stop-fragment_length, 0))
-            stop = np.where(is_forward,
-                            np.minimum(intervals.start+fragment_length, chrom_sizes),
-                            intervals.stop)
-                            
-            yield dataclasses.replace(
-                intervals,
-                start=start,
-                stop=stop)
+        print('Here')
+        return NpDataclassStream(Geometry(self._chrom_sizes).extend_to_size(i, fragment_length)
+                                 for i in intervals)
+
+    def clip(self, intervals: Interval) -> Interval:
+        """Clip intervals so that all intervals are contained in their corresponding chromosome
+
+        Parameters
+        ----------
+        intervals : Interval
+
+        Returns
+        -------
+        Interval
+        """
+        return NpDataclassStream(Geometry(self._chrom_sizes).clip(i)
+                                 for i in intervals)
+    
+        # for interval in intervals:
+        #     chrom_sizes = self._global_offset.get_size(intervals.chromosome)
+        #     is_forward = intervals.strand.ravel() == "+"
+        #     start = np.where(is_forward,
+        #                      intervals.start,
+        #                      np.maximum(intervals.stop-fragment_length, 0))
+        #     stop = np.where(is_forward,
+        #                     np.minimum(intervals.start+fragment_length, chrom_sizes),
+        #                     intervals.stop)
+        #                     
+        #     yield dataclasses.replace(
+        #         intervals,
+        #         start=start,
+        #         stop=stop)
 
