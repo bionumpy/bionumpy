@@ -12,6 +12,7 @@ from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
 from ..util import interleave
+from ..bnpdataclass import replace
 
 
 class GenomicRunLengthArray(RunLengthArray):
@@ -96,13 +97,13 @@ class GenomicRunLengthArray(RunLengthArray):
     def to_bedgraph(self, sequence_name):
         return BedGraph([sequence_name]*len(self.starts), self.starts,
                         self.ends, self.values)
+
     @classmethod
     def from_rle(cls, rle):
         return cls(rle._events, rle._values)
 
     def extract_intervals(self, intervals):
         return self[intervals]
-
 
 
 @bnpdataclass
@@ -256,7 +257,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
         stops += distance
-    valid_start_mask = intervals.start[1:] > stops[:-1] # intervals[:-1].stop
+    valid_start_mask = intervals.start[1:] > stops[:-1]  # intervals[:-1].stop
     start_mask = np.concatenate(([True], valid_start_mask))
     stop_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
@@ -383,3 +384,19 @@ def pileup(intervals):
     stops = np.delete(intervals[:, 1], mask)
     return BedGraph(chroms[:values.size-1],
                     starts, stops, values[:-1])
+
+def clip(intervals: Interval, chrom_sizes) -> Interval: 
+    """Clip intervals so that all intervals are contained in their corresponding chromosome
+
+    Parameters
+    ----------
+    intervals : Interval
+
+    Returns
+    -------
+    Interval
+    """
+    return replace(
+        intervals,
+        start=np.maximum(0, intervals.start),
+        stop=np.minimum(chrom_sizes, intervals.stop))
