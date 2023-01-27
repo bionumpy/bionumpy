@@ -77,6 +77,8 @@ class ComputationNode(Node):
                 break
 
 def compute(func, args, kwargs=None):
+    if not any(isinstance(a, Node) for a in args):
+        return func(args, kwargs)
     if kwargs is None:
         kwargs = {}
     node = ComputationNode(func, args, kwargs)

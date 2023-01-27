@@ -90,7 +90,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         self._global_track = global_track
         self._global_offset = global_offset
         names = self._global_offset.names()
-        starts = self._global_offset.get_offset(names)
+        starts = self._global_offset.get_size(names)
         self._genome_context = dict(zip(names, starts))
 
     def sum(self) -> float:

@@ -1,8 +1,8 @@
-from typing import List, Union, Iterable, Tuple, Dict
+from typing import List, Iterable, Tuple, Dict
 from .genomic_track import GenomicTrack, GenomicTrackNode
 from ..datatypes import Interval
 from .intervals import get_pileup, merge_intervals, extend_to_size, clip
-from ..streams import groupby, NpDataclassStream
+from ..streams import groupby
 from ..computation_graph import StreamNode, Node, ComputationNode
 from .geometry import Geometry
 import dataclasses
@@ -22,27 +22,91 @@ class GenomicIntervals:
         return self._intervals.chromosome
 
     def extended_to_size(self, size: int) -> 'GenomicIntervals':
+        """Extend intervals along strand to rach the given size
+
+        Parameters
+        ----------
+        size : int
+
+        Returns
+        -------
+        'GenomicIntervals'
+        """
         return NotImplemented
 
-    def merged(self, distance: int) -> 'GenomicIntervals':
+    def merged(self, distance: int = 0) -> 'GenomicIntervals':
+        """Merge intervals that overlap or lie within distance of eachother
+
+        Parameters
+        ----------
+        distance : int
+
+        Returns
+        -------
+        'GenomicIntervals'
+            4
+        """
+
         return NotImplemented
 
     def get_mask(self) -> GenomicTrack:
+        """Return a boolean mask of areas covered by any interval
+
+        Returns
+        -------
+        GenomicTrack
+            Genomic mask
+        """
+
         return NotImplemented
 
     def get_pileup(self) -> GenomicTrack:
+        """Return a genmic track of counting the number of intervals covering each bp
+
+        Returns
+        -------
+        GenomicTrack
+            Pileup track
+        """
         return NotImplemented
 
     @classmethod
-    def from_track(cls, track: GenomicTrack):
-        return cls(track.get_data(), track._genome_context)
+    def from_track(cls, track: GenomicTrack) -> 'GenomicIntervals':
+        """Return intervals of contigous areas of nonzero values of track
+
+        Parameters
+        ----------
+        track : GenomicTrack
+
+        Returns
+        -------
+        'GenomicIntervals'
+        """
+        if isinstance(track, GenomicTrackNode):
+            return GenomicIntervalsStreamed(track.get_data(), track._genome_context)
+        return GenomicIntervalsFull(track.get_data(), track._genome_context)
 
     @classmethod
     def from_intervals(cls, intervals: Interval, chrom_sizes: Dict[str, int]):
+        """Create genomic intervals from interval entries and genome info
+
+        Parameters
+        ----------
+        intervals : Interval
+        chrom_sizes : Dict[str, int]
+        """
         return GenomicIntervalsFull(intervals, chrom_sizes)
 
     @classmethod
     def from_interval_stream(cls, interval_stream: Iterable[Interval], chrom_sizes: Dict[str, int]):
+        """Create streamed genomic intervals from a stream of intervals and genome info
+
+        Parameters
+        ----------
+        interval_stream : Iterable[Interval]
+        chrom_sizes : Dict[str, int]
+        """
+        
         interval_stream = groupby(interval_stream, 'chromosome')
         interval_stream = StreamNode(pair[1] for pair in interval_stream)
         return GenomicIntervalsStreamed(interval_stream, chrom_sizes)
