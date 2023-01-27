@@ -1,5 +1,6 @@
 import pytest
-from bionumpy.encodings.string_encodings import StringEncoding
+import bionumpy as bnp
+from bionumpy.encodings.string_encodings import StringEncoding, AsciiHashTable
 from numpy.testing import assert_array_equal
 import bionumpy as bnp
 
@@ -9,6 +10,27 @@ def encoded_ragged_array():
     return bnp.as_encoded_array(["chr1",
                                  "chr2",
                                  "chr13"])
+
+@pytest.fixture
+def problems():
+    return bnp.as_encoded_array([
+        'chr4_GL000257v2_alt',
+        'chr6_GL000256v2_alt'])
+
+
+@pytest.fixture
+def chrom_names():
+    return bnp.open("example_data/hg38.chrom.sizes").read().name
+
+
+def test_problems(problems):
+    AsciiHashTable.from_sequences(problems, modulo=103)
+
+
+def test_chromosome_encoding(chrom_names):
+    from collections import Counter
+    print(Counter(chrom_names.tolist()).most_common(10))
+    encoding = AsciiHashTable.from_sequences(chrom_names, modulo=103)
 
 
 def test_string_encoding_labels(encoded_ragged_array):

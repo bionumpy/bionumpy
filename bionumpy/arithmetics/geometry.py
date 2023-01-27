@@ -7,6 +7,7 @@ from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..bnpdataclass import replace
+from .genomic_track import GenomicTrack
 import numpy as np
 
 
@@ -114,7 +115,7 @@ class Geometry(GeometryBase):
         -------
         GenomicMask
         """
-        return GenomicMask.from_global_data(self.get_global_mask(intervals), self._global_offset)
+        return GenomicTrack.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
     def get_pileup(self, intervals: Interval) -> 'GenomicTrack':
         """Create a GenomicTrack of how many intervals covers each position in the genome

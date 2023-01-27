@@ -2,7 +2,7 @@ import numpy as np
 from ..encoded_array import EncodedRaggedArray
 from npstructures.mixin import NPSArray
 from npstructures import RaggedArray, HashTable
-n_letters = 128
+n_letters = 129
 
 
 def column_index_array(shape):
@@ -16,9 +16,12 @@ def column_index_array(shape):
 
 
 def _get_power_array(n, mod):
+    '''
+    (1*mod + k) * 128  =mod 128
+    '''
     l = [1]
     for _ in range(n-1):
-        l.append((l[-1]*n_letters % mod))
+        l.append(((l[-1]*n_letters) % mod))
     return np.array(l).view(NPSArray)
 
 
@@ -27,19 +30,22 @@ def get_ascii_hash(encoded_array, mod):
     if isinstance(encoded_array, EncodedRaggedArray):
         col_indices = column_index_array(encoded_array.shape)
         powers = RaggedArray(powers[col_indices.ravel()], encoded_array.shape)
-
     return np.sum((powers*encoded_array.raw()) % mod, axis=-1) % mod
 
 
 class AsciiHashTable:
-    big_mod = 2**31-1
+    big_mod = (2**31)-1
+
     def __init__(self, hash_table, sequences):
         self._hash_table = hash_table
         self._seqeunces = sequences
 
     @classmethod
     def from_sequences(cls, encoded_ragged_array, modulo=103):
+        from collections import Counter
         ascii_hashes = get_ascii_hash(encoded_ragged_array, cls.big_mod)
+        idx = Counter(ascii_hashes).most_common(1)[0][0]
+        assert len(set(ascii_hashes)) == len(ascii_hashes), (len(set(ascii_hashes)), len(ascii_hashes))
         hash_table = HashTable(ascii_hashes, np.arange(len(encoded_ragged_array)), mod=modulo)
         return cls(hash_table, encoded_ragged_array)
 
