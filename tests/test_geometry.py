@@ -144,3 +144,10 @@ def test_stream_sum(pileup, geometry, streamed_geometry):
 def test_compute(pileup, geometry, streamed_geometry):
     track = streamed_geometry.get_track(pileup).compute()
     assert_equal(track, geometry.get_track(pileup))
+
+
+def test_repr():
+    geometry_dict = {"chr1": 10, "chr2": 20}
+    g = Geometry(geometry_dict)
+    assert repr(g) == "Geometry(" + repr(geometry_dict) + ")"
+

@@ -1,5 +1,6 @@
 import dataclasses
 from typing import List, Union, Iterable, Tuple, Dict
+from bionumpy.util.formating import table
 from ..streams import groupby, NpDataclassStream
 from ..streams.left_join import left_join
 from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals, extend_to_size
@@ -530,6 +531,13 @@ class Geometry(GeometryBase):
         global_intervals = self._global_offset.from_local_interval(intervals)
         return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"
+
+    def __str__(self):
+        return table(zip(self._chrom_sizes.keys(), self._chrom_sizes.values()), headers=["Chromosome", "Size"])
+
+
 
 class StreamedGeometry(GeometryBase):
     def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicTrack:
@@ -593,7 +601,6 @@ class StreamedGeometry(GeometryBase):
 
         """
         return NpDataclassStream(merge_intervals(i, distance) for i in intervals)
-
 
 
 class GenomicIntervals:
