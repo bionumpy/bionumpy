@@ -33,15 +33,22 @@ def get_ascii_hash(encoded_array, mod):
 
 class AsciiHashTable:
     big_mod = 2**31-1
-    def __init__(self, hash_table):
+    def __init__(self, hash_table, sequences):
         self._hash_table = hash_table
+        self._seqeunces = sequences
 
     @classmethod
     def from_sequences(cls, encoded_ragged_array, modulo=103):
         ascii_hashes = get_ascii_hash(encoded_ragged_array, cls.big_mod)
         hash_table = HashTable(ascii_hashes, np.arange(len(encoded_ragged_array)), mod=modulo)
-        return cls(hash_table)
+        return cls(hash_table, encoded_ragged_array)
 
     def __getitem__(self, encoded_array):
         hashes = get_ascii_hash(encoded_array, self.big_mod)
-        return self._hash_table[hashes]
+        try:
+            values = self._hash_table[hashes]
+        except IndexError:
+            print('Error Looking for', encoded_array)
+            print('available keys:', self._seqeunces)
+            raise
+        return values

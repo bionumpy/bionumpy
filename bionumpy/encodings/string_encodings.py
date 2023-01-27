@@ -25,3 +25,6 @@ class StringEncoding(Encoding):
         else:
             data = encoded_array
         return self._seqeunces[data]
+
+    def __eq__(self, other):
+        return isinstance(other, StringEncoding) and self._seqeunces == other._seqeunces and self._modulo == other._modulo

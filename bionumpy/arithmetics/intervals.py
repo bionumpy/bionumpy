@@ -100,6 +100,10 @@ class GenomicRunLengthArray(RunLengthArray):
     def from_rle(cls, rle):
         return cls(rle._events, rle._values)
 
+    def extract_intervals(self, intervals):
+        return self[intervals]
+
+
 
 @bnpdataclass
 class RawInterval:
@@ -246,7 +250,8 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     Merged Intervals
 
     """
-
+    if len(intervals) == 0:
+        return intervals
     assert np.all(intervals.start[:-1] <= intervals.start[1:]), "merge_intervals requires intervals sorted on start position"
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
@@ -327,6 +332,36 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
                              intervals.stop+forward,
                              intervals.start+reverse)
             )
+
+
+def extend_to_size(intervals: Interval, fragment_length: int, chromosome_size: np.ndarray) -> Interval:
+    """Extend/shrink intervals to match the given length. Stranded
+
+    For intervals on the + strand, keep the start coordinate and
+    adjust the stop coordinate. For - intervals keep the stop
+    coordinate and adjust the start
+
+    Parameters
+    ----------
+    intervals : Interval
+    fragment_length : int
+
+    Returns
+    -------
+    Interval
+    """
+    is_forward = intervals.strand.ravel() == "+"
+    start = np.where(is_forward,
+                     intervals.start,
+                     np.maximum(intervals.stop-fragment_length, 0))
+    stop = np.where(is_forward,
+                    np.minimum(intervals.start+fragment_length, chromosome_size),
+                    intervals.stop)
+
+    return dataclasses.replace(
+        intervals,
+        start=start,
+        stop=stop)
 
 
 def pileup(intervals):

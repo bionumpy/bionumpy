@@ -126,7 +126,7 @@ def test_get_pileup_streamed(streamed_geometry, stranded_intervals):
 
 def test_to_intervals(geometry, disjoint_intervals):
     mask = geometry.get_mask(disjoint_intervals)
-    intervals = mask.to_intervals()
+    intervals = mask.to_intervals().to_dataclass()
     assert_bnpdataclass_equal(intervals, disjoint_intervals.astype(Interval))
 
 
