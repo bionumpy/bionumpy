@@ -14,7 +14,16 @@ class GenomicData:
         pass
 
     def __getitem__(self, idx: GenomeIndex):
-        return NotImplemented
+        if isinstance(idx, str):
+            return self.extract_intervals(idx)
+        if isinstance(idx, Interval):
+            return self.extract_intervals(idx)
+        if isinstance(idx, list):
+            if len(idx) == 0:
+                return self.empty()
+            if isinstance(idx[0], str):
+                return self.extract_intervals(idx)
+        assert False
 
     def get_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
         return NotImplemented
@@ -47,6 +56,7 @@ class GenomicData:
         return NotImplemented        
 
 
+
 class GenomicTrack(GenomicData):
     def sum(self) -> float:
         return NotImplemented
@@ -55,6 +65,9 @@ class GenomicTrack(GenomicData):
         return NotImplemented
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+        return NotImplemented
+
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
         return NotImplemented
 
     def to_bedgraph(self) -> 'BedGraph':
@@ -66,10 +79,6 @@ class GenomicTrack(GenomicData):
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'GenomicTrack':
         return GenomicTrackGlobal(global_pileup, global_offset)
-
-    # @classmethod
-    # def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], global_offset: GlobalOffset) -> 'GenomicTrack':
-    #     return GenomicTrackStream(stream, global_offset)
 
     def _get_intervals_from_data(self, name, data):
         if data.dtype == bool:
@@ -193,6 +202,28 @@ class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def extract_intervals(self, intervals: Interval, stranded: bool = False):
         assert stranded is False
         return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
+
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        """Handles any numpy array functions called on a raggedarray
+
+        Parameters
+        ----------
+        func : callable
+        types : List
+        args : List
+        kwargs : Dict
+        """
+        if func == np.histogram:
+            print(args)
+            raise
+            
+        if func not in HANDLED_FUNCTIONS:
+            return NotImplemented
+        if func != np.where and not all(issubclass(t, self.__class__) for t in types):
+            return NotImplemented
+        return HANDLED_FUNCTIONS[func](*args, **kwargs)
+
+
     # GenomicRunLengthArray.extract_intervals,
     #         [self._run_length_node, intervals])
                                
