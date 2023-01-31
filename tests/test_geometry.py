@@ -101,6 +101,7 @@ def test_get_pileup(geometry, stranded_intervals):
                 true[interval.start:interval.stop] += 1
         assert_equal(true, track)
 
+
 @pytest.mark.skip('old_stream')
 def test_add_pileup(geometry, streamed_geometry, pileup):
     track = geometry.get_track(pileup)
@@ -110,6 +111,7 @@ def test_add_pileup(geometry, streamed_geometry, pileup):
     assert set(trueish.keys()) == set(streamed.keys())
     for key, value in trueish.items():
         assert_equal(streamed[key], value)
+
 
 @pytest.mark.skip('old_stream')
 def test_get_pileup_streamed(streamed_geometry, stranded_intervals):
@@ -132,7 +134,7 @@ def test_to_intervals(geometry, disjoint_intervals):
 
 def test_to_bedgraph(geometry, pileup):
     track = geometry.get_track(pileup)
-    new_pileup = track.to_bedgraph()
+    new_pileup = track.get_data()
     assert_bnpdataclass_equal(pileup, new_pileup)
 
 
@@ -140,6 +142,7 @@ def test_to_bedgraph(geometry, pileup):
 def test_stream_sum(pileup, geometry, streamed_geometry):
     track = streamed_geometry.get_track(pileup)
     assert track.sum() == geometry.get_track(pileup).sum()
+
 
 @pytest.mark.skip('old_stream')
 def test_compute(pileup, geometry, streamed_geometry):
