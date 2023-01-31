@@ -94,8 +94,8 @@ class DelimitedBuffer(FileBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
-        integer_starts = self._col_starts(cols)# self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        integer_ends = self._col_ends(cols)# self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
         integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
         return integers.reshape(-1, cols.size)
 
@@ -115,8 +115,8 @@ class DelimitedBuffer(FileBuffer):
 
         """
         cols = np.asanyarray(cols)
-        float_starts = self._col_starts(cols)# self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        float_ends = self._col_ends(cols)# self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        float_starts = self._col_starts(cols)
+        float_ends = self._col_ends(cols)
         floats = str_to_float(ragged_slice(self._data, float_starts, float_ends))
         return floats.reshape(-1, cols.size)
 
@@ -142,8 +142,8 @@ class DelimitedBuffer(FileBuffer):
         """
         self.validate_if_not()
         assert np.max(col) < self._n_cols, (col, self._n_cols, self._data, self.__class__, self.dataclass)
-        starts = self._col_starts(col)  # self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-        ends = self._col_ends(col)  # self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+        starts = self._col_starts(col)
+        ends = self._col_ends(col)
         if keep_sep:
             ends += 1
         if fixed_length:
@@ -174,8 +174,8 @@ class DelimitedBuffer(FileBuffer):
         assert col_start < self._n_cols, self._n_cols
         assert col_end <= self._n_cols
 
-        starts = self._col_starts(col_start)# self._delimiters[:-1].reshape(-1, self._n_cols)[:, col_start] + 1
-        ends = self._col_ends(col_end-1)# self._delimiters[1:].reshape(-1, self._n_cols)[:, col_end-1]
+        starts = self._col_starts(col_start)
+        ends = self._col_ends(col_end-1)
         if keep_sep:
             ends += 1
 
@@ -206,12 +206,11 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        starts = self._col_starts(col) + start  # self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
+        starts = self._col_starts(col) + start
         if end is not None:
             return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
         else:
             ends = self._col_ends(col)
-            # ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
 
     def _extract_integers(self, integer_starts, integer_ends):
@@ -310,8 +309,8 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        starts = self._col_starts(col) # self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-        ends = self._col_ends(col) # self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + len(sep)
+        starts = self._col_starts(col)
+        ends = self._col_ends(col)
         text = self._data[starts:ends]
         if len(sep):
             text[:, -1] = sep
@@ -472,8 +471,8 @@ class BedBuffer(DelimitedBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
-        integer_starts = self._col_starts(cols)# self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        integer_ends = self._col_ends(cols)# self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
         array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
         try:
             digits = as_encoded_array(array, DigitEncoding).raw()
