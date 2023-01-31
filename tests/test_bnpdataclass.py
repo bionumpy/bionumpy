@@ -7,6 +7,7 @@ from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
 from bionumpy.util.testing import assert_bnpdataclass_equal
 import pandas as pd
+import bionumpy as bnp
 
 
 @bnpdataclass
@@ -78,3 +79,23 @@ def test_keyword_init():
 def test_bnpdataclassfunction():
     bnp_add = bnpdataclassfunction("a", "b", (add))
     assert_equal(bnp_add(MyClass([10], [20])), [30])
+
+
+def test_set_get_context():
+    data = MyClass(a=[10, 20], b=[100, 200])
+    context = "Test test"
+    data.set_context("test", context)
+    assert data.get_context("test") == context
+
+
+@pytest.mark.parametrize("file", [
+    "example_data/variants.vcf",
+    "example_data/variants_with_header.vcf"
+])
+def test_read_header(file):
+    chunks = list(bnp.open(file).read_chunks())
+    true_header = "".join(line for line in open(file) if line.startswith("#"))
+    for chunk in chunks:
+        header = chunk.get_context("header")
+        assert header == true_header
+

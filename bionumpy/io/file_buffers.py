@@ -66,6 +66,7 @@ class FileBuffer:
         """
         if cls.COMMENT == 0:
             return
+        header = []
         comment = cls.COMMENT
         if isinstance(comment, str):
             comment = ord(comment)
@@ -73,6 +74,8 @@ class FileBuffer:
             if line[0] != comment:
                 file_object.seek(-len(line), 1)
                 break
+            header.append(line.decode("utf-8"))
+        return "".join(header)
 
     @classmethod
     def from_raw_buffer(cls, raw_buffer: np.ndarray, header_data=None) -> "FileBuffer":

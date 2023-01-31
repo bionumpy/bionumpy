@@ -35,7 +35,7 @@ class DelimitedBuffer(FileBuffer):
 
     DELIMITER = "\t"
     COMMENT = "#"
-    INCLUDE_HEADER = False
+    HAS_UNCOMMENTED_HEADER_LINE = False
     n_lines_per_entry = 1
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
@@ -255,8 +255,10 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def make_header(cls, data: bnpdataclass):
-        """makes a header from field names separated by delimiter"""
-        return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
+        header = ""
+        if data.has_context("header"):
+            header = data.get_context("header")
+        return bytes(header, "ascii")
 
     def get_data(self) -> BNPDataClass:
         """Parse the data in the buffer according to the fields in _dataclass
@@ -291,7 +293,9 @@ class DelimitedBuffer(FileBuffer):
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
                    for c, value in columns.items()}
-        return self.dataclass(**columns)
+        data = self.dataclass(**columns)
+        data.set_context("header", self._header_data)
+        return data
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -381,7 +385,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = delimiter
         COMMENT = comment
-        INCLUDE_HEADER = has_header
+        HAS_UNCOMMENTED_HEADER_LINE = has_header
         dataclass = _dataclass
         fields = None
 
@@ -409,6 +413,11 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             if not isinstance(delimiter, str):
                 delimiter = chr(delimiter)
             return file_object.readline().decode('ascii').strip().split(delimiter)
+
+        @classmethod
+        def make_header(cls, data: bnpdataclass):
+            """makes a header from field names separated by delimiter"""
+            return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
         def set_fields_from_header(self, columns: List[str]):
             if not has_header:
@@ -516,7 +525,8 @@ class VCFMatrixBuffer(VCFBuffer):
     genotype_encoding = GenotypeRowEncoding
 
     @classmethod
-    def read_header(cls, file_object):
+    def __read_header(cls, file_object):
+        # NOT IMPLEMENTED version of read_header()
         prev_line = None
         for line in file_object:
             line = line.decode()
