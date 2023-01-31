@@ -13,6 +13,18 @@ GenomeIndex = Union[str, List[str], Interval, Interval.single_entry]
 
 class GenomicData:
 
+    def __getitem__(self, idx: GenomeIndex):
+        if isinstance(idx, str):
+            return self.extract_chromsome(idx)
+        if isinstance(idx, Interval) or (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome')):
+            return self.extract_intervals(idx)
+        if isinstance(idx, list):
+            if len(idx) == 0:
+                return self.empty()
+            if isinstance(idx[0], str):
+                return self.extract_intervals(idx)
+        assert False
+
     @abstractmethod
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
         return NotImplemented
@@ -73,8 +85,14 @@ class GenomicTrack(GenomicData):
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         return NotImplemented
 
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        return NotImplemented
+
     @abstractmethod
     def sum(self, axis=None) -> float:
+        return NotImplemented
+
+    def to_bedgraph(self) -> 'BedGraph':
         return NotImplemented
 
     @classmethod
@@ -129,7 +147,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
             intervals_list.append(self._get_intervals_from_data(name, data))
         return np.concatenate(intervals_list)
 
-    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'], stranded: bool = True) -> RunLengthRaggedArray:
+    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'], stranded: bool = False) -> RunLengthRaggedArray:
         """Extract the data contained in a set of intervals
 
         Parameters
@@ -166,3 +184,23 @@ class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
         assert stranded is False
         return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
+
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        """Handles any numpy array functions called on a raggedarray
+
+        Parameters
+        ----------
+        func : callable
+        types : List
+        args : List
+        kwargs : Dict
+        """
+        return NotImplemented
+        if func == np.histogram:
+            return NotImplemented
+            
+        if func not in HANDLED_FUNCTIONS:
+            return NotImplemented
+        if func != np.where and not all(issubclass(t, self.__class__) for t in types):
+            return NotImplemented
+        return HANDLED_FUNCTIONS[func](*args, **kwargs)

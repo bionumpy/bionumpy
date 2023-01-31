@@ -227,8 +227,8 @@ class GenomicIntervalsStreamed:
         """
         return GenomicTrackNode(ComputationNode(get_pileup, [self._intervals_node, self._chrom_size_node]),
                                 self._chrom_sizes)
-
-    def get_pileup(self) -> GenomicTrack:
+    
+    def get_mask(self) -> GenomicTrack:
         return GenomicTrackNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
                                 self._chrom_sizes)
         

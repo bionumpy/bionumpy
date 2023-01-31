@@ -1,10 +1,10 @@
 import pytest
 import numpy as np
 from bionumpy import str_equal
-from bionumpy.streams import groupby, NpDataclassStream
+from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import Interval, BedGraph
 from numpy.testing import assert_equal
-from bionumpy.arithmetics.geometry import Geometry, GenomicTrack, StreamedGeometry
+from bionumpy.arithmetics.geometry import Geometry, StreamedGeometry
 from bionumpy.datatypes import Bed6, ChromosomeSize
 from bionumpy.util.testing import assert_bnpdataclass_equal
 

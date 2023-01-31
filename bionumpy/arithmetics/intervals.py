@@ -385,6 +385,7 @@ def pileup(intervals):
     return BedGraph(chroms[:values.size-1],
                     starts, stops, values[:-1])
 
+
 def clip(intervals: Interval, chrom_sizes) -> Interval: 
     """Clip intervals so that all intervals are contained in their corresponding chromosome
 
