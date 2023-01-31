@@ -53,8 +53,7 @@ class GenomicData:
         return NotImplemented
 
     def get_data(self):
-        return NotImplemented        
-
+        return NotImplemented
 
 
 class GenomicTrack(GenomicData):
