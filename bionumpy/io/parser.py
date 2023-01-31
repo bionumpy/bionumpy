@@ -130,9 +130,11 @@ class NumpyFileReader:
                 self._file_obj.seek(buff.size - chunk.size, 1)
             else:
                 self._prepend = chunk[buff.size:]
+
         if chunk is not None and chunk.size:
             self.n_bytes_read += buff.size
             self.n_lines_read += buff.n_lines
+            #buff.set_context("context", "test")
             return wrapper(buff)
 
     def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):

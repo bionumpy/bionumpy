@@ -7,6 +7,7 @@ from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
 from bionumpy.util.testing import assert_bnpdataclass_equal
 import pandas as pd
+import bionumpy as bnp
 
 
 @bnpdataclass
@@ -78,3 +79,15 @@ def test_keyword_init():
 def test_bnpdataclassfunction():
     bnp_add = bnpdataclassfunction("a", "b", (add))
     assert_equal(bnp_add(MyClass([10], [20])), [30])
+
+
+def test_context():
+    data = MyClass(a=[10, 20], b=[100, 200])
+    header = "Test test"
+    data.set_context("header", header)
+    assert data.get_context("header") == header
+
+
+def test_context2():
+    chunk = bnp.open("example_data/test.bed").read_chunk()
+    print(chunk.get_context("context"))

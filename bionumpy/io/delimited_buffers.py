@@ -496,6 +496,7 @@ class VCFBuffer(DelimitedBuffer):
     def get_data(self):
         data = super().get_data()
         data.position -= 1
+        data.set_context("header", self._header_data)
         return data
 
     @classmethod
