@@ -450,6 +450,16 @@ def _is_encoded(data):
     return isinstance(data, (EncodedArray, EncodedRaggedArray))
 
 
+def bnp_array_func_dispatch(func):
+    def new_func(array, *args, **kwargs):
+        result = func(array, *args, **kwargs)
+        if result is NotImplemented:
+            if hasattr(array, '__array_function__'):
+                result = array.__array_function__(func, [array] + args, kwargs)
+                if result is NotImplemented:
+                    raise Exception
+        return result
+
 def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
     Can be called with already encoded arrays, and will then do nothing.

@@ -94,7 +94,7 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
 
     """
     if column is not None:
-        assert hasattr(data, column), (data.__class__, dataclasses.fields(data), column)
+        assert hasattr(data, column), (data.__class__, data, column)
         keys = getattr(data, column)
     else:
         keys = data

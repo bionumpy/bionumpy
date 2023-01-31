@@ -2,7 +2,7 @@ import dataclasses
 import numpy as np
 from ..encodings.string_encodings import StringEncoding
 from ..encoded_array import EncodedArray, as_encoded_array
-
+from ..bnpdataclass import replace
 global_encoding = StringEncoding(["global"])
 
 
@@ -53,7 +53,7 @@ class GlobalOffset:
             stop = np.minimum(stop, sizes)
         else:
             assert np.all(stop <= sizes)
-        return dataclasses.replace(
+        return replace(
             interval,
             chromosome=EncodedArray(np.zeros(len(interval), dtype=np.uint8), global_encoding),
             start=interval.start+offsets,

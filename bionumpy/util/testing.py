@@ -3,6 +3,7 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 from npstructures.testing import assert_raggedarray_equal
 from npstructures.npdataclasses import shallow_tuple
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
 import numpy as np
 
@@ -28,6 +29,10 @@ def assert_float_close_enough(a, b):
 def assert_bnpdataclass_equal(a, b):
     assert dataclasses.fields(a) == dataclasses.fields(b)
     for s, o, field in zip(shallow_tuple(a), shallow_tuple(b), dataclasses.fields(a)):
+        if isinstance(s, EncodedArray) and isinstance(s.encoding, StringEncoding):
+            s = s.encoding.decode(s)
+        if isinstance(o, EncodedArray) and isinstance(o.encoding, StringEncoding):
+            o = o.encoding.decode(o)
         assert issubclass(type(s), type(o)) or issubclass(type(o), type(s)), (type(s), type(o))
         if isinstance(s, EncodedRaggedArray):
             assert_encoded_raggedarray_equal(s, o)
