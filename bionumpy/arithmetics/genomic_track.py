@@ -15,7 +15,7 @@ class GenomicData:
 
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
-            return self.extract_intervals(idx)
+            return self.extract_chromsome(idx)
         if isinstance(idx, Interval):
             return self.extract_intervals(idx)
         if isinstance(idx, list):
@@ -28,7 +28,6 @@ class GenomicData:
     @abstractmethod
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
         return NotImplemented
-
 
     @abstractmethod
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
