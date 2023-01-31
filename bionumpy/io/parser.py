@@ -194,6 +194,7 @@ class NpBufferedWriter:
             if hasattr(self._file_obj, "name")
             else str(self._file_obj)
         )
+        self._header_written = False
 
     def __enter__(self):
         return self
@@ -214,7 +215,9 @@ class NpBufferedWriter:
             dataset containing entries
 
         """
-        if hasattr(self._buffer_type, 'make_header') and (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab') and getattr(self._buffer_type, 'INCLUDE_HEADER', False):
+        if hasattr(self._buffer_type, 'make_header') and \
+                (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
+                #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 

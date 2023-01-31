@@ -74,7 +74,6 @@ class NpDataclassReader:
         except FormatException as e:
             e.line_number += n_lines_read
             raise e
-        data.set_context("context", "test")
         return data
 
     def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> NpDataclassStream:

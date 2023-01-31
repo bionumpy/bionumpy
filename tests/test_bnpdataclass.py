@@ -81,13 +81,21 @@ def test_bnpdataclassfunction():
     assert_equal(bnp_add(MyClass([10], [20])), [30])
 
 
-def test_context():
+def test_set_get_context():
     data = MyClass(a=[10, 20], b=[100, 200])
-    header = "Test test"
-    data.set_context("header", header)
-    assert data.get_context("header") == header
+    context = "Test test"
+    data.set_context("test", context)
+    assert data.get_context("test") == context
 
 
-def test_context2():
-    chunk = bnp.open("example_data/test.bed").read_chunk()
-    print(chunk.get_context("context"))
+@pytest.mark.parametrize("file", [
+    "example_data/variants.vcf",
+    "example_data/variants_with_header.vcf"
+])
+def test_read_header(file):
+    chunks = list(bnp.open(file).read_chunks())
+    true_header = "".join(line for line in open(file) if line.startswith("#"))
+    for chunk in chunks:
+        header = chunk.get_context("header")
+        assert header == true_header
+

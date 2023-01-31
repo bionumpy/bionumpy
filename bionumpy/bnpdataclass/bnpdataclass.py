@@ -98,6 +98,9 @@ class BNPDataClass(NpDataClass):
     def get_context(self, name):
         return self._context[name]
 
+    def has_context(self, name):
+        return name in self._context
+
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
     """Create a `bnpdataclass` from a class with fields specified
