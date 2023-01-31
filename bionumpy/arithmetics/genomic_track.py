@@ -16,7 +16,7 @@ class GenomicData:
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
             return self.extract_chromsome(idx)
-        if isinstance(idx, Interval):
+        if isinstance(idx, Interval) or (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome')):
             return self.extract_intervals(idx)
         if isinstance(idx, list):
             if len(idx) == 0:
@@ -147,7 +147,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
             intervals_list.append(self._get_intervals_from_data(name, data))
         return np.concatenate(intervals_list)
 
-    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'], stranded: bool = True) -> RunLengthRaggedArray:
+    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'], stranded: bool = False) -> RunLengthRaggedArray:
         """Extract the data contained in a set of intervals
 
         Parameters
