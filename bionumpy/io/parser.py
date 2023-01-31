@@ -215,12 +215,6 @@ class NpBufferedWriter:
             dataset containing entries
 
         """
-        if hasattr(self._buffer_type, 'make_header') and \
-                (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
-                #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
-            header_array = self._buffer_type.make_header(data)
-            self._file_obj.write(header_array)
-
         if isinstance(data, BnpStream):
             for buf in data:
                 if len(buf) > 0:
@@ -231,6 +225,14 @@ class NpBufferedWriter:
                 if len(buf) > 0:
                     self.write(buf)
             return
+
+        if hasattr(self._buffer_type, 'make_header') and \
+                (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
+                #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
+            header_array = self._buffer_type.make_header(data)
+            self._file_obj.write(header_array)
+
+
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
