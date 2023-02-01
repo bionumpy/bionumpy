@@ -90,9 +90,15 @@ class GenomicRunLengthArray(RunLengthArray):
         return cls(events, values, do_clean=True)
 
     @classmethod
-    def from_bedgraph(cls, bedgraph):
-        events = np.append(bedgraph.start, bedgraph.stop[-1])
-        return cls(events, bedgraph.value)
+    def from_bedgraph(cls, bedgraph, size=None):
+        assert bedgraph.start[0] == 0
+        if size is None or size == bedgraph.stop[-1]:
+            events = np.append(bedgraph.start, bedgraph.stop[-1])
+            values = bedgraph.value
+        else:
+            events = np.append(bedgraph.start, [bedgraph.stop[-1], size])
+            values = np.append(bedgraph.value, 0)
+        return cls(events, values)
 
     def to_bedgraph(self, sequence_name):
         return BedGraph([sequence_name]*len(self.starts), self.starts,

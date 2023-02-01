@@ -7,6 +7,7 @@ from .bam import BamBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
                                 NarrowPeakBuffer, BdgBuffer)
+from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter
 from .exceptions import FormatException
 from ..streams import NpDataclassStream
@@ -32,7 +33,8 @@ buffer_types = {
     ".gff3": GFFBuffer,
     ".sam": SAMBuffer, #, comment="@"),
     ".bam": BamBuffer,
-    ".sizes": ChromosomeSizeBuffer
+    ".sizes": ChromosomeSizeBuffer,
+    '.wig': WigBuffer
 }
 
 

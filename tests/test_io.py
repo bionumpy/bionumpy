@@ -11,7 +11,6 @@ from bionumpy.io.matrix_dump import matrix_to_csv
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
-
 @pytest.mark.parametrize("file_format", combos.keys())
 def test_read_write_roundtrip(file_format):
     if file_format in ("multiline_fasta", "bed12", 'wig'):

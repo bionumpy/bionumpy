@@ -18,6 +18,9 @@ class GlobalOffset:
         self._offset = np.insert(np.cumsum(self._sizes), 0, 0)
         self._old_encoding = StringEncoding(self._names)
 
+    def total_size(self):
+        return self._sizes.sum()
+
     def names(self):
         return self._names.tolist()
 

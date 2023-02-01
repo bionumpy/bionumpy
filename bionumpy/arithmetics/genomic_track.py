@@ -5,6 +5,7 @@ from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
 from .intervals import GenomicRunLengthArray
 from ..bnpdataclass import BNPDataClass
+from ..streams import groupby
 from npstructures import RunLengthRaggedArray
 from typing import List, Union, Iterable, Tuple, Dict
 
@@ -106,6 +107,20 @@ class GenomicTrack(GenomicData):
         else:
             return BedGraph([name]*len(data.starts),
                             data.starts, data.ends, data.values)
+
+    @classmethod
+    def from_bedgraph(cls, bedgraph: BedGraph, chrom_sizes: Dict[str, int]):
+        if isinstance(bedgraph, BedGraph):
+            go = GlobalOffset(chrom_sizes)
+            gi = go.from_local_interval(bedgraph)
+            rle = GenomicRunLengthArray.from_bedgraph(gi, go.total_size())
+            return cls.from_global_data(rle, go)
+
+        interval_stream = groupby(bedgraph, 'chromosome')
+        interval_stream = StreamNode(pair[1] for pair in interval_stream)
+        return GenomicTrackNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
+                                                [interval_stream, StreamNode(iter(chrom_sizes.values()))]),
+                                chrom_sizes)
 
 
 class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
