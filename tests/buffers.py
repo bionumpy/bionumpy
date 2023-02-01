@@ -77,7 +77,7 @@ SRR1524970.316478	16	test_ref	1706	255	24M	*	0	0	TGCTGATGAAGCAGAACAACTTTA	`\X_`a
 chr21 10079666  10120808   uc002yiv.1  0  -  10081686  10120608  0     4   528,91,101,215, 0,1930,39750,40927,
 chr21 10080031  10081687   uc002yiw.1  0  -  10080031  100800310\t0     2   200,91,    0,1565,
 """,
-    'wig': '''/
+    'wig': '''\
 #bedGraph section chr1:0-9871
 chr1	0	9800	-0
 chr1	9800	9871	0.36612
@@ -134,8 +134,7 @@ buffer_type = {"bed": Bed6Buffer,
                "gfa_sequence": GfaSequenceBuffer,
                "multiline_fasta": MultiLineFastaBuffer,
                "bed12": Bed12Buffer,
-               # 'wig': WigBuffer,
-}
+               'wig': WigBuffer}
 
 
 combos = {key: (buffers[key], data[key], buffer_type[key]) for key in buffer_type}
