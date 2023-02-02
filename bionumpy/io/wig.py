@@ -25,10 +25,15 @@ class WigBuffer(DelimitedBuffer):
 
     def _calculate_col_starts_and_ends(self, data, delimiters):
         comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == self.COMMENT)
+        # comment_mask[0] = data[0] == self.COMMENT
         comment_mask = np.flatnonzero(comment_mask)
-        start_delimiters = np.insert(np.delete(delimiters, comment_mask), 0, -1)[:-1]+1
+        start_delimiters = np.delete(delimiters, comment_mask)[:-1]
         end_delimiters = np.delete(delimiters, comment_mask+1)
-        return start_delimiters, end_delimiters
+        if data[0] != self.COMMENT:
+            start_delimiters = np.insert(start_delimiters, 0, -1)
+        else:
+            end_delimiters=end_delimiters[1:]
+        return start_delimiters+1, end_delimiters
 
     def _col_ends(self, col):
         return self.__col_ends[:, col]
