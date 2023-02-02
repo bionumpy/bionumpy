@@ -1,8 +1,9 @@
 import dataclasses
 import pytest
+import numpy as np
 from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass
+from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass, dynamic_concatenate
 from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
 from bionumpy.util.testing import assert_bnpdataclass_equal
@@ -14,6 +15,20 @@ import bionumpy as bnp
 class Person:
     name: str
     age: int
+
+
+@pytest.fixture
+def data():
+    return Person(['knut', 'per', 'jon', 'erling'],
+                  [10, 20,  30, 40])
+
+
+@pytest.fixture
+def data_list():
+    return [Person(['knut', 'per', 'jon', 'erling'],
+                   [10, 20,  30, 40])
+            for _ in range(100)]
+
 
 
 def test_add_fields():
@@ -99,3 +114,8 @@ def test_read_header(file):
         header = chunk.get_context("header")
         assert header == true_header
 
+
+def test_dynamic_join(data_list):
+    truth = np.concatenate(data_list)
+    solution = dynamic_concatenate(data_list)
+    assert_bnpdataclass_equal(truth, solution)

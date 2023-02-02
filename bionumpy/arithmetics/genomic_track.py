@@ -150,6 +150,20 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
         return self.__class__(r, self._global_offset)
 
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        """Handles any numpy array functions called on a raggedarray
+
+        Parameters
+        ----------
+        func : callable
+        types : List
+        args : List
+        kwargs : Dict
+        """
+        args = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in args]
+        if func == np.histogram:
+            return np.histogram(*args, **kwargs)
+
     def get_data(self) -> Union[Interval, BedGraph]:
         names = self._global_offset.names()
         starts = self._global_offset.get_offset(names)
@@ -210,6 +224,6 @@ class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         args : List
         kwargs : Dict
         """
-        return NotImplemented
         if func == np.histogram:
-            pass
+            return ComputationNode(np.histogram, [args[0]._run_length_node] + args[1:], kwargs)
+        return NotImplemented

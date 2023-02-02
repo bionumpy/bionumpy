@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Type, Dict
+from typing import List, Type, Dict, Iterable
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
@@ -242,3 +242,22 @@ def _extract_field_types(fields_with_values: dict, field_type_map: dict = None) 
 def _assert_all_same_type(values):
     original_type = type(values[0])
     assert all(isinstance(val, original_type) for val in values), (original_type, [type(val) for val in values])
+
+
+def dynamic_concatenate(dataclass_iter: Iterable[BNPDataClass]):
+    iterable = iter(dataclass_iter)
+
+    first = next(iterable)
+    first_class = first.__class__
+    fields = [[vals] for vals in first.shallow_tuple()]
+    l = len(first)
+    for c in iterable:
+        for f, vals in zip(fields, c.shallow_tuple()):
+            f.append(vals)
+        l += len(c)
+        print(l)
+    print('Joining fields', sum(len(f) for f in fields[0]))
+    for i, f in enumerate(fields):
+        fields[i] = np.concatenate(f)
+    print('creating object')
+    return first_class(*fields)
