@@ -144,7 +144,7 @@ def str_to_float(number_text: EncodedRaggedArray) -> np.ndarray:
     """
     number_text = as_encoded_array(number_text)
     assert number_text.encoding == BaseEncoding
-    return np.array([float(row.to_string()) for row in number_text])
+    # return np.array([float(row.to_string()) for row in number_text])
 
     scientific = np.any(number_text == "e", axis=-1)
     numbers = np.empty(len(number_text))
