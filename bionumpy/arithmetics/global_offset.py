@@ -58,6 +58,7 @@ class GlobalOffset:
             assert np.all(stop <= sizes)
         return replace(
             interval,
-            chromosome=EncodedArray(np.zeros(len(interval), dtype=np.uint8), global_encoding),
+            chromosome=EncodedArray(
+                np.broadcast_to(np.array(0,dtype=np.uint8), (len(interval), )), global_encoding),
             start=interval.start+offsets,
             stop=stop+offsets)
