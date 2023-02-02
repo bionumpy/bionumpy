@@ -5,14 +5,14 @@ from functools import reduce
 import operator
 
 
-def add_histograms(histogram_a, histogram_b):
-    assert np.all(histogram_a[0] == histogram_b)
-    return (histogram_a[0], (histogram_a[1]+histogram_b[1]))
+def _add_histograms(histogram_a, histogram_b):
+    assert np.all(histogram_a[1] == histogram_b[1]), (histogram_a, histogram_b)
+    return ((histogram_a[0]+histogram_b[0]), histogram_a[1])
 
 
 reductions_map = {
     np.sum: operator.add,
-    np.histogram: add_histograms
+    np.histogram: _add_histograms
     }
 
 

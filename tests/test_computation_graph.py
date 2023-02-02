@@ -74,7 +74,14 @@ def test_reduce(stream_data, data):
     data = data[0]
     true = np.sum(data)
     s = np.sum(stream_data)
-    print(s)
     solution = s.compute()
-    print(true, solution)
     assert true == solution
+
+
+def test_histogram(stream_data, data):
+    stream_data = stream_data[0]
+    data = data[0]
+    true = np.histogram(data, bins=3, range=(0, 6))
+    s = np.histogram(stream_data, bins=3, range=(0, 6))
+    solution = s.compute()
+    assert_equal(true[1], solution[1])
