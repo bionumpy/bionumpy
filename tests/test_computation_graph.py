@@ -12,9 +12,11 @@ class ExampleDatatype:
     b: int
     c: int
 
+
 @pytest.fixture
 def data():
     return (np.array([0, 1, 2, 3, 4]), np.array([2, 3, 4, 1, 0]), np.array([100, 200, 1, 2, 3]))
+
 
 @pytest.fixture
 def stream_data(data):
@@ -49,7 +51,7 @@ def complicated(a, b, c):
 @pytest.mark.parametrize("func", [add, two_step, complicated])
 def test_equal(data, stream_data, func):
     true = func(*data)
-    ours = np.concatenate(list(func(*stream_data)))
+    ours = func(*stream_data).compute()
     assert_equal(true, ours)
 
 
@@ -57,12 +59,22 @@ def test_equal(data, stream_data, func):
 @pytest.mark.skip('should fail')
 def test_mixed_equal(data, mixed_data, func):
     true = func(*data)
-    ours = np.concatenate(list(func(*mixed_data)))
+    ours = func(*mixed_data).compute()
     assert_equal(true, ours)
-
 
 
 def test_print(stream_data):
     a, b, c = stream_data
     print(a, b)
     print(complicated(a, b, c))
+
+
+def test_reduce(stream_data, data):
+    stream_data = stream_data[0]
+    data = data[0]
+    true = np.sum(data)
+    s = np.sum(stream_data)
+    print(s)
+    solution = s.compute()
+    print(true, solution)
+    assert true == solution

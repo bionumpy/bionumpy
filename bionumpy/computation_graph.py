@@ -1,6 +1,19 @@
 import numpy as np
 from itertools import count, chain
 from traceback import extract_stack, format_list
+from functools import reduce
+import operator
+
+
+def add_histograms(histogram_a, histogram_b):
+    assert np.all(histogram_a[0] == histogram_b)
+    return (histogram_a[0], (histogram_a[1]+histogram_b[1]))
+
+
+reductions_map = {
+    np.sum: operator.add,
+    np.histogram: add_histograms
+    }
 
 
 class Node(np.lib.mixins.NDArrayOperatorsMixin):
@@ -14,10 +27,23 @@ class Node(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_function__(self, func, types, args, kwargs):
         stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
-        return ComputationNode(func, args, kwargs, stack_trace=stack_trace)
+        comp_node = ComputationNode(func, args, kwargs, stack_trace=stack_trace)
+        if func in reductions_map:
+            return ReductionNode(comp_node, reductions_map[func])
+        return comp_node
 
     def __str__(self):
         return f'{self.__class__.__name__} with current buffer: {self._current_buffer}'
+
+    def compute(self):
+        return NotImplemented
+
+    def get_iter(self):
+        for i in count():
+            try:
+                yield self._get_buffer(i)
+            except StopIteration:
+                break
 
 
 class StreamNode(Node):
@@ -34,6 +60,22 @@ class StreamNode(Node):
             self._buffer_index += 1
         return self._current_buffer
 
+    def compute(self):
+        return np.concataenate(list(self._stream))
+
+
+class ReductionNode(Node):
+    def __init__(self, stream, binary_func):
+        self._stream  = stream
+        self._binary_func = binary_func
+
+    def compute(self):
+        return reduce(self._binary_func, self._stream.get_iter())
+
+    def __str__(self):
+        return f'{self._binary_func} reduction of: {self._stream}'
+
+
 class ComputationNode(Node):
     def __init__(self, func, args, kwargs=None, stack_trace=None):
         self._func = func
@@ -42,9 +84,6 @@ class ComputationNode(Node):
         self._stack_trace = stack_trace
         self._buffer_index = -1
         self._get_buffer(0)
-
-    def __len__(self):
-        return NotImplemented
 
     def __getitem__(self, item):
         return ComputationNode(self.__class__,
@@ -69,19 +108,14 @@ class ComputationNode(Node):
             self._buffer_index += 1
         return self._current_buffer
 
-    def __iter__(self):
-        for i in count():
-            try:
-                yield self._get_buffer(i)
-            except StopIteration:
-                break
+    def compute(self):
+        return np.concatenate(list(self.get_iter()))
+
 
 def compute(func, args, kwargs=None):
     if not any(isinstance(a, Node) for a in args):
-        return func(args, kwargs)
+        return func(*args, **kwargs)
     if kwargs is None:
         kwargs = {}
     node = ComputationNode(func, args, kwargs)
-    return np.concatenate(list(node))
-    
-    
+    return np.concatenate(list(node.get_iter()))
