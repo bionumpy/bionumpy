@@ -116,11 +116,27 @@ class GenomicTrack(GenomicData):
             rle = GenomicRunLengthArray.from_bedgraph(gi, go.total_size())
             return cls.from_global_data(rle, go)
 
-        interval_stream = groupby(bedgraph, 'chromosome')
-        interval_stream = StreamNode(pair[1] for pair in interval_stream)
+        filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
+        interval_stream = StreamNode(filled)
         return GenomicTrackNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
                                                 [interval_stream, StreamNode(iter(chrom_sizes.values()))]),
                                 chrom_sizes)
+
+
+def fill_grouped(grouped, real_order, dataclass):
+    real_order = iter(real_order)
+    next_real = next(real_order, None)
+    for name, group in grouped:
+        assert next_real is not None
+        while name != next_real:
+            yield dataclass.empty()
+            next_real = next(real_order, None)
+        yield group
+        next_real = next(real_order, None)
+    # next_real = next(real_order, None)
+    while next_real is not None:
+        yield next_real
+        next_real = next(real_order, None)
 
 
 class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
@@ -225,5 +241,5 @@ class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         kwargs : Dict
         """
         if func == np.histogram:
-            return ComputationNode(np.histogram, [args[0]._run_length_node] + args[1:], kwargs)
+            return np.histogram(args[0]._run_length_node, *args[1:], **kwargs)
         return NotImplemented

@@ -41,9 +41,8 @@ def test_histogram(track, array):
         np.testing.assert_equal(h, t)
 
 
-@pytest.mark.skip('not implemented')
 def test_stream_histogram(stream_track, array):
-    hist = np.histogram(stream_track)
-    true_hist = np.histogram(array)
+    hist = np.histogram(stream_track, bins=3, range=(0, 5)).compute()
+    true_hist = np.histogram(array, bins=3, range=(0, 5))
     for h, t in zip(hist, true_hist):
         np.testing.assert_equal(h, t)
