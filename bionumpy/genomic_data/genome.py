@@ -4,6 +4,7 @@ from .genomic_track import GenomicTrack
 from .genomic_intervals import GenomicIntervals
 from .geometry import Geometry, StreamedGeometry
 
+
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
     def __init__(self, chrom_sizes: Dict[str, int]):
@@ -91,3 +92,7 @@ class Genome:
         """
         content = self._open(filename, stream)
         return GenomicIntervals.from_intervals(content, self._chrom_sizes)
+
+    @property
+    def size(self):
+        return sum(self._chrom_sizes.values())
