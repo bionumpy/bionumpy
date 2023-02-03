@@ -1,6 +1,6 @@
 import pytest
 from bionumpy.datatypes import Interval, ChromosomeSize
-from bionumpy.arithmetics.global_offset import GlobalOffset, global_encoding
+from bionumpy.genomic_data.global_offset import GlobalOffset, global_encoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
 

@@ -3,7 +3,7 @@ from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
 from .global_offset import GlobalOffset
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
-from .intervals import GenomicRunLengthArray
+from ..arithmetics.intervals import GenomicRunLengthArray
 from ..bnpdataclass import BNPDataClass
 from ..streams import groupby
 from npstructures import RunLengthRaggedArray

@@ -7,7 +7,7 @@ Files should already be sorted.
 import bionumpy as bnp
 from bionumpy.arithmetics.similarity_measures import jaccard
 from bionumpy.arithmetics import intersect
-from bionumpy.arithmetics.global_offset import GlobalOffset
+from bionumpy.genomic_data.global_offset import GlobalOffset
 import numpy as np
 import sys
 # prefix = "../"

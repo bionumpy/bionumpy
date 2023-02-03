@@ -2,7 +2,7 @@ from typing import List, Union, Iterable, Tuple, Dict
 from bionumpy.util.formating import table
 from ..streams import groupby, NpDataclassStream
 from ..streams.left_join import left_join
-from .intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals, extend_to_size
+from ..arithmetics.intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals, extend_to_size
 from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
 from ..computation_graph import StreamNode, Node, ComputationNode
@@ -308,4 +308,3 @@ class StreamedGeometry(GeometryBase):
 
         """
         return NpDataclassStream(merge_intervals(i, distance) for i in intervals)
-

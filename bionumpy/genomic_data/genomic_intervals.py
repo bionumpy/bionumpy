@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
 from typing import List, Iterable, Tuple, Dict
 from .genomic_track import GenomicTrack, GenomicTrackNode
 from ..datatypes import Interval
-from .intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
+from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
 from ..computation_graph import StreamNode, Node, ComputationNode
 from .geometry import Geometry
@@ -100,7 +100,10 @@ class GenomicIntervals(ABC):
         intervals : Interval
         chrom_sizes : Dict[str, int]
         """
-        return GenomicIntervalsFull(intervals, chrom_sizes)
+        if isinstance(intervals, Interval):
+            return GenomicIntervalsFull(intervals, chrom_sizes)
+        else:
+            return cls.from_interval_stream(intervals, chrom_sizes)
 
     @classmethod
     def from_interval_stream(cls, interval_stream: Iterable[Interval], chrom_sizes: Dict[str, int]):

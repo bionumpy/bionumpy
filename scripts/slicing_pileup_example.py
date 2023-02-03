@@ -1,5 +1,5 @@
 import bionumpy as bnp
-from bionumpy.arithmetics.geometry import Geometry
+from bionumpy.genomic_data.geometry import Geometry
 
 
 def test_pileup():

@@ -1,4 +1,4 @@
-from bionumpy.arithmetics import GenomicTrack
+from bionumpy.genomic_data import GenomicTrack
 from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import BedGraph
 import numpy as np
