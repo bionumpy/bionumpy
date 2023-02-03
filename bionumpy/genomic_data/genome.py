@@ -3,6 +3,8 @@ from ..io import bnp_open
 from .genomic_track import GenomicTrack
 from .genomic_intervals import GenomicIntervals
 from .geometry import Geometry, StreamedGeometry
+from ..util.formating import table
+
 
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
@@ -91,3 +93,9 @@ class Genome:
         """
         content = self._open(filename, stream)
         return GenomicIntervals.from_intervals(content, self._chrom_sizes)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"
+
+    def __str__(self):
+        return table(zip(self._chrom_sizes.keys(), self._chrom_sizes.values()), headers=["Chromosome", "Size"])
