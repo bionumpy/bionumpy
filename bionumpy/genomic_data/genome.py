@@ -75,8 +75,8 @@ class Genome:
         content = self._open(filename, stream)
         geom = self._streamed_geometry if stream else self._geometry
         return geom.get_mask(content)
-    
-    def read_intervals(self, filename: str, stream: bool = False) -> GenomicIntervals:
+
+    def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`
 
         If `stream` is `True` then read the bedgraph in chunks and get
