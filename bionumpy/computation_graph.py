@@ -72,6 +72,16 @@ class ReductionNode(Node):
     def compute(self):
         return reduce(self._binary_func, self._stream.get_iter())
 
+    def get_iter(self):
+        return accumulate
+
+    @classmethod
+    def join(cls, reduction_nodes):
+        node = ComputationNode(lambda *args: tuple(args), [node._stream for node in reduction_nodes])
+        binary_func = lambda t1, t2: tuple(node._binary_func(e1, e2)
+                                           for node, e1, e2 in zip(reduction_nodes, t1, t2))
+        return cls(node, binary_func)
+
     def __str__(self):
         return f'{self._binary_func} reduction of: {self._stream}'
 
@@ -104,6 +114,7 @@ class ComputationNode(Node):
                     else a for a in self._args]
             kwargs = {key: (v._get_buffer(i) if isinstance(v, Node) else v)
                       for key, v in self._kwargs.items()}
+            print(self._func, args, kwargs)
             self._current_buffer = self._func(*args, **kwargs)
             self._buffer_index += 1
         return self._current_buffer
@@ -112,7 +123,16 @@ class ComputationNode(Node):
         return np.concatenate(list(self.get_iter()))
 
 
-def compute(func, args, kwargs=None):
+def compute(*args): # func, args, kwargs=None):
+    if all(isinstance(a, ReductionNode) for a in args):
+        return ReductionNode.join(args).compute()
+    
+
+    print(args)
+    t = ComputationNode(tuple, args)
+    return t.compute()
+
+
     if not any(isinstance(a, Node) for a in args):
         return func(*args, **kwargs)
     if kwargs is None:

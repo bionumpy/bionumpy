@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_equal
 import pytest
 from npstructures import npdataclass
-from bionumpy.computation_graph import StreamNode
+from bionumpy.computation_graph import StreamNode, compute
 # from bionumpy.code_nodes import LeafNode, consume, NpDataclassStream
 
 
@@ -84,4 +84,16 @@ def test_histogram(stream_data, data):
     true = np.histogram(data, bins=3, range=(0, 6))
     s = np.histogram(stream_data, bins=3, range=(0, 6))
     solution = s.compute()
-    assert_equal(true[1], solution[1])
+    assert_equal(true[0], solution[0])
+
+
+def test_double_reduce(stream_data, data):
+    stream_data = stream_data[0]
+    data = data[0]
+    true_hist = np.histogram(data, bins=3, range=(0, 6))
+    true_sum = np.sum(data)
+    h = np.histogram(stream_data, bins=3, range=(0, 6))
+    s = np.sum(stream_data)
+    h, s = compute(h, s)
+    assert_equal(h[0], true_hist[0])
+    assert_equal(s, true_sum)
