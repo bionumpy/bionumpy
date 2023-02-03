@@ -6,6 +6,7 @@ from .geometry import Geometry, StreamedGeometry
 from ..util.formating import table
 
 
+
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
     def __init__(self, chrom_sizes: Dict[str, int]):
@@ -99,3 +100,7 @@ class Genome:
 
     def __str__(self):
         return table(zip(self._chrom_sizes.keys(), self._chrom_sizes.values()), headers=["Chromosome", "Size"])
+
+    @property
+    def size(self):
+        return sum(self._chrom_sizes.values())

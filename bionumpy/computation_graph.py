@@ -114,7 +114,6 @@ class ComputationNode(Node):
                     else a for a in self._args]
             kwargs = {key: (v._get_buffer(i) if isinstance(v, Node) else v)
                       for key, v in self._kwargs.items()}
-            print(self._func, args, kwargs)
             self._current_buffer = self._func(*args, **kwargs)
             self._buffer_index += 1
         return self._current_buffer
@@ -126,16 +125,21 @@ class ComputationNode(Node):
 def compute(*args): # func, args, kwargs=None):
     if all(isinstance(a, ReductionNode) for a in args):
         return ReductionNode.join(args).compute()
-    
-
-    print(args)
-    t = ComputationNode(tuple, args)
-    return t.compute()
-
-
-    if not any(isinstance(a, Node) for a in args):
-        return func(*args, **kwargs)
-    if kwargs is None:
-        kwargs = {}
-    node = ComputationNode(func, args, kwargs)
-    return np.concatenate(list(node.get_iter()))
+    else:
+        assert not any(isinstance(a, ReductionNode) for a in args)
+        node = ComputationNode(lambda *a: tuple(a),
+                               args)
+        return node.compute()
+    # 
+    # 
+    # func, args = args
+    # t = ComputationNode(tuple, args)
+    # return t.compute()
+    # 
+    # 
+    # if not any(isinstance(a, Node) for a in args):
+    #     return func(*args, **kwargs)
+    # if kwargs is None:
+    #     kwargs = {}
+    # node = ComputationNode(func, args, kwargs)
+    # return np.concatenate(list(node.get_iter()))

@@ -2,6 +2,7 @@ from bionumpy.genomic_data import GenomicTrack
 from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import BedGraph
 import numpy as np
+from numpy.testing import assert_equal
 import pytest
 
 
@@ -33,6 +34,11 @@ def stream_track(pileup, chrom_sizes):
 def array(track):
     return np.concatenate([rle for rle in track.to_dict().values()])
 
+
+def test_extract_chromosome(track):
+    assert_equal(track['chr2'].to_array(),
+                 np.full(50, 4))
+                 
 
 def test_histogram(track, array):
     hist = np.histogram(track)

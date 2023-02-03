@@ -151,6 +151,11 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
     def sum(self) -> float:
         return self._global_track.sum(axis=None)
 
+    def extract_chromsome(self, chromosome):
+        assert isinstance(chromosome, str)
+        offset = self._global_offset.get_offset([chromosome])[0]
+        return self._global_track[offset:offset + self._global_offset.get_size([chromosome])[0]]
+
     def __str__(self) -> str:
         return str(self._global_track)
 
