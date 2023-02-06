@@ -12,14 +12,16 @@ from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
                  GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
-# from .genomic_data import Genome, GenomicTrack, GenomicIntervals
 from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded)
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .io.strops import str_equal
 from .util.cli import run_as_commandline
+
+
 from . import simulate
 from . import arithmetics
+from .genomic_data import Genome, GenomicTrack, GenomicIntervals
 open = bnp_open
 
 
