@@ -8,10 +8,25 @@ def test():
     genome = Genome.from_file("example_data/hg38.chrom.sizes")
     print(genome)
 
-    # read a bed-file as a mask with this genome
-    peak_mask = genome.read_intervals("example_data/ctcf.bed.gz").get_mask()
-    print(peak_mask)
+    # read peaks as intervals
+    peaks = genome.read_intervals("example_data/ctcf_chr21-22.bed.gz")
 
+    # Get reads as intervals
+    reads = genome.read_intervals("example_data/ctcf_chr21-22.bam")
+
+    # reads are just intervals. Get a pileup (GenomeArray) across the genome
+    pileup = reads.get_pileup()
+
+    # Fetch the pileup in peak areas
+    peaks_pileup = pileup[peaks]
+
+    print(peaks_pileup)
+
+    return
+    # Get a GenomeArray boolean mask (True where we have peaks)
+    mask = peaks.get_mask()
+
+    return
     # We can get the interval dataclass for this GenomicTrack
     data = peak_mask.get_data()
     print("Average inteval length: ", np.mean(data.stop-data.start))

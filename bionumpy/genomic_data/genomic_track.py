@@ -24,7 +24,7 @@ class GenomicData:
                 return self.empty()
             if isinstance(idx[0], str):
                 return self.extract_intervals(idx)
-        assert False
+        raise ValueError("Can only be indexed with str, list or Interval-like object, not", idx)
 
     @abstractmethod
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
