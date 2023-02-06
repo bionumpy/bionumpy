@@ -12,13 +12,14 @@ class GenomicData:
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
             return self.extract_chromsome(idx)
-        if isinstance(idx, Interval) or (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome')):
-            return self.extract_intervals(idx)
+        if (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome') and hasattr(idx, 'is_stranded')):
+            return self.extract_intervals(idx, stranded=idx.is_stranded())
         if isinstance(idx, list):
             if len(idx) == 0:
                 return self.empty()
             if isinstance(idx[0], str):
-                return self.extract_intervals(idx)
+                return self.extract_chromosome(idx)
+            
         assert False
 
     @abstractmethod
@@ -42,7 +43,7 @@ class GenomicData:
             Data for all intervals
         """
         return NotImplemented
-
+    
     @abstractclassmethod
     def from_dict(cls, d: Dict[str, GenomicRunLengthArray]) -> 'GenomicData':
         """Create genomic data from a dict of data with chromosomes as keys

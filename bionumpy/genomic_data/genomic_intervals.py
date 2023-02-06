@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
+import numpy as np
 from typing import List, Iterable, Tuple, Dict
 from .genomic_track import GenomicArray, GenomicArrayNode
-from ..datatypes import Interval
+from ..datatypes import Interval, Bed6
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
 from ..computation_graph import StreamNode, Node, ComputationNode, compute
@@ -9,7 +10,7 @@ from .geometry import Geometry
 import dataclasses
 
 
-class GenomicIntervals(ABC):
+class GenomicIntervals:
     @abstractproperty
     def start(self):
         return NotImplemented
@@ -20,6 +21,14 @@ class GenomicIntervals(ABC):
 
     @abstractproperty
     def chromosome(self):
+        return NotImplemented
+
+    @abstractproperty
+    def strand(self):
+        return NotImplemented
+
+    @abstractmethod
+    def is_stranded(self):
         return NotImplemented
 
     @abstractmethod
@@ -92,7 +101,17 @@ class GenomicIntervals(ABC):
         return GenomicIntervalsFull(track.get_data(), track._genome_context)
 
     @classmethod
-    def from_intervals(cls, intervals: Interval, chrom_sizes: Dict[str, int]):
+    def from_fields(cls, chrom_sizes, chromosome, start, stop, strand=None):
+        is_stranded = strand is not None
+        if is_stranded:
+            intervals = Bed6(chromosome, start, stop, ['.']*len(start),
+                             np.zeros_like(start), strand)
+        else:
+            intervals = Interval(chromosome, start, stop)
+        return cls.from_intervals(intervals, chrom_sizes, is_stranded=is_stranded)
+
+    @classmethod
+    def from_intervals(cls, intervals: Interval, chrom_sizes: Dict[str, int], is_stranded=False):
         """Create genomic intervals from interval entries and genome info
 
         Parameters
@@ -101,12 +120,12 @@ class GenomicIntervals(ABC):
         chrom_sizes : Dict[str, int]
         """
         if isinstance(intervals, Interval): #TODO check is node
-            return GenomicIntervalsFull(intervals, chrom_sizes)
+            return GenomicIntervalsFull(intervals, chrom_sizes, is_stranded)
         else:
-            return cls.from_interval_stream(intervals, chrom_sizes)
+            return cls.from_interval_stream(intervals, chrom_sizes, is_stranded)
 
     @classmethod
-    def from_interval_stream(cls, interval_stream: Iterable[Interval], chrom_sizes: Dict[str, int]):
+    def from_interval_stream(cls, interval_stream: Iterable[Interval], chrom_sizes: Dict[str, int], is_stranded=False):
         """Create streamed genomic intervals from a stream of intervals and genome info
 
         Parameters
@@ -117,7 +136,7 @@ class GenomicIntervals(ABC):
         
         interval_stream = groupby(interval_stream, 'chromosome')
         interval_stream = StreamNode(pair[1] for pair in interval_stream)
-        return GenomicIntervalsStreamed(interval_stream, chrom_sizes)
+        return GenomicIntervalsStreamed(interval_stream, chrom_sizes, is_stranded=is_stranded)
 
     @abstractmethod
     def clip(self) -> 'GenomicIntervals':
@@ -128,10 +147,11 @@ class GenomicIntervals(ABC):
 
 
 class GenomicIntervalsFull(GenomicIntervals):
-    def __init__(self, intervals: Interval, chrom_sizes: Dict[str, int]):
+    def __init__(self, intervals: Interval, chrom_sizes: Dict[str, int], is_stranded=False):
         self._intervals = intervals
         self._geometry = Geometry(chrom_sizes)
         self._chrom_sizes = chrom_sizes
+        self._is_stranded = is_stranded
 
     def __repr__(self):
         return f'Genomic Intervals on {list(self._chrom_sizes)[:5]+["..."]}:\n{self._intervals.astype(Interval)}'
@@ -155,6 +175,12 @@ class GenomicIntervalsFull(GenomicIntervals):
     @property
     def stop(self):
         return self._intervals.stop
+
+    @property
+    def strand(self):
+        if not self.is_stranded():
+            return NotImplemented
+        return self._intervals.strand
 
     @property
     def chromosome(self):
@@ -182,6 +208,10 @@ class GenomicIntervalsFull(GenomicIntervals):
     def compute(self):
         return self
 
+    def get_sorted_stream(self):
+        sorted_intervals = self.sorted()
+        return self.from_interval_stream(iter([sorted_intervals]))
+
 
 class GenomicIntervalsStreamed:
     def _get_chrom_size(self, intervals: Interval):
@@ -190,14 +220,19 @@ class GenomicIntervalsStreamed:
     def __str__(self):
         return 'GIS:' + str(self._intervals_node)
 
-    def __init__(self, intervals_node: Node, chrom_sizes: Dict[str, int]):
+    def __init__(self, intervals_node: Node, chrom_sizes: Dict[str, int], is_stranded=False):
         self._chrom_sizes = chrom_sizes
         self._start = ComputationNode(getattr, [intervals_node, 'start'])
         self._stop = ComputationNode(getattr, [intervals_node, 'stop'])
-        # self._strand = ComputationNode(getattr, [intervals_node, 'strand'])
+        if is_stranded:
+            self._strand = ComputationNode(getattr, [intervals_node, 'strand'])
         self._chromosome = ComputationNode(getattr, [intervals_node, 'chromosome'])
         self._chrom_size_node = StreamNode(iter(self._chrom_sizes.values()))
         self._intervals_node = intervals_node
+        self._is_stranded = is_stranded
+
+    def is_stranded(self):
+        return self._is_stranded
 
     def sorted(self):
         return NotImplemented
@@ -213,6 +248,12 @@ class GenomicIntervalsStreamed:
     @property
     def chromosome(self):
         return self._chromosome
+
+    @property
+    def strand(self):
+        if not self.is_stranded():
+            return NotImplemented
+        return self._strand
 
     def __getitem__(self, item):
         return self.__class__(ComputationNode(lambda x, i: x[i], [self._intervals_node, item]), self._chrom_sizes)
@@ -243,7 +284,6 @@ class GenomicIntervalsStreamed:
     def get_mask(self) -> GenomicArray:
         return GenomicArrayNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
                                 self._chrom_sizes)
-        
 
     def clip(self) -> 'GenomicIntervalsFull':
         return self.__class__(ComputationNode(clip, [self._intervals_node, self._chrom_size_node]), self._chrom_sizes)
