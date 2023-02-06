@@ -165,7 +165,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         sizes = self._global_offset.get_size(names)
         return {name: self._global_track[offset:offset+size].to_array()
                 for name, offset, size in zip(names, offsets, sizes)}
-    
+
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
