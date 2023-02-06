@@ -3,7 +3,7 @@ import gzip
 import dataclasses
 from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer
-from .bam import BamBuffer
+from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
                                 NarrowPeakBuffer, BdgBuffer)

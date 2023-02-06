@@ -130,6 +130,9 @@ class GenomicIntervalsFull(GenomicIntervals):
         self._geometry = Geometry(chrom_sizes)
         self._chrom_sizes = chrom_sizes
 
+    def __repr__(self):
+        return f'Genomic Intervals on {list(self._chrom_sizes)[:5]+["..."]}:\n{self._intervals}'
+
     def get_data(self):
         return self._intervals
 

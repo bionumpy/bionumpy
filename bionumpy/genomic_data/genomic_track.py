@@ -156,8 +156,13 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         offset = self._global_offset.get_offset([chromosome])[0]
         return self._global_track[offset:offset + self._global_offset.get_size([chromosome])[0]]
 
-    def __str__(self) -> str:
-        return str(self._global_track)
+    def __repr__(self) -> str:
+        lines = []
+        for name, _ in zip(self._genome_context, range(10)):
+            lines.append(f'{name}: {self[name]}')
+        if len(self._genome_context) > 10:
+            lines.extend('...')
+        return '\n'.join(lines)
 
     def to_dict(self) -> Dict[str, GenomicRunLengthArray]:
         names = self._global_offset.names()
@@ -165,7 +170,7 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         sizes = self._global_offset.get_size(names)
         return {name: self._global_track[offset:offset+size].to_array()
                 for name, offset, size in zip(names, offsets, sizes)}
-    
+
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         inputs = [(i._global_track if isinstance(i, GenomicArrayGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
