@@ -40,9 +40,23 @@ From this genome object we can create genomic data from reading files, or from b
 
 .. testoutput::
 
+
     Genomic Intervals on ['chr1', 'chr2', 'chr3', 'chr4', 'chr5', '...']:
     Interval with 3 entries
                    chromosome                    start                     stop
                          chr1                  9356548                  9356648
                          chr1                  9358722                  9358822
                          chr1                  9361082                  9361182
+    chr1: [ False False False ... False False False]
+    chr2: [ False False False ... False False False]
+    chr3: [ False False False ... False False False]
+    chr4: [ False False False ... False False False]
+    chr5: [ False False False ... False False False]
+    chr6: [ False False False ... False False False]
+    chr7: [ False False False ... False False False]
+    chr8: [ False False False ... False False False]
+    chr9: [ False False False ... False False False]
+    chr10: [ False False False ... False False False]
+    .
+    .
+    .
