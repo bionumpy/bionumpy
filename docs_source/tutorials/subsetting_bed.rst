@@ -1,7 +1,10 @@
-Getting read pileup for multiple regions
--------------------------------------------
 
-This is a brief example of how you can you can analyse alignments inside a given set of regions. This example assumes that:
+.. _subsetting_bed:
+
+Getting read pileup inside peaks (intervals)
+---------------------------------------------
+
+This is a brief example of how you can you can analyse alignments (pileup) inside a given set of regions. This example assumes that:
 
 * You have a set of alignments as a bam or bed file
 * You have a set of regions in another bed-file

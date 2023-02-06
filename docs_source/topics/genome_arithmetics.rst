@@ -29,7 +29,7 @@ Reading a bed-file into a NumPy-like datastructure that supports indexing, slici
 
 See the following tutorials/guides on intervals and genome arithmetics:
 
-    * :ref:`Tutorial: Computing the similarity between to bed files <similarity_measures_tutorial>`
+    * :ref:`Tutorial: Analysing read pileup inside peaks (intervals) <similarity_measures_tutorial>`
     * :ref:`More about intervals <intervals>`
     * :ref:`API documentation on the arithmetics module <arithmetics_api>`
     * :ref:`Working with Multiple Files/Data Sources <multiple_data_sources>`
