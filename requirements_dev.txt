@@ -25,3 +25,4 @@ more_itertools
 sphinxcontrib.bibtex
 pandas
 pyjaspar
+biopython
