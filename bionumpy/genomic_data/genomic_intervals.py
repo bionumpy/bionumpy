@@ -255,4 +255,4 @@ class GenomicIntervalsStreamed:
 
     def compute(self):
         chromosome, start, stop = compute(self.chromosome, self.start, self.stop)
-        return GenomicIntervalsFull(Interval(chromosome, start, stop))
+        return GenomicIntervalsFull(Interval(chromosome, start, stop), self._chrom_sizes)
