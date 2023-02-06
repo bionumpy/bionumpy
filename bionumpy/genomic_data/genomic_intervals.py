@@ -4,7 +4,7 @@ from .genomic_track import GenomicArray, GenomicArrayNode
 from ..datatypes import Interval
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
-from ..computation_graph import StreamNode, Node, ComputationNode
+from ..computation_graph import StreamNode, Node, ComputationNode, compute
 from .geometry import Geometry
 import dataclasses
 
@@ -100,7 +100,7 @@ class GenomicIntervals(ABC):
         intervals : Interval
         chrom_sizes : Dict[str, int]
         """
-        if isinstance(intervals, Interval):
+        if isinstance(intervals, Interval): #TODO check is node
             return GenomicIntervalsFull(intervals, chrom_sizes)
         else:
             return cls.from_interval_stream(intervals, chrom_sizes)
@@ -123,6 +123,9 @@ class GenomicIntervals(ABC):
     def clip(self) -> 'GenomicIntervals':
         return NotImplemented
 
+    def compute(self):
+        return NotImplemented
+
 
 class GenomicIntervalsFull(GenomicIntervals):
     def __init__(self, intervals: Interval, chrom_sizes: Dict[str, int]):
@@ -131,7 +134,7 @@ class GenomicIntervalsFull(GenomicIntervals):
         self._chrom_sizes = chrom_sizes
 
     def __repr__(self):
-        return f'Genomic Intervals on {list(self._chrom_sizes)[:5]+["..."]}:\n{self._intervals}'
+        return f'Genomic Intervals on {list(self._chrom_sizes)[:5]+["..."]}:\n{self._intervals.astype(Interval)}'
 
     def get_data(self):
         return self._intervals
@@ -175,6 +178,9 @@ class GenomicIntervalsFull(GenomicIntervals):
 
     def __replace__(self, **kwargs):
         return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._chrom_sizes)
+
+    def compute(self):
+        return self
 
 
 class GenomicIntervalsStreamed:
@@ -246,3 +252,7 @@ class GenomicIntervalsStreamed:
     def __replace__(self, **kwargs):
         return self.__class__(ComputationNode(dataclasses.replace, [self._intervals_node], kwargs), self._chrom_sizes)
         return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._chrom_sizes)
+
+    def compute(self):
+        chromosome, start, stop = compute(self.chromosome, self.start, self.stop)
+        return GenomicIntervalsFull(Interval(chromosome, start, stop))
