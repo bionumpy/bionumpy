@@ -3,7 +3,7 @@ Genomic Data
 
 Analysis of genomic data is best done with the knowledge of how the genome looks like. At the very least, we should know how the names of each chromosome in the genome, and how long the sequence of each chromosome is. This serves several purposes:
 
-* We (and the computer) becomes aware of which reference genome we are using, which can prevent errors from mismatched reference genomes
+* We (and the computer) become aware of which reference genome we are using, which can prevent errors from mismatched reference genomes
 * Chromosomes without any data gets handled correctly
 * We get a speed increase in the algorithms
 
@@ -103,25 +103,25 @@ we can now again use these values to filter the intervals based on the treat_pil
                          chr3                    10677                    11387
                          chr3                    27057                    27367
 
-A further way to analyze these peaks is to check the sequence in the peaks for motifs. We can load a the reference sequence using the `genome.read_sequence()` method:
+A further way to analyze these peaks is to check the sequence in the peaks for motifs. We can load the reference sequence using the `genome.read_sequence()` method:
 
 
 .. testcode::
 
     genome_sequence = genome.read_sequence('example_data/small_sequence.fa')
-    print (genome_sequence)
+    print(genome_sequence)
    
 
 .. testoutput::
 
    GenomicSequence over chromosomes: ['chr1', 'chr2', 'chr3']
 
-Now we can use our intervals as indexed to the reference sequence in much the same way as with genomic arrays. This we can use to get the sequences of the peak and check them for motifs:
+Now we can use our intervals as indexed to the reference sequence in much the same way as with genomic arrays. This we can use to get the sequences of the peaks and check them for motifs:
 
 .. testcode::
 
     peak_sequences = genome_sequence[high_pileup_peaks]
-    print (peak_sequences)
+    print(peak_sequences)
     from pyjaspar import jaspardb
     from bionumpy.sequence import PWM
     jaspar_object = jaspardb(release="JASPAR2020")
@@ -143,3 +143,11 @@ Now we can use our intervals as indexed to the reference sequence in much the sa
     [-0.82852725 -4.78231564 -0.90188366 -4.97871502 -3.06703885 -1.00359223
       7.75920829  0.19382436  2.5188205 ]
    
+Further reading
+-----------------
+
+    * :ref:`Tutorial: Analysing the read pileup within peaks (intervals) <subsetting_bed>`
+    * :ref:`Tutorial: Computing the similarity between to bed files <similarity_measures_tutorial>`
+    * :ref:`More about intervals <intervals>`
+    * :ref:`API documentation on the arithmetics module <arithmetics_api>`
+
