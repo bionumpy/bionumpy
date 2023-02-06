@@ -1,6 +1,6 @@
 from typing import Dict
 from ..io import bnp_open, Bed6Buffer, BedBuffer
-from .genomic_track import GenomicTrack
+from .genomic_track import GenomicArray
 from .genomic_intervals import GenomicIntervals
 from .geometry import Geometry, StreamedGeometry
 from ..util.formating import table
@@ -43,7 +43,7 @@ class Genome:
             content = f.read()
         return content
 
-    def read_track(self, filename: str, stream: bool=False) -> GenomicTrack:
+    def read_track(self, filename: str, stream: bool=False) -> GenomicArray:
         """Read a bedgraph from file and convert it to a `GenomicTrack`
 
         If `stream` is `True` then read the bedgraph in chunks and get
@@ -58,9 +58,9 @@ class Genome:
 
         """
         content = self._open(filename, stream)
-        return GenomicTrack.from_bedgraph(content, self._chrom_sizes)
+        return GenomicArray.from_bedgraph(content, self._chrom_sizes)
 
-    def __read_mask(self, filename: str , stream: bool = False) -> GenomicTrack:
+    def __read_mask(self, filename: str , stream: bool = False) -> GenomicArray:
         """Read a bed file and convert it to a `GenomicMask` of areas covered by an interval
 
         If `stream` is `True` then read the bedgraph in chunks and get

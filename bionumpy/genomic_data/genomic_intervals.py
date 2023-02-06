@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
 from typing import List, Iterable, Tuple, Dict
-from .genomic_track import GenomicTrack, GenomicTrackNode
+from .genomic_track import GenomicArray, GenomicArrayNode
 from ..datatypes import Interval
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
@@ -53,41 +53,41 @@ class GenomicIntervals(ABC):
         return NotImplemented
 
     @abstractmethod
-    def get_mask(self) -> GenomicTrack:
+    def get_mask(self) -> GenomicArray:
         """Return a boolean mask of areas covered by any interval
 
         Returns
         -------
-        GenomicTrack
+        GenomicArray
             Genomic mask
         """
 
         return NotImplemented
 
     @abstractmethod
-    def get_pileup(self) -> GenomicTrack:
+    def get_pileup(self) -> GenomicArray:
         """Return a genmic track of counting the number of intervals covering each bp
 
         Returns
         -------
-        GenomicTrack
+        GenomicArray
             Pileup track
         """
         return NotImplemented
 
     @classmethod
-    def from_track(cls, track: GenomicTrack) -> 'GenomicIntervals':
+    def from_track(cls, track: GenomicArray) -> 'GenomicIntervals':
         """Return intervals of contigous areas of nonzero values of track
 
         Parameters
         ----------
-        track : GenomicTrack
+        track : GenomicArray
 
         Returns
         -------
         'GenomicIntervals'
         """
-        if isinstance(track, GenomicTrackNode):
+        if isinstance(track, GenomicArrayNode):
             return GenomicIntervalsStreamed(track.get_data(), track._genome_context)
         return GenomicIntervalsFull(track.get_data(), track._genome_context)
 
@@ -164,10 +164,10 @@ class GenomicIntervalsFull(GenomicIntervals):
         return self.from_intervals(
             self._geometry.merge_intervals(self._intervals, distance), self._chrom_sizes)
 
-    def get_pileup(self) -> GenomicTrack:
+    def get_pileup(self) -> GenomicArray:
         return self._geometry.get_pileup(self._intervals)
 
-    def get_mask(self) -> GenomicTrack:
+    def get_mask(self) -> GenomicArray:
         return self._geometry.get_mask(self._intervals)
 
     def clip(self) -> 'GenomicIntervalsFull':
@@ -220,7 +220,7 @@ class GenomicIntervalsStreamed:
     def merged(self, distance: int = 0) -> GenomicIntervals:
         return self.__class__(ComputationNode(merge_intervals, [self._intervals_node]), self._chrom_sizes)
 
-    def get_pileup(self) -> GenomicTrack:
+    def get_pileup(self) -> GenomicArray:
         """Create a GenomicTrack of how many intervals covers each position in the genome
 
         Parameters
@@ -229,13 +229,13 @@ class GenomicIntervalsStreamed:
 
         Returns
         -------
-        GenomicTrack
+        GenomicArray
         """
-        return GenomicTrackNode(ComputationNode(get_pileup, [self._intervals_node, self._chrom_size_node]),
+        return GenomicArrayNode(ComputationNode(get_pileup, [self._intervals_node, self._chrom_size_node]),
                                 self._chrom_sizes)
     
-    def get_mask(self) -> GenomicTrack:
-        return GenomicTrackNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
+    def get_mask(self) -> GenomicArray:
+        return GenomicArrayNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
                                 self._chrom_sizes)
         
 
