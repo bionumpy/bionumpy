@@ -3,7 +3,7 @@ Getting read pileup for multiple regions
 
 This is a brief example of how you can you can analyse alignments inside a given set of regions. This example assumes that:
 
-* You have a set of alignments as a bed-file (can be converted from bam using bedtools BamToBed).
+* You have a set of alignments as a bam or bed file
 * You have a set of regions in another bed-file
 * For simplicity, we here assumes both files are sorted by chromosome. If not, `bnp.arithmetics.sort_intervals` may be used.
 
