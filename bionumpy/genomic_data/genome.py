@@ -4,6 +4,7 @@ from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
 from .genomic_track import GenomicArray
 from .genomic_intervals import GenomicIntervals
+from .genomic_sequence import GenomicSequence
 from .geometry import Geometry, StreamedGeometry
 from ..util.formating import table
 
@@ -98,15 +99,15 @@ class Genome:
         if suffix == ".gz":
             suffix = path.suffixes[-2]
         buffer_type = buffer_types[suffix]
-        if stranded and buffer_type == BedBuffer:
+        if buffer_type == BedBuffer and stranded: 
             buffer_type = Bed6Buffer
         if buffer_type == BamBuffer:
             buffer_type = BamIntervalBuffer
         content = self._open(filename, stream, buffer_type=buffer_type)
         return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
-    def read_sequence(self, filename: str):
-        return open_indexed(filename)
+    def read_sequence(self, filename: str) -> GenomicSequence:
+        return GenomicSequence.from_indexed_fasta(open_indexed(filename))
 
     def __repr__(self):
         return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"

@@ -1,11 +1,10 @@
 import numpy as np
-from bionumpy.genomic_data.genome import Genome
 import bionumpy as bnp
 
 
-def test(stream=True):
+def test(stream=False):
     # read a genome
-    genome = Genome.from_file("example_data/hg38.chrom.sizes")
+    genome = bnp.Genome.from_file("example_data/hg38.chrom.sizes")
 
     # read peaks as intervals
     peaks = genome.read_intervals("example_data/ctcf_chr21-22.bed.gz", stream=stream)
@@ -26,5 +25,5 @@ def test(stream=True):
 
     # We can filter the peak intervals
     high_peaks = peaks[max_pileup_value_per_peak > 4]
-    print(high_peaks)
+    print(high_peaks.compute())
 
