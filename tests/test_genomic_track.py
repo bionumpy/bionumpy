@@ -38,7 +38,7 @@ def array(track):
 def test_extract_chromosome(track):
     assert_equal(track['chr2'].to_array(),
                  np.full(50, 4))
-                 
+
 
 def test_histogram(track, array):
     hist = np.histogram(track)

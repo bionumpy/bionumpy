@@ -185,7 +185,7 @@ class GenomicIntervalsStreamed:
         self._chrom_sizes = chrom_sizes
         self._start = ComputationNode(getattr, [intervals_node, 'start'])
         self._stop = ComputationNode(getattr, [intervals_node, 'stop'])
-        self._strand = ComputationNode(getattr, [intervals_node, 'stop'])
+        # self._strand = ComputationNode(getattr, [intervals_node, 'strand'])
         self._chromosome = ComputationNode(getattr, [intervals_node, 'chromosome'])
         self._chrom_size_node = StreamNode(iter(self._chrom_sizes.values()))
         self._intervals_node = intervals_node

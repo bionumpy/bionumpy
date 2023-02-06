@@ -122,13 +122,18 @@ class ComputationNode(Node):
         return np.concatenate(list(self.get_iter()))
 
 
+class JoinNode(ComputationNode):
+    def compute(self):
+        return [np.concatenate(column) for column in zip(*self.get_iter())]
+
+
 def compute(*args): # func, args, kwargs=None):
     if all(isinstance(a, ReductionNode) for a in args):
         return ReductionNode.join(args).compute()
     else:
         assert not any(isinstance(a, ReductionNode) for a in args)
-        node = ComputationNode(lambda *a: tuple(a),
-                               args)
+        node = JoinNode(lambda *a: tuple(a),
+                        args)
         return node.compute()
     # 
     # 
