@@ -80,7 +80,7 @@ class GenomicData:
         return NotImplemented
 
 
-class GenomicTrack(GenomicData):
+class GenomicArray(GenomicData):
 
     @abstractmethod
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
@@ -97,8 +97,8 @@ class GenomicTrack(GenomicData):
         return NotImplemented
 
     @classmethod
-    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'GenomicTrack':
-        return GenomicTrackGlobal(global_pileup, global_offset)
+    def from_global_data(cls, global_pileup: GenomicRunLengthArray, global_offset: GlobalOffset) -> 'GenomicArray':
+        return GenomicArrayGlobal(global_pileup, global_offset)
 
     def _get_intervals_from_data(self, name, data):
         if data.dtype == bool:
@@ -118,7 +118,7 @@ class GenomicTrack(GenomicData):
 
         filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
         interval_stream = StreamNode(filled)
-        return GenomicTrackNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
+        return GenomicArrayNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
                                                 [interval_stream, StreamNode(iter(chrom_sizes.values()))]),
                                 chrom_sizes)
 
@@ -139,7 +139,7 @@ def fill_grouped(grouped, real_order, dataclass):
         next_real = next(real_order, None)
 
 
-class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
+class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, global_track: GenomicRunLengthArray, global_offset: GlobalOffset):
         assert isinstance(global_track, GenomicRunLengthArray)
         self._global_track = global_track
@@ -167,7 +167,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
                 for name, offset, size in zip(names, offsets, sizes)}
     
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
-        inputs = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in inputs]
+        inputs = [(i._global_track if isinstance(i, GenomicArrayGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
         return self.__class__(r, self._global_offset)
 
@@ -181,7 +181,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         args : List
         kwargs : Dict
         """
-        args = [(i._global_track if isinstance(i, GenomicTrackGlobal) else i) for i in args]
+        args = [(i._global_track if isinstance(i, GenomicArrayGlobal) else i) for i in args]
         if func == np.histogram:
             return np.histogram(*args, **kwargs)
 
@@ -214,7 +214,7 @@ class GenomicTrackGlobal(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         return self._global_track[global_intervals]
 
 
-class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
+class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     def __str__(self):
         return 'GTN:' + str(self._run_length_node)
 
@@ -225,7 +225,7 @@ class GenomicTrackNode(GenomicTrack, np.lib.mixins.NDArrayOperatorsMixin):
         self._genome_context = self._chrom_sizes
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
-        args = [gtn._run_length_node if isinstance(gtn, GenomicTrackNode) else gtn for gtn in inputs]
+        args = [gtn._run_length_node if isinstance(gtn, GenomicArrayNode) else gtn for gtn in inputs]
         return self.__class__(ufunc(*args, **kwargs), self._chrom_sizes)
 
     def get_data(self):

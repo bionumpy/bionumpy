@@ -21,7 +21,7 @@ from .util.cli import run_as_commandline
 
 from . import simulate
 from . import arithmetics
-from .genomic_data import Genome, GenomicTrack, GenomicIntervals
+from .genomic_data import Genome, GenomicArray, GenomicIntervals
 open = bnp_open
 
 

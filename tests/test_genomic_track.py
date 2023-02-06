@@ -1,4 +1,4 @@
-from bionumpy.genomic_data import GenomicTrack
+from bionumpy.genomic_data import GenomicArray
 from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import BedGraph
 import numpy as np
@@ -22,12 +22,12 @@ def pileup():
 
 @pytest.fixture
 def track(pileup, chrom_sizes):
-    return GenomicTrack.from_bedgraph(pileup, chrom_sizes)
+    return GenomicArray.from_bedgraph(pileup, chrom_sizes)
 
 
 @pytest.fixture
 def stream_track(pileup, chrom_sizes):
-    return GenomicTrack.from_bedgraph(NpDataclassStream([pileup]), chrom_sizes)
+    return GenomicArray.from_bedgraph(NpDataclassStream([pileup]), chrom_sizes)
 
 
 @pytest.fixture

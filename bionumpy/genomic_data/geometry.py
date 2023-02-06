@@ -7,7 +7,7 @@ from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..bnpdataclass import replace
-from .genomic_track import GenomicTrack
+from .genomic_track import GenomicArray
 import numpy as np
 
 
@@ -115,9 +115,9 @@ class Geometry(GeometryBase):
         -------
         GenomicMask
         """
-        return GenomicTrack.from_global_data(self.get_global_mask(intervals), self._global_offset)
+        return GenomicArray.from_global_data(self.get_global_mask(intervals), self._global_offset)
 
-    def get_pileup(self, intervals: Interval) -> 'GenomicTrack':
+    def get_pileup(self, intervals: Interval) -> 'GenomicArray':
         """Create a GenomicTrack of how many intervals covers each position in the genome
 
         Parameters
@@ -126,10 +126,10 @@ class Geometry(GeometryBase):
 
         Returns
         -------
-        GenomicTrack
+        GenomicArray
         """
         go = self._global_offset.from_local_interval(intervals)
-        return GenomicTrack.from_global_data(
+        return GenomicArray.from_global_data(
             get_pileup(go, self._global_size),
             self._global_offset)
 
@@ -192,7 +192,7 @@ class Geometry(GeometryBase):
         chrom_sizes = self._global_offset.get_size(intervals.chromosome)
         return extend_to_size(intervals, fragment_length, chrom_sizes)
 
-    def get_track(self, bedgraph: BedGraph) -> GenomicTrack:
+    def get_track(self, bedgraph: BedGraph) -> GenomicArray:
         """Create a genomic track from a bedgraph
 
         Parameters
@@ -201,11 +201,11 @@ class Geometry(GeometryBase):
 
         Returns
         -------
-        GenomicTrack
+        GenomicArray
         """
         gi = self._global_offset.from_local_interval(bedgraph)
         rle = GenomicRunLengthArray.from_bedgraph(gi)
-        return GenomicTrack.from_global_data(rle, self._global_offset)
+        return GenomicArray.from_global_data(rle, self._global_offset)
 
     def merge_intervals(self, intervals: Interval, distance: int = 0) -> Interval:
         """Merge all intervals that either overlaps or lie within a given distance
@@ -247,16 +247,16 @@ class Geometry(GeometryBase):
 
 
 class StreamedGeometry(GeometryBase):
-    def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicTrack:
+    def get_track(self, bedgraph: Iterable[BedGraph]) -> GenomicArray:
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
                         for name, b in grouped)
-        return GenomicTrack.from_stream(track_stream, self._global_offset)
+        return GenomicArray.from_stream(track_stream, self._global_offset)
 
-    def get_pileup(self, intervals: Iterable[Interval]) -> GenomicTrack:
+    def get_pileup(self, intervals: Iterable[Interval]) -> GenomicArray:
         grouped = groupby(intervals, 'chromosome')
         pileups = ((name, get_pileup(intervals, size)) if intervals is not None else GenomicRunLengthArray(np.array([0, size]), [0]) for name, size, intervals in left_join(self._chrom_sizes.items(), grouped))
-        return GenomicTrack.from_stream(pileups, self._global_offset)
+        return GenomicArray.from_stream(pileups, self._global_offset)
 
     def extend_to_size(self, intervals: Iterable[Interval], fragment_length: int) -> Iterable[Interval]:
         """Extend/shrink intervals to match the given length. Stranded

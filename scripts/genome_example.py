@@ -20,10 +20,12 @@ def test():
     chr1_mask = peak_mask["chr1"]
     print(chr1_mask[0:10])
 
-    # GenomicTracks can be indexes with other GenomicTracks
+    # GenomicTracks can be indexes with Intervals
     ctcf = genome.read_intervals("example_data/ctcf.bed.gz").get_mask()
     znf = genome.read_intervals("example_data/znf263.bed.gz")
 
-    print(type(ctcf[znf]))
-    subset = ctcf[znf]
+    print(type(ctcf))
+    print(type(znf))
+    #print(type(ctcf[znf]))
+    #print(znf[ctcf])
 
