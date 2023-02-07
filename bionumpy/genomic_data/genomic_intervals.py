@@ -179,7 +179,7 @@ class GenomicIntervalsFull(GenomicIntervals):
     @property
     def strand(self):
         if not self.is_stranded():
-            return NotImplemented
+            raise ValueError('Unstranded interval has not strand')
         return self._intervals.strand
 
     @property
@@ -211,6 +211,9 @@ class GenomicIntervalsFull(GenomicIntervals):
     def get_sorted_stream(self):
         sorted_intervals = self.sorted()
         return self.from_interval_stream(iter([sorted_intervals]))
+
+    def is_stranded(self):
+        return self._is_stranded
 
 
 class GenomicIntervalsStreamed:
@@ -252,7 +255,7 @@ class GenomicIntervalsStreamed:
     @property
     def strand(self):
         if not self.is_stranded():
-            return NotImplemented
+            raise ValueError('Strand not supported on unstranded intervals')
         return self._strand
 
     def __getitem__(self, item):
