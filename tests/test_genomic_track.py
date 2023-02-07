@@ -1,4 +1,6 @@
-from bionumpy.genomic_data import GenomicArray
+from npstructures import RaggedArray
+from npstructures.testing import assert_raggedarray_equal
+from bionumpy.genomic_data import GenomicArray, GenomicIntervals
 from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import BedGraph
 import numpy as np
@@ -21,6 +23,23 @@ def pileup():
 
 
 @pytest.fixture
+def genomic_intervals(chrom_sizes):
+    return GenomicIntervals.from_fields(chrom_sizes,
+                                        ['chr1', 'chr1', 'chr2'],
+                                        [5, 10, 0],
+                                        [15, 95, 50],
+                                        ['-', '+', '-'])
+
+
+@pytest.fixture
+def interval_pileup():
+    return RaggedArray(
+        [np.concatenate([np.full(5, 2), np.full(5, 1)]),
+         np.concatenate([np.full(80, 2), np.full(5, 3)]),
+         np.full(50, 4)])
+
+
+@pytest.fixture
 def track(pileup, chrom_sizes):
     return GenomicArray.from_bedgraph(pileup, chrom_sizes)
 
@@ -38,6 +57,12 @@ def array(track):
 def test_extract_chromosome(track):
     assert_equal(track['chr2'].to_array(),
                  np.full(50, 4))
+
+
+def test_extract_intervals(track, genomic_intervals, interval_pileup):
+    result = track[genomic_intervals]
+    assert_raggedarray_equal(result.to_array(),
+                             interval_pileup)
 
 
 def test_histogram(track, array):

@@ -149,9 +149,9 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         rle = self._global_track[global_intervals]
         if not stranded:
             return rle
-        return np.where(intervals.strand == '+',
-                        rle,
-                        rle[:, ::-1])
+        r = rle[:, ::-1]
+        return np.where((intervals.strand.ravel() == '+')[:, np.newaxis],
+                        rle, r)
 
 
 class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
