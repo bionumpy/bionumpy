@@ -13,6 +13,15 @@ from typing import List, Union, Iterable, Tuple, Dict
 
 class GenomicArray(GenomicData):
 
+    def __getitem__(self, idx):
+        if isinstance(idx, GenomicArray):
+            return self._index_boolean(idx)
+        return super().__getitem__(idx)
+
+    @abstractmethod
+    def _index_boolean(self, idx):
+        return NotImplemented
+
     @abstractmethod
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         return NotImplemented
@@ -78,6 +87,11 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         names = self._global_offset.names()
         starts = self._global_offset.get_size(names)
         self._genome_context = dict(zip(names, starts))
+
+    def _index_boolean(self, idx):
+        assert idx.dtype == bool
+        assert isinstance(idx, GenomicArrayGlobal)
+        return self._global_track[idx._global_track]
 
     def sum(self) -> float:
         return self._global_track.sum(axis=None)
@@ -170,6 +184,11 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
     def get_data(self):
         return ComputationNode(self._get_intervals_from_data, [self._chrom_name_node, self._run_length_node])
+
+    def _index_boolean(self, idx):
+        assert idx.dtype == bool
+        assert isinstance(idx, GenomicArrayNode)
+        return ComputationNode(lambda a, i: a[i], [self._run_length_node, idx])
 
     def _extract_full_intervals(self, intervals, stranded):
         return NotImplemented
