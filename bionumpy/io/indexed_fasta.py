@@ -150,7 +150,8 @@ class IndexedFasta:
             self._f_obj.seek(idx["offset"] + start_offset)
             lengths.append(stop_offset-start_offset-(stop_row-start_row))
             sequences.extend(self._f_obj.read(stop_offset-start_offset))
-            delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod for j in range(stop_row-start_row))
+            delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod
+                                  for j in range(stop_row-start_row))
             cur_offset += stop_offset-start_offset
         s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
         a = EncodedArray(s, BaseEncoding)

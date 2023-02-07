@@ -145,9 +145,13 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         -------
         RunLengthRaggedArray
         """
-        
         global_intervals = self._global_offset.from_local_interval(intervals)
-        return self._global_track[global_intervals]
+        rle = self._global_track[global_intervals]
+        if not stranded:
+            return rle
+        return np.where(intervals.strand == '+',
+                        rle,
+                        rle[:, ::-1])
 
 
 class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
@@ -166,6 +170,17 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
     def get_data(self):
         return ComputationNode(self._get_intervals_from_data, [self._chrom_name_node, self._run_length_node])
+
+    def _extract_full_intervals(self, intervals, stranded):
+        return NotImplemented
+        #stream_intervals = intervals.get_sorted_stream()
+        #subset = self.extract_intervals(stream_intervals, stranded)
+        ## return ComputationNode(subset.__getitem__(
+        #return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
+        #
+        #sorted_intervals = intervals[argsort]
+        # grouped = StreamNode((g[1] for g in groupby(sorted_intervals, 'chromosome')))
+        
 
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
         assert stranded is False
