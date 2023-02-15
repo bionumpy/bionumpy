@@ -18,6 +18,10 @@ class GenomicArray(GenomicData):
             return self._index_boolean(idx)
         return super().__getitem__(idx)
 
+    @abstractproperty
+    def dtype(self):
+        return NotImplemented
+
     @abstractmethod
     def _index_boolean(self, idx):
         return NotImplemented
@@ -87,6 +91,10 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         names = self._global_offset.names()
         starts = self._global_offset.get_size(names)
         self._genome_context = dict(zip(names, starts))
+
+    @property
+    def dtype(self):
+        return self._global_track.dtype
 
     def _index_boolean(self, idx):
         assert idx.dtype == bool
@@ -186,7 +194,6 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         return ComputationNode(self._get_intervals_from_data, [self._chrom_name_node, self._run_length_node])
 
     def _index_boolean(self, idx):
-        assert idx.dtype == bool
         assert isinstance(idx, GenomicArrayNode)
         return ComputationNode(lambda a, i: a[i], [self._run_length_node, idx])
 
