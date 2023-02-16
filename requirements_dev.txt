@@ -24,5 +24,3 @@ nbsphinx
 more_itertools
 sphinxcontrib.bibtex
 pandas
-biopython
-pyjaspar
