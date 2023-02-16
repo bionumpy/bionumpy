@@ -9,7 +9,6 @@ from bionumpy.sequence.genes import get_transcript_sequences
 def gtf_entries():
     return bnp.open("example_data/small.gtf").read()
 
-
 @pytest.fixture
 def reference_sequences():
     return as_encoded_array("A" * 40000, bnp.encodings.BaseEncoding)
@@ -24,6 +23,13 @@ def test_get_transcript_sequences(gtf_entries, reference_sequences):
     assert np.all(transcript_sequences.sequence==true)
 
 
-
 def test_get_exons(gtf_entries):
     assert len(gtf_entries.get_exons()) == 3
+
+
+# @pytest.mark.skip('waiting')
+def test_read_gff():
+    annotation = bnp.open('example_data/small_gff.gff3').read()
+    genes = annotation.get_genes()
+    print(genes)
+

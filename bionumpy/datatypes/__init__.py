@@ -4,7 +4,7 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
                          CigarEncoding, StrandEncoding)
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
 from ..bnpdataclass import bnpdataclass
-from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry
+from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
 
 
 @bnpdataclass

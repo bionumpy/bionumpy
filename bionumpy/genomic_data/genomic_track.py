@@ -1,7 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
 from .global_offset import GlobalOffset
-from .genomic_data import GenomicData
+from .genomic_data import GenomicData, GenomeContext
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray
@@ -13,23 +13,11 @@ from typing import List, Union, Iterable, Tuple, Dict
 
 class GenomicArray(GenomicData):
 
-    def __getitem__(self, idx):
-        if isinstance(idx, GenomicArray):
-            return self._index_boolean(idx)
-        return super().__getitem__(idx)
-
-    @abstractproperty
-    def dtype(self):
-        return NotImplemented
-
-    @abstractmethod
-    def _index_boolean(self, idx):
-        return NotImplemented
-
     @abstractmethod
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         return NotImplemented
 
+    @abstractmethod
     def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
         return NotImplemented
 
@@ -89,8 +77,12 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         self._global_track = global_track
         self._global_offset = global_offset
         names = self._global_offset.names()
-        starts = self._global_offset.get_size(names)
-        self._genome_context = dict(zip(names, starts))
+        sizes = self._global_offset.get_size(names)
+        self._genome_context = dict(zip(names, sizes))
+
+    @property
+    def genome_context(self):
+        return GenomeContext(self._genome_context)
 
     @property
     def dtype(self):
@@ -175,6 +167,26 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         return np.where((intervals.strand.ravel() == '+')[:, np.newaxis],
                         rle, r)
 
+    @classmethod
+    def from_dict(cls, d: Dict[str, GenomicRunLengthArray]) -> 'GenomicData':
+        """Create genomic data from a dict of data with chromosomes as keys
+
+        Parameters
+        ----------
+        d : Dict[str, GenomicRunLengthArray]
+
+        Returns
+        -------
+        'GenomicData'
+        """
+        chrom_sizes = {name: array.size for name, array in d}
+        array = np.concatenate(list(d.values()))
+        return cls(array, chrom_sizes)
+
+    @classmethod
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'GenomicData':
+        return cls.from_dict(dict(stream))
+
 
 class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     def __str__(self):
@@ -185,6 +197,10 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         self._chrom_sizes = chrom_sizes
         self._chrom_name_node = StreamNode(iter(chrom_sizes.keys()))
         self._genome_context = self._chrom_sizes
+
+    @property
+    def genome_context(self):
+        return GenomeContext(self._genome_context)
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         args = [gtn._run_length_node if isinstance(gtn, GenomicArrayNode) else gtn for gtn in inputs]
@@ -212,6 +228,35 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         assert stranded is False
         return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
 
+    def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
+        assert False
+
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'GenomicData':
+        stream_node = StreamNode((array for _, array in stream))
+        return cls(stream_node, chrom_sizes)
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, GenomicRunLengthArray]) -> 'GenomicData':
+        """Create genomic data from a dict of data with chromosomes as keys
+
+        Parameters
+        ----------
+        d : Dict[str, GenomicRunLengthArray]
+
+        Returns
+        -------
+        'GenomicData'
+        """
+        chrom_sizes = {name: array.size for name, array in d}
+        stream_node = StreamNode(iter(d.values()))
+        return cls(stream_node, chrom_sizes)
+
+    def to_dict(self):
+        assert False
+
+    def sum(self, axis=None) -> float:
+        return np.sum(self._run_length_node)
+
     def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
         """Handles any numpy array functions called on a raggedarray
 
@@ -225,3 +270,4 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         if func == np.histogram:
             return np.histogram(args[0]._run_length_node, *args[1:], **kwargs)
         return NotImplemented
+

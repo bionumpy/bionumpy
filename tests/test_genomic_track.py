@@ -77,3 +77,5 @@ def test_stream_histogram(stream_track, array):
     true_hist = np.histogram(array, bins=3, range=(0, 5))
     for h, t in zip(hist, true_hist):
         np.testing.assert_equal(h, t)
+
+

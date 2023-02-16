@@ -17,10 +17,8 @@ pytest-cov
 coverage-badge
 sphinx-design
 sphinx_rtd_theme
-#matplotlib
 plotly
 kaleido
-biopython
 nbsphinx
 more_itertools
 sphinxcontrib.bibtex

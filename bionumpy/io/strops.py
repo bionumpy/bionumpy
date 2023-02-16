@@ -1,5 +1,5 @@
 import numpy as np
-
+from typing import List, Union
 from npstructures import RaggedArray, RaggedShape
 from npstructures.util import unsafe_extend_right, unsafe_extend_left
 from npstructures.raggedarray.raggedslice import ragged_slice
@@ -276,7 +276,7 @@ def join(sequences: EncodedRaggedArray, sep: str = "\t", keep_last: bool = False
     return new_array.ravel()[:-1]
 
 
-def split(sequence: EncodedArray, sep: str = ",") -> EncodedRaggedArray:
+def split(sequence: EncodedArray, sep: Union[str, List[str]] = ",") -> EncodedRaggedArray:
     """Split the sequence on `sep` character into a ragged array
 
     Parameters
@@ -295,7 +295,12 @@ def split(sequence: EncodedArray, sep: str = ",") -> EncodedRaggedArray:
     --------
     """
     us = unsafe_extend_right(sequence)
-    mask = us == sep
+    if isinstance(sep, list):
+        mask = (us == sep[0])
+        for s in sep[1:]:
+            mask |= (us == s)
+    else:
+        mask = us == sep
     mask[-1] = True
     sep_idx = np.flatnonzero(mask)
     lens = np.diff(unsafe_extend_left(sep_idx))

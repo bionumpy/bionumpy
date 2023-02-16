@@ -8,6 +8,14 @@ import numpy as np
 GenomeIndex = Union[str, List[str], Interval, Interval.single_entry]
 
 
+class GenomeContext:
+    def __init__(self, chrom_size_dict: Dict[str, int]):
+        self._chrom_size_dict = chrom_size_dict
+
+    def is_compatible(self, other):
+        return self._chrom_size_dict == other.chrom_size_dict
+
+
 class GenomicData:
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
@@ -19,8 +27,20 @@ class GenomicData:
                 return self.empty()
             if isinstance(idx[0], str):
                 return self.extract_chromosome(idx)
-            
-        assert False
+        if isinstance(idx, GenomicData) and idx.dtype == bool:
+            return self._index_boolean(idx)
+        raise ValueError(f'{type(idx)} object not valid as index for GenomicData: {idx}')
+
+    @abstractproperty
+    def genome_context(self):
+        return NotImplemented
+
+    @abstractmethod
+    def _index_boolean(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
+        return NotImplemented
+
+    def dtype(self):
+        return None
 
     @abstractmethod
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':

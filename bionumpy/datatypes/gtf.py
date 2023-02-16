@@ -1,10 +1,10 @@
 from ..bnpdataclass import bnpdataclass
 from ..encodings import StrandEncoding
-from ..io.strops import str_equal, split
+from ..io.strops import str_equal, split, join
 
 
 @bnpdataclass
-class GFFEntry:
+class GTFEntry:
     chromosome: str
     source: str
     feature_type: str
@@ -38,6 +38,17 @@ class GFFEntry:
         genes = gtf_entries[str_equal(gtf_entries.feature_type, "exon")]
         attributes = genes._get_attributes(["transcript_id", "gene_id", "exon_id"])
         return GFFExonEntry(*genes.shallow_tuple(), **attributes)
+
+
+class GFFEntry(GTFEntry):
+    def _get_attributes(gtf_entries, attribute_names):
+        print(gtf_entries.atributes)
+        # gtf_entries.atributes[:, -1] = " "
+        all_features = split(join(gtf_entries.atributes, ';'), [";", '='])
+        print(all_features)
+        keys = all_features[:-1:2]
+        values = all_features[1::2, 1:-2]
+        return {name: values[str_equal(keys, name)] for name in attribute_names}
 
 
 @bnpdataclass

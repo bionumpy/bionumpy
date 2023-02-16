@@ -6,7 +6,7 @@ from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
+                         GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
                          GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
@@ -557,8 +557,8 @@ class NarrowPeakBuffer(DelimitedBuffer):
     dataclass = NarrowPeak
 
 
-class GFFBuffer(DelimitedBuffer):
-    dataclass = GFFEntry
+class GTFBuffer(DelimitedBuffer):
+    dataclass = GTFEntry
 
 
 class SAMBuffer(DelimitedBuffer):
@@ -568,3 +568,90 @@ class SAMBuffer(DelimitedBuffer):
 
 class ChromosomeSizeBuffer(DelimitedBuffer):
     dataclass = ChromosomeSize
+
+
+
+
+class DelimitedBufferWithInernalComments(DelimitedBuffer):
+    def _calculate_col_starts_and_ends(self, data, delimiters):
+        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == self.COMMENT)
+        comment_mask = np.flatnonzero(comment_mask)
+        start_delimiters = np.delete(delimiters, comment_mask)[:-1]
+        end_delimiters = np.delete(delimiters, comment_mask+1)
+        if data[0] != self.COMMENT:
+            start_delimiters = np.insert(start_delimiters, 0, -1)
+        else:
+            end_delimiters=end_delimiters[1:]
+        return start_delimiters+1, end_delimiters
+
+    def _col_ends(self, col):
+        return self.__col_ends[:, col]
+
+    def _col_starts(self, col):
+        return self.__col_starts[:, col]
+
+    def _validate(self):
+        self._validated = True
+
+
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+        delimiters_mask = data == self.DELIMITER
+        delimiters_mask[new_lines] = True
+        delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
+        super().__init__(data, new_lines, delimiters, header_data)
+        starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
+        n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
+        self._n_cols = n_fields
+        self.__col_starts = starts.reshape(-1, n_fields)
+        self.__col_ends = ends.reshape(-1, n_fields)
+
+    @classmethod
+    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
+        """Make EncodedArray of the chunk and extract all complete lines
+
+        Also find all delimiters in the buffer
+
+        Parameters
+        ----------
+        chunk : np.ndarray
+            Raw bytes chunk as array
+        header_data : 6
+            Any header data that was read in `read_header`
+
+        Returns
+        -------
+        DelimitedBuffer
+            DelimitedBuffer object of all complete lines
+
+        """
+        chunk = EncodedArray(chunk, BaseEncoding)
+        new_lines = np.flatnonzero(chunk == '\n')
+        return cls(chunk[:new_lines[-1]+1], new_lines[:-1], header_data)
+
+    def get_integers(self, cols: list) -> np.ndarray:
+        """Get integers from integer string
+
+        Extract integers from the specified columns
+
+        Parameters
+        ----------
+        cols : list
+            list of columns containing integers
+
+        """
+        assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
+        cols = np.asanyarray(cols)
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
+        array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
+        try:
+            digits = as_encoded_array(array, DigitEncoding).raw()
+        except EncodingError as e:
+            row_number = e.offset//array.shape[-1]#  rows._shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
+        powers = 10**np.arange(digits.shape[-1])[::-1]
+        return digits.dot(powers).reshape(-1, cols.size)
+
+
+class GFFBuffer(DelimitedBufferWithInernalComments):
+    dataclass = GFFEntry

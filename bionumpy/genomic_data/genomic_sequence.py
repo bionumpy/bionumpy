@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Dict
-from .genomic_track import GenomicData
+from .genomic_track import GenomicData, GenomeContext
 from ..io.indexed_fasta import IndexedFasta
 from ..sequence import get_reverse_complement
 from ..encodings import DNAEncoding
@@ -10,6 +10,10 @@ from ..encoded_array import as_encoded_array
 class GenomicSequence(GenomicData):
     def __init__(self, indexed_fasta: IndexedFasta):
         self._fasta = indexed_fasta
+
+    @property
+    def genome_context(self):
+        return GenomeContext(self._fasta.get_contig_lengths())
 
     def __repr__(self):
         return f'GenomicSequence over chromosomes: {list(self._fasta.keys())}'

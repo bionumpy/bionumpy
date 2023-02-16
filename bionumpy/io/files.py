@@ -6,7 +6,7 @@ from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
-                                NarrowPeakBuffer, BdgBuffer)
+                                NarrowPeakBuffer, BdgBuffer, GTFBuffer)
 from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter
 from .exceptions import FormatException
@@ -29,7 +29,7 @@ buffer_types = {
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
     ".gff": GFFBuffer,
-    ".gtf": GFFBuffer,
+    ".gtf": GTFBuffer,
     ".gff3": GFFBuffer,
     ".sam": SAMBuffer, #, comment="@"),
     ".bam": BamBuffer,
