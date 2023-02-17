@@ -59,6 +59,9 @@ class Genome:
             content = f.read()
         return content
 
+    def get_track(self, bedgraph):
+        return GenomicArray.from_bedgraph(bedgraph, self._chrom_sizes)
+
     def read_track(self, filename: str, stream: bool=False) -> GenomicArray:
         """Read a bedgraph from file and convert it to a `GenomicTrack`
 
@@ -74,7 +77,8 @@ class Genome:
 
         """
         content = self._open(filename, stream)
-        return GenomicArray.from_bedgraph(content, self._chrom_sizes)
+        return self.get_track(content)
+        # return GenomicArray.from_bedgraph(content, self._chrom_sizes)
 
     def __read_mask(self, filename: str , stream: bool = False) -> GenomicArray:
         """Read a bed file and convert it to a `GenomicMask` of areas covered by an interval
@@ -93,6 +97,9 @@ class Genome:
         content = self._open(filename, stream)
         geom = self._streamed_geometry if stream else self._geometry
         return geom.get_mask(content)
+
+    def get_intervals(self, intervals, stranded=False):
+        return GenomicIntervals.from_intervals(intervals, self._chrom_sizes)
 
     def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`
@@ -118,7 +125,8 @@ class Genome:
         if buffer_type == BamBuffer:
             buffer_type = BamIntervalBuffer
         content = self._open(filename, stream, buffer_type=buffer_type)
-        return GenomicIntervals.from_intervals(content, self._chrom_sizes)
+        return self.get_intervals(content, stranded)
+    # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
     def read_sequence(self, filename: str = None) -> GenomicSequence:
         if filename is None:
