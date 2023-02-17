@@ -41,6 +41,20 @@ class PWM:
         self._encoding = AlphabetEncoding(alphabet)
         self._indices = np.arange(self.window_size)
 
+    def as_valid_encoded_array(self, sequence):
+        if isinstance(sequence, (EncodedArray, EncodedRaggedArray)):
+            
+            if isinstance(sequence.encoding, AlphabetEncoding):
+                alphabet = list((sequence.encoding.get_alphabet()))
+                s_alphabet = list(self._alphabet)
+                if not alphabet[:len(self._alphabet)] == s_alphabet or np.max(sequence.raw()) >= len(self._alphabet):
+                    raise Exception(f'Could not calculate pwm for alphabet {s_alphabet} on {alphabet} encoded array')
+                else:
+                    return sequence
+        return as_encoded_array(sequence, self._encoding)
+
+        
+
     @property
     def alphabet(self):
         return self._alphabet
@@ -60,8 +74,9 @@ class PWM:
         sequence : EncodedArrayLike
 
         """
-        sequence = as_encoded_array(sequence, self._encoding)
-        assert sequence.encoding == self._encoding
+        sequence = self.as_valid_encoded_array(sequence)
+        # sequence = as_encoded_array(sequence, self._encoding)
+        # assert sequence.encoding == self._encoding
         assert sequence.shape[-1] == self.window_size
         scores = self._matrix[sequence.raw(), self._indices]
         return scores.sum(axis=-1)
@@ -78,8 +93,9 @@ class PWM:
         ArrayLike
             Motif scores for all valid and invalid windows
         """
-        sequence = as_encoded_array(sequence, self._encoding)
-        assert sequence.encoding == self._encoding
+        sequence = self.as_valid_encoded_array(sequence)
+        # sequence = as_encoded_array(sequence, self._encoding)
+        # assert sequence.encoding == self._encoding
         scores = np.zeros(sequence.size, dtype=float)
         m = self._matrix.T.copy()
         for offset, row in enumerate(m):

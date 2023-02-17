@@ -3,8 +3,12 @@ from typing import Dict
 from .genomic_track import GenomicData, GenomeContext
 from ..io.indexed_fasta import IndexedFasta
 from ..sequence import get_reverse_complement
-from ..encodings import DNAEncoding
+from ..encodings import DNAEncoding, ACGTnEncoding
 from ..encoded_array import as_encoded_array
+
+
+def dna_encode(output):
+    return as_encoded_array(output, ACGTnEncoding)
 
 
 class GenomicSequence(GenomicData):
@@ -27,13 +31,13 @@ class GenomicSequence(GenomicData):
         return GenomicSequenceDict(sequence_dict)
 
     def extract_chromsome(self, chromosome):
-        return self._fasta[chromosome]
+        return dna_encode(self._fasta[chromosome])
 
     def _extract_intervals(self, intervals):
         return NotImplemented
 
     def _index_boolean(self, boolean_array):
-        return self.extract_intervals(boolean_array.get_data(), stranded=False)
+        return self.extract_intervals(boolean_array.get_data(), stranded=False).ravel()
 
     def extract_intervals(self, intervals, stranded: bool = False):
         sequences = self._extract_intervals(intervals)
@@ -41,7 +45,7 @@ class GenomicSequence(GenomicData):
             sequences = np.where(intervals.strand == '+',
                                  sequences,
                                  get_reverse_complement(sequences))
-        return sequences
+        return dna_encode(sequences)
 
 
 class GenomicSequenceIndexedFasta(GenomicSequence):
@@ -52,7 +56,7 @@ class GenomicSequenceIndexedFasta(GenomicSequence):
 
 class GenomicSequenceDict(GenomicSequence):
     def __init__(self, sequence_dict: Dict[str, str]):
-        self._dict = {name: as_encoded_array(sequence, target_encoding=DNAEncoding)
+        self._dict = {name: as_encoded_array(sequence, target_encoding=ACGTnEncoding)
                       for name, sequence in sequence_dict.items()}
 
     def _extract_intervals(self, intervals):

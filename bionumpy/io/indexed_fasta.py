@@ -137,6 +137,9 @@ class IndexedFasta:
         lengths = []
         delete_indices = []
         cur_offset = 0
+        #        factor = max(idx['lenb'] for idx in self._index.values())/min(idx['lenc'] for idx in self._index.values())
+        pre_alloc = np.empty((intervals.stop-intervals.start).sum(), dtype=np.uint8)
+        alloc_offset = 0
         for interval in intervals:
             chromosome = interval.chromosome.to_string()
             idx = self._index[chromosome]
@@ -149,10 +152,18 @@ class IndexedFasta:
             stop_offset = stop_row*lenb+interval.stop % lenc
             self._f_obj.seek(idx["offset"] + start_offset)
             lengths.append(stop_offset-start_offset-(stop_row-start_row))
-            sequences.extend(self._f_obj.read(stop_offset-start_offset))
-            delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod
-                                  for j in range(stop_row-start_row))
+            D = stop_offset-start_offset
+            tmp = np.frombuffer(self._f_obj.read(stop_offset-start_offset), dtype=np.uint8)
+            tmp = np.delete(tmp, [lenb*(j+1)-1-start_mod
+                                  for j in range(stop_row-start_row)])
+            pre_alloc[alloc_offset:alloc_offset+tmp.size] = tmp
+            assert tmp.size == interval.stop-interval.start
+            alloc_offset += tmp.size
+            # sequences.extend(self._f_obj.read(stop_offset-start_offset))
+            #delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod
+            # for j in range(stop_row-start_row))
             cur_offset += stop_offset-start_offset
-        s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
-        a = EncodedArray(s, BaseEncoding)
+        # s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
+        #s = np.delete(pre_alloc[:alloc_offset], delete_indices)
+        a = EncodedArray(pre_alloc, BaseEncoding)
         return EncodedRaggedArray(a, lengths)

@@ -1,7 +1,7 @@
 import numpy as np
 from ..encoded_array import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
-                                AminoAcidEncoding,
+                                AminoAcidEncoding, ACGTnEncoding,
                                 CigarOpEncoding, BamEncoding, StrandEncoding)
 
 
