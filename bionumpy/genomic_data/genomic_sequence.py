@@ -32,6 +32,9 @@ class GenomicSequence(GenomicData):
     def _extract_intervals(self, intervals):
         return NotImplemented
 
+    def _index_boolean(self, boolean_array):
+        return self.extract_intervals(boolean_array.get_data(), stranded=False)
+
     def extract_intervals(self, intervals, stranded: bool = False):
         sequences = self._extract_intervals(intervals)
         if stranded:
@@ -42,6 +45,7 @@ class GenomicSequence(GenomicData):
 
 
 class GenomicSequenceIndexedFasta(GenomicSequence):
+
     def _extract_intervals(self, intervals):
         return self._fasta.get_interval_sequences(intervals)
 

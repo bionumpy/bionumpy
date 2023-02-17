@@ -57,7 +57,7 @@ class GenomicRunLengthArray(RunLengthArray):
         'RunLengthArray'
         """
         
-        assert np.all(ends > starts)
+        assert np.all(ends > starts), (ends[ends<=starts], starts[ends <= starts])
         assert np.all(starts[1:] >= ends[:-1])
         prefix = [0] if (len(starts) == 0 or starts[0] != 0) else []
         postfix = [size] if (len(ends) == 0 or ends[-1] != size) else []
@@ -202,7 +202,10 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     if len(intervals) == 0:
         return GenomicRunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
     merged = merge_intervals(intervals[np.argsort(intervals.start)])
-    return GenomicRunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
+    m = merged.start != merged.stop
+    return GenomicRunLengthArray.from_intervals(merged.start[m], merged.stop[m],
+                                                size=chromosome_size, default_value=False)
+# merged.start, merged.stop, 
 
 
 def human_key_func(chrom_name):
@@ -274,6 +277,7 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     new_interval.stop = stops[stop_mask]
     if distance > 0:
         new_interval.stop -= distance
+    assert np.all(new_interval.start[1:] > new_interval.stop[:-1]), np.sum(new_interval.start[1:] > new_interval.stop[:-1])
     return new_interval
 
 

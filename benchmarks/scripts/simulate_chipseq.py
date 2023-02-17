@@ -1,7 +1,7 @@
 from pyjaspar import jaspardb
 import bionumpy as bnp
 from bionumpy.sequence.position_weight_matrix import PWM
-from bionumpy.datatypes import ChromosomeSize
+from bionumpy.datatypes import ChromosomeSize, SequenceEntry
 from bionumpy.simulate.chipseq import simulate_chip_seq_reads, simulate_sequence, ChipSeqSimulationSettings
 jaspar_object = jaspardb(release="JASPAR2020")
 ctcf_motif = jaspar_object.fetch_motifs_by_name('CTCF')[0]
@@ -17,8 +17,11 @@ settings = ChipSeqSimulationSettings(motif)
 sequences = {name: simulate_sequence("acgt", size) for name, size in chromosome_sizes.items()}
 multistream = bnp.MultiStream(chromosome_sizes, sequences=sequences)
 reads = simulate_chip_seq_reads(multistream.sequences, settings, multistream.sequence_names)
+with bnp.open(snakemake.output[2], 'w') as f:
+    f.write(SequenceEntry(list(sequences.keys()), list(sequences.values())))
 with bnp.open(snakemake.output[1], 'w') as f:
     f.write(reads)
+
 with bnp.open(snakemake.output[0], "w") as f:
     f.write(chrom_sizes)
         

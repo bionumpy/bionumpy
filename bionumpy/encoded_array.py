@@ -399,12 +399,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
             args = [a.raw() if isinstance(a, EncodedArray) else np.asarray(a) for a in args[0]]
             return func(args, *kwargs)
-
+        if func == np.full_like:
+            return full_like(*args, **kwargs)
         if func == np.insert:
             return self.__class__(func(args[0].data, args[1], args[2].data, *args[3:], **kwargs), encoding = self.encoding)
         elif func in (np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
-        
+
         return NotImplemented
         return super().__array_function__(func, types, args, kwargs)
 
@@ -515,6 +516,12 @@ def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
 
     return target_encoding.encode(s)
 
+def full_like(a, fill_value, dtype=None, order='K', subok=True, shape=None):
+    assert dtype is None
+    assert order == 'K'
+    assert subok is True
+    fill_value = a.encoding.encode(fill_value)
+    return EncodedArray(np.full_like(a.raw(), fill_value, shape=shape), a.encoding)
 
 def from_encoded_array(encoded_array: EncodedArray) -> str:
     """Convert data in an `EncodedArray`/`EncodedRaggedArray into `str`/`List[str]`

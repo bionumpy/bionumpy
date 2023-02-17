@@ -36,6 +36,8 @@ rule bionumpy_callpeak:
 rule simulate_chipseq:
     output:
         "results/small.chrom.sizes",
-        'results/intervals/small_reads.bed'
+        'results/intervals/small_reads.bed',
+        'results/small_sequence.fa'
+        
     script:
         '../scripts/simulate_chipseq.py'

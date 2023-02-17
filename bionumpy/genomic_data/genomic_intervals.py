@@ -10,6 +10,34 @@ from .geometry import Geometry
 import dataclasses
 
 
+class GenomicPlace:
+    @abstractproperty
+    def get_location(self, where='start'):
+        return NotImplemented
+
+
+class GenomicLocation(GenomicPlace):
+    @abstractproperty
+    def chromosome(self):
+        return NotImplemented
+
+    @abstractproperty
+    def position(self):
+        return NotImplemented
+
+    @abstractproperty
+    def strand(self):
+        return NotImplemented
+
+    @abstractmethod
+    def is_stranded(self):
+        return NotImplemented
+
+
+class GenomicLocationGlobal:
+    pass
+
+
 class GenomicIntervals:
     @abstractproperty
     def start(self):

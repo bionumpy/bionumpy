@@ -1,20 +1,24 @@
+import os
 from typing import Dict
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
+from ..io.indexed_files import IndexBuffer, create_index
 from .genomic_track import GenomicArray
 from .genomic_intervals import GenomicIntervals
 from .genomic_sequence import GenomicSequence
+from .annotation import GenomicAnnotation
 from .geometry import Geometry, StreamedGeometry
 from ..util.formating import table
 
 
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
-    def __init__(self, chrom_sizes: Dict[str, int]):
+    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None):
         self._chrom_sizes = chrom_sizes
         self._geometry = Geometry(self._chrom_sizes)
         self._streamed_geometry = StreamedGeometry(self._chrom_sizes)
+        self._fasta_filename = fasta_filename
 
     @classmethod
     def from_file(cls, filename: str) -> 'Genome':
@@ -33,8 +37,18 @@ class Genome:
             A `Genome` object created from the read chromosome sizes
 
         """
+        path = PurePath(filename)
+        suffix = path.suffixes[-1]
+        index_file_name = path.with_suffix(path.suffix + ".fai")
+        fasta_filename = None
+        if suffix in (".fa", ".fasta"):
+            if not os.path.isfile(index_file_name):
+                bnp_open(index_file_name, "w", buffer_type=IndexBuffer).write(create_index(path))
+            fasta_filename = filename
+            filename = index_file_name
+
         split_lines = (line.split()[:2] for line in open(filename))
-        return cls({name: int(length) for name, length in split_lines})
+        return cls({name: int(length) for name, length in split_lines}, fasta_filename=fasta_filename)
 
     @staticmethod
     def _open(filename, stream, buffer_type=None):
@@ -106,8 +120,15 @@ class Genome:
         content = self._open(filename, stream, buffer_type=buffer_type)
         return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
-    def read_sequence(self, filename: str) -> GenomicSequence:
+    def read_sequence(self, filename: str = None) -> GenomicSequence:
+        if filename is None:
+            assert self._fasta_filename is not None
+            filename = self._fasta_filename 
         return GenomicSequence.from_indexed_fasta(open_indexed(filename))
+
+    def read_annotation(self, filename: str) -> GenomicAnnotation:
+        gtf_entries = self._open(filename, stream=False)
+        return GenomicAnnotation.from_gtf_entries(gtf_entries, self._chrom_sizes)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"

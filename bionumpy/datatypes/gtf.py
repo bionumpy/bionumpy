@@ -42,10 +42,7 @@ class GTFEntry:
 
 class GFFEntry(GTFEntry):
     def _get_attributes(gtf_entries, attribute_names):
-        print(gtf_entries.atributes)
-        # gtf_entries.atributes[:, -1] = " "
         all_features = split(join(gtf_entries.atributes, ';'), [";", '='])
-        print(all_features)
         keys = all_features[:-1:2]
         values = all_features[1::2, 1:-2]
         return {name: values[str_equal(keys, name)] for name in attribute_names}
