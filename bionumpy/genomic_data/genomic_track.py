@@ -6,7 +6,7 @@ from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray
 from ..bnpdataclass import BNPDataClass
-from ..streams import groupby
+from ..streams import groupby, NpDataclassStream
 from npstructures import RunLengthRaggedArray
 from typing import List, Union, Iterable, Tuple, Dict
 
@@ -179,9 +179,9 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         -------
         'GenomicData'
         """
-        chrom_sizes = {name: array.size for name, array in d}
+        chrom_sizes = {name: array.size for name, array in d.items()}
         array = np.concatenate(list(d.values()))
-        return cls(array, chrom_sizes)
+        return cls(array, GlobalOffset(chrom_sizes))
 
     @classmethod
     def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], chrom_sizes: dict) -> 'GenomicData':
@@ -222,10 +222,19 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         #
         #sorted_intervals = intervals[argsort]
         # grouped = StreamNode((g[1] for g in groupby(sorted_intervals, 'chromosome')))
-        
 
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
-        assert stranded is False
+        def stranded_func(ra, start, stop, strand):
+            rle = ra[start:stop]
+            r = rle[:, ::-1]
+            return np.where((strand == '+')[:, np.newaxis],
+                            rle, r)
+        intervals = intervals.as_stream()
+        if stranded:
+            return ComputationNode(stranded_func, [self._run_length_node,
+                                                   intervals.start,
+                                                   intervals.stop,
+                                                   intervals.strand])
         return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
 
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
@@ -247,7 +256,7 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         -------
         'GenomicData'
         """
-        chrom_sizes = {name: array.size for name, array in d}
+        chrom_sizes = {name: array.size for name, array in d.items()}
         stream_node = StreamNode(iter(d.values()))
         return cls(stream_node, chrom_sizes)
 

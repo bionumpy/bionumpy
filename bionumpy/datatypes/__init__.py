@@ -41,6 +41,11 @@ class Interval:
 
 
 @bnpdataclass
+class StrandedInterval(Interval):
+    strand: StrandEncoding
+
+
+@bnpdataclass
 class Bed6(Interval):
     name: str
     score: int

@@ -1,13 +1,26 @@
 from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
 import numpy as np
 from typing import List, Iterable, Tuple, Dict
+from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
+from ..encodings import StrandEncoding
 from .genomic_track import GenomicArray, GenomicArrayNode
-from ..datatypes import Interval, Bed6
+from ..datatypes import Interval, Bed6, StrandedInterval
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
 from ..computation_graph import StreamNode, Node, ComputationNode, compute
 from .geometry import Geometry
 import dataclasses
+
+
+@bnpdataclass
+class LocationEntry:
+    chromosome: str
+    position: int
+
+
+@bnpdataclass
+class StrandedLocationEntry(LocationEntry):
+    strand: StrandEncoding
 
 
 class GenomicPlace:
@@ -33,9 +46,66 @@ class GenomicLocation(GenomicPlace):
     def is_stranded(self):
         return NotImplemented
 
+    @classmethod
+    def from_fields(cls, chrom_sizes, chromosome, position, strand=None):
+        is_stranded = strand is not None
+        if is_stranded:
+            data = StrandedLocationEntry(chromosome, position, strand)
+        else:
+            data = LocationEntry(chromosome, position)
+        return GenomicLocationGlobal.from_data(data, chrom_sizes, is_stranded=is_stranded)
 
-class GenomicLocationGlobal:
-    pass
+    @classmethod
+    def from_data(cls, data: BNPDataClass,
+                  chrom_sizes: Dict[str, int],
+                  is_stranded: bool = False,
+                  chromosome_name: str = 'chromosome',
+                  position_name: str = 'position',
+                  strand_name: str = 'strand'):
+        assert all(hasattr(data, name) for name in (chromosome_name, position_name))
+        if is_stranded:
+            assert hasattr(data, strand_name)
+        return GenomicLocationGlobal(data, chrom_sizes, is_stranded,
+                                     {'chromosome': chromosome_name,
+                                      'position': position_name,
+                                      'strand': strand_name})
+
+
+class GenomicLocationGlobal(GenomicLocation):
+    def __init__(self, locations, chrom_sizes, is_stranded, field_dict):
+        self._locations = locations
+        self._chrom_sizes = chrom_sizes
+        self._geometry = Geometry(self._chrom_sizes)
+        self._is_stranded = is_stranded
+        self._field_dict = field_dict
+
+    @property
+    def chromosome(self):
+        return getattr(self._locations, self._field_dict['chromosome'])
+
+    @property
+    def position(self):
+        return getattr(self._locations, self._field_dict['position'])
+
+    @property
+    def strand(self):
+        if not self.is_stranded():
+            raise ValueError('Unstranded position has not strand')
+        return getattr(self._locations, self._field_dict['strand'])
+
+    def is_stranded(self):
+        return self._is_stranded
+
+    def get_windows(self, flank):
+        if self.is_stranded():
+            intervals = StrandedInterval(self.chromosome, self.position-flank,
+                                         self.position+flank, self.strand)
+        else:
+            intervals = Interval(self.chromosome, self.position-flank,
+                                 self.position+flank)
+        return GenomicIntervalsFull(
+            self._geometry.clip(intervals), self._chrom_sizes,
+            is_stranded=self.is_stranded())
 
 
 class GenomicIntervals:
@@ -57,6 +127,10 @@ class GenomicIntervals:
 
     @abstractmethod
     def is_stranded(self):
+        return NotImplemented
+
+    @abstractmethod
+    def get_location(self, where='start'):
         return NotImplemented
 
     @abstractmethod
@@ -175,6 +249,8 @@ class GenomicIntervals:
 
 
 class GenomicIntervalsFull(GenomicIntervals):
+    is_stream=False
+
     def __init__(self, intervals: Interval, chrom_sizes: Dict[str, int], is_stranded=False):
         self._intervals = intervals
         self._geometry = Geometry(chrom_sizes)
@@ -194,7 +270,25 @@ class GenomicIntervalsFull(GenomicIntervals):
         return NotImplemented
 
     def __getitem__(self, idx):
-        return self.__class__(self._intervals[idx], self._chrom_sizes)
+        return self.__class__(self._intervals[idx], self._chrom_sizes, self._is_stranded)
+
+    def get_location(self, where='start'):
+        if where in ('start', 'stop'):
+            if not self.is_stranded():
+                data = self._intervals
+            else:
+                location = np.where(self.strand==('+' if where=='start' else '-'),
+                                    self.start,
+                                    self.stop-1)
+                data = replace(self._intervals, start=location)
+        else:
+            assert where == 'center'
+            location = (self.start+self.stop)//2
+            data = replace(self._intervals, start=location)
+        return GenomicLocationGlobal.from_data(
+            data, self._chrom_sizes, is_stranded=self.is_stranded(),
+            position_name='start')
+
 
     @property
     def start(self):
@@ -236,6 +330,11 @@ class GenomicIntervalsFull(GenomicIntervals):
     def compute(self):
         return self
 
+    def as_stream(self):
+        return GenomicIntervalsStreamed(
+            StreamNode(value for _, value in groupby(self._intervals, 'chromosome')),
+            self._chrom_sizes, self._is_stranded)
+
     def get_sorted_stream(self):
         sorted_intervals = self.sorted()
         return self.from_interval_stream(iter([sorted_intervals]))
@@ -245,6 +344,8 @@ class GenomicIntervalsFull(GenomicIntervals):
 
 
 class GenomicIntervalsStreamed:
+    is_stream = True
+
     def _get_chrom_size(self, intervals: Interval):
         return self._chrom_sizes[intervals.chromosome]
 
@@ -327,3 +428,6 @@ class GenomicIntervalsStreamed:
     def compute(self):
         chromosome, start, stop = compute(self.chromosome, self.start, self.stop)
         return GenomicIntervalsFull(Interval(chromosome, start, stop), self._chrom_sizes)
+
+    def as_stream(self):
+        return self

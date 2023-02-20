@@ -7,6 +7,7 @@ import numpy as np
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
+from ..encodings.alphabet_encoding import FlatAlphabetEncoding
 from ..util import is_subclass_or_instance
 
 
@@ -186,6 +187,8 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     # must do as_encoded and not explicit encode as pre_val might already
                     # be encoded
                     val = as_encoded_array(pre_val, field.type)
+                    if isinstance(field.type, FlatAlphabetEncoding):
+                        val = val.ravel()
                 elif field.type == List[int] or field.type == List[bool]:
                     if not isinstance(pre_val, RaggedArray):
                         val = RaggedArray(pre_val)

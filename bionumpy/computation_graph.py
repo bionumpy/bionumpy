@@ -9,10 +9,28 @@ def _add_histograms(histogram_a, histogram_b):
     assert np.all(histogram_a[1] == histogram_b[1]), (histogram_a, histogram_b)
     return ((histogram_a[0]+histogram_b[0]), histogram_a[1])
 
+def mean_reduction(sum_and_n_a, sum_and_n_b):
+    return (sum_and_n_a[0]+sum_and_n_b[0],
+            sum_and_n_a[1]+sum_and_n_b[1])
+
+def sum_and_n(array, axis=None):
+    s = np.sum(array, axis=axis)
+    if axis is None:
+        n = array.size
+    elif axis == 0:
+        if hasattr(array.shape[-1], '__len__'):
+            if hasattr(array, 'col_counts'):
+                n = array.col_counts()
+            else:
+                n = np.bincount(array.shape[-1])
+                n = np.cumsum(n[::-1])[::-1][1:]
+        else:
+            n = len(array)
+    return (s, n)
 
 reductions_map = {
     np.sum: operator.add,
-    np.histogram: _add_histograms
+    np.histogram: _add_histograms,
     }
 
 
@@ -27,7 +45,11 @@ class Node(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_function__(self, func, types, args, kwargs):
         stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
-        comp_node = ComputationNode(func, args, kwargs, stack_trace=stack_trace)
+        if func == np.mean:
+            comp_node = ComputationNode(sum_and_n, args, kwargs, stack_trace=stack_trace)
+            return ReductionNode(comp_node, mean_reduction, lambda sn: sn[0]/sn[1])
+        else:
+            comp_node = ComputationNode(func, args, kwargs, stack_trace=stack_trace)
         if func in reductions_map:
             return ReductionNode(comp_node, reductions_map[func])
         return comp_node
@@ -61,16 +83,20 @@ class StreamNode(Node):
         return self._current_buffer
 
     def compute(self):
-        return np.concataenate(list(self._stream))
+        return np.concatenate(list(self._stream))
 
 
 class ReductionNode(Node):
-    def __init__(self, stream, binary_func):
+    def __init__(self, stream, binary_func, post_process=None):
         self._stream  = stream
         self._binary_func = binary_func
+        self._post_process = post_process
 
     def compute(self):
-        return reduce(self._binary_func, self._stream.get_iter())
+        r = reduce(self._binary_func, self._stream.get_iter())
+        if self._post_process is not None:
+            r = self._post_process(r)
+        return r
 
     def get_iter(self):
         return accumulate
@@ -80,7 +106,8 @@ class ReductionNode(Node):
         node = ComputationNode(lambda *args: tuple(args), [node._stream for node in reduction_nodes])
         binary_func = lambda t1, t2: tuple(node._binary_func(e1, e2)
                                            for node, e1, e2 in zip(reduction_nodes, t1, t2))
-        return cls(node, binary_func)
+        post_process = lambda t: (e if node._post_process is None else node._post_process(e) for e, node in zip(t, reduction_nodes))
+        return cls(node, binary_func, post_process)
 
     def __str__(self):
         return f'{self._binary_func} reduction of: {self._stream}'
@@ -104,8 +131,12 @@ class ComputationNode(Node):
         return np.max(self, axis=-1, **kwargs)
 
     def mean(self, axis=None):
-        assert axis == -1, axis
-        return np.mean(self, axis=-1)
+        if axis  in (-1, 1, 0):
+            return np.mean(self, axis=axis)
+        raise ValueError('invalid axis for mean', axis)
+
+    def sum(self, *args, **kwargs):
+        return np.sum(self, *args, **kwargs)
 
     def _get_buffer(self, i: int):
         assert self._buffer_index in (i, i-1),  (i, self._buffer_index)

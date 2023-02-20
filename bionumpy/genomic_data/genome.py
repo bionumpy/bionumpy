@@ -5,7 +5,7 @@ from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
 from ..io.indexed_files import IndexBuffer, create_index
 from .genomic_track import GenomicArray
-from .genomic_intervals import GenomicIntervals
+from .genomic_intervals import GenomicIntervals, GenomicLocation
 from .genomic_sequence import GenomicSequence
 from .annotation import GenomicAnnotation
 from .geometry import Geometry, StreamedGeometry
@@ -128,6 +128,10 @@ class Genome:
         return self.get_intervals(content, stranded)
     # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
+    def get_locations(self, data):
+        return GenomicLocation.from_data(data, self._chrom_sizes)
+        
+
     def read_sequence(self, filename: str = None) -> GenomicSequence:
         if filename is None:
             assert self._fasta_filename is not None
@@ -142,7 +146,9 @@ class Genome:
         return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"
 
     def __str__(self):
-        return table(zip(self._chrom_sizes.keys(), self._chrom_sizes.values()), headers=["Chromosome", "Size"])
+        return table(
+            ((key, value) for key, value in self._chrom_sizes.items() if '_' not in key),
+            headers=["Chromosome", "Size"])
 
     @property
     def size(self):

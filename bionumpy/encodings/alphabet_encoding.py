@@ -78,7 +78,14 @@ RNAENcoding = ACUGEncoding
 AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
 CigarOpEncoding = AlphabetEncoding("MIDNSHP=X")
-StrandEncoding = AlphabetEncoding("+-.")
+
+
+class FlatAlphabetEncoding(AlphabetEncoding):
+    def _encode(self, *args, **kwargs):
+        return super()._encode(*args, **kwargs).ravel()
+
+
+StrandEncoding = FlatAlphabetEncoding("+-.")
 
 
 def get_alphabet_encodings():

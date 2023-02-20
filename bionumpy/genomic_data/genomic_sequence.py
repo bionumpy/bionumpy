@@ -42,7 +42,7 @@ class GenomicSequence(GenomicData):
     def extract_intervals(self, intervals, stranded: bool = False):
         sequences = self._extract_intervals(intervals)
         if stranded:
-            sequences = np.where(intervals.strand == '+',
+            sequences = np.where((intervals.strand == '+')[:, np.newaxis],
                                  sequences,
                                  get_reverse_complement(sequences))
         return dna_encode(sequences)
