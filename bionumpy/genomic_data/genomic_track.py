@@ -1,7 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
 from .global_offset import GlobalOffset
-from .genomic_data import GenomicData, GenomeContext
+from .genomic_data import GenomicData, GenomeContext, fill_grouped
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray
@@ -9,6 +9,7 @@ from ..bnpdataclass import BNPDataClass
 from ..streams import groupby, NpDataclassStream
 from npstructures import RunLengthRaggedArray
 from typing import List, Union, Iterable, Tuple, Dict
+
 
 
 class GenomicArray(GenomicData):
@@ -47,28 +48,12 @@ class GenomicArray(GenomicData):
             gi = go.from_local_interval(bedgraph)
             rle = GenomicRunLengthArray.from_bedgraph(gi, go.total_size())
             return cls.from_global_data(rle, go)
-
-        filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
+        filled = GenomeContext.from_dict(chrom_sizes).iter_chromosomes(bedgraph, BedGraph)
+        # filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
         interval_stream = StreamNode(filled)
         return GenomicArrayNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
                                                 [interval_stream, StreamNode(iter(chrom_sizes.values()))]),
                                 chrom_sizes)
-
-
-def fill_grouped(grouped, real_order, dataclass):
-    real_order = iter(real_order)
-    next_real = next(real_order, None)
-    for name, group in grouped:
-        assert next_real is not None
-        while name != next_real:
-            yield dataclass.empty()
-            next_real = next(real_order, None)
-        yield group
-        next_real = next(real_order, None)
-    # next_real = next(real_order, None)
-    while next_real is not None:
-        yield next_real
-        next_real = next(real_order, None)
 
 
 class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
@@ -82,7 +67,7 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def genome_context(self):
-        return GenomeContext(self._genome_context)
+        return GenomeContext.from_dict(self._genome_context)
 
     @property
     def dtype(self):
@@ -192,6 +177,8 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     def __str__(self):
         return 'GTN:' + str(self._run_length_node)
 
+    __repr__ = __str__
+
     def __init__(self, run_length_node: ComputationNode, chrom_sizes: Dict[str, int]):
         self._run_length_node = run_length_node
         self._chrom_sizes = chrom_sizes
@@ -200,7 +187,7 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def genome_context(self):
-        return GenomeContext(self._genome_context)
+        return GenomeContext.from_dict(self._genome_context)
 
     def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
         args = [gtn._run_length_node if isinstance(gtn, GenomicArrayNode) else gtn for gtn in inputs]
@@ -225,17 +212,23 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
         def stranded_func(ra, start, stop, strand):
+            assert np.all(stop <= ra.size), (np.max(stop), ra.size)
             rle = ra[start:stop]
             r = rle[:, ::-1]
             return np.where((strand == '+')[:, np.newaxis],
                             rle, r)
+
+        def unstranded_func(ra, start, stop):
+            assert np.all(stop <= ra.size), (np.max(stop), ra.size)
+            return ra[start:stop]
+
         intervals = intervals.as_stream()
         if stranded:
             return ComputationNode(stranded_func, [self._run_length_node,
                                                    intervals.start,
                                                    intervals.stop,
                                                    intervals.strand])
-        return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
+        return ComputationNode(unstranded_func, [self._run_length_node, intervals.start, intervals.stop])
 
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
         assert False

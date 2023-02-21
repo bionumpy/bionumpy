@@ -2,9 +2,10 @@ import numpy as np
 from numpy.testing import assert_equal
 from bionumpy.datatypes import Interval, StrandedInterval
 from bionumpy.arithmetics.intervals import GenomicRunLengthArray
-from bionumpy.genomic_data.genomic_intervals import GenomicIntervals, GenomicLocation
+from bionumpy.genomic_data.genomic_intervals import GenomicIntervals, GenomicLocation, LocationEntry
 from bionumpy.genomic_data.genomic_track import GenomicArray, GenomicArrayGlobal, GenomicArrayNode
-from bionumpy.util.testing import assert_raggedarray_equal
+from bionumpy.genomic_data.genomic_data import GenomeContext, GenomeError
+from bionumpy.util.testing import assert_raggedarray_equal, assert_bnpdataclass_equal
 from bionumpy.computation_graph import compute
 import pytest
 
@@ -12,6 +13,13 @@ import pytest
 @pytest.fixture
 def chrom_sizes():
     return {"chr1": 100, "chr2": 100}
+
+@pytest.fixture
+def chrom_sizes_big():
+    return {'chr1': 10,
+            'chr2': 20,
+            'chr10_alt': 100,
+            'chr3': 30}
 
 
 @pytest.fixture
@@ -93,4 +101,48 @@ def test_extract_windows(windows, track_stream, track_arrays):
     result = result.to_array()
     true = np.mean([track_arrays[w.chromosome.to_string()][w.start:w.stop] if w.strand == '+' else track_arrays[w.chromosome.to_string()][w.stop-1:w.start-1:-1] for w in windows], axis=0)
     assert_raggedarray_equal(result, true)
-                             
+
+
+def test_extract_windows_and_subset(windows, track_stream, track_arrays):
+    tmp = track_stream[windows]
+    # print(tmp)
+    tmp = tmp[:, ::2]
+    result, = compute(tmp)
+    result = result[np.argsort(windows.stop-windows.start)]
+
+    result = result.to_array()
+    true = np.array([track_arrays[w.chromosome.to_string()][w.start:w.stop][::2]
+                    if w.strand == '+' else track_arrays[w.chromosome.to_string()][w.stop-1:w.start-1:-1][::2] for w in windows])
+    assert_equal(result, true)
+
+
+def test_genome_context(chrom_sizes_big):
+    locations = LocationEntry(
+        ['chr1', 'chr10_alt', 'chr3'],
+        [0, 1, 2])
+    genome_context = GenomeContext.from_dict(chrom_sizes_big)
+    filled = genome_context.iter_chromosomes(locations, LocationEntry)
+    true = [LocationEntry.from_entry_tuples([('chr1', 0)]),
+            LocationEntry.empty(),
+            LocationEntry.from_entry_tuples([('chr3', 2)])]
+    for f, t in zip(filled, true):
+        assert_bnpdataclass_equal(f, t)
+
+
+def test_invalid_context(chrom_sizes_big):
+    genome_context = GenomeContext.from_dict(chrom_sizes_big)
+    locations = LocationEntry(
+        ['chr3', 'chr10_alt', 'chr1'],
+        [0, 1, 2])
+    with pytest.raises(Exception):
+        list(genome_context.iter_chromosomes(locations, LocationEntry))
+
+
+def test_invalid_context2(chrom_sizes_big):
+    genome_context = GenomeContext.from_dict(chrom_sizes_big)
+    locations = LocationEntry(
+        ['chr1', 'chr11_alt', 'chr3'],
+        [0, 1, 2])
+    with pytest.raises(GenomeError):
+        list(genome_context.iter_chromosomes(locations, LocationEntry))
+

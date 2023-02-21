@@ -3,7 +3,8 @@ from itertools import count, chain
 from traceback import extract_stack, format_list
 from functools import reduce
 import operator
-
+class ComputationException(Exception):
+    pass
 
 def _add_histograms(histogram_a, histogram_b):
     assert np.all(histogram_a[1] == histogram_b[1]), (histogram_a, histogram_b)
@@ -39,12 +40,12 @@ class Node(np.lib.mixins.NDArrayOperatorsMixin):
         return NotImplemented
 
     def __array_ufunc__(self, ufunc, method,  *args, **kwargs):
-        stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
+        stack_trace = "".join(format_list(extract_stack(limit=5)))
         assert method == "__call__"
         return ComputationNode(ufunc, args, kwargs, stack_trace=stack_trace)
 
     def __array_function__(self, func, types, args, kwargs):
-        stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
+        stack_trace = "".join(format_list(extract_stack(limit=10))[:-2])
         if func == np.mean:
             comp_node = ComputationNode(sum_and_n, args, kwargs, stack_trace=stack_trace)
             return ReductionNode(comp_node, mean_reduction, lambda sn: sn[0]/sn[1])
@@ -121,9 +122,10 @@ class ComputationNode(Node):
         self._stack_trace = stack_trace
         self._buffer_index = -1
         self._get_buffer(0)
+        self._stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
 
     def __getitem__(self, item):
-        return ComputationNode(self.__class__,
+        return ComputationNode(lambda obj, item: obj[item],
                                (self, item))
 
     def max(self, axis=None, **kwargs):
@@ -140,13 +142,29 @@ class ComputationNode(Node):
 
     def _get_buffer(self, i: int):
         assert self._buffer_index in (i, i-1),  (i, self._buffer_index)
-        if i > self._buffer_index:
-            args = [a._get_buffer(i) if isinstance(a, Node)
-                    else a for a in self._args]
-            kwargs = {key: (v._get_buffer(i) if isinstance(v, Node) else v)
-                      for key, v in self._kwargs.items()}
+        if i <= self._buffer_index:
+            return self._current_buffer
+        args = [a._get_buffer(i) if isinstance(a, Node)
+                else a for a in self._args]
+        kwargs = {key: (v._get_buffer(i) if isinstance(v, Node) else v)
+                  for key, v in self._kwargs.items()}
+        try:
             self._current_buffer = self._func(*args, **kwargs)
-            self._buffer_index += 1
+        except Exception as e:
+            if isinstance(e, ComputationException):
+                raise
+            print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+            print(self._stack_trace)
+            print('////////////////////////////////////////')
+            print(self._func)
+            print([type(a) for a in args])
+            print([str(a) for a in args])
+            # print(args)
+            print(kwargs)
+            raise ComputationException(e)
+
+        self._buffer_index += 1
+        
         return self._current_buffer
 
     def compute(self):

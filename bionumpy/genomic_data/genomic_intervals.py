@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Iterable, Tuple, Dict
 from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
 from ..encodings import StrandEncoding
-from .genomic_track import GenomicArray, GenomicArrayNode
+from .genomic_track import GenomicArray, GenomicArrayNode, fill_grouped, GenomeContext
 from ..datatypes import Interval, Bed6, StrandedInterval
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby
@@ -24,6 +24,10 @@ class StrandedLocationEntry(LocationEntry):
 
 
 class GenomicPlace:
+    @property
+    def genome_context(self):
+        return GenomeContext.from_dict(self._chrom_sizes)
+
     @abstractproperty
     def get_location(self, where='start'):
         return NotImplemented
@@ -108,7 +112,7 @@ class GenomicLocationGlobal(GenomicLocation):
             is_stranded=self.is_stranded())
 
 
-class GenomicIntervals:
+class GenomicIntervals(GenomicPlace):
     @abstractproperty
     def start(self):
         return NotImplemented
@@ -236,9 +240,12 @@ class GenomicIntervals:
         chrom_sizes : Dict[str, int]
         """
         
-        interval_stream = groupby(interval_stream, 'chromosome')
-        interval_stream = StreamNode(pair[1] for pair in interval_stream)
-        return GenomicIntervalsStreamed(interval_stream, chrom_sizes, is_stranded=is_stranded)
+        # filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
+        interval_stream = GenomeContext.from_dict(chrom_sizes).iter_chromosomes(interval_stream, StrandedInterval if is_stranded else Interval)
+        # grouped = groupby(interval_stream, 'chromosome')
+        # interval_stream = StreamNode(fill_grouped(grouped, chrom_sizes.keys(), StrandedInterval if is_stranded else Interval))
+        # pair[1] for pair in interval_stream)
+        return GenomicIntervalsStreamed(StreamNode(interval_stream), chrom_sizes, is_stranded=is_stranded)
 
     @abstractmethod
     def clip(self) -> 'GenomicIntervals':
@@ -331,8 +338,12 @@ class GenomicIntervalsFull(GenomicIntervals):
         return self
 
     def as_stream(self):
+        interval_class = StrandedInterval if self._is_stranded else Interval
+        filled = self.genome_context.iter_chromosomes(self._intervals, interval_class)
+        # grouped = groupby(self._intervals, 'chromosome')
+        # filled = fill_grouped(grouped, self._chrom_sizes.keys(), interval_class)
         return GenomicIntervalsStreamed(
-            StreamNode(value for _, value in groupby(self._intervals, 'chromosome')),
+            StreamNode(filled),
             self._chrom_sizes, self._is_stranded)
 
     def get_sorted_stream(self):
@@ -343,13 +354,16 @@ class GenomicIntervalsFull(GenomicIntervals):
         return self._is_stranded
 
 
-class GenomicIntervalsStreamed:
+class GenomicIntervalsStreamed(GenomicIntervals):
     is_stream = True
 
     def _get_chrom_size(self, intervals: Interval):
         return self._chrom_sizes[intervals.chromosome]
 
     def __str__(self):
+        return 'GIS:' + str(self._intervals_node)
+
+    def __repr__(self):
         return 'GIS:' + str(self._intervals_node)
 
     def __init__(self, intervals_node: Node, chrom_sizes: Dict[str, int], is_stranded=False):
