@@ -15,6 +15,9 @@ def mean_reduction(sum_and_n_a, sum_and_n_b):
             sum_and_n_a[1]+sum_and_n_b[1])
 
 def sum_and_n(array, axis=None):
+    if array.size == 0:
+        return 0, 0
+
     s = np.sum(array, axis=axis)
     if axis is None:
         n = array.size
@@ -154,14 +157,6 @@ class ComputationNode(Node):
         except Exception as e:
             if isinstance(e, ComputationException):
                 raise
-            print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
-            print(self._stack_trace)
-            print('////////////////////////////////////////')
-            print(self._func)
-            print([type(a) for a in args])
-            print([str(a) for a in args])
-            # print(args)
-            print(kwargs)
             raise ComputationException(f'Error in computation of:\n {self._stack_trace}') from e
 
         self._buffer_index += 1

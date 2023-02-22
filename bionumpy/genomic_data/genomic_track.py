@@ -1,7 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
 from .global_offset import GlobalOffset
-from .genomic_data import GenomicData, GenomeContext, fill_grouped
+from .genomic_data import GenomicData, GenomeContext
 from ..computation_graph import StreamNode, Node, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray

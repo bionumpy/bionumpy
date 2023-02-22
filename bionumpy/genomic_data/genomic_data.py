@@ -12,23 +12,23 @@ logger = logging.getLogger(__name__)
 GenomeIndex = Union[str, List[str], Interval, Interval.single_entry]
 
 
-def fill_grouped(grouped: Iterable[Tuple[str, Any]], real_order: Iterable[str], dataclass: type, allowed: set = None):
-    real_order = iter(real_order)
-    next_real = next(real_order, None)
-    for name, group in grouped:
-        assert next_real is not None
-        while name != next_real:
-            print('yielding empty', name, dataclass)
-            yield dataclass.empty()
-            next_real = next(real_order, None)
-        print('yielding full', name, dataclass)
-        yield group
-        next_real = next(real_order, None)
-    # next_real = next(real_order, None)
-    while next_real is not None:
-        print('yielding last', next_real)
-        yield next_real
-        next_real = next(real_order, None)
+# def fill_grouped(grouped: Iterable[Tuple[str, Any]], real_order: Iterable[str], dataclass: type, allowed: set = None):
+#     real_order = iter(real_order)
+#     next_real = next(real_order, None)
+#     for name, group in grouped:
+#         assert next_real is not None
+#         while name != next_real:
+#             print('yielding empty', name, dataclass)
+#             yield dataclass.empty()
+#             next_real = next(real_order, None)
+#         logging.info('yielding full', name, dataclass)
+#         yield group
+#         next_real = next(real_order, None)
+#     # next_real = next(real_order, None)
+#     while next_real is not None:
+#         logging('yielding last', next_real)
+#         yield next_real
+#         next_real = next(real_order, None)
 
 
 class GenomeError(Exception):
@@ -81,7 +81,8 @@ class GenomeContext:
                 yield next_group
                 next_name, next_group = next(grouped, (None, None))
                 if next_name in seen:
-                    raise GenomeError(f'Sort order discrepancy ({next_name}): Genome so far {seen}, data: {seen_group}')
+                    raise GenomeError(
+                        f'Sort order discrepancy ({next_name}): Genome so far {seen}, data: {seen_group}')
             else:
                 logger.debug(f'Yielding empty data for {name}')
                 yield dataclass.empty()

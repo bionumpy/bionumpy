@@ -18,7 +18,9 @@ from ..bnpdataclass import replace, BNPDataClass
 
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
-    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None):
+    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False):
+        if sort_names:
+            chrom_sizes = {key: chrom_sizes[key] for key in sorted(chrom_sizes.keys())}
         self._chrom_sizes = chrom_sizes
         self._geometry = Geometry(self._chrom_sizes)
         self._chromosome_encoding = StringEncoding(as_encoded_array(list(chrom_sizes.keys())))
@@ -27,7 +29,7 @@ class Genome:
         self._include_mask = np.array(['_' not in name for name in chrom_sizes])
 
     @classmethod
-    def from_file(cls, filename: str) -> 'Genome':
+    def from_file(cls, filename: str, sort_names=False) -> 'Genome':
         """Read genome information from a 'chrom.sizes' or 'fa.fai' file
 
         File should contain rows of names and lengths of chromosomes
@@ -54,7 +56,7 @@ class Genome:
             filename = index_file_name
 
         split_lines = (line.split()[:2] for line in open(filename))
-        return cls({name: int(length) for name, length in split_lines}, fasta_filename=fasta_filename)
+        return cls({name: int(length) for name, length in split_lines}, fasta_filename=fasta_filename, sort_names=sort_names)
 
     @staticmethod
     def _open(filename, stream, buffer_type=None):

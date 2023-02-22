@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Iterable, Tuple, Dict
 from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
 from ..encodings import StrandEncoding
-from .genomic_track import GenomicArray, GenomicArrayNode, fill_grouped, GenomeContext
+from .genomic_track import GenomicArray, GenomicArrayNode, GenomeContext
 from ..datatypes import Interval, Bed6, StrandedInterval
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
 from ..streams import groupby

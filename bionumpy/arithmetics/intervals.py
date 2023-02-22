@@ -96,7 +96,9 @@ class GenomicRunLengthArray(RunLengthArray):
             return cls(np.array([0, size], dtype=int),
                        np.array([0]))
         assert bedgraph.start[0] == 0
-        if size is None or size == bedgraph.stop[-1]:
+        if size is not None:
+            assert bedgraph.stop[-1] <= size, (bedgraph.stop[-1], size)
+        if (size is None) or (size == bedgraph.stop[-1]):
             events = np.append(bedgraph.start, bedgraph.stop[-1])
             values = bedgraph.value
         else:

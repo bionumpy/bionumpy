@@ -9,12 +9,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: str):
-    genome = bnp.Genome.from_file(chrom_sizes_filename)
+    genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True)
+    track = genome.read_track(wig_filename, stream=True)
     annotation = genome.read_annotation(annotation_filename)
     transcripts = annotation.transcripts
     tss = transcripts.get_location('start')
+    # tss = tss.sorted()
     windows = tss.get_windows(flank=500)
-    track = genome.read_track(wig_filename, stream=True)
+
     signals = track[windows]
     mean_signal = signals.mean(axis=0)
     signal, = compute(mean_signal)
@@ -64,11 +66,12 @@ def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
         func = tss_plot
     func(wig_filename, chrom_sizes_filename, filename)
 
+
 tss_plot(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()))
 
 
-#main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
+# main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
 
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #    typer.run(main)

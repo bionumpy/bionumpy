@@ -70,7 +70,7 @@ class streamable:
 
         def log(sequence):
             for i, args in enumerate(sequence):
-                logger.debug(f"Running {func.__name__} on chunk {i}")
+                # logger.debug(f"Running {func.__name__} on chunk {i}")
                 yield args
 
         def new_func(*args, **kwargs):
