@@ -145,6 +145,8 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArr
     [0 0 0 1 1 2 2 1 0 0 1 1 0 0 0 0 0 0 0 0]
 
     """
+    if len(intervals) == 0:
+        return GenomicRunLengthArray(np.array([0, chromosome_size], dtype=int), np.array([0], dtype=int))
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
     return GenomicRunLengthArray.from_rle(rla.sum(axis=0))
 

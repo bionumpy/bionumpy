@@ -78,8 +78,9 @@ class GenomicLocation(GenomicPlace):
 class GenomicLocationGlobal(GenomicLocation):
     def __init__(self, locations, chrom_sizes, is_stranded, field_dict):
         self._locations = locations
+        self._genome_context = GenomeContext.from_dict(chrom_sizes)
         self._chrom_sizes = chrom_sizes
-        self._geometry = Geometry(self._chrom_sizes)
+        self._geometry = Geometry(self._genome_context.chrom_sizes)
         self._is_stranded = is_stranded
         self._field_dict = field_dict
 

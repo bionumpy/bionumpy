@@ -31,6 +31,15 @@ def intervals():
 
 
 @pytest.fixture
+def intervals_big():
+    return Interval.from_entry_tuples([
+        ('chr1', 5, 7),
+        ('chr10_alt', 1, 2),
+        ('chr3', 2, 3),
+        ('chr3', 5, 7)])
+
+
+@pytest.fixture
 def stranded_intervals():
     return StrandedInterval.from_entry_tuples([
         ('chr1', 10, 20, '-'),
@@ -40,7 +49,7 @@ def stranded_intervals():
 
 @pytest.fixture
 def windows(chrom_sizes):
-    w =  GenomicIntervals.from_fields(
+    w = GenomicIntervals.from_fields(
         chrom_sizes,
         ['chr1', 'chr2', 'chr2'],
         [14, 15, 45],
@@ -77,6 +86,11 @@ def track_stream(track_arrays):
     return GenomicArrayNode.from_dict(
         {name: GenomicRunLengthArray.from_array(a)
          for name, a in track_arrays.items()})
+
+
+@pytest.fixture
+def genomic_intervals_big(intervals_big, chrom_sizes_big):
+    return GenomicIntervals.from_intervals(intervals_big, chrom_sizes_big, is_stranded=False)
 
 
 @pytest.fixture
@@ -127,6 +141,14 @@ def test_genome_context(chrom_sizes_big):
             LocationEntry.from_entry_tuples([('chr3', 2)])]
     for f, t in zip(filled, true):
         assert_bnpdataclass_equal(f, t)
+
+
+def test_global_offset(chrom_sizes_big, genomic_intervals_big):
+    genomic_intervals_big.get_pileup()
+
+
+def test_empty_intervals_pileup(chrom_sizes_big, genomic_intervals_big):
+    genomic_intervals_big.as_stream().get_pileup()
 
 
 def test_invalid_context(chrom_sizes_big):

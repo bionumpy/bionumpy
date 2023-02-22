@@ -43,6 +43,10 @@ class GenomeContext:
             self._ignored = set([])
         self._included = set(chrom_size_dict.keys())
 
+    @property
+    def chrom_sizes(self):
+        return self._chrom_size_dict
+
     @classmethod
     def from_dict(cls, chrom_size_dict):
         f = lambda key: '_' not in key

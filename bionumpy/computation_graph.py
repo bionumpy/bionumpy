@@ -121,8 +121,9 @@ class ComputationNode(Node):
         self._kwargs = kwargs if kwargs is not None else {}
         self._stack_trace = stack_trace
         self._buffer_index = -1
-        self._get_buffer(0)
         self._stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
+        self._get_buffer(0)
+
 
     def __getitem__(self, item):
         return ComputationNode(lambda obj, item: obj[item],
@@ -161,7 +162,7 @@ class ComputationNode(Node):
             print([str(a) for a in args])
             # print(args)
             print(kwargs)
-            raise ComputationException(e)
+            raise ComputationException(f'Error in computation of:\n {self._stack_trace}') from e
 
         self._buffer_index += 1
         

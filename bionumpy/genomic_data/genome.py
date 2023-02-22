@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from typing import Dict
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
@@ -9,7 +10,10 @@ from .genomic_intervals import GenomicIntervals, GenomicLocation
 from .genomic_sequence import GenomicSequence
 from .annotation import GenomicAnnotation
 from .geometry import Geometry, StreamedGeometry
+from ..encodings.string_encodings import StringEncoding
 from ..util.formating import table
+from ..encoded_array import as_encoded_array
+from ..bnpdataclass import replace, BNPDataClass
 
 
 class Genome:
@@ -17,8 +21,10 @@ class Genome:
     def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None):
         self._chrom_sizes = chrom_sizes
         self._geometry = Geometry(self._chrom_sizes)
+        self._chromosome_encoding = StringEncoding(as_encoded_array(list(chrom_sizes.keys())))
         self._streamed_geometry = StreamedGeometry(self._chrom_sizes)
         self._fasta_filename = fasta_filename
+        self._include_mask = np.array(['_' not in name for name in chrom_sizes])
 
     @classmethod
     def from_file(cls, filename: str) -> 'Genome':
@@ -60,6 +66,7 @@ class Genome:
         return content
 
     def get_track(self, bedgraph):
+        bedgraph = self._mask_data_on_extra_chromosomes(bedgraph)
         return GenomicArray.from_bedgraph(bedgraph, self._chrom_sizes)
 
     def read_track(self, filename: str, stream: bool=False) -> GenomicArray:
@@ -99,6 +106,7 @@ class Genome:
         return geom.get_mask(content)
 
     def get_intervals(self, intervals, stranded=False):
+        intervals = self._mask_data_on_extra_chromosomes(intervals)
         return GenomicIntervals.from_intervals(intervals, self._chrom_sizes)
 
     def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
@@ -128,9 +136,17 @@ class Genome:
         return self.get_intervals(content, stranded)
     # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
+    def _mask_data_on_extra_chromosomes(self, data, chromosome_field_name='chromosome'):
+        if not isinstance(data, BNPDataClass):
+            return data
+        encoded_chromosomes = self._chromosome_encoding.encode(getattr(data, chromosome_field_name))
+        data = replace(data, **{chromosome_field_name: encoded_chromosomes})
+        mask = self._include_mask[encoded_chromosomes.raw()]
+        return data[mask]
+
     def get_locations(self, data):
+        data = self._mask_data_on_extra_chromosomes(data)
         return GenomicLocation.from_data(data, self._chrom_sizes)
-        
 
     def read_sequence(self, filename: str = None) -> GenomicSequence:
         if filename is None:
