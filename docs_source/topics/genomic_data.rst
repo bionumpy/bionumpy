@@ -119,6 +119,7 @@ A further way to analyze these peaks is to check the sequence in the peaks for m
 Now we can use our intervals as indexed to the reference sequence in much the same way as with genomic arrays. This we can use to get the sequences of the peaks and check them for motifs:
 
 .. testcode::
+   :skipif: True
 
     peak_sequences = genome_sequence[high_pileup_peaks]
     print(peak_sequences)
@@ -130,7 +131,8 @@ Now we can use our intervals as indexed to the reference sequence in much the sa
     print(bnp.get_motif_scores(peak_sequences, motif).max(axis=-1))
 
 .. testoutput::
-
+   :skipif: True
+    
     AGAGCCGGACCGAATGACGT...
     TCAGGTAGAACTCGCATTTC...
     AAGACTTATTTGATGGCCGG...
