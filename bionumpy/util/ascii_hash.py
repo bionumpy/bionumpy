@@ -53,8 +53,7 @@ class AsciiHashTable:
         hashes = get_ascii_hash(encoded_array, self.big_mod)
         try:
             values = self._hash_table[hashes]
-        except IndexError:
-            print('Error Looking for', encoded_array)
-            print('available keys:', self._seqeunces)
-            raise
+        except IndexError as e:
+            missing = ~self._hash_table.contains(hashes)
+            raise IndexError('Error Looking for:\n {encoded_array[missing]}\nAvailable keys:\n{self._seqeunces}')
         return values
