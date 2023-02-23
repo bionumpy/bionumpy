@@ -57,7 +57,7 @@ class NarrowPeak(Bed6):
     signal_value: float
     p_value: float
     q_value: float
-    peak: int
+    summit: int
 
 
 @bnpdataclass

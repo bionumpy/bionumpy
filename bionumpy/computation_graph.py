@@ -173,6 +173,8 @@ class JoinNode(ComputationNode):
 
 
 def compute(*args): # func, args, kwargs=None):
+    if not any(isinstance(a, Node) for a in args):
+        return args
     if all(isinstance(a, ReductionNode) for a in args):
         return ReductionNode.join(args).compute()
     else:

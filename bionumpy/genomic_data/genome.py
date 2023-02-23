@@ -109,7 +109,7 @@ class Genome:
 
     def get_intervals(self, intervals, stranded=False):
         intervals = self._mask_data_on_extra_chromosomes(intervals)
-        return GenomicIntervals.from_intervals(intervals, self._chrom_sizes)
+        return GenomicIntervals.from_intervals(intervals, self._chrom_sizes, is_stranded=stranded)
 
     def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`

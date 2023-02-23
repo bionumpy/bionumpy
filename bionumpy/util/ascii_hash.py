@@ -55,5 +55,5 @@ class AsciiHashTable:
             values = self._hash_table[hashes]
         except IndexError as e:
             missing = ~self._hash_table.contains(hashes)
-            raise IndexError('Error Looking for:\n {encoded_array[missing]}\nAvailable keys:\n{self._seqeunces}')
+            raise IndexError(f'Error Looking for:\n {encoded_array[missing]}\nAvailable keys:\n{self._seqeunces}')
         return values
