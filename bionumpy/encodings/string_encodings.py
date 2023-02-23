@@ -1,4 +1,5 @@
 from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray
+from .exceptions import EncodingError
 from ..util.ascii_hash import AsciiHashTable
 
 
@@ -16,7 +17,10 @@ class StringEncoding(Encoding):
 
     def encode(self, encoded_ragged_array):
         encoded_ragged_array = as_encoded_array(encoded_ragged_array)
-        hashes = self._hash_table[encoded_ragged_array]
+        try:
+            hashes = self._hash_table[encoded_ragged_array]
+        except IndexError as e:
+            raise EncodingError('String encoding failed') from e
         return EncodedArray(hashes, self)
 
     def decode(self, encoded_array):
