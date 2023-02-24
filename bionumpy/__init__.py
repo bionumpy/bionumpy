@@ -17,6 +17,7 @@ from .streams import mean, bincount, histogram, streamable, quantile, MultiStrea
 from .datatypes import SAMEntry, GFFEntry, Bed6
 from .io.strops import str_equal
 from .util.cli import run_as_commandline
+from .computation_graph import compute
 
 
 from . import simulate
