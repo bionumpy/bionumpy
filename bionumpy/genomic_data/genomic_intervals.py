@@ -268,7 +268,8 @@ class GenomicIntervalsFull(GenomicIntervals):
         return len(self._intervals)
 
     def sorted(self):
-        return NotImplemented
+        args = np.lexsort([self.stop, self.start, self.chromosome.raw()])
+        return self[args]
 
     def __getitem__(self, idx):
         return self.__class__(self._intervals[idx], self._genome_context, self._is_stranded)

@@ -135,7 +135,6 @@ def test_extract_windows_2(windows, track_stream, track_arrays):
     assert_equal(result, true)
 
 
-
 def test_extract_windows_and_subset(windows, track_stream, track_arrays):
     tmp = track_stream[windows]
     tmp = tmp[:, ::2]
