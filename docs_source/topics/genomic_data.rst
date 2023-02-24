@@ -33,9 +33,8 @@ From this genome object we can create genomic data from reading files, or from b
 
 .. testoutput::
 
-
-    Genomic Intervals on ['chr1', 'chr2', 'chr3', '...']:
-    Interval with 13 entries
+    Genomic Intervals on ['chr1', 'chr2', 'chr3']:
+   Interval with 13 entries
                    chromosome                    start                     stop
                          chr1                      482                      790
                          chr1                     5873                     6183
@@ -90,7 +89,7 @@ we can now again use these values to filter the intervals based on the treat_pil
 
 .. testoutput::
 
-   Genomic Intervals on ['chr1', 'chr2', 'chr3', '...']:
+   Genomic Intervals on ['chr1', 'chr2', 'chr3']:
     Interval with 9 entries
                    chromosome                    start                     stop
                          chr1                      482                      790

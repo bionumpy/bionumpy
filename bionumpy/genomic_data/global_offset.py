@@ -7,7 +7,7 @@ global_encoding = StringEncoding(["global"])
 
 
 class GlobalOffset:
-    def __init__(self, sequence_sizes):
+    def __init__(self, sequence_sizes, string_encoding=None):
         if isinstance(sequence_sizes, dict):
             self._names = as_encoded_array(list(sequence_sizes.keys()))
             self._sizes = np.array(list(sequence_sizes.values()), dtype=int)
@@ -16,7 +16,9 @@ class GlobalOffset:
             self._sizes = sequence_sizes.size
 
         self._offset = np.insert(np.cumsum(self._sizes), 0, 0)
-        self._old_encoding = StringEncoding(self._names)
+        self._old_encoding = string_encoding
+        if string_encoding is None:
+            self._old_encoding = StringEncoding(self._names)
 
     def total_size(self):
         return self._sizes.sum()

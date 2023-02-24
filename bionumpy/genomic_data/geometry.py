@@ -3,9 +3,8 @@ from bionumpy.util.formating import table
 from ..streams import groupby, NpDataclassStream
 from ..streams.left_join import left_join
 from ..arithmetics.intervals import get_boolean_mask, GenomicRunLengthArray, get_pileup, merge_intervals, extend_to_size
-from .global_offset import GlobalOffset
 from ..datatypes import Interval, BedGraph, ChromosomeSize
-from ..computation_graph import StreamNode, Node, ComputationNode
+from .genome_context import GenomeContext
 from ..bnpdataclass import replace
 from .genomic_track import GenomicArray
 import numpy as np
@@ -14,8 +13,9 @@ import numpy as np
 class GeometryBase:
     def __init__(self, chrom_sizes: dict):
         self._chrom_sizes = chrom_sizes
-        self._global_offset = GlobalOffset(chrom_sizes)
-        self._global_size = sum(chrom_sizes.values())
+        self._genome_context = GenomeContext.from_dict(chrom_sizes)
+        # self._global_offset = GlobalOffset(chrom_sizes)
+        self._global_size = self._genome_context.size
 
     @classmethod
     def from_chrom_sizes(cls, chrom_sizes: ChromosomeSize):
@@ -60,8 +60,7 @@ class GeometryBase:
         -------
         int
         """
-        return self._global_size
-
+        return self._genome_context.size
 
 
 class Geometry(GeometryBase):
@@ -101,8 +100,8 @@ class Geometry(GeometryBase):
         """
         if isinstance(intervals, GenomicRunLengthArray):
             return intervals
-        go = self._global_offset.from_local_interval(intervals)
-        return get_boolean_mask(go, self._global_size)
+        go = self._genome_context.global_offset.from_local_interval(intervals)
+        return get_boolean_mask(go, self._genome_context.size)
 
     def get_mask(self, intervals: Interval) -> 'GenomicMask':
         """Create a GenomeMask of all areas covered by at least one interval
@@ -115,7 +114,7 @@ class Geometry(GeometryBase):
         -------
         GenomicMask
         """
-        return GenomicArray.from_global_data(self.get_global_mask(intervals), self._global_offset)
+        return GenomicArray.from_global_data(self.get_global_mask(intervals), self._genome_context)
 
     def get_pileup(self, intervals: Interval) -> 'GenomicArray':
         """Create a GenomicTrack of how many intervals covers each position in the genome
@@ -128,10 +127,10 @@ class Geometry(GeometryBase):
         -------
         GenomicArray
         """
-        go = self._global_offset.from_local_interval(intervals)
+        go = self._genome_context.global_offset.from_local_interval(intervals)
         return GenomicArray.from_global_data(
             get_pileup(go, self._global_size),
-            self._global_offset)
+            self._genome_context)
 
     def jaccard_all_vs_all(self, intervals_list: List[Interval]) -> np.ndarray:
         """Calculate all pairwise Jaccard similarity scores for a list of interval sets
@@ -167,7 +166,7 @@ class Geometry(GeometryBase):
         -------
         Interval
         """
-        chrom_sizes = self._global_offset.get_size(intervals.chromosome)
+        chrom_sizes = self._genome_context.global_offset.get_size(intervals.chromosome)
         return replace(
             intervals,
             start=np.maximum(0, intervals.start),
@@ -189,7 +188,7 @@ class Geometry(GeometryBase):
         -------
         Interval
         """
-        chrom_sizes = self._global_offset.get_size(intervals.chromosome)
+        chrom_sizes = self._genome_context.global_offset.get_size(intervals.chromosome)
         return extend_to_size(intervals, fragment_length, chrom_sizes)
 
     def get_track(self, bedgraph: BedGraph) -> GenomicArray:
@@ -203,9 +202,9 @@ class Geometry(GeometryBase):
         -------
         GenomicArray
         """
-        gi = self._global_offset.from_local_interval(bedgraph)
+        gi = self._genome_context.global_offset.from_local_interval(bedgraph)
         rle = GenomicRunLengthArray.from_bedgraph(gi)
-        return GenomicArray.from_global_data(rle, self._global_offset)
+        return GenomicArray.from_global_data(rle, self._genome_context)
 
     def merge_intervals(self, intervals: Interval, distance: int = 0) -> Interval:
         """Merge all intervals that either overlaps or lie within a given distance
@@ -220,9 +219,9 @@ class Geometry(GeometryBase):
         Interval
 
         """
-        global_intervals = self._global_offset.from_local_interval(intervals)
+        global_intervals = self._genome_context._global_offset.from_local_interval(intervals)
         global_merged = merge_intervals(global_intervals, distance)
-        return self._global_offset.to_local_interval(global_merged)
+        return self._genome_context._global_offset.to_local_interval(global_merged)
 
     def sort(self, intervals: Interval) -> Interval:
         """Sort a set of intervals according to the chormosome order
@@ -236,8 +235,8 @@ class Geometry(GeometryBase):
         Interval
 
         """
-        global_intervals = self._global_offset.from_local_interval(intervals)
-        return self._global_offset.to_local_interval(global_intervals.sort_by('start'))
+        global_intervals = self._genome_context.global_offset.from_local_interval(intervals)
+        return self._genome_context.global_offset.to_local_interval(global_intervals.sort_by('start'))
 
     def __repr__(self):
         return f"{self.__class__.__name__}(" + repr(self._chrom_sizes) + ")"
@@ -251,12 +250,12 @@ class StreamedGeometry(GeometryBase):
         grouped = groupby(bedgraph, 'chromosome')
         track_stream = ((name, GenomicRunLengthArray.from_bedgraph(b))
                         for name, b in grouped)
-        return GenomicArray.from_stream(track_stream, self._global_offset)
+        return GenomicArray.from_stream(track_stream, self._genome_context)
 
     def get_pileup(self, intervals: Iterable[Interval]) -> GenomicArray:
         grouped = groupby(intervals, 'chromosome')
         pileups = ((name, get_pileup(intervals, size)) if intervals is not None else GenomicRunLengthArray(np.array([0, size]), [0]) for name, size, intervals in left_join(self._chrom_sizes.items(), grouped))
-        return GenomicArray.from_stream(pileups, self._global_offset)
+        return GenomicArray.from_stream(pileups, self._genome_context)
 
     def extend_to_size(self, intervals: Iterable[Interval], fragment_length: int) -> Iterable[Interval]:
         """Extend/shrink intervals to match the given length. Stranded

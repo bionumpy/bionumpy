@@ -5,12 +5,15 @@ import numpy as np
 from . import streamable, grouped_stream
 from ..bnpdataclass import bnpdataclass
 from ..encoded_array import EncodedArray
+from ..encodings.string_encodings import StringEncoding
 
 def get_changes(array):
+    if isinstance(array, EncodedArray) and isinstance(array.encoding, StringEncoding):
+        return np.flatnonzero(array.raw()[1:] != array.raw()[:-1])+1
     if isinstance(array, RaggedArray):
         return get_ragged_changes(array)
     array = array.reshape(len(array), -1)
-    return np.flatnonzero(np.all(array[1:]!=array[-1], axis=-1))+1
+    return np.flatnonzero(np.all(array[1:]!=array[:-1], axis=-1))+1
 
 
 def get_ragged_changes(ragged_array):

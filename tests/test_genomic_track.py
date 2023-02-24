@@ -1,6 +1,7 @@
 from npstructures import RaggedArray
 from npstructures.testing import assert_raggedarray_equal
 from bionumpy.genomic_data import GenomicArray, GenomicIntervals
+from bionumpy.genomic_data.genome_context import GenomeContext
 from bionumpy.streams import NpDataclassStream
 from bionumpy.datatypes import BedGraph
 import numpy as np
@@ -14,6 +15,11 @@ def chrom_sizes():
 
 
 @pytest.fixture
+def genome_context(chrom_sizes):
+    return GenomeContext.from_dict(chrom_sizes)
+
+
+@pytest.fixture
 def pileup():
     return BedGraph.from_entry_tuples([
         ('chr1', 0, 10, 1),
@@ -23,8 +29,8 @@ def pileup():
 
 
 @pytest.fixture
-def genomic_intervals(chrom_sizes):
-    return GenomicIntervals.from_fields(chrom_sizes,
+def genomic_intervals(genome_context):
+    return GenomicIntervals.from_fields(genome_context,
                                         ['chr1', 'chr1', 'chr2'],
                                         [5, 10, 0],
                                         [15, 95, 50],
@@ -40,13 +46,13 @@ def interval_pileup():
 
 
 @pytest.fixture
-def track(pileup, chrom_sizes):
-    return GenomicArray.from_bedgraph(pileup, chrom_sizes)
+def track(pileup, genome_context) -> GenomicArray:
+    return GenomicArray.from_bedgraph(pileup, genome_context)
 
 
 @pytest.fixture
-def stream_track(pileup, chrom_sizes):
-    return GenomicArray.from_bedgraph(NpDataclassStream([pileup]), chrom_sizes)
+def stream_track(pileup, genome_context):
+    return GenomicArray.from_bedgraph(NpDataclassStream([pileup]), genome_context)
 
 
 @pytest.fixture

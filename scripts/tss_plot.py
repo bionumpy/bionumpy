@@ -7,6 +7,7 @@ import numpy as np
 from bionumpy.computation_graph import compute
 import logging
 import typer
+logging.basicConfig(level=logging.DEBUG)
 
 
 def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: str):
@@ -21,13 +22,10 @@ def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: 
     logging.info('subsetting')
     windows = tss.get_windows(flank=500)
     signals = track[windows]
-    print(type(signals))
     logging.info('getting mean')
     mean_signal = signals.mean(axis=0)
-    print(type(mean_signal))
     logging.info('computing')
     signal, = compute(mean_signal)
-    print(signal)
     signal = signal.to_array()
     plt.plot(np.arange(-500, 500), signal)
     plt.show()
@@ -37,7 +35,6 @@ def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
     genome = bnp.Genome.from_file(chrom_sizes_filename)
     peaks = genome.read_intervals(peak_filename)
     peak_sizes = peaks.stop-peaks.start
-
     max_len = np.max(peak_sizes)
     mid_points = peaks.get_location('center')
     windows = mid_points.get_windows(flank=(max_len+1)//2)
@@ -57,7 +54,7 @@ def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str
     location_entries = LocationEntry(peaks.chromosome, peaks.start+peaks.summit)
     summits = genome.get_locations(location_entries)
     windows = summits.get_windows(flank=200)
-    reads = genome.read_intervals(bam_filename, stream=False, stranded=True)
+    reads = genome.read_intervals(bam_filename, stream=True, stranded=True)
     means = [reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)
              for strand in '+-']
     pos_mean, neg_mean = compute(*means)
@@ -71,8 +68,7 @@ def vcf_plot(wig_filename: str, chrom_sizes_filename: str, vcf_filename: str):
     genome = bnp.Genome.from_file(chrom_sizes_filename)
     variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=True)
     windows = variants.get_windows(flank=flank)
-    reads = genome.read_intervals(wig_filename, stranded=True)
-    print(bnp.count_encoded(reads.strand))
+    reads = genome.read_intervals(wig_filename, stream=True, stranded=True)
     track = reads.get_pileup()
     signals = track[windows]
     mean_signal = signals.sum(axis=0)
@@ -90,7 +86,6 @@ def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
     elif filename.endswith('bed.gz'):
         func = peak_plot
     else:
-        print('hmm')
         func = tss_plot
     func(wig_filename, chrom_sizes_filename, filename)
 
@@ -98,8 +93,10 @@ def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
 # tss_plot(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()))
 
 
-main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
-#main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/chr21a22.gtf'.split())
-#main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
-# main(*'example_data/ctcf_chr21-22_reads.bed example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
+# main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
+# main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/chr21a22.gtf'.split())
+# main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
+#main(*'example_data/ctcf_chr21-22_reads.bed example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
 # vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
+if __name__ == '__main__':
+    typer.run(main)

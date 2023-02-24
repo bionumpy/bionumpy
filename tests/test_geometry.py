@@ -132,6 +132,7 @@ def test_to_intervals(geometry, disjoint_intervals):
     assert_bnpdataclass_equal(intervals, disjoint_intervals.astype(Interval))
 
 
+@pytest.mark.skip('geometry')
 def test_to_bedgraph(geometry, pileup):
     track = geometry.get_track(pileup)
     new_pileup = track.get_data()

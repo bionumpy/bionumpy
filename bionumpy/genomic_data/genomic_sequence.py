@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Dict
-from .genomic_track import GenomicData, GenomeContext
+from .genomic_track import GenomicData
+from .genome_context import GenomeContext
 from ..io.indexed_fasta import IndexedFasta
 from ..sequence import get_reverse_complement
 from ..encodings import DNAEncoding, ACGTnEncoding
