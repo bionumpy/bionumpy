@@ -107,19 +107,7 @@ def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
     func(wig_filename, chrom_sizes_filename, filename)
 
 
-def test():
-    #tss_plot("example_data/CTCF_chr21-22.wig.gz", "example_data/chr21-22.chrom.sizes", "example_data/chr21a22.gtf")
+def _test():
+    tss_plot("example_data/CTCF_chr21-22.wig.gz", "example_data/chr21-22.chrom.sizes", "example_data/chr21a22.gtf")
     summit_plot("example_data/ctcf_chr21-22.bam", "example_data/chr21-22.chrom.sizes", "example_data/ctcf_chr21-22.bed.gz")
-    #vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
-
-if __name__ == "__main__":
-    test()
-
-# tss_plot(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()))
-
-
-#main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
-#main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/chr21a22.gtf'.split())
-#main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
-# main(*'example_data/ctcf_chr21-22_reads.bed example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
-# vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
+    vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
