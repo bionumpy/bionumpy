@@ -37,8 +37,9 @@ class StringEncoding(Encoding):
     def __eq__(self, other):
         if not isinstance(other, StringEncoding):
             return False
-        if len(self._seqeunces.shape)!=len(other._seqeunces.shape):
+        my_shape, other_shape = (o.shape[-1] for o in (self, other ))
+        if len(my_shape) != len(other_shape):
             return False
-        if np.any(self._seqeunces.shape !=other._seqeunces.shape):
+        if np.any(my_shape != other_shape):
             return False
         return np.all(self._seqeunces == other._seqeunces) and self._modulo == other._modulo
