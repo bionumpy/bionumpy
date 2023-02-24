@@ -1,3 +1,4 @@
+import numpy as np
 from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray
 from .exceptions import EncodingError
 from ..util.ascii_hash import AsciiHashTable
@@ -30,5 +31,14 @@ class StringEncoding(Encoding):
             data = encoded_array
         return self._seqeunces[data]
 
+    def __repr__(self):
+        return f'StringEncoding({self._seqeunces.tolist()})'
+
     def __eq__(self, other):
-        return isinstance(other, StringEncoding) and self._seqeunces == other._seqeunces and self._modulo == other._modulo
+        if not isinstance(other, StringEncoding):
+            return False
+        if len(self._seqeunces.shape)!=len(other._seqeunces.shape):
+            return False
+        if np.any(self._seqeunces.shape !=other._seqeunces.shape):
+            return False
+        return np.all(self._seqeunces == other._seqeunces) and self._modulo == other._modulo
