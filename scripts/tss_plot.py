@@ -17,8 +17,8 @@ def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: 
     logging.info('Reading annotation')
     annotation = genome.read_annotation(annotation_filename)
     transcripts = annotation.transcripts
-    tss = transcripts.get_location('start')
-    # tss = tss.sorted()
+    tss = transcripts.get_location('start').sorted()
+    print(tss._locations)
     logging.info('subsetting')
     windows = tss.get_windows(flank=500)
     signals = track[windows]
@@ -32,8 +32,8 @@ def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: 
 
 
 def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
-    genome = bnp.Genome.from_file(chrom_sizes_filename)
-    peaks = genome.read_intervals(peak_filename)
+    genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True)
+    peaks = genome.read_intervals(peak_filename).sorted()
     peak_sizes = peaks.stop-peaks.start
     max_len = np.max(peak_sizes)
     mid_points = peaks.get_location('center')
@@ -49,10 +49,10 @@ def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
 
 
 def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str):
-    genome = bnp.Genome.from_file(chrom_sizes_filename)
+    genome = bnp.Genome.from_file(chrom_sizes_filename).with_ignored_added(['chrEBV'])
     peaks = bnp.open(peak_filename, buffer_type=NarrowPeakBuffer).read()
     location_entries = LocationEntry(peaks.chromosome, peaks.start+peaks.summit)
-    summits = genome.get_locations(location_entries)
+    summits = genome.get_locations(location_entries).sorted()
     windows = summits.get_windows(flank=200)
     reads = genome.read_intervals(bam_filename, stream=True, stranded=True)
     means = [reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)

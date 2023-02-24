@@ -17,10 +17,16 @@ from ..util.formating import table
 class Genome:
     '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
     def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False):
-        if sort_names:
-            chrom_sizes = {key: chrom_sizes[key] for key in sorted(chrom_sizes.keys())}
-        self._genome_context = GenomeContext.from_dict(chrom_sizes)
+        if isinstance(chrom_sizes, GenomeContext):
+            self._genome_context = chrom_sizes
+        else:
+            if sort_names:
+                chrom_sizes = {key: chrom_sizes[key] for key in sorted(chrom_sizes.keys())}
+            self._genome_context = GenomeContext.from_dict(chrom_sizes)
         self._fasta_filename = fasta_filename
+
+    def with_ignored_added(self, ignored):
+        return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
     def from_file(cls, filename: str, sort_names=False) -> 'Genome':

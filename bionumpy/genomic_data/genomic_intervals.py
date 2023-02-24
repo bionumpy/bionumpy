@@ -68,7 +68,7 @@ class GenomicLocation(GenomicPlace):
         assert all(hasattr(data, name) for name in (chromosome_name, position_name))
         if is_stranded:
             assert hasattr(data, strand_name)
-        return GenomicLocationGlobal(data, genome_context, is_stranded,
+        return GenomicLocationGlobal(genome_context.mask_data(data), genome_context, is_stranded,
                                      {'chromosome': chromosome_name,
                                       'position': position_name,
                                       'strand': strand_name})
@@ -105,7 +105,16 @@ class GenomicLocationGlobal(GenomicLocation):
         else:
             intervals = Interval(self.chromosome, self.position-flank,
                                  self.position+flank)
-        return GenomicIntervalsFull(intervals, self._genome_context, is_stranded=self.is_stranded()).clip()
+        return GenomicIntervalsFull(intervals, self._genome_context,
+                                    is_stranded=self.is_stranded()).clip()
+
+    def sorted(self):
+        return self[np.lexsort([self.position, self.chromosome.raw()])]
+
+    def __getitem__(self, idx):
+        return self.__class__(self._locations[idx], self._genome_context, self._is_stranded, self._field_dict)
+
+
     # self._genome_context.geometry.clip(intervals), self._genome_context,
     # is_stranded=self.is_stranded())
 

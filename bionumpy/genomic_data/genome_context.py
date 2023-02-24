@@ -4,6 +4,7 @@ from typing import List, Union, Iterable, Tuple, Dict, Any
 from ..bnpdataclass import replace
 from .global_offset import GlobalOffset
 from ..streams import groupby
+from ..encoded_array import as_encoded_array
 from ..encodings.string_encodings import StringEncoding
 from .genome_context_base import GenomeContextBase
 
@@ -16,6 +17,7 @@ class GenomeError(Exception):
 
 class GenomeContext(GenomeContextBase):
     def __init__(self, chrom_size_dict: Dict[str, int], ignored=None):
+        self._original_chrom_sizes = chrom_size_dict
         self._ignored = ignored
         if ignored is None:
             self._ignored = set([])
@@ -26,6 +28,11 @@ class GenomeContext(GenomeContextBase):
         self._string_endcoding = StringEncoding(list(chrom_size_dict.keys()))
         self._chrom_size_dict = {key: value for key, value in chrom_size_dict.items() if key in self._included}
         self._global_offset = GlobalOffset(self._chrom_size_dict, string_encoding=self._string_endcoding)
+
+    def with_ignored_added(self, ignored):
+        c = self._original_chrom_sizes.copy()
+        c.update({name: 0 for name in ignored})
+        return self.__class__(c, set(ignored) | set(self._ignored))
 
     def __repr__(self):
         return repr(list(self._included)[:10] + ['...']*(len(self._included) > 10))
@@ -50,7 +57,7 @@ class GenomeContext(GenomeContextBase):
         return self._included_mask[chromosomes.raw()]
 
     def mask_data(self, data, chromosome_field_name='chromosome'):
-        encoded_chromosomes = self.encoding.encode(getattr(data, chromosome_field_name))
+        encoded_chromosomes = as_encoded_array(getattr(data, chromosome_field_name), self.encoding)
         data = replace(data, **{chromosome_field_name: encoded_chromosomes})
         mask = self.is_included(encoded_chromosomes)
         return data[mask]
