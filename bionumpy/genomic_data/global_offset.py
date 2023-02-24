@@ -50,7 +50,9 @@ class GlobalOffset:
         chromosome = as_encoded_array(interval.chromosome, target_encoding=self._old_encoding)
         offsets = self.get_offset(chromosome)
         sizes = self.get_size(chromosome)
-        assert np.all(interval.start < sizes), (interval, sizes)
+        if np.any(interval.start >= sizes):
+            mask = interval.start >= sizes
+            raise Exception(f'Starts larger than size {interval.start[mask]}, {sizes[mask]}')
         stop = interval.stop
         if do_clip:
             stop = np.minimum(stop, sizes)

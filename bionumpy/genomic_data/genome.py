@@ -138,6 +138,17 @@ class Genome:
         return self.get_intervals(content, stranded)
     # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
+    def read_locations(self, filename, stranded=False, stream=False, has_numeric_chromosomes=False):
+        assert not (stream and has_numeric_chromosomes)
+        f = bnp_open(filename)
+        if not stream:
+            data = f.read()
+            if has_numeric_chromosomes:
+                data = replace(data, chromosome=as_encoded_array(['chr'+chromosome.to_string() for chromosome in data.chromosome]))
+        else:
+            data = f.read_chunks()
+        return self.get_locations(data)
+
     def _mask_data_on_extra_chromosomes(self, data, chromosome_field_name='chromosome'):
         if not isinstance(data, BNPDataClass):
             return data

@@ -14,6 +14,7 @@ import pytest
 def chrom_sizes():
     return {"chr1": 100, "chr2": 100}
 
+
 @pytest.fixture
 def chrom_sizes_big():
     return {'chr1': 10,
@@ -167,4 +168,3 @@ def test_invalid_context2(chrom_sizes_big):
         [0, 1, 2])
     with pytest.raises(GenomeError):
         list(genome_context.iter_chromosomes(locations, LocationEntry))
-
