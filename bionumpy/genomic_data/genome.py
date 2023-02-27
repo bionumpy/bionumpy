@@ -16,7 +16,16 @@ from ..util.formating import table
 
 
 class Genome:
-    '''Should return GenomicIntervals, GenomicTrack, GenomicMask'''
+    '''
+    The entry point for working with genomic data. Supports reading data directly from
+    file and into GenomicData objects, or creating GenomicData objects from `BNPDataClass` objects, 
+    such `Interval`, `BedGraph` or `LocationEntry`.
+
+    Supports both in memory or streamed/lazy data, controlled with the `stream` keyword. For streamed
+    data it requires that the data in the file uses the same chromosome ordering as the genome. This
+    will usually be the same as either what is provided in the `chrom.sizes` file, or a simple alphabetic
+    ordering. If sort order errors occur, try using `sort_names=True` when creating the `Genome` object.
+    '''
     def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False):
         if isinstance(chrom_sizes, GenomeContext):
             self._genome_context = chrom_sizes
@@ -117,7 +126,7 @@ class Genome:
         -------
         GenomicIntervals
         """
-        GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
+        return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
     def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`
