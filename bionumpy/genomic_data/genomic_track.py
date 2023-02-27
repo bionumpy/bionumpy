@@ -1,38 +1,54 @@
 import numpy as np
 from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
-# from .genome_context import GenomeContext
 from .genomic_data import GenomicData
 from .genome_context_base import GenomeContextBase
 from ..computation_graph import StreamNode, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray
 from npstructures import RunLengthRaggedArray
-from typing import List, Union, Iterable, Tuple, Dict
+from typing import List, Union, Iterable, Tuple, Dict, Any
 
 
 class GenomicArray(GenomicData):
+    '''
+    Class for representing data on a genome.
+    '''
 
     @property
     def genome_context(self):
         return self._genome_context
 
     @abstractmethod
-    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs) -> 'GenomicArray':
         return NotImplemented
 
     @abstractmethod
-    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict) -> Any:
         return NotImplemented
 
     @abstractmethod
-    def sum(self, axis=None) -> float:
+    def sum(self, axis: int = None) -> float:
         return NotImplemented
 
-    def to_bedgraph(self) -> 'BedGraph':
+    def to_bedgraph(self) -> BedGraph:
         return NotImplemented
 
     @classmethod
     def from_global_data(cls, global_pileup: GenomicRunLengthArray, genome_context: GenomeContextBase) -> 'GenomicArray':
+        """Create the genomic array from data represened on a flat/concatenated genome.
+
+        Parameters
+        ----------
+        global_pileup : GenomicRunLengthArray
+            Array over the concatenated genome
+        genome_context : GenomeContextBase
+            The genome context
+
+        Returns
+        -------
+        'GenomicArray'
+        """
+        
         return GenomicArrayGlobal(global_pileup, genome_context)
 
     def _get_intervals_from_data(self, name, data):
@@ -44,7 +60,21 @@ class GenomicArray(GenomicData):
                             data.starts, data.ends, data.values)
 
     @classmethod
-    def from_bedgraph(cls, bedgraph: BedGraph, genome_context: GenomeContextBase):
+    def from_bedgraph(cls, bedgraph: BedGraph, genome_context: GenomeContextBase) -> 'GenomicData':
+        """Create a genomic array from a bedgraph and genomic context
+
+        Parameters
+        ----------
+        bedgraph : BedGraph
+            Bedgraph with data along the genome
+        genome_context : GenomeContextBase
+            The genome context
+
+        Returns
+        -------
+        'GenomicData'
+        """
+        
         if isinstance(bedgraph, BedGraph):
             go = genome_context.global_offset
             gi = go.from_local_interval(bedgraph)
@@ -59,6 +89,9 @@ class GenomicArray(GenomicData):
 
 
 class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
+    '''
+    Class for holding the the enitre genomic array in memory
+    '''
     def __init__(self, global_track: GenomicRunLengthArray, genome_context: GenomeContextBase):
         assert isinstance(global_track, GenomicRunLengthArray)
         self._global_track = global_track
@@ -76,7 +109,18 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     def sum(self) -> float:
         return self._global_track.sum(axis=None)
 
-    def extract_chromsome(self, chromosome):
+    def extract_chromsome(self, chromosome: Union[str, List[str]]) -> Union[GenomicRunLengthArray, RunLengthRaggedArray]:
+        """Get the data on one or more chromosomes
+        Parameters
+        ----------
+        chromosome : Union[str, List[str]]
+            A chromosome name or a list of chromosome names
+
+        Returns
+        -------
+        Union[GenomicRunLengthArray, RunLengthRaggedArray]
+            A runlengtharray for a single chromosome or a `RunLengthRaggedArray` for a list of chromosomes
+        """
         assert isinstance(chromosome, str)
         offset = self._genome_context.global_offset.get_offset([chromosome])[0]
         return self._global_track[offset:offset + self._genome_context.global_offset.get_size([chromosome])[0]]
@@ -117,6 +161,14 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
             return np.histogram(*args, **kwargs)
 
     def get_data(self) -> Union[Interval, BedGraph]:
+        """The data of the array represented in BNPDataClass
+
+        Returns
+        -------
+        Union[Interval, BedGraph]
+            If boolean mask,return the intervals where True. Else a bedgraph containing the data
+        """
+        
         go = self._genome_context._global_offset
         names = go.names()
         starts = go.get_offset(names)
@@ -172,6 +224,11 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
 
 
 class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
+    '''
+    Class for representing a genomic array, but only keeping data for one 
+    chromosome in memory at a time
+    '''
+
     def __str__(self):
         return 'GTN:' + str(self._run_length_node)
 
@@ -186,34 +243,49 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         args = [gtn._run_length_node if isinstance(gtn, GenomicArrayNode) else gtn for gtn in inputs]
         return self.__class__(ufunc(*args, **kwargs), self._genome_context)
 
-    def get_data(self):
+    def get_data(self) -> ComputationNode:
+        """Get the data from the array in a lazy BNPDataClass
+        Returns
+        -------
+        ComputationNode
+            A lazy compution node representing the data from the array
+        """
+        
         return ComputationNode(self._get_intervals_from_data, [self._chrom_name_node, self._run_length_node])
 
     def _index_boolean(self, idx):
         assert isinstance(idx, GenomicArrayNode)
         return ComputationNode(lambda a, i: a[i], [self._run_length_node, idx])
 
-    def _extract_full_intervals(self, intervals, stranded):
-        return NotImplemented
-        #stream_intervals = intervals.get_sorted_stream()
-        #subset = self.extract_intervals(stream_intervals, stranded)
-        ## return ComputationNode(subset.__getitem__(
-        #return ComputationNode(lambda ra, start, stop: ra[start:stop], [self._run_length_node, intervals.start, intervals.stop])
-        #
-        #sorted_intervals = intervals[argsort]
-        # grouped = StreamNode((g[1] for g in groupby(sorted_intervals, 'chromosome')))
+    def extract_intervals(self, intervals: Interval, stranded: bool = False) -> ComputationNode:
+        """Extract the data on a set of intervals.
 
-    def extract_intervals(self, intervals: Interval, stranded: bool = False) -> RunLengthRaggedArray:
-        def stranded_func(ra, start, stop, strand):
+        Returns a `ComputationNode` representing the extracted data.
+
+        Parameters
+        ----------
+        intervals : Interval
+            The set of intervals to extract data from
+        stranded : bool
+            Whether or not to treat the intervals as stranded
+
+        Returns
+        -------
+        ComputationNode:
+            A computation node representing the raggedarray containing data from all the intervals
+        """
+        
+        def stranded_func(ra: GenomicRunLengthArray, start: int, stop: int, strand: str):
             assert np.all(stop <= ra.size), (np.max(stop), ra.size)
             rle = ra[start:stop]
             r = rle[:, ::-1]
             return np.where((strand == '+')[:, np.newaxis],
                             rle, r)
 
-        def unstranded_func(ra, start, stop):
+        def unstranded_func(ra: GenomicRunLengthArray, start: int, stop: int):
             assert np.all(stop <= ra.size), (np.max(stop), ra.size)
             return ra[start:stop]
+
         assert self.genome_context.is_compatible(intervals.genome_context), (self.genome_context, intervals.genome_context)
         intervals = intervals.as_stream()
         if stranded:
@@ -265,4 +337,3 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         if func == np.histogram:
             return np.histogram(args[0]._run_length_node, *args[1:], **kwargs)
         return NotImplemented
-
