@@ -264,7 +264,6 @@ class Genome:
         return f"{self.__class__.__name__}(" + repr(self._genome_context) + ")"
 
     def __str__(self):
-        #return str(self._genome_context)
         return table(
             ((key, value) for key, value in self._genome_context.chrom_sizes.items() if '_' not in key),
             headers=["Chromosome", "Size"])
