@@ -5,12 +5,13 @@ from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
 from ..io.indexed_files import IndexBuffer, create_index
 from .genomic_track import GenomicArray
-from .genomic_intervals import GenomicIntervals, GenomicLocation
+from .genomic_intervals import GenomicIntervals, GenomicLocation, LocationEntry
 from .genomic_sequence import GenomicSequence
 from .annotation import GenomicAnnotation
 from .genome_context import GenomeContext
 from ..encoded_array import as_encoded_array
 from ..bnpdataclass import replace, BNPDataClass
+from ..datatypes import BedGraph, Interval
 from ..util.formating import table
 
 
@@ -29,15 +30,19 @@ class Genome:
         return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
-    def from_file(cls, filename: str, sort_names=False) -> 'Genome':
+    def from_file(cls, filename: str, sort_names: bool=False) -> 'Genome':
         """Read genome information from a 'chrom.sizes' or 'fa.fai' file
 
-        File should contain rows of names and lengths of chromosomes
+        File should contain rows of names and lengths of chromosomes.
+        If a fasta file is provided, a fasta index will be written to 'fa.fai'
+        if not already theree. The sequence will then be available through, 'genome.read_sequence()'
+        without any 'filename' parameter.
 
         Parameters
         ----------
         cls :
         filename : str
+        sort_names : bool Whether or not to sort the chromosome names
 
         Returns
         -------
@@ -67,15 +72,25 @@ class Genome:
             content = f.read()
         return content
 
-    def get_track(self, bedgraph):
+    def get_track(self, bedgraph: BedGraph) -> GenomicArray:
+        """Create a `GenomicArray` for the data in the bedgraph
+
+        Parameters
+        ----------
+        bedgraph : BedGraph
+
+        Returns
+        -------
+        GenomicArray
+        """
         bedgraph = self._mask_data_on_extra_chromosomes(bedgraph)
         return GenomicArray.from_bedgraph(bedgraph, self._genome_context)
 
     def read_track(self, filename: str, stream: bool = False) -> GenomicArray:
-        """Read a bedgraph from file and convert it to a `GenomicTrack`
+        """Read a bedgraph from file and convert it to a `GenomicArray`
 
         If `stream` is `True` then read the bedgraph in chunks and get
-        a lazy evaluated GenomicTrack
+        a lazy evaluated GenomicArray
 
         Parameters
         ----------
@@ -88,9 +103,21 @@ class Genome:
         content = self._open(filename, stream)
         return self.get_track(content)
 
-    def get_intervals(self, intervals, stranded=False):
-        # intervals = self._mask_data_on_extra_chromosomes(intervals)
-        return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
+    def get_intervals(self, intervals: Interval, stranded: bool = False) -> GenomicIntervals:
+        """Get genomic intervals from interval data. 
+
+        Parameters
+        ----------
+        intervals : Interval
+            Interval's or stream of Intervals's
+        stranded : bool
+            Wheter or not the intervals are stranded
+
+        Returns
+        -------
+        GenomicIntervals
+        """
+        GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
     def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`
@@ -102,9 +129,14 @@ class Genome:
         ----------
         filename : str
             Filename for the bed file
+        stranded : bool
+            Whether or not to treat the intervals as stranded
         stream : bool
             Wheter to read as a stream
 
+        Returns
+        -------
+        GenomicIntervals
         """
         path = PurePath(filename)
         suffix = path.suffixes[-1]
@@ -119,7 +151,30 @@ class Genome:
         return self.get_intervals(content, stranded)
     # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
-    def read_locations(self, filename, stranded=False, stream=False, has_numeric_chromosomes=False):
+    def read_locations(self, filename: str, stranded: bool = False, stream: bool = False, has_numeric_chromosomes=False) -> GenomicLocation:
+        """Read a set of locations from file and convert them to `GenomicLocation`        
+
+        Locations can be treated as stranded or not stranded. If `has_numeric_chromosomes` then 'chr'
+        will be prepended to all the chromosome names in order to make them compatible with the
+        genome's chromosome names
+
+        Parameters
+        ----------
+        filename : str
+            Filename of the locations
+        stranded : bool
+            Whether or not the locations are stranded
+        stream : bool
+            Whether the data should be read as a stream
+        has_numeric_chromosomes : 6
+            Whether the file has the chromosomes as numbers
+
+        Returns
+        -------
+        GenomicLocation
+            (Stranded) GenomicLocation
+
+        """
         assert not (stream and has_numeric_chromosomes)
         f = bnp_open(filename)
         if not stream:
@@ -138,17 +193,61 @@ class Genome:
         mask = self._genome_context.is_included(encoded_chromosomes)
         return data[mask]
 
-    def get_locations(self, data):
+    def get_locations(self, data: LocationEntry) -> GenomicLocation:
+        """Create `GenomicLocation`s from location entries
+
+        Parameters
+        ----------
+        data : LocationEntry
+            BNPDataClass of location entries
+
+        Returns
+        -------
+        GenomicLocation
+
+        """
         data = self._mask_data_on_extra_chromosomes(data)
         return GenomicLocation.from_data(data, self._genome_context)
 
     def read_sequence(self, filename: str = None) -> GenomicSequence:
+        """Read the genomic sequence from file.
+
+        If a `fasta` file was used to create the Genome object, `filename` can be `None`
+        in which case the sequence will be read from that fasta file
+
+        Parameters
+        ----------
+        filename : str
+
+        Returns
+        -------
+        GenomicSequence
+
+        """
+        
         if filename is None:
             assert self._fasta_filename is not None
             filename = self._fasta_filename 
         return GenomicSequence.from_indexed_fasta(open_indexed(filename))
 
     def read_annotation(self, filename: str) -> GenomicAnnotation:
+        """Read genomic annotation from a 'gtf' or 'gff' file
+
+        The annotation file should have 'gene', 'transcript' and 'exon' entries.
+
+        Parameters
+        ----------
+        filename : str
+            Filename of the annotation file
+
+
+        Returns
+        -------
+        GenomicAnnotation
+            `GenomicAnnotation` containing the genes, transcripts and exons
+
+        """
+        
         gtf_entries = self._open(filename, stream=False)
         return GenomicAnnotation.from_gtf_entries(gtf_entries, self._genome_context)
 
@@ -163,4 +262,5 @@ class Genome:
 
     @property
     def size(self):
+        '''The size of the genome'''
         return self._genome_context.size
