@@ -12,6 +12,11 @@ GenomeIndex = Union[str, List[str], Interval, Interval.single_entry]
 
 
 class GenomicData:
+    '''
+    Base class for genomic data. All genomic data should support indexing on:
+    chromosome(s), GenomicIntervals, GenomicLocation and boolean GenomicArrays
+    '''
+
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
             return self.extract_chromsome(idx)

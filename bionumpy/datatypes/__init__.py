@@ -6,6 +6,17 @@ from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncod
 from ..bnpdataclass import bnpdataclass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
 
+@bnpdataclass
+class LocationEntry:
+    chromosome: str
+    position: int
+
+
+@bnpdataclass
+class StrandedLocationEntry(LocationEntry):
+    strand: StrandEncoding
+
+
 
 @bnpdataclass
 class BedGraph:
