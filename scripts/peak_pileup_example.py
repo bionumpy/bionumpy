@@ -51,7 +51,7 @@ def test_example_2_bam_pileup():
     # We can index any region
     region = pileup["chr22"][19970400:19970800]
 
-    px.line(region.to_array()).show()
+    #px.line(region.to_array()).show()
 
 
 
