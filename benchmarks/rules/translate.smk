@@ -19,6 +19,8 @@ rule translate_biopython:
         "results/biopython/translate/{name}.fa"
     benchmark:
         "benchmarks/translate/biopython/{name}.txt"
+    conda:
+        "../envs/biopython.yml"
     script:
         "../scripts/biopython_translate.py"
 
