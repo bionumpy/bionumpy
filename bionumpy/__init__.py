@@ -18,7 +18,6 @@ from .datatypes import SAMEntry, GFFEntry, Bed6, Interval, LocationEntry
 from .io.strops import str_equal
 from .util.cli import run_as_commandline
 from .computation_graph import compute
-
 from . import simulate
 from . import arithmetics
 from .genomic_data import Genome, GenomicArray, GenomicIntervals

@@ -190,3 +190,11 @@ def test_read_example_data(file_name):
         continue
 
     assert True
+
+
+@pytest.mark.skip("Failing")
+def test_read_bam():
+    data = bnp.open("example_data/alignments.bam").read()
+    n_lines = len([line for line in open("example_data/alignments.sam") if not line.startswith("@")])
+    assert n_lines == len(data)
+

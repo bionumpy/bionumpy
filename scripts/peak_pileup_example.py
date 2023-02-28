@@ -37,23 +37,21 @@ and data on a reference genome. Here are a few examples to illustrate how BioNum
 """
 Example 1: Creating a pileup from a BAM-file. 
 """
-def _test_example_2_bam_pileup():
+def test_example_2_bam_pileup():
     import bionumpy as bnp
-    import matplotlib.pyplot as plt
+    import plotly.express as px
 
-    # Getting a read pileup
-    genome = bnp.Genome.from_file("example_data/hg38.chrom.sizes")
-
-    # Reading reads as intervals on the genome
+    # Reading a genome and reads from a bam file
+    genome = bnp.Genome.from_file("example_data/chr21-22.chrom.sizes")
     reads = genome.read_intervals("example_data/ctcf_chr21-22.bam")
 
-    # Getting read pileup
+    # Getting read pileup (stored efficiently as a RunLengthArray)
     pileup = reads.get_pileup()
 
     # We can index any region
     region = pileup["chr22"][19970400:19970800]
-    plt.plot(region)
-    plt.show()
+
+    px.line(region.to_array()).show()
 
 
 

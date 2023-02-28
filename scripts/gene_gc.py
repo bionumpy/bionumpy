@@ -1,11 +1,6 @@
 import typer
 import bionumpy as bnp
-import logging
-import plotly.express as px
 import plotly.graph_objects as go
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 
 
 def bar(counter):
@@ -23,8 +18,9 @@ def main(fasta_filename: str, annotation_filename: str):
     exon_mask = annotation.exons.get_mask()
     intron_mask = transcription_mask & ~exon_mask
     counts = bnp.count_encoded(reference_sequence[exon_mask])
-    bar(counts).show()
+    print(counts)
     intron_sequence = reference_sequence[intron_mask]
+    print(intron_sequence)
     bar(bnp.count_encoded(intron_sequence)).show()
 
 

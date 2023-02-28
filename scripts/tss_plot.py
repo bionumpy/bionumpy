@@ -5,18 +5,26 @@ import bionumpy as bnp
 
 
 def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: str):
+    import plotly.express as px
+
+    # Read genome, a wig read pileup and transcripts
     genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True)
     track = genome.read_track(wig_filename, stream=True)
     annotation = genome.read_annotation(annotation_filename)
     transcripts = annotation.transcripts
+
+    # Get transcript start locations and make windows around them
     tss = transcripts.get_location('start').sorted()
     windows = tss.get_windows(flank=500)
+
+    # Get mean read pileup within these windows and plot
     signals = track[windows]
     mean_signal = signals.mean(axis=0)
     signal, = bnp.compute(mean_signal)
     signal = signal.to_array()
-    plt.plot(np.arange(-500, 500), signal)
-    plt.show()
+
+    px.line(x=np.arange(-500, 500), y=signal, title="Read pileup relative to TSS start",
+            labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
 
 
 def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
@@ -37,12 +45,20 @@ def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
 
 
 def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str):
+    import matplotlib.pyplot as plt
+
+    # Read genome and peaks
     genome = bnp.Genome.from_file(chrom_sizes_filename).with_ignored_added(['chrEBV'])
     peaks = bnp.open(peak_filename, buffer_type=bnp.NarrowPeakBuffer).read()
     location_entries = bnp.LocationEntry(peaks.chromosome, peaks.start+peaks.summit)
+    # Create locations of peaks summits
     summits = genome.get_locations(location_entries).sorted()
+
+    # Create windows around summits and extract read pileup
     windows = summits.get_windows(flank=200)
-    reads = genome.read_intervals(bam_filename, stream=True, stranded=True)
+    reads = genome.read_intervals(bam_filename, stream=False, stranded=True)
+
+    # Get mean pileup for reads with negative and positive strand
     means = [reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)
              for strand in '+-']
     pos_mean, neg_mean = bnp.compute(*means)
@@ -52,13 +68,18 @@ def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str
 
 
 def vcf_plot(wig_filename: str, chrom_sizes_filename: str, vcf_filename: str):
-    flank = 100
+    # Read genome and variants
     genome = bnp.Genome.from_file(chrom_sizes_filename)
     variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=True)
+
+    # Get windows around variants and get read pileup in these windows
+    flank = 100
     windows = variants.get_windows(flank=flank)
     reads = genome.read_intervals(wig_filename, stream=True, stranded=True)
     track = reads.get_pileup()
     signals = track[windows]
+
+    # Get mean signal inside these windows and plot
     mean_signal = signals.sum(axis=0)
     signal, = bnp.compute(mean_signal)
     signal = signal.to_array()
@@ -78,6 +99,10 @@ def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
     func(wig_filename, chrom_sizes_filename, filename)
 
 
+def test():
+    tss_plot("example_data/CTCF_chr21-22.wig.gz", "example_data/chr21-22.chrom.sizes", "example_data/chr21a22.gtf")
+    summit_plot("example_data/ctcf_chr21-22.bam", "example_data/chr21-22.chrom.sizes", "example_data/ctcf_chr21-22.bed.gz")
+    vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
 # tss_plot(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()))
 
 
@@ -86,5 +111,5 @@ main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_
 # main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
 #main(*'example_data/ctcf_chr21-22_reads.bed example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
 # vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
-if __name__ == '__main__':
-    typer.run(main)
+#if __name__ == '__main__':
+#    typer.run(main)

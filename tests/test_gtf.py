@@ -33,3 +33,10 @@ def test_read_gff():
     genes = annotation.get_genes()
     print(genes)
 
+
+@pytest.mark.skip('waiting')
+def test_read_sarcer_gtf():
+    annotation = bnp.open('example_data/sacCer3.ensGene.gtf.gz').read()
+    print(annotation)
+    genes = annotation.get_genes()
+    assert len(genes) > 0
