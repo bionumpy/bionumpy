@@ -10,6 +10,7 @@ def test_read():
     f = bnp.open(filename)
     d = f.read()
     print(d)
+    print(d.flag.dtype)
 
 
 def test_read_intervals():
