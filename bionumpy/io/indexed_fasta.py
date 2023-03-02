@@ -144,7 +144,6 @@ class IndexedFasta:
             chromosome = interval.chromosome.to_string()
             idx = self._index[chromosome]
             lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
-            assert interval.stop <= rlen
             start_row = interval.start//lenc
             start_mod = interval.start % lenc
             start_offset = start_row*lenb+start_mod
@@ -153,16 +152,15 @@ class IndexedFasta:
             self._f_obj.seek(idx["offset"] + start_offset)
             lengths.append(stop_offset-start_offset-(stop_row-start_row))
             D = stop_offset-start_offset
-            tmp = np.frombuffer(self._f_obj.read(stop_offset-start_offset), dtype=np.uint8)
+            tmp = np.frombuffer(self._f_obj.read(stop_offset-start_offset),
+                                dtype=np.uint8)
             tmp = np.delete(tmp, [lenb*(j+1)-1-start_mod
                                   for j in range(stop_row-start_row)])
             pre_alloc[alloc_offset:alloc_offset+tmp.size] = tmp
-            assert tmp.size == interval.stop-interval.start
             alloc_offset += tmp.size
-            # sequences.extend(self._f_obj.read(stop_offset-start_offset))
-            #delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod
-            # for j in range(stop_row-start_row))
             cur_offset += stop_offset-start_offset
+        assert alloc_offset == pre_alloc.size, (alloc_offset, pre_alloc.size)
+        assert np.all(pre_alloc> 0), np.sum(pre_alloc==0)
         # s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
         #s = np.delete(pre_alloc[:alloc_offset], delete_indices)
         a = EncodedArray(pre_alloc, BaseEncoding)

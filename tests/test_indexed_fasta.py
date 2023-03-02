@@ -1,3 +1,4 @@
+from numpy.testing import assert_equal
 from bionumpy.io.indexed_fasta import create_index
 from bionumpy.datatypes import Interval
 from bionumpy.util.testing import assert_encoded_array_equal
@@ -15,6 +16,7 @@ import numpy as np
 
 def test_fasta_index():
     index = create_index("example_data/small_genome.fa")
+    assert_equal(index.length, [300, 600, 900, 1200])
 
 
 def test_dictlike():

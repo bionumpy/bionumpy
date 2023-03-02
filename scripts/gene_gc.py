@@ -22,7 +22,7 @@ def main(fasta_filename: str, annotation_filename: str):
     exon_counts = bnp.count_encoded(reference_sequence[exon_mask])
     intron_counts = bnp.count_encoded(reference_sequence[intron_mask])
     if plot:
-    plot_bars(exon=exon_counts, intron=intron_counts).show()
+        plot_bars(exon=exon_counts, intron=intron_counts).show()
 
 
 if __name__ == '__main__':

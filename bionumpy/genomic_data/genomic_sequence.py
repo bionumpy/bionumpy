@@ -44,11 +44,12 @@ class GenomicSequence(GenomicData):
 
     def extract_intervals(self, intervals: Interval, stranded: bool = False) -> EncodedRaggedArray:
         sequences = self._extract_intervals(intervals)
+        sequences = dna_encode(sequences)
         if stranded:
             sequences = np.where((intervals.strand == '+')[:, np.newaxis],
                                  sequences,
                                  get_reverse_complement(sequences))
-        return dna_encode(sequences)
+        return sequences
 
 
 class GenomicSequenceIndexedFasta(GenomicSequence):

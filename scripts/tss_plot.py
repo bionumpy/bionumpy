@@ -27,7 +27,7 @@ def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: 
                 labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
 
 
-def cpg_plot(fasta_filename, annotation_filename: str, plot: bool=True):
+def cpg_plot(fasta_filename: str, annotation_filename: str, plot: bool=True):
     genome = bnp.Genome.from_file(fasta_filename, sort_names=False) # The wig file is alphbetically sorted    
     reference_sequence = genome.read_sequence()
     annotation = genome.read_annotation(annotation_filename)
@@ -35,9 +35,10 @@ def cpg_plot(fasta_filename, annotation_filename: str, plot: bool=True):
     # Get transcript start locations and make windows around them
     tss = transcripts.get_location('start')
     tss = tss.sorted() # Make sure the transcripts are sorted alphabetically
-    windows = tss.get_windows(flank=500)    
+    flank = 200
+    windows = tss.get_windows(flank=flank)
     cpg_proportion = bnp.match_string(reference_sequence[windows], 'CG').mean(axis=0)
-    px.line(x=np.arange(-500, 499), y=cpg_proportion.to_array(),
+    px.line(x=np.arange(-flank, flank-1), y=cpg_proportion,
             title="Read pileup relative to TSS start",
             labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
 
@@ -168,5 +169,5 @@ def test(plot=False):
 # main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
 #main(*'example_data/ctcf_chr21-22_reads.bed example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
 # vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
-#if __name__ == '__main__':
-#    typer.run(main)
+if __name__ == '__main__':
+    typer.run(cpg_plot)
