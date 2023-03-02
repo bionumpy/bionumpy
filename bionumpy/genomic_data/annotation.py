@@ -24,7 +24,7 @@ class Exons(Transcripts):
 
 class GenomicAnnotation:
     ''' Class to hold a genomic annotations. Basically just a holder for gene, transcript and exon intervals.'''
-    @classmethod
+
     def __init__(self, genes, transcripts, exons, data):
         self._genes = genes
         self._transcripts = transcripts

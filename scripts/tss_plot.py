@@ -172,5 +172,9 @@ def test(plot=False):
 # vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
 # cpg_plot('/home/knut/Sources/bionumpy/example_data/sacCer3.fa',
 #          '/home/knut/Sources/bionumpy/example_data/sacCer3.ensGene.gtf.gz', plot=False)
-if __name__ == '__main__':
-    typer.run(cpg_plot)
+cpg_plot('/home/knut/Data/hg38.fa', '/home/knut/Data/gencode.v41.annotation.gtf.gz',
+         plot=False)
+
+# if __name__ == '__main__':
+
+#     typer.run(cpg_plot)

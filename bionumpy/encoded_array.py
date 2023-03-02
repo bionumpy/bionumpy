@@ -61,7 +61,8 @@ class OneToOneEncoding(Encoding):
 
     def _encode_list_of_strings(self, s: str):
         s = EncodedRaggedArray(
-            EncodedArray([ord(c) for ss in s for c in ss], BaseEncoding),
+            EncodedArray(
+                [ord(c) for ss in s for c in ss], BaseEncoding),
             [len(ss) for ss in s])
         return self._ragged_array_as_encoded_array(s)
 
