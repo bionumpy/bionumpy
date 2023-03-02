@@ -49,6 +49,10 @@ class EncodedCounts:
         return self.__class__(self.alphabet, self.counts+o_counts)
     # return dataclasses.replace(self, counts=self.counts+o_counts)
 
+    @property
+    def proportions(self):
+        return self.counts/self.counts.sum()
+
     def get_count_for_label(self, label):
         return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
 

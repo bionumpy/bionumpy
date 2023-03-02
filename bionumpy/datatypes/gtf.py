@@ -23,7 +23,6 @@ class GTFEntry:
         # ends_in_sep = gtf_entries.atributes[:, -1] ==
         gtf_entries.atributes[:, -1] = " "
         all_features = split(gtf_entries.atributes.ravel(), " ")
-        print(all_features)
         keys = all_features[:-1:2]
         values = all_features[1::2, 1:-2]
         return {name: values[str_equal(keys, name)] for name in attribute_names}
@@ -38,7 +37,6 @@ class GTFEntry:
     def get_transcripts(gtf_entries):
         transcripts = gtf_entries[str_equal(gtf_entries.feature_type, "transcript")]
         attributes = transcripts._get_attributes(["transcript_id", "gene_id"])
-        print(attributes)
         return GFFTranscriptEntry(*transcripts.shallow_tuple(), **attributes)
     
     def get_exons(gtf_entries):
