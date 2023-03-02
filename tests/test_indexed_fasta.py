@@ -37,9 +37,10 @@ def test_get_sequences():
     _intervals = Interval.from_entry_tuples([("1", 10, 20),
                                             ("2", 11, 50),
                                             ("1", 5, 10),
-                                            ("3", 10, 110)])
+                                             ("3", 10, 110),
+                                             ("1", 80, 250)])
     intervals = bnp.bnpdataclass.replace(_intervals, chromosome=bnp.as_encoded_array(_intervals.chromosome, StringEncoding(['0', '1', '2', '3'])))
     sequences = idx_fasta.get_interval_sequences(intervals)
-    assert np.all(sequences.lengths == [10, 39, 5, 100])
+    assert np.all(sequences.lengths == [10, 39, 5, 100, 170])
     for interval, sequence in zip(intervals, sequences):
         assert sequence.to_string() == idx_fasta[interval.chromosome.to_string()][int(interval.start):int(interval.stop)].to_string()
