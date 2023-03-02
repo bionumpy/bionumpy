@@ -151,7 +151,6 @@ class GenomicLocationGlobal(GenomicLocation):
             Window intervals
 
         """
-        
         if self.is_stranded():
             intervals = StrandedInterval(self.chromosome, self.position-flank,
                                          self.position+flank, self.strand)
@@ -488,7 +487,7 @@ class GenomicIntervalsFull(GenomicIntervals):
                        stop=np.minimum(chrom_sizes, self.stop))
 
     def __replace__(self, **kwargs):
-        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
+        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context, self._is_stranded)
 
     def compute(self):
         return self
@@ -619,7 +618,7 @@ class GenomicIntervalsStreamed(GenomicIntervals):
         return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
 
     def compute(self):
-        chromosome, start, stop = compute(self.chromosome, self.start, self.stop)
+        chromosome, start, stop = compute((self.chromosome, self.start, self.stop))
         return GenomicIntervalsFull(Interval(chromosome, start, stop), self._genome_context)
 
     def as_stream(self):

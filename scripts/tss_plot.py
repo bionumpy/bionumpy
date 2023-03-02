@@ -4,30 +4,75 @@ import plotly.graph_objects as go
 import plotly.express as px
 import bionumpy as bnp
 import typer
-
+plot=True
 
 def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: str, plot=True):
-
-
     # Read genome and transcripts
-    genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True)
+    genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True) # The wig file is alphbetically sorted
     annotation = genome.read_annotation(annotation_filename)
     transcripts = annotation.transcripts
 
     # Get transcript start locations and make windows around them
-    tss = transcripts.get_location('start').sorted()
+    tss = transcripts.get_location('start').sorted() # Make sure the transcripts are sorted alphabetically
     windows = tss.get_windows(flank=500)
 
     # Get mean read pileup within these windows and plot
     track = genome.read_track(wig_filename, stream=True)
     signals = track[windows]
     mean_signal = signals.mean(axis=0)
-    signal, = bnp.compute(mean_signal)
-    signal = signal.to_array()
-
+    signal = bnp.compute(mean_signal)  # Compute the actual value
     if plot:
-        px.line(x=np.arange(-500, 500), y=signal, title="Read pileup relative to TSS start",
+        px.line(x=np.arange(-500, 500), y=signal.to_array(),
+                title="Read pileup relative to TSS start",
+                labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
+
+
+def cpg_plot(fasta_filename, annotation_filename: str, plot: bool=True):
+    genome = bnp.Genome.from_file(fasta_filename, sort_names=False) # The wig file is alphbetically sorted    
+    reference_sequence = genome.read_sequence()
+    annotation = genome.read_annotation(annotation_filename)
+    transcripts = annotation.transcripts
+    # Get transcript start locations and make windows around them
+    tss = transcripts.get_location('start')
+    tss = tss.sorted() # Make sure the transcripts are sorted alphabetically
+    windows = tss.get_windows(flank=500)    
+    cpg_proportion = bnp.match_string(reference_sequence[windows], 'CG').mean(axis=0)
+    px.line(x=np.arange(-500, 499), y=cpg_proportion.to_array(),
+            title="Read pileup relative to TSS start",
             labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
+
+def cpg_tss_plot(wig_filename: str, fasta_filename: str, annotation_filename: str, plot=True):
+    # Read genome and transcripts
+    genome = bnp.Genome.from_file(fasta_filename, sort_names=False) # The wig file is alphbetically sorted
+    reference_sequence = genome.read_sequence()
+    annotation = genome.read_annotation(annotation_filename)
+    transcripts = annotation.transcripts
+    # Get transcript start locations and make windows around them
+    tss = transcripts.get_location('start')
+    tss = tss.sorted() # Make sure the transcripts are sorted alphabetically
+    windows = tss.get_windows(flank=500)
+    assert windows.is_stranded()
+    cpg_proportion = bnp.match_string(reference_sequence[windows], 'CG').mean(axis=-1)
+    has_cpg = np.log2(cpg_proportion) > -5
+    # px.histogram(np.log2(cpg_proportion)).show()
+    # Get mean read pileup within these windows and plot
+    track = genome.read_track(wig_filename, stream=True)
+    signals = bnp.compute(track[windows])
+    mean_signals = {'cpg': signals[has_cpg].mean(axis=0),
+                    'non-cpg': signals[~has_cpg].mean(axis=0)}
+    # mean_signals = bnp.compute(mean_signals)  # Compute the actual value
+    if plot:
+        go.Figure(
+            [go.Scatter(x=np.arange(-500, 500), y=signal.to_array(), name=name)
+             for name, signal in mean_signals.items()],
+            layout={'title': "Read pileup relative to TSS start",
+                    'xaxis_title': "Position relative to TSS start",
+                    'yaxis_title': 'Read coverage'}).show()
+        
+        # px.line(x=np.arange(-500, 500), y=signal.to_array(),
+        #         title=,
+        #         labels={"x": , "y": "Mean read pileup"}).show()
+
 
 
 def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
@@ -41,7 +86,7 @@ def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
     signals = track[windows]
     sample_rate = max(max_len//1000, 1)
     signals = signals[:, ::sample_rate]
-    signals, = bnp.compute(signals)
+    signals = bnp.compute(signals)
     args = np.argsort(peak_sizes)
     plt.imshow(signals.to_array()[args])
     plt.show()
@@ -61,14 +106,13 @@ def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str
     reads = genome.read_intervals(bam_filename, stream=False, stranded=True)
 
     # Get mean pileup for reads with negative and positive strand
-    means = [reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)
-             for strand in '+-']
-    pos_mean, neg_mean = bnp.compute(*means)
-
+    signals_dict = {strand: reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)
+                    for strand in '+-'}
+    signals_dict = bnp.compute(signals_dict)
     if plot:
         go.Figure(
-            [go.Scatter(x=np.arange(-200, 200), y=pos_mean.to_array(), name='Positive Strand'),
-             go.Scatter(x=np.arange(-200, 200), y=neg_mean.to_array(), name='Negative Strand')],
+            [go.Scatter(x=np.arange(-200, 200), y=signal.to_array(), name=f'{strand} Strand')
+             for strand, signal in signals_dict.items()],
             layout={'title': 'Summit plot',
                     'xaxis_title': 'Distance from peak summit',
                     'yaxis_title': 'Read coverage'}).show()
@@ -91,7 +135,7 @@ def vcf_plot(wig_filename: str, chrom_sizes_filename: str, vcf_filename: str, pl
 
     # Get mean signal inside these windows and plot
     mean_signal = signals.mean(axis=0)
-    signal, = bnp.compute(mean_signal)
+    signal = bnp.compute(mean_signal)
     signal = signal.to_array()
 
     if plot:

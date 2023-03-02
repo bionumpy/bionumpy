@@ -59,8 +59,8 @@ The mask here is a boolean array which is `True` wherever any of the intervals o
 
 .. testoutput::
 
-    chr1: [ 0.0 0.0 1.0 ... 1.0 1.0 1.0]
-    chr2: [ 0.0 0.0 0.0 ... 1.0 1.0 1.0]
+    chr1: [ 0.0 0.0 1.0 ... 0.0 0.0 0.0]
+    chr2: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
     chr3: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
    
 A benefit of working with genomic data in this way is that they cooperate in a consistent way. We can use GenomicIntervals as indexes to GenomicData, and can again use the extracted data to filter the intervals. Let's see how the `treat_pileup` looks in peak areas (we get the max and mean pileup value for each peak):

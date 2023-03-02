@@ -94,6 +94,6 @@ def test_double_reduce(stream_data, data):
     true_sum = np.sum(data)
     h = np.histogram(stream_data, bins=3, range=(0, 6))
     s = np.sum(stream_data)
-    h, s = compute(h, s)
+    h, s = compute((h, s))
     assert_equal(h[0], true_hist[0])
     assert_equal(s, true_sum)

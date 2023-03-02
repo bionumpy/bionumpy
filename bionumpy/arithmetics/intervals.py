@@ -95,15 +95,24 @@ class GenomicRunLengthArray(RunLengthArray):
             assert size is not None
             return cls(np.array([0, size], dtype=int),
                        np.array([0]))
-        assert bedgraph.start[0] == 0
+        # assert bedgraph.start[0] == 0, bedgraph
+        missing_idx = np.flatnonzero(bedgraph.start[1:] != bedgraph.stop[:-1])
+        if len(missing_idx):
+            start = np.insert(bedgraph.start, missing_idx+1, bedgraph.stop[missing_idx])
+            value = np.insert(bedgraph.value, missing_idx+1, 0)
+        else:
+            start, value = (bedgraph.start, bedgraph.value)
         if size is not None:
             assert bedgraph.stop[-1] <= size, (bedgraph.stop[-1], size)
         if (size is None) or (size == bedgraph.stop[-1]):
-            events = np.append(bedgraph.start, bedgraph.stop[-1])
-            values = bedgraph.value
+            events = np.append(start, bedgraph.stop[-1])
+            values = value
         else:
-            events = np.append(bedgraph.start, [bedgraph.stop[-1], size])
-            values = np.append(bedgraph.value, 0)
+            events = np.append(start, [bedgraph.stop[-1], size])
+            values = np.append(value, 0)
+        if events[0] != 0:
+            events = np.insert(events, 0, 0)
+            values = np.insert(values, 0, 0)
         return cls(events, values)
 
     def to_bedgraph(self, sequence_name):

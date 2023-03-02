@@ -1,10 +1,11 @@
 import numpy as np
 from numpy.testing import assert_equal
-from bionumpy.datatypes import Interval, StrandedInterval
+from bionumpy.datatypes import Interval, StrandedInterval, BedGraph
 from bionumpy.arithmetics.intervals import GenomicRunLengthArray
 from bionumpy.genomic_data.genomic_intervals import GenomicIntervals, GenomicLocation, LocationEntry
 from bionumpy.genomic_data.genomic_track import GenomicArray, GenomicArrayGlobal, GenomicArrayNode
 from bionumpy.genomic_data.genome_context import GenomeContext, GenomeError
+from bionumpy.genomic_data.genome import Genome
 from bionumpy.util.testing import assert_raggedarray_equal, assert_bnpdataclass_equal
 from bionumpy.computation_graph import compute
 import pytest
@@ -122,14 +123,14 @@ def test_get_windows(genomic_locations, windows):
 
 def test_extract_windows(windows, track_stream, track_arrays):
     tmp = track_stream[windows].mean(axis=0)
-    result, = compute(tmp)
+    result = compute(tmp)
     result = result.to_array()
     true = np.mean([track_arrays[w.chromosome.to_string()][w.start:w.stop] if w.strand == '+' else track_arrays[w.chromosome.to_string()][w.stop-1:w.start-1:-1] for w in windows], axis=0)
     assert_raggedarray_equal(result, true)
 
 def test_extract_windows_2(windows, track_stream, track_arrays):
     tmp = track_stream[windows]
-    result, = compute(tmp)
+    result = compute(tmp)
     result = result.to_array()
     true = np.array([track_arrays[w.chromosome.to_string()][w.start:w.stop] if w.strand == '+' else track_arrays[w.chromosome.to_string()][w.stop-1:w.start-1:-1] for w in windows])
     assert_equal(result, true)
@@ -138,7 +139,7 @@ def test_extract_windows_2(windows, track_stream, track_arrays):
 def test_extract_windows_and_subset(windows, track_stream, track_arrays):
     tmp = track_stream[windows]
     tmp = tmp[:, ::2]
-    result, = compute(tmp)
+    result = compute(tmp)
     result = result[np.argsort(windows.stop-windows.start)]
 
     result = result.to_array()
@@ -184,3 +185,5 @@ def test_invalid_context2(genome_context_big):
         [0, 1, 2])
     with pytest.raises(GenomeError):
         list(genome_context.iter_chromosomes(locations, LocationEntry))
+
+

@@ -172,7 +172,9 @@ class JoinNode(ComputationNode):
         return [np.concatenate(column) for column in zip(*self.get_iter())]
 
 
-def compute(*args): # func, args, kwargs=None):
+
+
+def _compute(*args): # func, args, kwargs=None):
     if not any(isinstance(a, Node) for a in args):
         return args
     if all(isinstance(a, ReductionNode) for a in args):
@@ -182,6 +184,17 @@ def compute(*args): # func, args, kwargs=None):
         node = JoinNode(lambda *a: tuple(a),
                         args)
         return node.compute()
+
+def compute(args):
+    if isinstance(args, dict):
+        return dict(zip(args.keys(), _compute(*args.values())))
+    elif isinstance(args, (list, tuple)):
+        return _compute(*args)
+    elif isinstance(args, Node):
+        return args.compute()
+    return args
+    
+
     # 
     # 
     # func, args = args
