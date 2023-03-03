@@ -25,25 +25,36 @@ class Exons(Transcripts):
 class GenomicAnnotation:
     ''' Class to hold a genomic annotations. Basically just a holder for gene, transcript and exon intervals.'''
 
-    def __init__(self, genes, transcripts, exons, data):
-        self._genes = genes
-        self._transcripts = transcripts
-        self._exons = exons
+    def __init__(self, data, genome_context):
+        # self._genes, transcripts, exons, data):
+        # self._genes = genes
+        # self._transcripts = transcripts
+        # self._exons = exons
+        self._exons = None
+        self._transcripts = None
+        self._genes = None
         self._data = data
+        self._genome_context = genome_context
 
     def __str__(self):
         return f'GenomicAnnotation with {len(self._genes)} genes, {len(self._transcripts)} transcripts and {len(self._exons)} exons'
 
     @property
     def genes(self) -> Genes:
+        if self._genes is None:
+            self._genes = Genes(self._data.get_genes(), self._genome_context, True)
         return self._genes
 
     @property
     def transcripts(self) -> Transcripts:
+        if self._transcripts is None:
+            self._transcripts = Transcripts(self._data.get_transcripts(), self._genome_context, True)
         return self._transcripts
 
     @property
     def exons(self) -> Exons:
+        if self._exons is None:
+            self._exons = Exons(self._data.get_exons(), self._genome_context, True)
         return self._exons
 
     @classmethod
@@ -62,7 +73,7 @@ class GenomicAnnotation:
         'GenomicAnnotation'
             Annotatin object holding the genes, transcripts and exons
         """
-        return cls(Genes(gtf_entries.get_genes(), genome_context, True),
-                   Transcripts(gtf_entries.get_transcripts(), genome_context, True),
-                   Exons(gtf_entries.get_exons(), genome_context, True),
-                   gtf_entries)
+        return cls(gtf_entries, genome_context)# Genes(gtf_entries.get_genes(), genome_context, True),
+    #Transcripts(gtf_entries.get_transcripts(), genome_context, True),
+    #               Exons(gtf_entries.get_exons(), genome_context, True),
+    #               gtf_entries)
