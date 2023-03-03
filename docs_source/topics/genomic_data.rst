@@ -146,7 +146,7 @@ Now we can use our intervals as indexed to the reference sequence in much the sa
    
 Further reading
 -----------------
-
+    * :ref:`Tutorail: Genomic data from multiple sources <multi_genomic_data>`
     * :ref:`Tutorial: Analysing the read pileup within peaks (intervals) <subsetting_bed>`
     * :ref:`Tutorial: Computing the similarity between to bed files <similarity_measures_tutorial>`
     * :ref:`More about intervals <intervals>`

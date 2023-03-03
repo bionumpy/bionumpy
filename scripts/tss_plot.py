@@ -6,6 +6,7 @@ import bionumpy as bnp
 import typer
 plot=True
 
+
 def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: str, plot=True):
     # Read genome and transcripts
     genome = bnp.Genome.from_file(chrom_sizes_filename, sort_names=True) # The wig file is alphbetically sorted
@@ -22,9 +23,9 @@ def tss_plot(wig_filename: str, chrom_sizes_filename: str, annotation_filename: 
     mean_signal = signals.mean(axis=0)
     signal = bnp.compute(mean_signal)  # Compute the actual value
     if plot:
-        px.line(x=np.arange(-500, 500), y=signal.to_array(),
-                title="Read pileup relative to TSS start",
-                labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
+        return px.line(x=np.arange(-500, 500), y=signal.to_array(),
+                       title="Read pileup relative to TSS start",
+                       labels={"x": "Position relative to TSS start", "y": "Mean read pileup"})
 
 
 def cpg_plot(fasta_filename: str, annotation_filename: str, plot: bool=True):
@@ -39,9 +40,10 @@ def cpg_plot(fasta_filename: str, annotation_filename: str, plot: bool=True):
     windows = tss.get_windows(flank=flank)
     cpg_proportion = bnp.match_string(reference_sequence[windows], 'CG').mean(axis=0)
     if plot:
-        px.line(x=np.arange(-flank, flank-1), y=cpg_proportion,
-                title="Read pileup relative to TSS start",
-                labels={"x": "Position relative to TSS start", "y": "Mean read pileup"}).show()
+        return px.line(x=np.arange(-flank, flank-1), y=cpg_proportion,
+                       title="Read pileup relative to TSS start",
+                       labels={"x": "Position relative to TSS start", "y": "Mean read pileup"})
+
 
 def cpg_tss_plot(wig_filename: str, fasta_filename: str, annotation_filename: str, plot=True):
     # Read genome and transcripts
@@ -64,17 +66,16 @@ def cpg_tss_plot(wig_filename: str, fasta_filename: str, annotation_filename: st
                     'non-cpg': signals[~has_cpg].mean(axis=0)}
     # mean_signals = bnp.compute(mean_signals)  # Compute the actual value
     if plot:
-        go.Figure(
+        return go.Figure(
             [go.Scatter(x=np.arange(-500, 500), y=signal.to_array(), name=name)
              for name, signal in mean_signals.items()],
             layout={'title': "Read pileup relative to TSS start",
                     'xaxis_title': "Position relative to TSS start",
-                    'yaxis_title': 'Read coverage'}).show()
+                    'yaxis_title': 'Read coverage'})
         
         # px.line(x=np.arange(-500, 500), y=signal.to_array(),
         #         title=,
         #         labels={"x": , "y": "Mean read pileup"}).show()
-
 
 
 def peak_plot(wig_filename: str, chrom_sizes_filename: str, peak_filename: str):
@@ -112,12 +113,12 @@ def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str
                     for strand in '+-'}
     signals_dict = bnp.compute(signals_dict)
     if plot:
-        go.Figure(
+        return go.Figure(
             [go.Scatter(x=np.arange(-200, 200), y=signal.to_array(), name=f'{strand} Strand')
              for strand, signal in signals_dict.items()],
             layout={'title': 'Summit plot',
                     'xaxis_title': 'Distance from peak summit',
-                    'yaxis_title': 'Read coverage'}).show()
+                    'yaxis_title': 'Read coverage'})
         # fig.add_trace(go.Scatter(x=np.arange(-200, 200), y=pos_mean.to_array(), name='Positive Strand'))
         #fig.add_trace(go.Scatter(x=np.arange(-200, 200), y=neg_mean.to_array(), name='Negative Strand'))
         # fig.show()
@@ -141,9 +142,9 @@ def vcf_plot(wig_filename: str, chrom_sizes_filename: str, vcf_filename: str, pl
     signal = signal.to_array()
 
     if plot:
-        px.line(x=np.arange(-flank, flank), y=signal,
-                title="Read pileup relative to common variants",
-                labels={"x": "Position relative to variant location", "y": "Mean read pileup"}).show()
+        return px.line(x=np.arange(-flank, flank), y=signal,
+                       title="Read pileup relative to common variants",
+                       labels={"x": "Position relative to variant location", "y": "Mean read pileup"})
 
 
 def main(wig_filename: str, chrom_sizes_filename: str, filename: str):
@@ -165,6 +166,16 @@ def test(plot=False):
 # tss_plot(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()))
 
 
+def write_images():
+    #fig = tss_plot(*('/home/knut/Downloads/ENCFF994MIH.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/gencode.v43.annotation.gff3.gz'.split()), True)
+    # fig.write_image('docs_source/figures/tss_plot_ENCFF994MIH.png')
+    fig = summit_plot("example_data/ctcf_chr21-22.bam", "example_data/chr21-22.chrom.sizes", "example_data/ctcf_chr21-22.bed.gz", plot=plot)
+    fig.write_image('docs_source/figures/summit_plot.png')
+    fig = vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz', plot=plot)
+    fig.write_image('docs_source/figures/vcf_plot.png')
+
+
+write_images()
 # main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
 #main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/chr21a22.gtf'.split())
 # main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())
@@ -172,8 +183,8 @@ def test(plot=False):
 # vcf_plot('example_data/ctcf_chr21-22.bam', 'example_data/chr21-22.chrom.sizes', 'example_data/1000Genomes_chr21-22.vcf.gz')
 # cpg_plot('/home/knut/Sources/bionumpy/example_data/sacCer3.fa',
 #          '/home/knut/Sources/bionumpy/example_data/sacCer3.ensGene.gtf.gz', plot=False)
-cpg_plot('/home/knut/Data/hg38.fa', '/home/knut/Data/gencode.v41.annotation.gtf.gz',
-         plot=False)
+#cpg_plot('/home/knut/Data/hg38.fa', '/home/knut/Data/gencode.v41.annotation.gtf.gz',
+#          plot=False)
 
 # if __name__ == '__main__':
 
