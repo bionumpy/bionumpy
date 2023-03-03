@@ -102,5 +102,5 @@ It's useful to see how the reads align on both sides of the summits we find from
                   layout={'title': 'Summit plot',
                           'xaxis_title': 'Distance from peak summit',
                           'yaxis_title': 'Read coverage'}).show()
-g
+
 .. image:: ../figures/summit_plot.png
