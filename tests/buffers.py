@@ -1,7 +1,8 @@
 import pytest
 from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
-from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry, Bed12, Bed6
+from bionumpy.datatypes import SequenceEntry, SequenceEntryWithQuality, Interval, SNP, SAMEntry, VCFEntry, Bed12, Bed6, BedGraph
 from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, Bed12Buffer, Bed6Buffer
+from bionumpy.io.wig import WigBuffer
 from bionumpy.io.multiline_buffer import MultiLineFastaBuffer
 from bionumpy.encoded_array import EncodedArray
 from bionumpy.encodings import BaseEncoding
@@ -75,16 +76,23 @@ SRR1524970.316478	16	test_ref	1706	255	24M	*	0	0	TGCTGATGAAGCAGAACAACTTTA	`\X_`a
     "bed12": """\
 chr21 10079666  10120808   uc002yiv.1  0  -  10081686  10120608  0     4   528,91,101,215, 0,1930,39750,40927,
 chr21 10080031  10081687   uc002yiw.1  0  -  10080031  100800310\t0     2   200,91,    0,1565,
-"""
+""",
+    'wig': '''\
+#bedGraph section chr1:0-9871
+chr1	0	9800	-0
+chr1	9800	9871	0.36612
+#bedGraph section chr1:9871-9872
+chr1	9871	9872	0.17042
+'''
 }
 
 buffers = {key: chunk_from_text(val) for key, val in buffer_texts.items()}
 
 data = {
     "bed": [
-        Bed6.single_entry("chr1", 1, 3, ".", "0", "-"),
-        Bed6.single_entry("chr1", 40, 60, ".", "1", "+"),
-        Bed6.single_entry("chr20",  400, 600, ".", "2", "+")],
+        Bed6.single_entry("chr1", 1, 3, ".", 0, "-"),
+        Bed6.single_entry("chr1", 40, 60, ".", 1, "+"),
+        Bed6.single_entry("chr20",  400, 600, ".", 2, "+")],
     "vcf2": [
         VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
         VCFEntry.single_entry("chr1",	887559, "rs3748595",	"A",	"CAA", ".", ".", "."),
@@ -109,8 +117,12 @@ data = {
         SAMEntry.single_entry("SRR1524970.144283", 16, "test_ref", 1705, 255, "25M",	"*", 0, 0, "TGCTGATGAAGCAGAACAACTTTAA", "]YG[^baaaa^W`ab]]````aaba"),
         SAMEntry.single_entry("SRR1524970.316478", 16, "test_ref", 1705, 255, "24M", "*", 0, 0, "TGCTGATGAAGCAGAACAACTTTA", 	"`\X_`aaaaaY]``b_aa_aaaaa")],
     "bed12": [
-        Bed12.single_entry("chr21", 10079666,  10120808,   "uc002yiv.1", "0", "-", 10081686, 10120608,  "0",     4,   [[528,91,101,215]], [[0,1930,39750,40927]]),
-        Bed12.single_entry("chr21", 10080031,  10081687,   "uc002yiw.1",  "0",  "-",  10080031,  10080031,  "0",     2,   [[200,91]],    [[0,1565]])]
+        Bed12.single_entry("chr21", 10079666,  10120808,   "uc002yiv.1", 0, "-", 10081686, 10120608,  "0",     4,   [[528,91,101,215]], [[0,1930,39750,40927]]),
+        Bed12.single_entry("chr21", 10080031,  10081687,   "uc002yiw.1",  0,  "-",  10080031,  10080031,  "0",     2,   [[200,91]],    [[0,1565]])],
+    'wig': BedGraph.from_entry_tuples([
+        ('chr1',	0, 9800,	-0),
+        ('chr1',	9800,	9871,	0.36612),
+        ('chr1',	9871,	9872,	0.17042)])
 }
 
 
@@ -121,7 +133,8 @@ buffer_type = {"bed": Bed6Buffer,
                "fasta": TwoLineFastaBuffer,
                "gfa_sequence": GfaSequenceBuffer,
                "multiline_fasta": MultiLineFastaBuffer,
-               "bed12": Bed12Buffer}
+               "bed12": Bed12Buffer,
+               'wig': WigBuffer}
 
 
 combos = {key: (buffers[key], data[key], buffer_type[key]) for key in buffer_type}

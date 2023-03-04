@@ -3,10 +3,11 @@ import gzip
 import dataclasses
 from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer
-from .bam import BamBuffer
+from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
-                                NarrowPeakBuffer)
+                                NarrowPeakBuffer, BdgBuffer, GTFBuffer)
+from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter
 from .exceptions import FormatException
 from ..streams import NpDataclassStream
@@ -17,11 +18,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
 buffer_types = {
     ".vcf": VCFBuffer,
     ".bed": BedBuffer,
+    '.bdg': BdgBuffer,
     ".narrowPeak": NarrowPeakBuffer,
     ".fasta": MultiLineFastaBuffer,
     ".fa": MultiLineFastaBuffer,
@@ -29,11 +29,12 @@ buffer_types = {
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
     ".gff": GFFBuffer,
-    ".gtf": GFFBuffer,
+    ".gtf": GTFBuffer,
     ".gff3": GFFBuffer,
     ".sam": SAMBuffer, #, comment="@"),
     ".bam": BamBuffer,
-    ".sizes": ChromosomeSizeBuffer
+    ".sizes": ChromosomeSizeBuffer,
+    '.wig': WigBuffer
 }
 
 

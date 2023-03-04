@@ -10,16 +10,15 @@ twine==1.14.0
 Click==7.1.2
 pytest==6.2.4
 black==21.7b0
+numpy
 hypothesis
 build
 pytest-cov
 coverage-badge
 sphinx-design
 sphinx_rtd_theme
-#matplotlib
 plotly
 kaleido
-biopython
 nbsphinx
 more_itertools
 sphinxcontrib.bibtex

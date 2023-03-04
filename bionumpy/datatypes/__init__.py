@@ -4,7 +4,18 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
                          CigarEncoding, StrandEncoding)
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
 from ..bnpdataclass import bnpdataclass
-from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry
+from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
+
+@bnpdataclass
+class LocationEntry:
+    chromosome: str
+    position: int
+
+
+@bnpdataclass
+class StrandedLocationEntry(LocationEntry):
+    strand: StrandEncoding
+
 
 
 @bnpdataclass
@@ -12,7 +23,7 @@ class BedGraph:
     chromosome: str
     start: int
     stop: int
-    value: int
+    value: float
 
 
 @bnpdataclass
@@ -41,18 +52,23 @@ class Interval:
 
 
 @bnpdataclass
+class StrandedInterval(Interval):
+    strand: StrandEncoding
+
+
+@bnpdataclass
 class Bed6(Interval):
     name: str
-    score: str
+    score: int
     strand: StrandEncoding
 
 
 @bnpdataclass
 class NarrowPeak(Bed6):
-    signal_value: str
+    signal_value: float
     p_value: float
     q_value: float
-    peak: int
+    summit: int
 
 
 @bnpdataclass

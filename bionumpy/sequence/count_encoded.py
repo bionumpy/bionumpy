@@ -49,6 +49,10 @@ class EncodedCounts:
         return self.__class__(self.alphabet, self.counts+o_counts)
     # return dataclasses.replace(self, counts=self.counts+o_counts)
 
+    @property
+    def proportions(self):
+        return self.counts/self.counts.sum()
+
     def get_count_for_label(self, label):
         return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
 
@@ -74,6 +78,9 @@ class EncodedCounts:
             [self.alphabet[i] for i in args],
             self.counts[args])
 
+    def as_dict(self):
+        return dict(zip(self.alphabet, self.counts.T))
+
 
 def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int = -1) -> EncodedCounts:
     """Count the occurances of encoded entries. Works on any encoding with finite alphabet
@@ -96,7 +103,12 @@ def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int
     else:
         alphabet = values.encoding.get_labels()
     if isinstance(values, EncodedArray) and len(values.shape) == 1:
-        counts = np.bincount(values, weights=weights, minlength=len(alphabet))
+        max_size = 1000000
+        if len(values) > max_size and weights is None:
+            counts = sum(np.bincount(values[i*max_size:(i+1)*max_size], minlength=len(alphabet))
+                         for i in range(len(values)//max_size+1))
+        else:
+            counts = np.bincount(values, weights=weights, minlength=len(alphabet))
     elif axis == -1:
         counts = np.array([np.bincount(row, weights=weights, minlength=len(alphabet)) for row in values])
     return EncodedCounts(alphabet, counts)

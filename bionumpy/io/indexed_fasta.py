@@ -4,6 +4,7 @@ from .multiline_buffer import FastaIdxBuffer, FastaIdx
 from ..datatypes import Interval
 from .files import bnp_open
 from ..encodings import BaseEncoding
+from ..encodings.string_encodings import StringEncoding
 
 
 def read_index(filename: str) -> dict:
@@ -64,6 +65,9 @@ class IndexedFasta:
         self._filename = filename
         self._index = read_index(filename+".fai")
         self._f_obj = open(filename, "rb")
+        self._index_table = FastaIdx.from_entry_tuples(
+            [(name, var['rlen'], var['offset'], var['lenc'], var['lenb'])
+             for name, var in self._index.items() if '_' not in name])
 
     def get_contig_lengths(self) -> dict:
         """Return a dict of chromosome names to seqeunce lengths
@@ -120,6 +124,40 @@ class IndexedFasta:
         return EncodedArray(ret, BaseEncoding)
         return EncodedArray(((ret - ord("A")) % 32) + ord("A"), BaseEncoding)
 
+    def _get_interval_sequences_fast(self, intervals: Interval) -> EncodedRaggedArray:
+        tmp = {name: self._index[name] for name in intervals.chromosome.encoding.get_labels()}
+        index_table = FastaIdx.from_entry_tuples(
+            [(name, var['rlen'], var['offset'], var['lenc'], var['lenb'])
+             for name, var in tmp.items()])
+
+        pre_alloc = np.empty((intervals.stop-intervals.start).sum(), dtype=np.uint8)
+        chromosome_i = intervals.chromosome.raw()
+        indices: FastaIdx = index_table[chromosome_i]
+        start_rows = intervals.start//indices.characters_per_line
+        start_mods = intervals.start % indices.characters_per_line
+        start_offsets = start_rows*indices.line_length+start_mods
+
+        stop_rows = intervals.stop // indices.characters_per_line
+        stop_offsets = stop_rows*indices.line_length+intervals.stop % indices.characters_per_line
+        read_starts = indices.start + start_offsets
+        read_lengths = stop_offsets-start_offsets
+
+        lengths = intervals.stop-intervals.start
+        n_rows = stop_rows-start_rows
+        offsets = np.insert(np.cumsum(lengths), 0, 0)
+        for read_start, read_length, n_row, start_mod, lenb, a_offset in zip(
+                read_starts, read_lengths, n_rows, start_mods, indices.line_length, offsets):
+            self._f_obj.seek(read_start)
+            r_sequence = np.frombuffer(self._f_obj.read(read_length), dtype=np.uint8)
+            sequence = np.delete(r_sequence,
+                                 [lenb*(j+1)-1-start_mod
+                                  for j in range(n_row)])
+            # assert not np.any(sequence == 10), (np.flatnonzero(r_sequence==10), [lenb*(j+1)-1-start_mod
+            #                                                                      for j in range(n_row)], read_start, read_length, n_row, start_mod, lenb, a_offset, intervals[i:i+1], indices[i:i+1])
+            pre_alloc[a_offset:a_offset+sequence.size] = sequence
+        a = EncodedArray(pre_alloc, BaseEncoding)
+        return EncodedRaggedArray(a, lengths)
+
     def get_interval_sequences(self, intervals: Interval) -> EncodedRaggedArray:
         """Get the seqeunces for a set of genomic intervals
 
@@ -133,15 +171,17 @@ class IndexedFasta:
         EncodedRaggedArray
             Sequences
         """
-        sequences = []
+        if isinstance(intervals.chromosome.encoding, StringEncoding):
+            return self._get_interval_sequences_fast(intervals)
         lengths = []
-        delete_indices = []
         cur_offset = 0
+        pre_alloc = np.empty((intervals.stop-intervals.start).sum(), dtype=np.uint8)
+        alloc_offset = 0
+        
         for interval in intervals:
             chromosome = interval.chromosome.to_string()
             idx = self._index[chromosome]
             lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
-            assert interval.stop <= rlen
             start_row = interval.start//lenc
             start_mod = interval.start % lenc
             start_offset = start_row*lenb+start_mod
@@ -149,9 +189,17 @@ class IndexedFasta:
             stop_offset = stop_row*lenb+interval.stop % lenc
             self._f_obj.seek(idx["offset"] + start_offset)
             lengths.append(stop_offset-start_offset-(stop_row-start_row))
-            sequences.extend(self._f_obj.read(stop_offset-start_offset))
-            delete_indices.extend(cur_offset + lenb*(j+1)-1-start_mod for j in range(stop_row-start_row))
+            D = stop_offset-start_offset
+            tmp = np.frombuffer(self._f_obj.read(stop_offset-start_offset),
+                                dtype=np.uint8)
+            tmp = np.delete(tmp, [lenb*(j+1)-1-start_mod
+                                  for j in range(stop_row-start_row)])
+            pre_alloc[alloc_offset:alloc_offset+tmp.size] = tmp
+            alloc_offset += tmp.size
             cur_offset += stop_offset-start_offset
-        s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
-        a = EncodedArray(s, BaseEncoding)
+        assert alloc_offset == pre_alloc.size, (alloc_offset, pre_alloc.size)
+        assert np.all(pre_alloc> 0), np.sum(pre_alloc==0)
+        # s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
+        #s = np.delete(pre_alloc[:alloc_offset], delete_indices)
+        a = EncodedArray(pre_alloc, BaseEncoding)
         return EncodedRaggedArray(a, lengths)

@@ -61,11 +61,11 @@ What can you do with BioNumpy?
 
     .. grid-item-card::  :material-regular:`calculate;3em`
         :text-align: center
-        :link: topics/genome_arithmetics.html
+        :link: topics/genomic_data.html
 
-        **Genome arithmetics**
+        **Genomic Data**
 
-        Analysing genomic tracks (BED-files, VCFs, GFFs, etc)
+        Analysing genomic data on a genome (Intervals, variants, annotations, etc)
 
 
     .. grid-item-card:: :material-regular:`hub;3em`

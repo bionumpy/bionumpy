@@ -11,10 +11,9 @@ from bionumpy.io.matrix_dump import matrix_to_csv
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
-
 @pytest.mark.parametrize("file_format", combos.keys())
 def test_read_write_roundtrip(file_format):
-    if file_format in ("multiline_fasta", "bed12"):
+    if file_format in ("multiline_fasta", "bed12", 'wig'):
         return
     _, _, buf_type = combos[file_format]
     buffer_text = buffer_texts[file_format]*100
@@ -39,7 +38,7 @@ def test_matrix_to_csv():
     assert text.to_string() == ",".join(header) + "\n" + "\n".join(",".join(str(i) for i in row) for row in integers)+"\n"
 
 
-@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta"])
+@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta", 'wig'])
 def test_buffer_read(buffer_name):
     _, true_data, buf_type = combos[buffer_name]
     text = buffer_texts[buffer_name]

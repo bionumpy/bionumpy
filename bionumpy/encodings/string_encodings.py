@@ -1,4 +1,6 @@
+import numpy as np
 from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray
+from .exceptions import EncodingError
 from ..util.ascii_hash import AsciiHashTable
 
 
@@ -16,7 +18,10 @@ class StringEncoding(Encoding):
 
     def encode(self, encoded_ragged_array):
         encoded_ragged_array = as_encoded_array(encoded_ragged_array)
-        hashes = self._hash_table[encoded_ragged_array]
+        try:
+            hashes = self._hash_table[encoded_ragged_array]
+        except IndexError as e:
+            raise EncodingError('String encoding failed') from e
         return EncodedArray(hashes, self)
 
     def decode(self, encoded_array):
@@ -25,3 +30,16 @@ class StringEncoding(Encoding):
         else:
             data = encoded_array
         return self._seqeunces[data]
+
+    def __repr__(self):
+        return f'StringEncoding({self._seqeunces.tolist()})'
+
+    def __eq__(self, other):
+        if not isinstance(other, StringEncoding):
+            return False
+        my_shape, other_shape = (o._seqeunces.shape[-1] for o in (self, other))
+        if len(my_shape) != len(other_shape):
+            return False
+        if np.any(my_shape != other_shape):
+            return False
+        return np.all(self._seqeunces == other._seqeunces) and self._modulo == other._modulo

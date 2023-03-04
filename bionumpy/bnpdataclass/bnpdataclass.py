@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Type, Dict
+from typing import List, Type, Dict, Iterable
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
@@ -7,10 +7,12 @@ import numpy as np
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
+from ..encodings.alphabet_encoding import FlatAlphabetEncoding
 from ..util import is_subclass_or_instance
 
 
 class BNPDataClass(NpDataClass):
+    _context = {}
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
@@ -87,6 +89,18 @@ class BNPDataClass(NpDataClass):
     @classmethod
     def from_entry_tuples(cls, tuples):
         return cls(*(list(c) for c in zip(*tuples)))
+    
+    def sort_by(self, field_name: str) -> 'BNPDataClass':
+        return self[np.argsort(getattr(self, field_name))]
+
+    def set_context(self, name, value):
+        self._context[name] = value
+
+    def get_context(self, name):
+        return self._context[name]
+
+    def has_context(self, name):
+        return name in self._context
 
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
@@ -173,6 +187,8 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     # must do as_encoded and not explicit encode as pre_val might already
                     # be encoded
                     val = as_encoded_array(pre_val, field.type)
+                    if isinstance(field.type, FlatAlphabetEncoding):
+                        val = val.ravel()
                 elif field.type == List[int] or field.type == List[bool]:
                     if not isinstance(pre_val, RaggedArray):
                         val = RaggedArray(pre_val)
@@ -229,3 +245,22 @@ def _extract_field_types(fields_with_values: dict, field_type_map: dict = None) 
 def _assert_all_same_type(values):
     original_type = type(values[0])
     assert all(isinstance(val, original_type) for val in values), (original_type, [type(val) for val in values])
+
+
+def dynamic_concatenate(dataclass_iter: Iterable[BNPDataClass]):
+    iterable = iter(dataclass_iter)
+
+    first = next(iterable)
+    first_class = first.__class__
+    fields = [[vals] for vals in first.shallow_tuple()]
+    l = len(first)
+    for c in iterable:
+        for f, vals in zip(fields, c.shallow_tuple()):
+            f.append(vals)
+        l += len(c)
+        print(l)
+    print('Joining fields', sum(len(f) for f in fields[0]))
+    for i, f in enumerate(fields):
+        fields[i] = np.concatenate(f)
+    print('creating object')
+    return first_class(*fields)

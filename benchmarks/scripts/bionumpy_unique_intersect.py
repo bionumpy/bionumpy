@@ -1,5 +1,5 @@
 import bionumpy as bnp
-from bionumpy.arithmetics.global_offset import GlobalOffset
+from bionumpy.genomic_data.global_offset import GlobalOffset
 import time
 import dataclasses
 

@@ -7,18 +7,20 @@ __version__ = '0.2.17'
 import npstructures as nps
 
 from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
-                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer,
+                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer, NarrowPeakBuffer,
                  BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
                  GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
-from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded)
+from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded, match_string)
 from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
-from .datatypes import SAMEntry, GFFEntry, Bed6
+from .datatypes import SAMEntry, GFFEntry, Bed6, Interval, LocationEntry
 from .io.strops import str_equal
 from .util.cli import run_as_commandline
+from .computation_graph import compute
 from . import simulate
 from . import arithmetics
+from .genomic_data import Genome, GenomicArray, GenomicIntervals
 open = bnp_open
 
 

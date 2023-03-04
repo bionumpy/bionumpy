@@ -9,17 +9,26 @@ def test_vcf_matrix_buffer():
     f = bnp.open("example_data/variants_with_header.vcf",
                  buffer_type=bnp.io.delimited_buffers.PhasedVCFMatrixBuffer)
 
-
     out = bnp.open("test1.vcf", mode="w")
 
     for chunk in f:
-        #print(chunk)
-        #print(chunk.genotypes)
-        #string_genotypes = bnp.encodings.PhasedGenotypeEncoding.decode(chunk.genotypes)
-        #print(string_genotypes)
-
-        #print(chunk)
+        header = chunk.get_context("header")
         out.write(chunk)
+
+    # check that header was written
+    chunk = bnp.open("test1.vcf").read_chunk()
+    assert chunk.get_context("header") != "" and chunk.get_context("header") == header
+
+
+def test_vcf_matrix_buffer_stream():
+    f = bnp.open("example_data/variants_with_header.vcf",
+                 buffer_type=bnp.io.delimited_buffers.PhasedVCFMatrixBuffer)
+
+    out = bnp.open("test1.vcf", mode="w")
+    out.write(f.read_chunks())
+    # check that header was written
+    chunk = bnp.open("test1.vcf").read_chunk()
+    assert chunk.get_context("header") != ""
 
 
 def test_phased_genotype_encoding():

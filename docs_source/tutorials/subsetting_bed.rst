@@ -1,74 +1,70 @@
-Getting read pileup for multiple regions
--------------------------------------------
 
-This is a brief example of how you can you can analyse alignments inside a given set of regions. This example assumes that:
+.. _subsetting_bed:
 
-* You have a set of alignments as a bed-file (can be converted from bam using bedtools BamToBed).
+Getting read pileup inside peaks (intervals)
+---------------------------------------------
+
+This is a brief example of how you can you can analyse alignments (pileup) inside a given set of regions. This example assumes that:
+
+* You have a set of alignments as a bam or bed file
 * You have a set of regions in another bed-file
-* For simplicity, we here assumes both files are sorted by chromosome. If not, `bnp.arithmetics.sort_intervals` may be used.
 
-We assume the alignments-file is quite big, so that we don't want to load all of it into memory at once.
-Thus, we read the file by chromsome using `bnp.groupby` and create a pileup for each chromosome (a NumPy-array).
-This pileup can then easily be analysed, e.g. by slicing it with the regions we are interested in using `npstructures.raggedslice`.
-The result is a RaggedArray, which behaves very much like a NumPy matrix. Full example below:
+In these scenarios it is common to have a bed-file that easily fits into memory (e.g. binding sites) and a large BAM file that we don't want to keep in memory. As long as these are sorted, BioNumPy will handle streaming of the files and make sure that only data for a single chromosome is processed in memory at once. We can specify the behaviour by using `stream=True/False` when reading the data.
 
+We start by reading our genome as the rest of the data depends on the genome (chromosome sizes).
 
-.. testcode::
+>>> import numpy as np
+>>> import bionumpy as bnp
+>>> genome = bnp.Genome.from_file("example_data/hg38.chrom.sizes")
+>>> print(genome)
+           Chromosome                     Size
+                 chr1                248956422
+                 chr2                242193529
+                 chr3                198295559
+                 chr4                190214555
+                 chr5                181538259
+                 chr6                170805979
+                 chr7                159345973
+                 chr8                145138636
+                 chr9                138394717
+                chr10                133797422
 
-    import bionumpy as bnp
-    import npstructures as nps
-    import numpy as np
+Using this genome object, we can now read our peaks and alignemnts. We add `stream=True` to tell BioNumPy to *stream* all data, i.e. only keep the data for a single chromosome in memory at the same time.
 
-    reads = bnp.open("example_data/alignments.bed").read_chunks()
-    regions = bnp.open("example_data/test2.bed").read()
-    chrom_sizes = bnp.open("example_data/small.chrom.sizes").read()
-    chrom_sizes = {str(name): size for name, size in zip(chrom_sizes.name, chrom_sizes.size)}
+>>> peaks = genome.read_intervals("example_data/ctcf_chr21-22.bed.gz", stream=True)
+>>> reads = genome.read_intervals("example_data/ctcf_chr21-22.bam", stream=True)
 
-    reads_by_chromosome = bnp.groupby(reads, "chromosome")
-    regions_by_chromosome = bnp.groupby(regions, "chromosome")
+The `peaks` and `reads` are now intervals. Using the `.get_pileup()` method, we can create a `GenomeArray` pileup, which lets us easily query the pileup value at any position along the genome. A `GenomeArray` can be thought of as an array along the genome.
 
-    for (chromosome, chromosome_reads), (_, chromosome_regions) in zip(reads_by_chromosome, regions_by_chromosome):
-        # Get read pileup, i.e. number of reads per base in this chromosome
-        # (we convert the pileup, which is a  to a regular numpy array with to_array())
-        read_pileup = bnp.arithmetics.get_pileup(chromosome_reads, chrom_sizes[chromosome]).to_array()
+>>> read_pileup = reads.get_pileup()
 
-        # Subset the pileup on the regions
-        subset = nps.ragged_slice(read_pileup, chromosome_regions.start, chromosome_regions.stop)
+We can then subset this pileup where we have peaks
 
-        # Subset is now a RaggedArray. Each row contains the pileup for each region
-        # We can easily e.g. get the max pileup for each region using axis=-1
-        max_per_region = np.max(subset, axis=-1)
-        print("")
-        print("Chromosome", chromosome)
-        print("Regions analysed:", chromosome_regions)
-        print("Max pileup within each region:")
-        print(max_per_region)
-        print("Mean pileup within each region:")
-        print(np.mean(subset, axis=-1))
+>>> peaks_pileup = read_pileup[peaks]
 
-In our small example data, we only have three regions for chromosome 1 and 2 regions on chromosome 2. The output should be:
+... get e.g. the max pileup value inside each peak:
 
-.. testoutput::
+>>> max_pileup_value_per_peak = np.max(peaks_pileup, axis=1)
 
-    Chromosome chr1
-    Regions analysed: Interval with 3 entries
+If you try to print `max_ipleup_value_per_peak`, you will see that no data is shown. Instead you get a ComputationNode object. This is because since we used `stream=True`, no computations have been performed yet. BioNumPy waits until you ask for results by calling `.compute()` on a ComputationNode object, and then finds out how to correctly stream the data and do the necessary jobs for creating the data you ask for.
+
+Having the max peak values, we can easily filter the original peaks, e.g. get the peaks with max pileup value above some threshold:
+
+>>> high_peaks = peaks[max_pileup_value_per_peak > 4]
+
+If we now call `.compute()` on the final peaks, BioNumPy performs all the necessary steps and gives us a final set of peaks:
+
+>>> print(high_peaks.compute())
+    Genomic Intervals on ['chr1', 'chr2', 'chr3', 'chr4', 'chr5', '...']:
+    Interval with 362 entries
                    chromosome                    start                     stop
-                         chr1                        5                       10
-                         chr1                       15                       20
-                         chr1                      100                      110
-    Max pileup within each region:
-    [3 1 0]
-    Mean pileup within each region:
-    [2.4 1.  0. ]
-
-    Chromosome chr2
-    Regions analysed: Interval with 2 entries
-                   chromosome                    start                     stop
-                         chr2                        1                       10
-                         chr2                       25                       35
-    Max pileup within each region:
-    [1 3]
-    Mean pileup within each region:
-    [0.55555556 3.        ]
-
-
+                        chr21                 13980409                 13980679
+                        chr21                 37460251                 37460521
+                        chr21                 31933717                 31933987
+                        chr21                 29164384                 29164654
+                        chr21                 34351806                 34352076
+                        chr21                 25708519                 25708789
+                        chr21                 32403198                 32403468
+                        chr21                 30434098                 30434368
+                        chr21                 30044653                 30044724
+                        chr21                 31874156                 31874275

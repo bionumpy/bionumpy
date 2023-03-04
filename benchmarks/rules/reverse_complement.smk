@@ -38,16 +38,10 @@ rule biopython_reverse_complement:
         "results/biopython/reverse_complement/{filename}.fa"
     benchmark:
         "benchmarks/reverse_complement/biopython/{filename}.txt"
-    run:
-        from Bio import SeqIO
-        from Bio.SeqRecord import SeqRecord
+    conda:
+        "../envs/biopython.yml"
+    script: "../scripts/biopython_reverse_complement.py"
 
-        with open(output[0],'w') as aa_fa:
-            for dna_record in SeqIO.parse(input[0],'fasta'):
-                new_record = SeqRecord(
-                    dna_record.seq.reverse_complement(),
-                    id=dna_record.id, description="")
-                SeqIO.write(new_record,aa_fa,'fasta-2line')
 
 rule python_reverse_complement:
     input:

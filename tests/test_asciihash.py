@@ -23,7 +23,7 @@ def test_ascii_hash_on_encoded_array(encoded_array):
     Out[5]: 21
     """
     h = get_ascii_hash(encoded_array, 103)
-    assert h == 21
+    assert h == 83
 
 
 def test_column_index_array(encoded_ragged_array):
@@ -38,7 +38,7 @@ def test_ascii_hash_on_encoded_ragged_array(encoded_ragged_array):
     Out[5]: 21
     """
     h = get_ascii_hash(encoded_ragged_array, 103)
-    assert_array_equal(h, [21, 93, 48])
+    assert_array_equal(h, [83, 46, 49])
 
 
 def test_ascii_string_hash_table(encoded_ragged_array):

@@ -61,7 +61,8 @@ class OneToOneEncoding(Encoding):
 
     def _encode_list_of_strings(self, s: str):
         s = EncodedRaggedArray(
-            EncodedArray([ord(c) for ss in s for c in ss], BaseEncoding),
+            EncodedArray(
+                [ord(c) for ss in s for c in ss], BaseEncoding),
             [len(ss) for ss in s])
         return self._ragged_array_as_encoded_array(s)
 
@@ -245,7 +246,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if hasattr(self.encoding, "_decode"):
             # new system, can be used in all cases after refactoring
             data = self
-            return "".join([chr(c) for c in self.encoding.decode(data).raw()])
+            return bytes(self.encoding.decode(data).raw()).decode('ascii')
+            # return "".join([chr(c) for c in self.encoding.decode(data).raw()])
         else:
             data = self.data
             return "".join([chr(c) for c in self.encoding.decode(data)])
@@ -399,12 +401,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
             args = [a.raw() if isinstance(a, EncodedArray) else np.asarray(a) for a in args[0]]
             return func(args, *kwargs)
-
+        if func == np.full_like:
+            return full_like(*args, **kwargs)
         if func == np.insert:
             return self.__class__(func(args[0].data, args[1], args[2].data, *args[3:], **kwargs), encoding = self.encoding)
         elif func in (np.lib.stride_tricks.sliding_window_view, np.lib.stride_tricks.as_strided):
             return self.__class__(func(args[0].data, *args[1:], **kwargs), self.encoding)
-        
+
         return NotImplemented
         return super().__array_function__(func, types, args, kwargs)
 
@@ -449,6 +452,16 @@ def _list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArra
 def _is_encoded(data):
     return isinstance(data, (EncodedArray, EncodedRaggedArray))
 
+
+def bnp_array_func_dispatch(func):
+    def new_func(array, *args, **kwargs):
+        result = func(array, *args, **kwargs)
+        if result is NotImplemented:
+            if hasattr(array, '__array_function__'):
+                result = array.__array_function__(func, [array] + args, kwargs)
+                if result is NotImplemented:
+                    raise Exception
+        return result
 
 def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
@@ -505,6 +518,12 @@ def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
 
     return target_encoding.encode(s)
 
+def full_like(a, fill_value, dtype=None, order='K', subok=True, shape=None):
+    assert dtype is None
+    assert order == 'K'
+    assert subok is True
+    fill_value = a.encoding.encode(fill_value)
+    return EncodedArray(np.full_like(a.raw(), fill_value, shape=shape), a.encoding)
 
 def from_encoded_array(encoded_array: EncodedArray) -> str:
     """Convert data in an `EncodedArray`/`EncodedRaggedArray into `str`/`List[str]`

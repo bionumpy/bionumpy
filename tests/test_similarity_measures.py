@@ -1,7 +1,7 @@
 from bionumpy.streams import MultiStream
 from bionumpy.arithmetics.similarity_measures import forbes, jaccard, get_contingency_table
 from bionumpy.datatypes import Interval
-from bionumpy.arithmetics.geometry import Geometry
+from bionumpy.genomic_data.geometry import Geometry
 from numpy.testing import assert_array_equal
 import pytest
 

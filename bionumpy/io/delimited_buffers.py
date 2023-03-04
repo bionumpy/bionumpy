@@ -5,8 +5,8 @@ from typing import List
 from npstructures import RaggedArray, ragged_slice
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
-                         SequenceEntry, VCFEntry, Bed12, Bed6,
-                         GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
+                         SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
+                         GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
                          GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
@@ -35,7 +35,7 @@ class DelimitedBuffer(FileBuffer):
 
     DELIMITER = "\t"
     COMMENT = "#"
-    INCLUDE_HEADER = False
+    HAS_UNCOMMENTED_HEADER_LINE = False
     n_lines_per_entry = 1
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
@@ -94,8 +94,8 @@ class DelimitedBuffer(FileBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
-        integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
         integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
         return integers.reshape(-1, cols.size)
 
@@ -115,8 +115,8 @@ class DelimitedBuffer(FileBuffer):
 
         """
         cols = np.asanyarray(cols)
-        float_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        float_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        float_starts = self._col_starts(cols)
+        float_ends = self._col_ends(cols)
         floats = str_to_float(ragged_slice(self._data, float_starts, float_ends))
         return floats.reshape(-1, cols.size)
 
@@ -142,14 +142,20 @@ class DelimitedBuffer(FileBuffer):
         """
         self.validate_if_not()
         assert np.max(col) < self._n_cols, (col, self._n_cols, self._data, self.__class__, self.dataclass)
-        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+        starts = self._col_starts(col)
+        ends = self._col_ends(col)
         if keep_sep:
             ends += 1
         if fixed_length:
             return self._move_intervals_to_2d_array(starts, ends)
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
+
+    def _col_starts(self, col):
+        return self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
+
+    def _col_ends(self, col):
+        return self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
 
     def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
         """Get multiple columns as text
@@ -168,8 +174,8 @@ class DelimitedBuffer(FileBuffer):
         assert col_start < self._n_cols, self._n_cols
         assert col_end <= self._n_cols
 
-        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col_start] + 1
-        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col_end-1]
+        starts = self._col_starts(col_start)
+        ends = self._col_ends(col_end-1)
         if keep_sep:
             ends += 1
 
@@ -200,11 +206,11 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1 + start
+        starts = self._col_starts(col) + start
         if end is not None:
             return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
         else:
-            ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+            ends = self._col_ends(col)
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
 
     def _extract_integers(self, integer_starts, integer_ends):
@@ -249,8 +255,10 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def make_header(cls, data: bnpdataclass):
-        """makes a header from field names separated by delimiter"""
-        return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
+        header = ""
+        if data.has_context("header"):
+            header = data.get_context("header")
+        return bytes(header, "ascii")
 
     def get_data(self) -> BNPDataClass:
         """Parse the data in the buffer according to the fields in _dataclass
@@ -285,7 +293,9 @@ class DelimitedBuffer(FileBuffer):
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
                    for c, value in columns.items()}
-        return self.dataclass(**columns)
+        data = self.dataclass(**columns)
+        data.set_context("header", self._header_data)
+        return data
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -303,8 +313,8 @@ class DelimitedBuffer(FileBuffer):
 
         """
         self.validate_if_not()
-        starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-        ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, col] + len(sep)
+        starts = self._col_starts(col)
+        ends = self._col_ends(col)
         text = self._data[starts:ends]
         if len(sep):
             text[:, -1] = sep
@@ -375,7 +385,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
     class DatatypeBuffer(DelimitedBuffer):
         DELIMITER = delimiter
         COMMENT = comment
-        INCLUDE_HEADER = has_header
+        HAS_UNCOMMENTED_HEADER_LINE = has_header
         dataclass = _dataclass
         fields = None
 
@@ -403,6 +413,11 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             if not isinstance(delimiter, str):
                 delimiter = chr(delimiter)
             return file_object.readline().decode('ascii').strip().split(delimiter)
+
+        @classmethod
+        def make_header(cls, data: bnpdataclass):
+            """makes a header from field names separated by delimiter"""
+            return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
         def set_fields_from_header(self, columns: List[str]):
             if not has_header:
@@ -465,8 +480,8 @@ class BedBuffer(DelimitedBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
-        integer_starts = self._delimiters[:-1].reshape(-1, self._n_cols)[:, cols] + 1
-        integer_ends = self._delimiters[1:].reshape(-1, self._n_cols)[:, cols]
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
         array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
         try:
             digits = as_encoded_array(array, DigitEncoding).raw()
@@ -486,6 +501,8 @@ class Bed6Buffer(BedBuffer):
 class Bed12Buffer(Bed6Buffer):
     dataclass = Bed12
 
+class BdgBuffer(BedBuffer):
+    dataclass = BedGraph
 
 
 class VCFBuffer(DelimitedBuffer):
@@ -508,7 +525,8 @@ class VCFMatrixBuffer(VCFBuffer):
     genotype_encoding = GenotypeRowEncoding
 
     @classmethod
-    def read_header(cls, file_object):
+    def __read_header(cls, file_object):
+        # NOT IMPLEMENTED version of read_header()
         prev_line = None
         for line in file_object:
             line = line.decode()
@@ -539,8 +557,8 @@ class NarrowPeakBuffer(DelimitedBuffer):
     dataclass = NarrowPeak
 
 
-class GFFBuffer(DelimitedBuffer):
-    dataclass = GFFEntry
+class GTFBuffer(DelimitedBuffer):
+    dataclass = GTFEntry
 
 
 class SAMBuffer(DelimitedBuffer):
@@ -550,3 +568,90 @@ class SAMBuffer(DelimitedBuffer):
 
 class ChromosomeSizeBuffer(DelimitedBuffer):
     dataclass = ChromosomeSize
+
+
+
+
+class DelimitedBufferWithInernalComments(DelimitedBuffer):
+    def _calculate_col_starts_and_ends(self, data, delimiters):
+        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == self.COMMENT)
+        comment_mask = np.flatnonzero(comment_mask)
+        start_delimiters = np.delete(delimiters, comment_mask)[:-1]
+        end_delimiters = np.delete(delimiters, comment_mask+1)
+        if data[0] != self.COMMENT:
+            start_delimiters = np.insert(start_delimiters, 0, -1)
+        else:
+            end_delimiters=end_delimiters[1:]
+        return start_delimiters+1, end_delimiters
+
+    def _col_ends(self, col):
+        return self.__col_ends[:, col]
+
+    def _col_starts(self, col):
+        return self.__col_starts[:, col]
+
+    def _validate(self):
+        self._validated = True
+
+
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+        delimiters_mask = data == self.DELIMITER
+        delimiters_mask[new_lines] = True
+        delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
+        super().__init__(data, new_lines, delimiters, header_data)
+        starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
+        n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
+        self._n_cols = n_fields
+        self.__col_starts = starts.reshape(-1, n_fields)
+        self.__col_ends = ends.reshape(-1, n_fields)
+
+    @classmethod
+    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
+        """Make EncodedArray of the chunk and extract all complete lines
+
+        Also find all delimiters in the buffer
+
+        Parameters
+        ----------
+        chunk : np.ndarray
+            Raw bytes chunk as array
+        header_data : 6
+            Any header data that was read in `read_header`
+
+        Returns
+        -------
+        DelimitedBuffer
+            DelimitedBuffer object of all complete lines
+
+        """
+        chunk = EncodedArray(chunk, BaseEncoding)
+        new_lines = np.flatnonzero(chunk == '\n')
+        return cls(chunk[:new_lines[-1]+1], new_lines[:-1], header_data)
+
+    def get_integers(self, cols: list) -> np.ndarray:
+        """Get integers from integer string
+
+        Extract integers from the specified columns
+
+        Parameters
+        ----------
+        cols : list
+            list of columns containing integers
+
+        """
+        assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
+        cols = np.asanyarray(cols)
+        integer_starts = self._col_starts(cols)
+        integer_ends = self._col_ends(cols)
+        array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
+        try:
+            digits = as_encoded_array(array, DigitEncoding).raw()
+        except EncodingError as e:
+            row_number = e.offset//array.shape[-1]#  rows._shape.starts, e.offset, side="right")-1
+            raise FormatException(e.args[0], line_number=row_number)
+        powers = 10**np.arange(digits.shape[-1])[::-1]
+        return digits.dot(powers).reshape(-1, cols.size)
+
+
+class GFFBuffer(DelimitedBufferWithInernalComments):
+    dataclass = GFFEntry

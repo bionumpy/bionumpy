@@ -12,6 +12,7 @@ from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
 from ..util import interleave
+from ..bnpdataclass import replace
 
 
 class GenomicRunLengthArray(RunLengthArray):
@@ -56,8 +57,8 @@ class GenomicRunLengthArray(RunLengthArray):
         'RunLengthArray'
         """
         
-        assert np.all(ends > starts)
-        assert np.all(starts[1:] > ends[:-1])
+        assert np.all(ends > starts), (ends[ends<=starts], starts[ends <= starts])
+        assert np.all(starts[1:] >= ends[:-1])
         prefix = [0] if (len(starts) == 0 or starts[0] != 0) else []
         postfix = [size] if (len(ends) == 0 or ends[-1] != size) else []
 
@@ -78,7 +79,7 @@ class GenomicRunLengthArray(RunLengthArray):
             values[::2] = default_value
             values[1::2] = tmp
         else:
-            values = interleave([np.broadcast(default_value, values.shape), values])
+            values = interleave(np.broadcast(default_value, values.shape), values)
             if ends[-1] != size:
                 values = np.append(values, default_value)
 
@@ -88,12 +89,42 @@ class GenomicRunLengthArray(RunLengthArray):
         values = values[:(len(events)-1)]
         return cls(events, values, do_clean=True)
 
+    @classmethod
+    def from_bedgraph(cls, bedgraph, size=None):
+        if len(bedgraph) == 0:
+            assert size is not None
+            return cls(np.array([0, size], dtype=int),
+                       np.array([0]))
+        # assert bedgraph.start[0] == 0, bedgraph
+        missing_idx = np.flatnonzero(bedgraph.start[1:] != bedgraph.stop[:-1])
+        if len(missing_idx):
+            start = np.insert(bedgraph.start, missing_idx+1, bedgraph.stop[missing_idx])
+            value = np.insert(bedgraph.value, missing_idx+1, 0)
+        else:
+            start, value = (bedgraph.start, bedgraph.value)
+        if size is not None:
+            assert bedgraph.stop[-1] <= size, (bedgraph.stop[-1], size)
+        if (size is None) or (size == bedgraph.stop[-1]):
+            events = np.append(start, bedgraph.stop[-1])
+            values = value
+        else:
+            events = np.append(start, [bedgraph.stop[-1], size])
+            values = np.append(value, 0)
+        if events[0] != 0:
+            events = np.insert(events, 0, 0)
+            values = np.insert(values, 0, 0)
+        return cls(events, values)
+
     def to_bedgraph(self, sequence_name):
         return BedGraph([sequence_name]*len(self.starts), self.starts,
                         self.ends, self.values)
+
     @classmethod
     def from_rle(cls, rle):
         return cls(rle._events, rle._values)
+
+    def extract_intervals(self, intervals):
+        return self[intervals]
 
 
 @bnpdataclass
@@ -110,7 +141,7 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArr
 
     Parameters
     ----------
-    intervals : Interval, 
+    intervals : Interval,
         Intervals on the same chromosome/contig
     chromosome_size : int
         size of the chromsome/contig
@@ -125,6 +156,8 @@ def get_pileup(intervals: Interval, chromosome_size: int) -> GenomicRunLengthArr
     [0 0 0 1 1 2 2 1 0 0 1 1 0 0 0 0 0 0 0 0]
 
     """
+    if len(intervals) == 0:
+        return GenomicRunLengthArray(np.array([0, chromosome_size], dtype=int), np.array([0], dtype=int))
     rla = RunLength2dArray.from_intervals(intervals.start, intervals.stop, chromosome_size)
     return GenomicRunLengthArray.from_rle(rla.sum(axis=0))
 
@@ -182,7 +215,10 @@ def get_boolean_mask(intervals: Interval, chromosome_size: int):
     if len(intervals) == 0:
         return GenomicRunLengthArray.from_intervals(np.array([], dtype=int), np.array([], dtype=int), int(chromosome_size), default_value=False)
     merged = merge_intervals(intervals[np.argsort(intervals.start)])
-    return GenomicRunLengthArray.from_intervals(merged.start, merged.stop, size=chromosome_size, default_value=False)
+    m = merged.start != merged.stop
+    return GenomicRunLengthArray.from_intervals(merged.start[m], merged.stop[m],
+                                                size=chromosome_size, default_value=False)
+# merged.start, merged.stop, 
 
 
 def human_key_func(chrom_name):
@@ -241,18 +277,20 @@ def merge_intervals(intervals: Interval, distance: int = 0) -> Interval:
     Merged Intervals
 
     """
-
+    if len(intervals) == 0:
+        return intervals
     assert np.all(intervals.start[:-1] <= intervals.start[1:]), "merge_intervals requires intervals sorted on start position"
     stops = np.maximum.accumulate(intervals.stop)
     if distance > 0:
         stops += distance
-    valid_start_mask = intervals.start[1:] > stops[:-1] # intervals[:-1].stop
+    valid_start_mask = intervals.start[1:] > stops[:-1]  # intervals[:-1].stop
     start_mask = np.concatenate(([True], valid_start_mask))
     stop_mask = np.concatenate((valid_start_mask, [True]))
     new_interval = intervals[start_mask]
     new_interval.stop = stops[stop_mask]
     if distance > 0:
         new_interval.stop -= distance
+    assert np.all(new_interval.start[1:] > new_interval.stop[:-1]), np.sum(new_interval.start[1:] > new_interval.stop[:-1])
     return new_interval
 
 
@@ -324,6 +362,36 @@ def extend(intervals, both=None, forward=None, reverse=None, left=None, right=No
             )
 
 
+def extend_to_size(intervals: Interval, fragment_length: int, chromosome_size: np.ndarray) -> Interval:
+    """Extend/shrink intervals to match the given length. Stranded
+
+    For intervals on the + strand, keep the start coordinate and
+    adjust the stop coordinate. For - intervals keep the stop
+    coordinate and adjust the start
+
+    Parameters
+    ----------
+    intervals : Interval
+    fragment_length : int
+
+    Returns
+    -------
+    Interval
+    """
+    is_forward = intervals.strand.ravel() == "+"
+    start = np.where(is_forward,
+                     intervals.start,
+                     np.maximum(intervals.stop-fragment_length, 0))
+    stop = np.where(is_forward,
+                    np.minimum(intervals.start+fragment_length, chromosome_size),
+                    intervals.stop)
+
+    return dataclasses.replace(
+        intervals,
+        start=start,
+        stop=stop)
+
+
 def pileup(intervals):
     chroms = np.concatenate([intervals.chromosome, intervals.chromosome])
 
@@ -343,3 +411,20 @@ def pileup(intervals):
     stops = np.delete(intervals[:, 1], mask)
     return BedGraph(chroms[:values.size-1],
                     starts, stops, values[:-1])
+
+
+def clip(intervals: Interval, chrom_sizes) -> Interval: 
+    """Clip intervals so that all intervals are contained in their corresponding chromosome
+
+    Parameters
+    ----------
+    intervals : Interval
+
+    Returns
+    -------
+    Interval
+    """
+    return replace(
+        intervals,
+        start=np.maximum(0, intervals.start),
+        stop=np.minimum(chrom_sizes, intervals.stop))

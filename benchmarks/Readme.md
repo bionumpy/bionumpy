@@ -5,7 +5,7 @@ This directory contains a Snakemake pipeline for benchmarking BioNumPy against s
 Benchmarking on small data sets is run on every push, and a bigger benchmark is run nightly on bigger data. The latest reports can be found here:
 
 * [Benchmarking on small data](https://github.com/bionumpy/bionumpy/blob/benchmarks/benchmarks/report_small.md)
-* [Benchmarking on bigger data](https://github.com/bionumpy/bionumpy/blob/benchmarks/benchmarks/report_big.md)
+* [Benchmarking on bigger data](https://github.com/bionumpy/bionumpy/blob/benchmarks-big/benchmarks/report_big.md)
 
 
 ## Reproducing the benchmark results

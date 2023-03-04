@@ -115,12 +115,14 @@ class FastaIdxBuffer(MultiLineFastaBuffer):
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
         new_entries = np.insert(self._new_entries+1, 0, 0)
         n_lines_per_entry = np.diff(np.append(new_entries, self._new_lines.size+1))-1
-        line_offsets = np.insert(np.cumsum(n_lines_per_entry),0, 0)
+        line_offsets = np.insert(np.cumsum(n_lines_per_entry), 0, 0)
         headers = data[new_entries, 1:]
         mask = np.ones(len(data), dtype=bool)
         mask[new_entries] = False
         sequence_lines = data[mask]
-        seq_lens = sequence_lines._shape.ends[line_offsets[1:]-1]-sequence_lines._shape.starts[line_offsets[:-1]]
+        ends = np.cumsum(sequence_lines.shape[-1])
+        starts = np.insert(ends, 0, 0)[:-1]
+        seq_lens = ends[line_offsets[1:]-1]-starts[line_offsets[:-1]]
         sequences = RaggedArray(sequence_lines.ravel(), seq_lens)
 
         seq_starts = line_starts[new_entries+1]
