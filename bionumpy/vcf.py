@@ -15,7 +15,7 @@ class VCFHeader:
     FORMAT: Mapping[str, Any]
     INFO: Mapping[str, Any]
     contig: Mapping[str, Any]
-    optional: List[Any]
+    optional: Mapping[str, List[Any]]
 
 def preprocess_number(x: str) -> Optional[int]:
     """Preprocess the number in field such as Number. Return None if x
