@@ -335,3 +335,26 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
     matrix = sequences.ravel()[starts[:, np.newaxis]+np.arange(L)]
     mask[mask] &= np.all(matrix == match_string, axis=-1)
     return mask
+
+
+def str_equal2(sequences: EncodedRaggedArray, sequences_b: EncodedRaggedArray) -> np.ndarray:
+    """Test if any of the sequences in `sequences` equals `match_string`
+
+    Parameters
+    ----------
+    sequences : EncodedRaggedArray
+        The set of sequences to test
+    match_string : str
+        The string to match
+
+    Returns
+    -------
+    np.ndarray
+        Boolean array of which sequences matches the `match_string`
+
+    """
+    sequences = as_encoded_array(sequences)
+    L = sequences_b.lengths
+    mask = (sequences.lengths == L)
+    mask[mask] &= (sequences[mask] == sequences_b[mask]).all(axis=-1)
+    return mask
