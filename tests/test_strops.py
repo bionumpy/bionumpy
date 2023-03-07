@@ -1,10 +1,11 @@
 import pytest
 from npstructures.testing import assert_raggedarray_equal
 import numpy as np
-
+import bionumpy as bnp
 from bionumpy import as_encoded_array
 from bionumpy.util.testing import assert_encoded_raggedarray_equal
 from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float, float_to_strings)
+from bionumpy.io.strops import _str_equal_two_encoded_ragged_arrays
 
 
 @pytest.fixture()
@@ -86,9 +87,24 @@ def test_str_equal(strings):
     mask = str_equal(s, "12")
     np.testing.assert_array_equal(mask, [False, False, True, False]*2)
 
+
 def test_str_equal_single(strings):
     assert str_equal(strings[2], "12")
     assert not str_equal(strings[3], "12")
+
+
+def test_str_equal_two_encoded_ragged_arrays():
+    r1 = as_encoded_array(["test1", "2", "test123"])
+    r2 = as_encoded_array(["test", "2", "test123"])
+    r3 = as_encoded_array(["", "", ""])
+    assert np.all(str_equal(r1, r2) == [False, True, True])
+    assert np.all(str_equal(r1, r3) == [False, False, False])
+
+
+def test_chromosome_str_equal():
+    bam = bnp.open("example_data/test.bam").read()
+    bam2 = bnp.open("example_data/test.bam").read()
+    assert np.all(str_equal(bam.chromosome, bam2.chromosome))
 
 
 if __name__ == "__main__":

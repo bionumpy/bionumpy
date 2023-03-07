@@ -309,15 +309,15 @@ def split(sequence: EncodedArray, sep: Union[str, List[str]] = ",") -> EncodedRa
     return ragged_array[:, :-1]
 
 
-def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
+def str_equal(sequences: EncodedRaggedArray, match_string: Union[str, EncodedRaggedArray]) -> np.ndarray:
     """Test if any of the sequences in `sequences` equals `match_string`
 
     Parameters
     ----------
     sequences : EncodedRaggedArray
         The set of sequences to test
-    match_string : str
-        The string to match
+    match_string : Union[str, EncodedRaggedArray]
+        Either a single string to match or a set of sequences to match
 
     Returns
     -------
@@ -326,6 +326,10 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
 
     """
     sequences = as_encoded_array(sequences)
+
+    if isinstance(sequences, EncodedRaggedArray) and isinstance(match_string, EncodedRaggedArray):
+        return _str_equal_two_encoded_ragged_arrays(sequences, match_string)
+
     if isinstance(sequences, EncodedArray):
         return (len(sequences) == len(match_string)) and np.all(sequences==match_string)
     L = len(match_string)
@@ -337,22 +341,7 @@ def str_equal(sequences: EncodedRaggedArray, match_string: str) -> np.ndarray:
     return mask
 
 
-def str_equal2(sequences: EncodedRaggedArray, sequences_b: EncodedRaggedArray) -> np.ndarray:
-    """Test if any of the sequences in `sequences` equals `match_string`
-
-    Parameters
-    ----------
-    sequences : EncodedRaggedArray
-        The set of sequences to test
-    match_string : str
-        The string to match
-
-    Returns
-    -------
-    np.ndarray
-        Boolean array of which sequences matches the `match_string`
-
-    """
+def _str_equal_two_encoded_ragged_arrays(sequences: EncodedRaggedArray, sequences_b: EncodedRaggedArray) -> np.ndarray:
     sequences = as_encoded_array(sequences)
     L = sequences_b.lengths
     mask = (sequences.lengths == L)
