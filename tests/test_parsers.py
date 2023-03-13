@@ -6,7 +6,7 @@ from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
 from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
 from bionumpy.io.files import bnp_open
-from bionumpy.util.testing import assert_bnpdataclass_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
 from bionumpy.io.parser import chunk_lines
 from bionumpy.bnpdataclass import bnpdataclass
@@ -192,9 +192,17 @@ def test_read_example_data(file_name):
     assert True
 
 
-@pytest.mark.skip("Failing")
+# @pytest.mark.skip("Failing")
 def test_read_bam():
     data = bnp.open("example_data/alignments.bam").read()
+    data2 = bnp.open("example_data/alignments.sam").read()
+    print(data)
+    print(data2)
+    print(data.sequence.raw(), data.sequence.shape)
+
+    print(data2.sequence.shape)
+    assert_encoded_raggedarray_equal(data.sequence, data2.sequence)
+    print(data)
     n_lines = len([line for line in open("example_data/alignments.sam") if not line.startswith("@")])
     assert n_lines == len(data)
 

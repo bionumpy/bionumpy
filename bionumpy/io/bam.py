@@ -55,7 +55,7 @@ class BamBuffer(FileBuffer):
     def _find_starts(chunk):
         chunk = bytes(chunk)
         new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
-        _starts = chain([0], accumulate(repeat(0), new_start))
+        _starts = accumulate(repeat(0), new_start)# chain([0], accumulate(repeat(0), new_start))
         starts = list(takewhile(lambda start: start <= len(chunk), _starts))
         return starts
 
@@ -97,9 +97,8 @@ class BamBuffer(FileBuffer):
         sequences = ragged_slice(self._data, self._new_lines+36+l_read_name+n_cigar_bytes,
                                  self._new_lines+36+l_read_name+n_cigar_bytes+n_seq_bytes)
         sequences = EncodedArray(
-            (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8))).ravel() & np.uint8(15)),
+            (((sequences.ravel()[:, None]) >> (4*np.arange(2, dtype=np.uint8)[::-1])).ravel() & np.uint8(15)),
             BamEncoding)
-        
         new_sequences = EncodedRaggedArray(sequences, n_seq_bytes*2)
         view = RaggedView(new_sequences._shape.starts, l_seq)
         new_sequences = new_sequences[view]
