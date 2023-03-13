@@ -55,7 +55,7 @@ class BamBuffer(FileBuffer):
     def _find_starts(chunk):
         chunk = bytes(chunk)
         new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
-        _starts = chain([0], accumulate(repeat(0), new_start))
+        _starts = accumulate(repeat(0), new_start)# chain([0], accumulate(repeat(0), new_start))
         starts = list(takewhile(lambda start: start <= len(chunk), _starts))
         return starts
 
