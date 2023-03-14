@@ -66,10 +66,12 @@ def test_empty_dna_encoded():
                                            
     assert_encoded_raggedarray_equal(result, true)
 
+
 def test_array_function(simple_sequence):
     result = np.append(simple_sequence, simple_sequence)
     concat_sequence = EncodedArray(np.array([1, 2, 2, 3, 1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
     assert_encoded_array_equal(result,  concat_sequence)
+
 
 def test_insert_function(simple_sequence):
     result = np.insert(simple_sequence, 0, simple_sequence)

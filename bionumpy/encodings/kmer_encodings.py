@@ -20,7 +20,12 @@ class KmerEncoding(Encoding):
         Returns a human-readable string representation
         of an encoded kmer.
         """
-        chars = EncodedArray((kmer >> (2 * np.arange(self._k))) & 3, self._alphabet_encoding)
+        if self._alphabet_encoding.alphabet_size == 4:
+            tmp = (kmer >> (2 * np.arange(self._k))) & 3
+        else:
+            n = self._alphabet_encoding.alphabet_size
+            tmp = (kmer//n**np.arange(self._k)) % n
+        chars = EncodedArray(tmp, self._alphabet_encoding)
         kmer = "".join(chr(int(b)) for b in chars.encoding.decode(chars).raw())
         return kmer
 

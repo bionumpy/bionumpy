@@ -61,6 +61,8 @@ class AlphabetEncoding(OneToOneEncoding):
         if not isinstance(other, AlphabetEncoding):
             return False
         other._initialize()
+        if len(self._alphabet) != len(other._alphabet):
+            return False
         return np.all(self._alphabet == other._alphabet)
 
     def __hash__(self):
