@@ -499,6 +499,13 @@ def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
             return s
         else:
             if not s.encoding.is_base_encoding():
+                if hasattr(s.encoding, 'get_alphabet') and hasattr(target_encoding, 'get_alphabet'):
+                    m = s.raw().max()
+                    if s.encoding.get_alphabet()[:m] == target_encoding.get_alphabet()[:m]:
+                        if isinstance(s, EncodedArray):
+                            return s.__class__(s.raw(), target_encoding)
+                        elif isinstance(s, EncodedRaggedArray):
+                            return s.__class__(EncodedArray(s.ravel().raw(), target_encoding), s.shape)
                 raise EncodingException("Trying to encode already encoded array with encoding %s to encoding %s. "
                                         "This is not supported. Use the change_encoding function." % (
                     s.encoding, target_encoding))
