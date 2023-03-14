@@ -268,6 +268,9 @@ class Genome:
             ((key, value) for key, value in self._genome_context.chrom_sizes.items() if '_' not in key),
             headers=["Chromosome", "Size"])
 
+    def get_genome_context(self):
+        return self._genome_context
+
     @property
     def size(self):
         '''The size of the genome'''
