@@ -11,9 +11,15 @@ import numpy as np
 def sequence():
     return EncodedArray(np.array([[1, 2], [2, 3]], dtype=np.uint8)+64, bnp.encodings.BaseEncoding)
 
+
 @pytest.fixture
 def simple_sequence():
     return EncodedArray(np.array([1, 2, 2, 3], dtype=np.uint8) + 64, bnp.encodings.BaseEncoding)
+
+
+@pytest.fixture
+def dna_sequence():
+    return as_encoded_array('ACGT').copy()
 
 
 @pytest.fixture
@@ -43,6 +49,28 @@ def test_getitem(sequence):
     sequence = sequence.ravel()
     for i in range(len(sequence)):
         assert isinstance(sequence[i], EncodedArray)
+
+
+def test_setitem(dna_sequence):
+    dna_sequence[2] = 'T'
+    assert_encoded_array_equal(dna_sequence, 'ACTT')
+
+
+def test_setitem2(dna_sequence):
+    dna_sequence = as_encoded_array(dna_sequence, bnp.DNAEncoding)
+    dna_sequence[2] = 'T'
+    assert_encoded_array_equal(dna_sequence, 'ACTT')
+
+def test_setitem3(dna_sequence):
+    dna_sequence = as_encoded_array(dna_sequence, bnp.DNAEncoding)
+    dna_sequence[2] = as_encoded_array('T')
+    assert_encoded_array_equal(dna_sequence, 'ACTT')
+
+
+
+def test_equal_different_encoding(dna_sequence):
+    diff = as_encoded_array(dna_sequence, bnp.DNAEncoding)
+    assert np.all(diff == dna_sequence), (diff.raw(), dna_sequence.raw())
 
 
 def test_works_with_ragged():
@@ -83,7 +111,7 @@ def test_encoded_array_list_to_raggedarray(simple_sequence):
     array_list = as_encoded_array([simple_sequence, simple_sequence])
     str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
     assert_encoded_raggedarray_equal(array_list, str_list)
-                                
+
 
 @pytest.mark.parametrize('dtype', [object, None])
 def test_object_array(ragged_string_list, dtype):
@@ -94,3 +122,24 @@ def test_object_array(ragged_string_list, dtype):
 
 if __name__ == "__main__":
     test_works_with_ragged()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

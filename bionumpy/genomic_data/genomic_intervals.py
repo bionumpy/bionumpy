@@ -20,6 +20,8 @@ class GenomicPlace:
     def get_location(self, where='start'):
         return NotImplemented
 
+    def get_data_field(self, field_name: str):
+        return NotImplemented
 
 class GenomicLocation(GenomicPlace):
     '''Class representing (possibliy stranded) locations in the genome'''
@@ -108,6 +110,7 @@ class GenomicLocation(GenomicPlace):
                                       'strand': strand_name})
 
 
+
 class GenomicLocationGlobal(GenomicLocation):
     ''' Class for genomic locations that are kept entirely in memory'''
 
@@ -175,6 +178,9 @@ class GenomicLocationGlobal(GenomicLocation):
 
     def __getitem__(self, idx):
         return self.__class__(self._locations[idx], self._genome_context, self._is_stranded, self._field_dict)
+
+    def get_data_field(self, field_name: str):
+        return getattr(self._locations, field_name)
 
 
 class GenomicIntervals(GenomicPlace):
@@ -326,6 +332,7 @@ class GenomicIntervals(GenomicPlace):
         return NotImplemented
 
 
+
 class GenomicIntervalsFull(GenomicIntervals):
     ''' Class for holding a set of intervals in memory''' 
     
@@ -409,6 +416,9 @@ class GenomicIntervalsFull(GenomicIntervals):
         if not self.is_stranded():
             raise ValueError('Unstranded interval has not strand')
         return self._intervals.strand
+
+    def get_data_field(self, field_name: str):
+        return getattr(self._intervals, field_name)
 
     @property
     def chromosome(self) -> str:
@@ -552,6 +562,9 @@ class GenomicIntervalsStreamed(GenomicIntervals):
     @property
     def chromosome(self):
         return self._chromosome
+
+    def get_data_field(self, field_name: str):
+        return ComputationNode(getattr, [self._intervals_node, 'chromosome'])
 
     @property
     def strand(self):

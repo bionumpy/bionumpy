@@ -234,6 +234,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         self.data = get_NPSArray(self.data)
         #assert isinstance(self.data, np.ndarray)
 
+    def copy(self):
+        return self.__class__(self.data.copy(), self.encoding)
+
     def __len__(self) -> int:
         return len(self.data)
 
@@ -360,9 +363,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         """
         assert isinstance(value, str) or isinstance(value, EncodedArray)
 
-        if isinstance(value, str):
-            value = self.encoding.encode(value)
-
+        # if isinstance(value, str):
+        #     value = self.encoding.encode(value)
+        value = as_encoded_array(value, self.encoding)
         self.data.__setitem__(idx, value.data)
 
     def __iter__(self):
@@ -429,15 +432,16 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 def _parse_ufunc_inputs(inputs, target_encoding):
     for a in inputs:
         assert isinstance(a, (str, list, EncodedArray, EncodedRaggedArray)), "%s is not str, list, EncodedArray or EncodedRaggedArray" % type(a)
-        if isinstance(a, str):
-            a = target_encoding.encode(a)
-        elif isinstance(a, list):
-            a = target_encoding.encode(a)
-        else:
-            # already encoded
-            pass
-
-        yield a.raw()
+        yield as_encoded_array(a, target_encoding).raw()
+        # if isinstance(a, str):
+        #     a = target_encoding.encode(a)
+        # elif isinstance(a, list):
+        #     a = target_encoding.encode(a)
+        # else:
+        #     # already encoded
+        #     pass
+        # 
+        # yield a.raw()
 
 
 def _list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArray]):
