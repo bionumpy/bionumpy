@@ -156,10 +156,10 @@ class GenomicLocationGlobal(GenomicLocation):
         """
         if self.is_stranded():
             intervals = StrandedInterval(self.chromosome, self.position-flank,
-                                         self.position+flank, self.strand)
+                                         self.position+flank+1, self.strand)
         else:
             intervals = Interval(self.chromosome, self.position-flank,
-                                 self.position+flank)
+                                 self.position+flank+1)
         return GenomicIntervalsFull(intervals, self._genome_context,
                                     is_stranded=self.is_stranded()).clip()
 
