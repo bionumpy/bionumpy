@@ -21,6 +21,9 @@ class Encoding:
     def get_labels(self):
         pass
 
+    def __call__(self, *args, **kwargs):
+        return self.encode(*args, **kwargs)
+    
     def is_base_encoding(self):
         return False
 
@@ -448,6 +451,9 @@ def _list_of_encoded_arrays_as_encoded_ragged_array(array_list: List[EncodedArra
     assert all(isinstance(a, EncodedArray) for a in array_list)
     encoding = array_list[0].encoding
     assert all(a.encoding == encoding for a in array_list)
+    if all(a.data.ndim == 0 for a in array_list):
+        data = np.array([a.data for a in array_list])
+        return EncodedArray(data, encoding)
     data = np.concatenate([a.data for a in array_list])
     shape = [len(a) for a in array_list]
     return EncodedRaggedArray(EncodedArray(data, encoding), shape)

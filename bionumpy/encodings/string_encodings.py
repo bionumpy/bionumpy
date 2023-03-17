@@ -18,10 +18,15 @@ class StringEncoding(Encoding):
 
     def encode(self, encoded_ragged_array):
         encoded_ragged_array = as_encoded_array(encoded_ragged_array)
+        is_flat = isinstance(encoded_ragged_array, EncodedArray)
+        if is_flat:
+            encoded_ragged_array = EncodedRaggedArray(encoded_ragged_array, [len(encoded_ragged_array)])
         try:
             hashes = self._hash_table[encoded_ragged_array]
         except IndexError as e:
             raise EncodingError('String encoding failed') from e
+        if is_flat:
+            hashes = np.squeeze(hashes)
         return EncodedArray(hashes, self)
 
     def decode(self, encoded_array):

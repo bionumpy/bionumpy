@@ -130,3 +130,4 @@ class TwoPerson:
 def test_hierachical(data):
     two_persons = TwoPerson(data, data, ['b', 'b', 'f', 'f'])
     assert_bnpdataclass_equal(two_persons.person_1, data)
+    print(two_persons)
