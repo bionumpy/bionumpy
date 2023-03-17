@@ -194,6 +194,9 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                         val = RaggedArray(pre_val)
                     else:
                         val = pre_val
+                elif issubclass(field.type, BNPDataClass):
+                    assert isinstance(pre_val, field.type)
+                    val = pre_val
                 else:
                     assert False, field.type
                 setattr(obj, field.name, val)
