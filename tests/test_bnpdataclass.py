@@ -30,7 +30,6 @@ def data_list():
             for _ in range(100)]
 
 
-
 def test_add_fields():
     @bnpdataclass
     class BaseDC:
@@ -119,3 +118,16 @@ def test_dynamic_join(data_list):
     truth = np.concatenate(data_list)
     solution = dynamic_concatenate(data_list)
     assert_bnpdataclass_equal(truth, solution)
+
+
+@bnpdataclass
+class TwoPerson:
+    person_1: Person
+    person_2: Person
+    relation: str
+
+
+def test_hierachical(data):
+    two_persons = TwoPerson(data, data, ['b', 'b', 'f', 'f'])
+    assert_bnpdataclass_equal(two_persons.person_1, data)
+    print(two_persons)

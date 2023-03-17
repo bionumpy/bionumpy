@@ -65,7 +65,7 @@ def windows(genome_context):
         genome_context,
         ['chr1', 'chr2', 'chr2'],
         [14, 15, 45],
-        [24, 25, 55],
+        [25, 26, 56],
         ['-', '+', '+'])
     assert w.is_stranded()
     return w

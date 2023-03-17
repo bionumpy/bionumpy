@@ -9,11 +9,20 @@ from bionumpy.util.testing import assert_encoded_array_equal, assert_encoded_rag
 from bionumpy import FastQBuffer, as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.datatypes import SequenceEntryWithQuality
-from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding, DigitEncodingFactory
+from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding, DigitEncodingFactory, DNAEncoding, ACGTnEncoding
 from bionumpy.encoded_array import NumericEncoding, OneToOneEncoding, BaseEncoding
 
 
 #from bionumpy.encoded_array import OneToOneEncoding
+
+@pytest.fixture
+def seqs():
+    return ['acgt', 'gct']
+
+
+def test_alphabet_conversion(seqs):
+    dna = as_encoded_array(seqs, ACGTnEncoding)
+    assert_encoded_raggedarray_equal(as_encoded_array(dna, DNAEncoding), seqs)
 
 
 def test_change_encoding_on_encoded_array():
