@@ -1,5 +1,4 @@
 import bionumpy as bnp
-import typer
 from bionumpy.genomic_data import Genome
 
 
@@ -33,4 +32,5 @@ def test():
 
 
 if __name__ == '__main__':
+    import typer
     typer.run(main)
