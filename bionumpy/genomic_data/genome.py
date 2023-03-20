@@ -236,8 +236,8 @@ class Genome:
         
         if filename is None:
             assert self._fasta_filename is not None
-            filename = self._fasta_filename 
-        return GenomicSequence.from_indexed_fasta(open_indexed(filename))
+            filename = self._fasta_filename
+        return GenomicSequence.from_indexed_fasta(open_indexed(filename), genome_context=self._genome_context)
 
     def read_annotation(self, filename: str) -> GenomicAnnotation:
         """Read genomic annotation from a 'gtf' or 'gff' file
