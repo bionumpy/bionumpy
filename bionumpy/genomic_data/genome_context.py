@@ -15,6 +15,13 @@ class GenomeError(Exception):
     pass
 
 
+def ignore_underscores(name):
+    return '_' not in name
+
+
+def keep_all(name):
+    return True
+
 class GenomeContext(GenomeContextBase):
     def __init__(self, chrom_size_dict: Dict[str, int], ignored=None):
         self._original_chrom_sizes = chrom_size_dict
@@ -63,10 +70,14 @@ class GenomeContext(GenomeContextBase):
         return data[mask]
 
     @classmethod
-    def from_dict(cls, chrom_size_dict):
-        f = lambda key: '_' not in key
+    def from_dict(cls, chrom_size_dict, filter_function=ignore_underscores):
+        if filter_function is None:
+            filter_function = lambda x: True
+        ignored_keys = {key for key in chrom_size_dict if not filter_function(key)}
+        if len(ignored_keys):
+            logger.info('Ignoring {len(ignored_keys)} chromosomes according to filter {filter_function.__name__}: {[key for key in zip(ignored_keys, range(3))] + ["..."]]}')
         return cls(chrom_size_dict, # {key: value for key, value in chrom_size_dict.items() if f(key)},
-                   {key for key in chrom_size_dict if not f(key)})
+                   ignored_keys)
 
     def chromosome_order(self):
         return (key for key in self._chrom_size_dict if '_' not in key)
