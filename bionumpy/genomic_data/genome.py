@@ -8,7 +8,7 @@ from .genomic_track import GenomicArray
 from .genomic_intervals import GenomicIntervals, GenomicLocation, LocationEntry
 from .genomic_sequence import GenomicSequence
 from .annotation import GenomicAnnotation
-from .genome_context import GenomeContext
+from .genome_context import GenomeContext, keep_all, ignore_underscores
 from ..encoded_array import as_encoded_array
 from ..bnpdataclass import replace, BNPDataClass
 from ..datatypes import BedGraph, Interval
@@ -26,20 +26,20 @@ class Genome:
     will usually be the same as either what is provided in the `chrom.sizes` file, or a simple alphabetic
     ordering. If sort order errors occur, try using `sort_names=True` when creating the `Genome` object.
     '''
-    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False):
+    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False, filter_function=ignore_underscores):
         if isinstance(chrom_sizes, GenomeContext):
             self._genome_context = chrom_sizes
         else:
             if sort_names:
                 chrom_sizes = {key: chrom_sizes[key] for key in sorted(chrom_sizes.keys())}
-            self._genome_context = GenomeContext.from_dict(chrom_sizes)
+            self._genome_context = GenomeContext.from_dict(chrom_sizes, filter_function)
         self._fasta_filename = fasta_filename
 
     def with_ignored_added(self, ignored):
         return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
-    def from_file(cls, filename: str, sort_names: bool=False) -> 'Genome':
+    def from_file(cls, filename: str, sort_names: bool=False, filter_function=ignore_underscores) -> 'Genome':
         """Read genome information from a 'chrom.sizes' or 'fa.fai' file
 
         File should contain rows of names and lengths of chromosomes.
@@ -70,7 +70,7 @@ class Genome:
             filename = index_file_name
 
         split_lines = (line.split()[:2] for line in open(filename))
-        return cls({name: int(length) for name, length in split_lines}, fasta_filename=fasta_filename, sort_names=sort_names)
+        return cls({name: int(length) for name, length in split_lines}, fasta_filename=fasta_filename, sort_names=sort_names, filter_function=filter_function)
 
     @staticmethod
     def _open(filename, stream, buffer_type=None):
@@ -236,8 +236,8 @@ class Genome:
         
         if filename is None:
             assert self._fasta_filename is not None
-            filename = self._fasta_filename 
-        return GenomicSequence.from_indexed_fasta(open_indexed(filename))
+            filename = self._fasta_filename
+        return GenomicSequence.from_indexed_fasta(open_indexed(filename), genome_context=self._genome_context)
 
     def read_annotation(self, filename: str) -> GenomicAnnotation:
         """Read genomic annotation from a 'gtf' or 'gff' file

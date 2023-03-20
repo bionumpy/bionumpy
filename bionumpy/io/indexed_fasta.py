@@ -67,7 +67,7 @@ class IndexedFasta:
         self._f_obj = open(filename, "rb")
         self._index_table = FastaIdx.from_entry_tuples(
             [(name, var['rlen'], var['offset'], var['lenc'], var['lenb'])
-             for name, var in self._index.items() if '_' not in name])
+             for name, var in self._index.items()])#  if '_' not in name])
 
     def get_contig_lengths(self) -> dict:
         """Return a dict of chromosome names to seqeunce lengths

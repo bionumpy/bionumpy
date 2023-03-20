@@ -25,6 +25,7 @@ BioNumPy documentation
     tutorials/position_weight_matrix.rst
     tutorials/set_of_sequences.rst
     tutorials/similarity_measures.rst
+    tutorials/extracting_kmers_around_snps.rst
 
 
 .. toctree::
