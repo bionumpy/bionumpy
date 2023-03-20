@@ -15,19 +15,23 @@ def dna_encode(output):
 
 class GenomicSequence(GenomicData):
     '''Class to hold a genomic sequence as a GenomicArray'''
-    def __init__(self, indexed_fasta: IndexedFasta):
+    def __init__(self, indexed_fasta: IndexedFasta, genome_context=None):
+        self._genome_context = genome_context
         self._fasta = indexed_fasta
 
     @property
     def genome_context(self):
-        return GenomeContext(self._fasta.get_contig_lengths())
+        if self._genome_context is None:
+            return GenomeContext(self._fasta.get_contig_lengths())
+        else:
+            return self._genome_context
 
     def __repr__(self):
         return f'GenomicSequence over chromosomes: {list(self._fasta.keys())}'
 
     @classmethod
-    def from_indexed_fasta(cls, indexed_fasta: IndexedFasta) -> 'GenomicSequenceIndexedFasta':
-        return GenomicSequenceIndexedFasta(indexed_fasta)
+    def from_indexed_fasta(cls, indexed_fasta: IndexedFasta, genome_context=None) -> 'GenomicSequenceIndexedFasta':
+        return GenomicSequenceIndexedFasta(indexed_fasta, genome_context)
 
     @classmethod
     def from_dict(cls, sequence_dict: Dict[str, str]):
