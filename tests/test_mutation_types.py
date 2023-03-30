@@ -17,7 +17,7 @@ def reference():
 
 @pytest.fixture
 def reference_sequence(reference):
-    return {'chr1': reference}
+    return GenomicSequenceDict({'chr1': reference})
 
 
 @pytest.fixture
@@ -25,12 +25,11 @@ def snp_locations(snps, reference):
     return Genome({'chr1': len(reference)}).get_locations(snps)
 
 
-@pytest.mark.xfail
 def test_genomic_verson(snp_locations, reference_sequence):
     counts = count_mutation_types_genomic(snp_locations, reference_sequence)
     for t in ["G[T>A]G", "A[C>G]C", "A[C>T]G"]:
         assert counts[t] == 1
-    assert counts.counts.sum() == len(snps)
+    assert counts.counts.sum() == 3
 
 
 def test_count_mutation_types(snps, reference):

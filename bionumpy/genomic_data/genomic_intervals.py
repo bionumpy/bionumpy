@@ -23,6 +23,11 @@ class GenomicPlace:
     def get_data_field(self, field_name: str):
         return NotImplemented
 
+    def set_strand(self, strand):
+        self._is_stranded = True
+        self._strand = strand
+
+
 class GenomicLocation(GenomicPlace):
     '''Class representing (possibliy stranded) locations in the genome'''
 
