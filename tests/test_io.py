@@ -76,7 +76,7 @@ def test_read_matrix_with_row_names(header, integers, matrix_text2, row_names):
     matrix = parse_matrix(matrix_text2, field_type=int)
     assert_encoded_raggedarray_equal(matrix.col_names, header)
     assert_equal(integers, matrix.data)
-    # assert_encoded_raggedarray_equal(matrix.row_names, row_names)
+    assert_encoded_raggedarray_equal(matrix.row_names, row_names)
 
 
 
