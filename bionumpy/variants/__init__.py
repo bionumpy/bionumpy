@@ -1,1 +1,2 @@
-from .mutation_signature import count_mutation_types
+from .mutation_signature import count_mutation_types_genomic
+from ._legacy import count_mutation_types

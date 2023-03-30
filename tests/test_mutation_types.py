@@ -1,9 +1,10 @@
 import pytest
 from bionumpy.datatypes import Variant
-from bionumpy.variants.mutation_signature import count_mutation_types, count_mutation_types_genomic
+from bionumpy.variants import count_mutation_types, count_mutation_types_genomic
+from bionumpy.variants.mutation_signature import MutationTypeEncoding
 from bionumpy.genomic_data.genome import Genome
 from bionumpy.genomic_data.genomic_sequence import GenomicSequenceDict
-
+import bionumpy as bnp
 
 @pytest.fixture
 def snps():
@@ -13,6 +14,11 @@ def snps():
 @pytest.fixture
 def reference():
     return "CCACCCGT"
+
+
+@pytest.fixture
+def mutation_encoding():
+    return MutationTypeEncoding(1)
 
 
 @pytest.fixture
@@ -38,3 +44,10 @@ def test_count_mutation_types(snps, reference):
     for t in ["G[T>A]G", "A[C>G]C", "A[C>T]G"]:
         assert counts[t] == 1
     assert counts.counts.sum() == len(snps)
+
+
+@pytest.mark.parametrize('s', ['A[C>A]A', 'C[T>G]A'])
+def test_mutation_encoding(s, mutation_encoding):
+    encoded = mutation_encoding.encode(bnp.as_encoded_array(s))
+    decoded = encoded.encoding.decode(encoded.raw())
+    assert decoded == s, (decoded, s)
