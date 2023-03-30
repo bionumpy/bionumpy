@@ -78,6 +78,12 @@ class MutationTypeEncoding:
     def get_labels(self):
         return [self.to_string(c) for c in np.arange(4**(self.k-1)*6)]
 
+from ..genomic_data import GenomicSequence, GenomicLocation
+
+
+def count_mutation_types_genomic(genome: GenomicSequence, variants: GenomicLocation, flank=1):
+    pass
+
 
 @streamable(reduction=sum)
 def count_mutation_types(variants, reference, flank=1):
