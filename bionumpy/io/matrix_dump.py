@@ -13,8 +13,8 @@ class Matrix:
 
 
 def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep='\t'):
+    print(text)
     assert colname_type == str
-    assert field_type == float
     text = as_encoded_array(text)
     line_endings = np.flatnonzero(text == '\n')
     if colname_type is not None:
@@ -25,10 +25,13 @@ def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep
     seps = np.flatnonzero((text == sep) | (text == '\n'))
     starts = np.insert(seps[:-1], 0, -1)+1
     ends = seps
-    if rowname_type is None:
-        numbers = str_to_float(ragged_slice(text, starts, ends))
-        return Matrix(None, col_names, numbers.reshape(-1, len(col_names)))
+    if rowname_type is not None:
+        starts = starts.reshape(-1, len(col_names))[:, 1:].ravel()
+        ends = ends.reshape(-1, len(col_names))[:, 1:].ravel()
+        col_names = col_names[1:]
 
+    numbers = str_to_float(ragged_slice(text, starts, ends))
+    return Matrix(None, col_names, numbers.reshape(-1, len(col_names)))
 
 def matrix_to_csv(matrix, header=None, sep=",", row_names=None):
     assert np.issubdtype(matrix.dtype,  np.integer)
