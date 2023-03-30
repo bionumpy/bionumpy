@@ -7,8 +7,9 @@ from io import BytesIO
 import bionumpy as bnp
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
-from bionumpy.io.matrix_dump import matrix_to_csv
-from bionumpy.util.testing import assert_bnpdataclass_equal
+from bionumpy.io.matrix_dump import matrix_to_csv, parse_matrix
+from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_array_equal, assert_encoded_raggedarray_equal
+from numpy.testing import assert_equal
 
 
 @pytest.mark.parametrize("file_format", combos.keys())
@@ -30,12 +31,51 @@ def test_read_write_roundtrip(file_format):
     assert out_obj.getvalue() == input_buffer
 
 
-def test_matrix_to_csv():
+@pytest.fixture
+def header():
+    return ["A", "AB", "ABC", "ABCD", "ABCDE"]
+
+
+@pytest.fixture
+def row_names():
+    return ['1', '2', '3', '4']
+
+
+@pytest.fixture
+def integers():
+    return np.arange(20).reshape(4, 5)
+
+
+@pytest.fixture
+def matrix_text(header, integers):
+    sep = '\t'
+    return sep.join(header) + "\n" + "\n".join(sep.join(str(i) for i in row) for row in integers)+"\n"
+
+
+@pytest.fixture
+def matrix_text2(header, integers, row_names):
+    sep = '\t'
+    return sep.join(['type'] + header) + "\n" + "\n".join(sep.join([row_name] + [str(i) for i in row]) for row_name, row in zip(row_names,integers))+"\n"
+
+
+def test_matrix_to_csv(header, integers, row_names):
     header = ["A", "AB", "ABC", "ABCD", "ABCDE"]
     integers = np.arange(20).reshape(4, 5)
     text = matrix_to_csv(integers, header=header)
 
     assert text.to_string() == ",".join(header) + "\n" + "\n".join(",".join(str(i) for i in row) for row in integers)+"\n"
+
+
+def test_read_matrix(header, integers, matrix_text):
+    matrix = parse_matrix(matrix_text, rowname_type=None)
+    assert_encoded_raggedarray_equal(matrix.col_names, header)
+    assert_equal(integers, matrix.data)
+
+def test_read_matrix_with_row_names(header, integers, matrix_text2, row_names):
+    matrix = parse_matrix(matrix_text, field_type=int)
+    assert_encoded_raggedarray_equal(matrix.col_names, header)
+    assert_encoded_raggedarray_equal(matrix.row_names, row_names)
+
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta", 'wig'])
@@ -111,4 +151,3 @@ def test_write_dna_fastq():
     result = buf_type.from_raw_buffer(buf_type.from_data(entry)).get_data()
     print(result)
     assert np.all(entry.sequence == result.sequence)
-
