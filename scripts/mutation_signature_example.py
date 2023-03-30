@@ -1,5 +1,4 @@
 import bionumpy as bnp
-import typer
 from bionumpy.streams.multistream import MultiStream
 from bionumpy.util.cli import run_as_commandline
 from bionumpy.variants.mutation_signature import count_mutation_types_genomic, count_mutation_types
@@ -45,5 +44,6 @@ def test():
 
 
 if __name__ == "__main__":
+    import typer
     typer.run(main)
     # run_as_commandline(main)
