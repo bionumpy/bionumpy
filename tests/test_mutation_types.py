@@ -1,6 +1,7 @@
 import pytest
+import numpy as np
 from bionumpy.datatypes import Variant
-from bionumpy.variants import count_mutation_types, count_mutation_types_genomic
+from bionumpy.variants import count_mutation_types, count_mutation_types_genomic, MutationTypeEncoding
 from bionumpy.variants.mutation_signature import MutationTypeEncoding
 from bionumpy.genomic_data.genome import Genome
 from bionumpy.genomic_data.genomic_sequence import GenomicSequenceDict
@@ -30,6 +31,12 @@ def reference_sequence(reference):
 def snp_locations(snps, reference):
     return Genome({'chr1': len(reference)}).get_locations(snps)
 
+
+def test_cosmic_read():
+    matrix = bnp.io.read_matrix('example_data/COSMIC_v3.3.1_SBS_GRCh38.txt')
+    encoded = bnp.as_encoded_array(matrix.row_names.to_numpy_array(),
+                                   MutationTypeEncoding(1))
+    matrix.data[np.argsort(encoded)]
 
 def test_genomic_verson(snp_locations, reference_sequence):
     counts = count_mutation_types_genomic(snp_locations, reference_sequence)

@@ -12,6 +12,10 @@ class Matrix:
     data: np.ndarray
 
 
+def read_matrix(filename, *args, **kwargs):
+    return parse_matrix(open(filename).read(), *args, **kwargs)
+
+
 def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep='\t'):
     print(text)
     assert colname_type == str
@@ -32,7 +36,7 @@ def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep
         starts = starts.reshape(-1, n_cols)[:, 1:].ravel()
         ends = ends.reshape(-1, n_cols)[:, 1:].ravel()
         col_names = col_names[1:]
-    f = str_to_int if field_type==int else str_to_float
+    f = str_to_int if field_type == int else str_to_float
     numbers = f(ragged_slice(text, starts, ends))
     return Matrix(row_names, col_names, numbers.reshape(-1, len(col_names)))
 

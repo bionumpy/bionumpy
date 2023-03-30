@@ -87,7 +87,7 @@ def encode_snps(kmer, alt_seq, true_ref_seq=None):
     k = kmer.shape[-1]
     ref_seq = kmer[..., k//2]
     if true_ref_seq is not None:
-        assert np.all(ref_seq.ravel() == true_ref_seq.ravel())
+        assert np.all(ref_seq.ravel() == as_encoded_array(true_ref_seq, DNAEncoding).ravel())
     forward_mask = (ref_seq == 'C') | (ref_seq == 'T')
     kmer = np.where(forward_mask[:, None], kmer, get_reverse_complement(kmer))
     snp_code = SNPEncoding.lookup[ref_seq, alt_seq]
@@ -98,12 +98,13 @@ def encode_snps(kmer, alt_seq, true_ref_seq=None):
 
 
 def count_mutation_types_genomic(variants: GenomicLocation, reference: GenomicSequence, flank=1):
-    snp_mask = (variants.get_data_field('alt_seq').shape[-1] ==1) & (variants.get_data_field('ref_seq').shape[-1]==1)
+    snp_mask = (variants.get_data_field('alt_seq').shape[-1] == 1) & (variants.get_data_field('ref_seq').shape[-1]==1)
     snps = variants[snp_mask]
     ref_seq = snps.get_data_field('ref_seq')
-    windows = variants.get_windows(flank)
+    windows = snps.get_windows(flank)
     kmers = reference[windows].to_numpy_array()
-    hashes = encode_snps(kmers, snps.get_data_field('alt_seq'), ref_seq)
+    mask = ~np.any(kmers == 'N', axis=-1)
+    hashes = encode_snps(kmers, snps[mask].get_data_field('alt_seq'), ref_seq[mask])
     return count_encoded(hashes)
 
 

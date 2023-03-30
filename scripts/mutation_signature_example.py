@@ -1,22 +1,38 @@
 import bionumpy as bnp
+import numpy as np
 from bionumpy.streams.multistream import MultiStream
-from bionumpy.variants import count_mutation_types_genomic, count_mutation_types
+from bionumpy.variants import count_mutation_types_genomic, count_mutation_types, MutationTypeEncoding
 from bionumpy.io.delimited_buffers import PhasedVCFMatrixBuffer
-from bionumpy.io.matrix_dump import matrix_to_csv
+from bionumpy.io.matrix_dump import matrix_to_csv, read_matrix
 from bionumpy import Genome
 import logging
 logging.basicConfig(level="INFO")
 
 
-def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1):
+def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, has_numeric_chromosomes=True):
     genome = Genome.from_file(fasta_filename)
-    variants = genome.read_locations(vcf_filename)
+    variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=has_numeric_chromosomes)
     counts = count_mutation_types_genomic(variants, genome.read_sequence())
     output = matrix_to_csv(counts.counts, header=counts.alphabet)
     if out_filename is not None:
         open(out_filename, "wb").write(bytes(output.raw()))
     else:
         print(output.to_string())
+
+
+def nmf(signature_filename: str, count_filename: str):
+    from sklearn.decomposition import NMF
+    encoding = MutationTypeEncoding(1)
+    signature_matrix = read_matrix(signature_filename)
+    count_matrix = read_matrix(count_filename, field_type=int)
+    signature_encoded = bnp.as_encoded_array(signature_matrix.row_names.to_numpy_array(),
+                                             encoding)
+    S = signature_matrix.data[np.argsort(signature_encoded)]
+    count_encoded = bnp.as_encoded_array(count_matrix.col_names.to_numpy_array(),
+                                         encoding)
+    M = count_matrix.data[:, np.argsort(count_encoded)]
+    result = NMF().fit_transform(M, H=S)
+    # mutation_types = bnp.as_encoded_array(signature_matrix.row_names, MutationTypeEncoding)
 
 
 def main_old(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = False):

@@ -33,8 +33,6 @@ def _get_ascii_complement_lookup():
     return Lookup(EncodedArray(values, BaseEncoding))
 
 
-
-
 def complement(_array):
     array = _array
     if isinstance(_array, EncodedRaggedArray):
@@ -64,6 +62,7 @@ def get_reverse_complement(sequence: EncodedArrayLike) -> EncodedArrayLike:
 
     """
     sequence = as_encoded_array(sequence)
+    print(np.max(sequence.raw()), sequence.encoding)
     return complement(sequence)[..., ::-1]
 
 
