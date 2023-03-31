@@ -10,14 +10,17 @@ logging.basicConfig(level="INFO")
 
 
 def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, has_numeric_chromosomes=True, genotyped=False):
+    buffer_type = PhasedVCFMatrixBuffer if genotyped else None
     genome = Genome.from_file(fasta_filename)
-    variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=has_numeric_chromosomes)
-    counts = count_mutation_types_genomic(variants, genome.read_sequence())
-    output = matrix_to_csv(counts.counts, header=counts.alphabet)
+    variants = np.concatenate(list(bnp.open(vcf_filename, buffer_type=buffer_type).read_chunks()))
+    variants = genome.get_locations(variants, has_numeric_chromosomes=has_numeric_chromosomes)
+    # variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=has_numeric_chromosomes)
+    counts = count_mutation_types_genomic(variants, genome.read_sequence(), genotyped=genotyped)
     if out_filename is not None:
+        output = matrix_to_csv(counts.counts, header=counts.alphabet)
         open(out_filename, "wb").write(bytes(output.raw()))
     else:
-        print(output.to_string())
+        print(counts)
     return counts
 
 def nmf(signature_matrix, count_matrix):
@@ -29,7 +32,7 @@ def nmf(signature_matrix, count_matrix):
     count_encoded = bnp.as_encoded_array(bnp.as_encoded_array(count_matrix.col_names).to_numpy_array(),
                                          encoding)
     M = count_matrix.data[:, np.argsort(count_encoded)]
-    result = NMF().fit_transform(M, H=S)
+    result = NMF(max_iter=1000).fit_transform(M, H=S)
     return result
 
 def nmf_from_file(signature_filename: str, count_filename: str):
@@ -62,8 +65,8 @@ def test():
     main("example_data/few_variants.vcf", "example_data/small_genome.fa", has_numeric_chromosomes=False)
 
 
-def pipeline(vcf_filename: str, fasta_filename: str, signature_filename, has_numeric_chromosomes=True):
-    counts = main(vcf_filename, fasta_filename, has_numeric_chromosomes=has_numeric_chromosomes)
+def pipeline(vcf_filename: str, fasta_filename: str, signature_filename, has_numeric_chromosomes=True, genotyped=False):
+    counts = main(vcf_filename, fasta_filename, has_numeric_chromosomes=has_numeric_chromosomes, genotyped=genotyped)
     signature_matrix = read_matrix(signature_filename)
     count_matrix = signature_matrix.__class__(np.atleast_2d(counts.counts), col_names=counts.alphabet)
     print(nmf(signature_matrix, count_matrix))

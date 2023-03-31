@@ -188,8 +188,6 @@ class Genome:
         f = bnp_open(filename)
         if not stream:
             data = f.read()
-            if has_numeric_chromosomes:
-                data = replace(data, chromosome=as_encoded_array(['chr'+chromosome.to_string() for chromosome in data.chromosome]))
         else:
             data = f.read_chunks()
         return self.get_locations(data)
@@ -202,7 +200,7 @@ class Genome:
         mask = self._genome_context.is_included(encoded_chromosomes)
         return data[mask]
 
-    def get_locations(self, data: LocationEntry) -> GenomicLocation:
+    def get_locations(self, data: LocationEntry, has_numeric_chromosomes=False) -> GenomicLocation:
         """Create `GenomicLocation`s from location entries
 
         Parameters
@@ -215,6 +213,8 @@ class Genome:
         GenomicLocation
 
         """
+        if has_numeric_chromosomes:
+            data = replace(data, chromosome=as_encoded_array(['chr'+chromosome.to_string() for chromosome in data.chromosome]))
         data = self._mask_data_on_extra_chromosomes(data)
         return GenomicLocation.from_data(data, self._genome_context)
 
