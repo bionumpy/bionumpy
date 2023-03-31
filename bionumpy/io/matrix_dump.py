@@ -7,9 +7,9 @@ from dataclasses import dataclass
 
 @dataclass
 class Matrix:
-    row_names: list
-    col_names: list
     data: np.ndarray
+    row_names: list = None
+    col_names: list = None
 
 
 def read_matrix(filename, *args, **kwargs):
@@ -38,7 +38,8 @@ def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep
         col_names = col_names[1:]
     f = str_to_int if field_type == int else str_to_float
     numbers = f(ragged_slice(text, starts, ends))
-    return Matrix(row_names, col_names, numbers.reshape(-1, len(col_names)))
+    return Matrix(numbers.reshape(-1, len(col_names)), row_names, col_names)
+
 
 def matrix_to_csv(matrix, header=None, sep=",", row_names=None):
     assert np.issubdtype(matrix.dtype,  np.integer)

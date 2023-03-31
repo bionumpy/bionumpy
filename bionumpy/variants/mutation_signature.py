@@ -104,7 +104,7 @@ def count_mutation_types_genomic(variants: GenomicLocation, reference: GenomicSe
     windows = snps.get_windows(flank)
     kmers = reference[windows].to_numpy_array()
     mask = ~np.any(kmers == 'N', axis=-1)
-    hashes = encode_snps(kmers, snps[mask].get_data_field('alt_seq'), ref_seq[mask])
+    hashes = encode_snps(kmers[mask], snps[mask].get_data_field('alt_seq'), ref_seq[mask])
     return count_encoded(hashes)
 
 

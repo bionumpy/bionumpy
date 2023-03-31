@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level="INFO")
 
 
-def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, has_numeric_chromosomes=True):
+def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, has_numeric_chromosomes=True, genotyped=False):
     genome = Genome.from_file(fasta_filename)
     variants = genome.read_locations(vcf_filename, has_numeric_chromosomes=has_numeric_chromosomes)
     counts = count_mutation_types_genomic(variants, genome.read_sequence())
@@ -18,21 +18,25 @@ def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank
         open(out_filename, "wb").write(bytes(output.raw()))
     else:
         print(output.to_string())
+    return counts
 
-
-def nmf(signature_filename: str, count_filename: str):
+def nmf(signature_matrix, count_matrix):
     from sklearn.decomposition import NMF
     encoding = MutationTypeEncoding(1)
-    signature_matrix = read_matrix(signature_filename)
-    count_matrix = read_matrix(count_filename, field_type=int)
     signature_encoded = bnp.as_encoded_array(signature_matrix.row_names.to_numpy_array(),
                                              encoding)
     S = signature_matrix.data[np.argsort(signature_encoded)]
-    count_encoded = bnp.as_encoded_array(count_matrix.col_names.to_numpy_array(),
+    count_encoded = bnp.as_encoded_array(bnp.as_encoded_array(count_matrix.col_names).to_numpy_array(),
                                          encoding)
     M = count_matrix.data[:, np.argsort(count_encoded)]
     result = NMF().fit_transform(M, H=S)
-    # mutation_types = bnp.as_encoded_array(signature_matrix.row_names, MutationTypeEncoding)
+    return result
+
+def nmf_from_file(signature_filename: str, count_filename: str):
+    signature_matrix = read_matrix(signature_filename)
+    count_matrix = read_matrix(count_filename, field_type=int)
+    return nmf(signature_matrix, count_matrix)
+   # mutation_types = bnp.as_encoded_array(signature_matrix.row_names, MutationTypeEncoding)
 
 
 def main_old(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank: int = 1, genotyped: bool = False):
@@ -55,10 +59,17 @@ def main_old(vcf_filename: str, fasta_filename: str, out_filename: str = None, f
 
 
 def test():
-    main("example_data/few_variants.vcf", "example_data/small_genome.fa")
+    main("example_data/few_variants.vcf", "example_data/small_genome.fa", has_numeric_chromosomes=False)
+
+
+def pipeline(vcf_filename: str, fasta_filename: str, signature_filename, has_numeric_chromosomes=True):
+    counts = main(vcf_filename, fasta_filename, has_numeric_chromosomes=has_numeric_chromosomes)
+    signature_matrix = read_matrix(signature_filename)
+    count_matrix = signature_matrix.__class__(np.atleast_2d(counts.counts), col_names=counts.alphabet)
+    print(nmf(signature_matrix, count_matrix))
 
 
 if __name__ == "__main__":
     import typer
-    typer.run(main)
+    typer.run(pipeline)
     # run_as_commandline(main)
