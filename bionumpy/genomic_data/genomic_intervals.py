@@ -281,8 +281,8 @@ class GenomicIntervals(GenomicPlace):
         'GenomicIntervals'
         """
         if isinstance(track, GenomicArrayNode):
-            return GenomicIntervalsStreamed(track.get_data(), track._genome_context)
-        return GenomicIntervalsFull(track.get_data(), track._genome_context)
+            return GenomicIntervalsStreamed(track.get_data(), track.genome_context)
+        return GenomicIntervalsFull(track.get_data(), track.genome_context)
 
     @classmethod
     def from_fields(cls, genome_context: GenomeContextBase, chromosome, start, stop, strand=None):
@@ -456,6 +456,10 @@ class GenomicIntervalsFull(GenomicIntervals):
         'GenomicIntervals'
         """
 
+        if distance > 0:
+            stream = self.as_stream()
+            return stream.merged(distance).compute()
+
         assert distance == 0, 'Distance might cross chromosome boundries so is not supported with current implementation'
         go = self._genome_context.global_offset
         global_intervals = go.from_local_interval(self._intervals)
@@ -608,7 +612,7 @@ class GenomicIntervalsStreamed(GenomicIntervals):
             4
         """
 
-        return self.__class__(ComputationNode(merge_intervals, [self._intervals_node]), self._genome_context)
+        return self.__class__(ComputationNode(merge_intervals, [self._intervals_node, distance]), self._genome_context)
 
     def get_pileup(self) -> GenomicArray:
         """Create a GenomicTrack of how many intervals covers each position in the genome

@@ -22,6 +22,7 @@ def ignore_underscores(name):
 def keep_all(name):
     return True
 
+
 class GenomeContext(GenomeContextBase):
     def __init__(self, chrom_size_dict: Dict[str, int], ignored=None):
         self._original_chrom_sizes = chrom_size_dict

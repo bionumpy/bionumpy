@@ -19,6 +19,7 @@ def sum_and_n(array, axis=None):
         return 0, 0
 
     s = np.sum(array, axis=axis)
+    assert axis in (None, 0, -2), axis
     if axis is None:
         n = array.size
     elif axis == 0:
@@ -49,7 +50,7 @@ class Node(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_function__(self, func, types, args, kwargs):
         stack_trace = "".join(format_list(extract_stack(limit=10))[:-2])
-        if func == np.mean:
+        if func == np.mean and ('axis' not in kwargs or kwargs['axis'] in (None, 0)):
             comp_node = ComputationNode(sum_and_n, args, kwargs, stack_trace=stack_trace)
             return ReductionNode(comp_node, mean_reduction, lambda sn: sn[0]/sn[1])
         else:
