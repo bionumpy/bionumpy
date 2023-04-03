@@ -162,6 +162,8 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self.ravel(), EncodedArray)
 
     def __repr__(self) -> str:
+        if len(self) == 0:
+            return ''
         if self.size>1000:
             rows = [str(row) for row in self[:5]]
         else:

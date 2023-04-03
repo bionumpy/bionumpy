@@ -2,17 +2,23 @@ import numpy as np
 from itertools import count, chain
 from traceback import extract_stack, format_list
 from functools import reduce
+from abc import ABC, abstractmethod
 import operator
+
+
 class ComputationException(Exception):
     pass
+
 
 def _add_histograms(histogram_a, histogram_b):
     assert np.all(histogram_a[1] == histogram_b[1]), (histogram_a, histogram_b)
     return ((histogram_a[0]+histogram_b[0]), histogram_a[1])
 
+
 def mean_reduction(sum_and_n_a, sum_and_n_b):
     return (sum_and_n_a[0]+sum_and_n_b[0],
             sum_and_n_a[1]+sum_and_n_b[1])
+
 
 def sum_and_n(array, axis=None):
     if array.size == 0:
@@ -39,7 +45,9 @@ reductions_map = {
     }
 
 
-class Node(np.lib.mixins.NDArrayOperatorsMixin):
+class Node(np.lib.mixins.NDArrayOperatorsMixin, ABC):
+
+    @abstractmethod
     def _get_buffer(self, i: int):
         return NotImplemented
 
@@ -96,6 +104,9 @@ class ReductionNode(Node):
         self._stream  = stream
         self._binary_func = binary_func
         self._post_process = post_process
+
+    def _get_buffer(self, i: int):
+        raise NotImplementedError
 
     def compute(self):
         r = reduce(self._binary_func, self._stream.get_iter())
@@ -169,22 +180,35 @@ class ComputationNode(Node):
 
 
 class JoinNode(ComputationNode):
+    def _get_buffer(self, i: int):
+        raise NotImplementedError
+
     def compute(self):
-        return [np.concatenate(column) for column in zip(*self.get_iter())]
+        buffer_list = None
+        for buffer_tuple in self.get_iter():
+            if buffer_list is None:
+                buffer_list = [list() for _ in buffer_tuple]
+            for l, b in zip(buffer_list, buffer_tuple):
+                l.append(b)
+        return [np.concatenate(column) for column in buffer_list]
+    # return [np.concatenate(column) for column in zip(*self.get_iter())]
 
 
-
-
-def _compute(*args): # func, args, kwargs=None):
+def _compute(*args):
     if not any(isinstance(a, Node) for a in args):
         return args
     if all(isinstance(a, ReductionNode) for a in args):
         return ReductionNode.join(args).compute()
     else:
         assert not any(isinstance(a, ReductionNode) for a in args)
-        node = JoinNode(lambda *a: tuple(a),
-                        args)
-        return node.compute()
+        node_idxs = [i for i, a in enumerate(args) if isinstance(a, Node)]
+        results = JoinNode(lambda *a: tuple(a),
+                           [args[i] for i in node_idxs]).compute()
+        args = list(args)
+        for i, idx in enumerate(node_idxs):
+            args[idx] = results[i]
+        return args
+
 
 def compute(args):
     if isinstance(args, dict):

@@ -115,7 +115,6 @@ class GenomicLocation(GenomicPlace):
                                       'strand': strand_name})
 
 
-
 class GenomicLocationGlobal(GenomicLocation):
     ''' Class for genomic locations that are kept entirely in memory'''
 
@@ -348,6 +347,13 @@ class GenomicIntervalsFull(GenomicIntervals):
         self._is_stranded = is_stranded
         self._genome_context = genome_context
 
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        if func == np.concatenate:
+            return self.__class__(np.concatenate([obj._intervals for obj in args[0]]), self._genome_context, self._is_stranded)
+            
+        return NotImplemented
+
+
     def __repr__(self):
         return f'Genomic Intervals on {self._genome_context}:\n{self._intervals.astype(Interval)}'
 
@@ -526,7 +532,7 @@ class GenomicIntervalsFull(GenomicIntervals):
         return self._is_stranded
 
 
-class GenomicIntervalsStreamed(GenomicIntervals):
+class GenomicIntervalsStreamed(GenomicIntervals, Node):
     '''
     Class for representing intervals that are grouped by chromosome, and where only intervals
     for one chromosome at the time is kept in memory
@@ -627,6 +633,7 @@ class GenomicIntervalsStreamed(GenomicIntervals):
         """
         return GenomicArrayNode(ComputationNode(get_pileup, [self._intervals_node, self._chrom_size_node]),
                                 self._genome_context)
+
     
     def get_mask(self) -> GenomicArray:
         return GenomicArrayNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
@@ -642,6 +649,12 @@ class GenomicIntervalsStreamed(GenomicIntervals):
     def compute(self):
         chromosome, start, stop = compute((self.chromosome, self.start, self.stop))
         return GenomicIntervalsFull(Interval(chromosome, start, stop), self._genome_context)
+
+    def _get_buffer(self, i):
+        return GenomicIntervalsFull(Interval(self.chromosome._get_buffer(i),
+                                             self.start._get_buffer(i),
+                                             self.stop._get_buffer(i)),
+                                    self._genome_context)
 
     def as_stream(self):
         return self
