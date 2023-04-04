@@ -139,7 +139,6 @@ class ComputationNode(Node):
         self._stack_trace = "".join(format_list(extract_stack(limit=5))[:-2])
         self._get_buffer(0)
 
-
     def __getitem__(self, item):
         return ComputationNode(lambda obj, item: obj[item],
                                (self, item))
@@ -180,9 +179,7 @@ class ComputationNode(Node):
 
 
 class JoinNode(ComputationNode):
-    def _get_buffer(self, i: int):
-        raise NotImplementedError
-
+    
     def compute(self):
         buffer_list = None
         for buffer_tuple in self.get_iter():
