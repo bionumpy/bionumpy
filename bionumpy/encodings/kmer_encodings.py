@@ -1,6 +1,7 @@
 from . import AlphabetEncoding
 from ..encoded_array import Encoding
-from ..encoded_array import EncodedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from npstructures import RaggedArray
 from ..util import is_subclass_or_instance
 import numpy as np
 
@@ -14,6 +15,24 @@ class KmerEncoding(Encoding):
     @property
     def k(self):
         return self._k
+
+    def encode(self, data):
+        if isinstance(data, str):
+            assert len(data) == self.k
+            letters = self._alphabet_encoding.encode(data).raw()
+            return EncodedArray(
+                letters.dot(self._alphabet_encoding.alphabet_size**np.arange(self._k)),
+                self)
+        if isinstance(data, (list, EncodedRaggedArray)):
+            assert all(len(row) == self.k for row in data)
+            letters = self._alphabet_encoding.encode(data).raw()
+            if isinstance(letters, RaggedArray):
+                letters = letters.to_numpy_array()
+            return EncodedArray(
+                letters.dot(self._alphabet_encoding.alphabet_size**np.arange(self._k)),
+                self)
+        print(data, type(data))
+        raise NotImplementedError
 
     def to_string(self, kmer):
         """
