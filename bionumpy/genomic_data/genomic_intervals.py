@@ -124,6 +124,10 @@ class GenomicLocationGlobal(GenomicLocation):
         self._is_stranded = is_stranded
         self._field_dict = field_dict
 
+    def __replace__(self, **kwargs):
+        kwargs = {self._field_dict[kw]: value for kw, value in kwargs.items()}
+        return self.__class__(dataclasses.replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
+
     @property
     def chromosome(self):
         return getattr(self._locations, self._field_dict['chromosome'])

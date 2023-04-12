@@ -19,7 +19,7 @@ multistream = bnp.MultiStream(chromosome_sizes, sequences=sequences)
 reads = simulate_chip_seq_reads(multistream.sequences, settings, multistream.sequence_names)
 with bnp.open(snakemake.output[2], 'w') as f:
     f.write(SequenceEntry(list(sequences.keys()), list(sequences.values())))
-with bnp.open(snakemake.output[1], 'w') as f:
+with bnp.open(snakemake.output[1], 'w', buffer_type=bnp.Bed6Buffer) as f:
     f.write(reads)
 
 with bnp.open(snakemake.output[0], "w") as f:

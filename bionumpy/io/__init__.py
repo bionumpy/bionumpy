@@ -6,3 +6,4 @@ from .delimited_buffers import (BedBuffer, Bed6Buffer, VCFBuffer, PhasedVCFMatri
                                 GfaSequenceBuffer, get_bufferclass_for_datatype, NarrowPeakBuffer)
 from .indexed_fasta import IndexedFasta
 from .matrix_dump import read_matrix
+from .motifs import read_motif
