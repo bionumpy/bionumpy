@@ -23,6 +23,7 @@ def main(vcf_filename: str, fasta_filename: str, out_filename: str = None, flank
         print(counts)
     return counts
 
+
 def nmf(signature_matrix, count_matrix):
     from sklearn.decomposition import NMF
     encoding = MutationTypeEncoding(1)

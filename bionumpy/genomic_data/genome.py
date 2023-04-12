@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from typing import Dict
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
@@ -128,7 +129,7 @@ class Genome:
         """
         return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
-    def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False) -> GenomicIntervals:
+    def read_intervals(self, filename: str, stranded: bool = False, stream: bool = False, buffer_type=None) -> GenomicIntervals:
         """Read a bed file and represent it as `GenomicIntervals`
 
         If `stream` is `True` then read the bedgraph in chunks and get
@@ -151,16 +152,17 @@ class Genome:
         suffix = path.suffixes[-1]
         if suffix == ".gz":
             suffix = path.suffixes[-2]
-        buffer_type = buffer_types[suffix]
-        if buffer_type == BedBuffer and stranded: 
-            buffer_type = Bed6Buffer
-        if buffer_type == BamBuffer:
-            buffer_type = BamIntervalBuffer
+        if buffer_type is None:
+            buffer_type = buffer_types[suffix]
+            if buffer_type == BedBuffer and stranded: 
+                buffer_type = Bed6Buffer
+            if buffer_type == BamBuffer:
+                buffer_type = BamIntervalBuffer
         content = self._open(filename, stream, buffer_type=buffer_type)
         return self.get_intervals(content, stranded)
     # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
-    def read_locations(self, filename: str, stranded: bool = False, stream: bool = False, has_numeric_chromosomes=False) -> GenomicLocation:
+    def read_locations(self, filename: str, stranded: bool = False, stream: bool = False, has_numeric_chromosomes=False, buffer_type=None) -> GenomicLocation:
         """Read a set of locations from file and convert them to `GenomicLocation`        
 
         Locations can be treated as stranded or not stranded. If `has_numeric_chromosomes` then 'chr'
@@ -175,7 +177,7 @@ class Genome:
             Whether or not the locations are stranded
         stream : bool
             Whether the data should be read as a stream
-        has_numeric_chromosomes : 6
+        has_numeric_chromosomes : bool
             Whether the file has the chromosomes as numbers
 
         Returns
@@ -185,12 +187,11 @@ class Genome:
 
         """
         assert not (stream and has_numeric_chromosomes)
-        f = bnp_open(filename)
+        f = bnp_open(filename, buffer_type=buffer_type)
+        data = f.read_chunks()
         if not stream:
-            data = f.read()
-        else:
-            data = f.read_chunks()
-        return self.get_locations(data)
+            data = np.concatenate(list(data))
+        return self.get_locations(data, has_numeric_chromosomes=has_numeric_chromosomes)
 
     def _mask_data_on_extra_chromosomes(self, data, chromosome_field_name='chromosome'):
         if not isinstance(data, BNPDataClass):

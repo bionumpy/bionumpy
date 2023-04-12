@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import ArrayLike
 from numbers import Number
-import dataclasses
+from ..io.matrix_dump import Matrix
 from ..util.typing import EncodedArrayLike
 from ..encoded_array import EncodedArray
 
@@ -51,7 +51,15 @@ class EncodedCounts:
 
     @property
     def proportions(self):
-        return self.counts/self.counts.sum()
+        s = self.counts.sum(axis=-1, keepdims=True)
+        return np.where(s > 0, self.counts/s, 0)
+    
+    @property
+    def proportion_matrix(self):
+        s = self.counts.sum(axis=-1, keepdims=True)
+        return Matrix(np.where(s > 0, self.counts/s, 0), col_names=self.alphabet)
+            
+        
 
     def get_count_for_label(self, label):
         return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)

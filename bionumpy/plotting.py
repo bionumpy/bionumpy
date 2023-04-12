@@ -1,12 +1,21 @@
 import numpy as np
+from npstructures import RunLengthArray
 from .genomic_data import GenomicArray, GenomicIntervals
 from .computation_graph import Node
 from .io.matrix_dump import Matrix
+from .sequence.count_encoded import EncodedCounts
+from .encoded_array import EncodedRaggedArray
+import dataclasses
+
+@dataclasses.dataclass
+class Vector:
+    data: np.ndarray
+    names: list
 
 class Plotter:
     def __init__(self, plt):
         self.plt = plt
-        self._show = False
+        self._show = True
 
     def set_config(self, **kwargs):
         accepted_configs = {'show'}
@@ -18,15 +27,27 @@ class Plotter:
     def show(self, f=None):
         if not self._show:
             return
-        if f is None:
-            self.plt.show()
-        else:
-            f.show()
+        plt.show()
+        # if f is None:
+        #     self.plt.show()
+        # else:
+        #     print(';;;;;;;;;;;;;;;;')
+        #     f.show()
 
     def _conversion(self, data):
         if isinstance(data, GenomicIntervals):
             return data.get_pileup()
+        elif isinstance(data, EncodedCounts):
+            if len(data.counts.shape) == 2:
+                return Matrix(data.counts, col_names=data.alphabet)
+            else:
+                return Vector(data.counts, names=data.alphabet)
         return data
+
+    def _plot_bars(self, vector):
+        fig, ax = self.plt.subplots()
+        ax.bar([str(c) for c in vector.names], vector.data)
+        self.show()
 
     def _plot_heatmap(self, matrix):
 
@@ -36,10 +57,20 @@ class Plotter:
         im = ax.imshow(data)
         
         # Show all ticks and label them with the respective list entries
+
         ax.set_xticks(np.arange(n_cols))
-        ax.set_xticklabels(matrix.col_names)
+        print(matrix.col_names, type(matrix.col_names))
+        if matrix.col_names is not None:
+            if isinstance(matrix.col_names, EncodedRaggedArray):
+                ax.set_xticklabels(matrix.col_names.tolist())
+            else:
+                ax.set_xticklabels(matrix.col_names)
         ax.set_yticks(np.arange(n_rows))
-        ax.set_yticklabels(matrix.row_names)
+        if matrix.row_names is not None:
+            if isinstance(matrix.row_names, EncodedRaggedArray):
+                ax.set_yticklabels(matrix.row_names.tolist())
+            else:
+                ax.set_yticklabels(matrix.row_names)
         
         # Rotate the tick labels and set their alignment.
         self.plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
@@ -87,6 +118,12 @@ class Plotter:
                 axes[i].title.set_text(chromosome)
             f.legend()
             self.show(f)
+        elif isinstance(data, RunLengthArray):
+            f, axes = self.plt.subplots()
+            for key, data in data_dict.items():
+                self._plot_single(data, ax=axes, label=key)
+            f.legend()
+            self.show()
         else:
             raise NotImplementedError(f'{type(data)} not supported')        
         pass 
@@ -94,7 +131,7 @@ class Plotter:
     def _subplots_for_genome(self, gc):
         return self.plt.subplots(len(gc.chrom_sizes), 1, sharey=True, sharex=True)
         
-    def _plot_single(self, data):
+    def _plot_single(self, data, ax=None, label=None):
         data = self._conversion(data)
         if isinstance(data, GenomicArray):
             f, axes = self._subplots_for_genome(data.genome_context)
@@ -103,9 +140,21 @@ class Plotter:
                 axes[i].plot(np.asarray(data[chromosome]))
                 axes[i].title.set_text(chromosome)
             self.show(f)
-
+        elif isinstance(data, RunLengthArray):
+            if ax is None:
+                f, ax = self.plt.subplots()# self._subplots_for_genome(data.genome_context)
+                ax.plot(np.asarray(data), label=label)
+                self.show()
+            else:
+                ax.plot(np.asarray(data), label=label)
         elif isinstance(data, Matrix):
             return self._plot_heatmap(data)
+        elif isinstance(data, Vector):
+            return self._plot_bars(data)
+        elif isinstance(data, np.ndarray):
+            f, ax = self.plt.subplots()
+            ax.plot(data)
+            self.show()
         else:
             raise NotImplementedError(f'{type(data)} not supported')
 

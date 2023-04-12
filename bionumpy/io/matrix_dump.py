@@ -17,7 +17,6 @@ def read_matrix(filename, *args, **kwargs):
 
 
 def parse_matrix(text, field_type=float, colname_type=str, rowname_type=str, sep='\t'):
-    print(text)
     assert colname_type == str
     text = as_encoded_array(text)
     line_endings = np.flatnonzero(text == '\n')
