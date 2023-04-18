@@ -46,7 +46,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/bionumpy/bionumpy',
-    version='0.2.22',
+    version='0.2.23',
     zip_safe=False,
 )
 
