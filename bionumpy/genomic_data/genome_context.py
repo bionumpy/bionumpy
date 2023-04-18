@@ -22,6 +22,7 @@ def ignore_underscores(name):
 def keep_all(name):
     return True
 
+
 class GenomeContext(GenomeContextBase):
     def __init__(self, chrom_size_dict: Dict[str, int], ignored=None):
         self._original_chrom_sizes = chrom_size_dict
@@ -75,7 +76,7 @@ class GenomeContext(GenomeContextBase):
             filter_function = lambda x: True
         ignored_keys = {key for key in chrom_size_dict if not filter_function(key)}
         if len(ignored_keys):
-            logger.info('Ignoring {len(ignored_keys)} chromosomes according to filter {filter_function.__name__}: {[key for key in zip(ignored_keys, range(3))] + ["..."]]}')
+            logger.info(f'Ignoring {len(ignored_keys)} chromosomes according to filter {filter_function.__name__}: {[key for key in zip(ignored_keys, range(3))] + ["..."]}')
         return cls(chrom_size_dict, # {key: value for key, value in chrom_size_dict.items() if f(key)},
                    ignored_keys)
 

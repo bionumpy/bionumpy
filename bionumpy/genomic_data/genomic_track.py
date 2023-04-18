@@ -1,5 +1,5 @@
 import numpy as np
-from abc import abstractclassmethod, abstractmethod, abstractproperty, ABC
+from abc import abstractmethod
 from .genomic_data import GenomicData
 from .genome_context_base import GenomeContextBase
 from ..computation_graph import StreamNode, ComputationNode
@@ -119,8 +119,9 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         Returns
         -------
         Union[GenomicRunLengthArray, RunLengthRaggedArray]
-            A runlengtharray for a single chromosome or a `RunLengthRaggedArray` for a list of chromosomes
+            A runlengtharray for a single chromosome or a RunLengthRaggedArray for a list of chromosomes
         """
+
         assert isinstance(chromosome, str)
         offset = self._genome_context.global_offset.get_offset([chromosome])[0]
         return self._global_track[offset:offset + self._genome_context.global_offset.get_size([chromosome])[0]]

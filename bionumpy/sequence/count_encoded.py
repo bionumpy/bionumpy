@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import ArrayLike
 from numbers import Number
-import dataclasses
+from ..io.matrix_dump import Matrix
 from ..util.typing import EncodedArrayLike
 from ..encoded_array import EncodedArray
 
@@ -51,7 +51,15 @@ class EncodedCounts:
 
     @property
     def proportions(self):
-        return self.counts/self.counts.sum()
+        s = self.counts.sum(axis=-1, keepdims=True)
+        return np.where(s > 0, self.counts/s, 0)
+    
+    @property
+    def proportion_matrix(self):
+        s = self.counts.sum(axis=-1, keepdims=True)
+        return Matrix(np.where(s > 0, self.counts/s, 0), col_names=self.alphabet)
+            
+        
 
     def get_count_for_label(self, label):
         return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
@@ -96,13 +104,14 @@ def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int
     EncodedCounts
 
     """
+    weights2d = weights is not None and np.asanyarray(weights).ndim ==2
     if axis is None:
         values = values.ravel()
     if hasattr(values.encoding, "get_alphabet"):
         alphabet = values.encoding.get_alphabet()
     else:
         alphabet = values.encoding.get_labels()
-    if isinstance(values, EncodedArray) and len(values.shape) == 1:
+    if isinstance(values, EncodedArray) and len(values.shape) == 1 and not weights2d:
         max_size = 1000000
         if len(values) > max_size and weights is None:
             counts = sum(np.bincount(values[i*max_size:(i+1)*max_size], minlength=len(alphabet))
@@ -110,5 +119,8 @@ def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int
         else:
             counts = np.bincount(values, weights=weights, minlength=len(alphabet))
     elif axis == -1:
-        counts = np.array([np.bincount(row, weights=weights, minlength=len(alphabet)) for row in values])
+        if not weights2d:
+            counts = np.array([np.bincount(row, weights=weights, minlength=len(alphabet)) for row in values])
+        else:
+            counts = np.array([np.bincount(values, weights=row, minlength=len(alphabet)) for row in weights])
     return EncodedCounts(alphabet, counts)

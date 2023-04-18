@@ -23,6 +23,11 @@ class GenomicPlace:
     def get_data_field(self, field_name: str):
         return NotImplemented
 
+    def set_strand(self, strand):
+        self._is_stranded = True
+        self._strand = strand
+
+
 class GenomicLocation(GenomicPlace):
     '''Class representing (possibliy stranded) locations in the genome'''
 
@@ -110,7 +115,6 @@ class GenomicLocation(GenomicPlace):
                                       'strand': strand_name})
 
 
-
 class GenomicLocationGlobal(GenomicLocation):
     ''' Class for genomic locations that are kept entirely in memory'''
 
@@ -119,6 +123,10 @@ class GenomicLocationGlobal(GenomicLocation):
         self._genome_context = genome_context
         self._is_stranded = is_stranded
         self._field_dict = field_dict
+
+    def __replace__(self, **kwargs):
+        kwargs = {self._field_dict[kw]: value for kw, value in kwargs.items()}
+        return self.__class__(dataclasses.replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
 
     @property
     def chromosome(self):
@@ -137,7 +145,7 @@ class GenomicLocationGlobal(GenomicLocation):
     def is_stranded(self):
         return self._is_stranded
 
-    def get_windows(self, flank: int) -> 'GenomicIntervals':
+    def get_windows(self, flank: int = None, window_size: int = None) -> 'GenomicIntervals':
         """Create windows around the locations. 
 
         `Flank specifies the flank on either side of the location. The full windows
@@ -154,12 +162,20 @@ class GenomicLocationGlobal(GenomicLocation):
             Window intervals
 
         """
-        if self.is_stranded():
-            intervals = StrandedInterval(self.chromosome, self.position-flank,
-                                         self.position+flank+1, self.strand)
+        if flank is not None:
+            assert window_size is None
+            l_flank = flank
+            r_flank = flank + 1
         else:
-            intervals = Interval(self.chromosome, self.position-flank,
-                                 self.position+flank+1)
+            assert window_size is not None
+            l_flank = window_size//2
+            r_flank = window_size//2 + window_size % 2
+        if self.is_stranded():
+            intervals = StrandedInterval(self.chromosome, self.position-l_flank,
+                                         self.position+r_flank, self.strand)
+        else:
+            intervals = Interval(self.chromosome, self.position-l_flank,
+                                 self.position+r_flank)
         return GenomicIntervalsFull(intervals, self._genome_context,
                                     is_stranded=self.is_stranded()).clip()
 
@@ -181,6 +197,106 @@ class GenomicLocationGlobal(GenomicLocation):
 
     def get_data_field(self, field_name: str):
         return getattr(self._locations, field_name)
+
+
+class GenomicLocationStreamed(GenomicLocation, Node):
+    '''
+    Class for representing intervals that are grouped by chromosome, and where only intervals
+    for one chromosome at the time is kept in memory
+    '''
+
+    is_stream = True
+
+    def _get_chrom_size(self, intervals: Interval):
+        return self._genome_context.chrom_sizes[intervals.chromosome]
+
+    def __str__(self):
+        return 'GLS:' + str(self._data_node)
+
+    def __repr__(self):
+        return 'GLS:' + str(self._data_node)
+
+    def __init__(self, data_node: Node, genome_context: GenomeContextBase, is_stranded=False, field_dict: Dict[str, str]=None):
+        if field_dict is None:
+            field_dict = {name: name for name in ['chromosome', 'positions', 'strand']}
+        self._genome_context = genome_context
+        self._chromosome = ComputationNode(getattr, [data_node, field_dict['chromosome']])
+        self._position = ComputationNode(getattr, [data_node, field_dict['position']])
+        if is_stranded:
+            self._strand = ComputationNode(getattr, [data_node, field_dict['strand']])
+
+        self._chrom_size_node = StreamNode(iter(self._genome_context.chrom_sizes.values()))
+        self._data_node = data_node
+        self._is_stranded = is_stranded
+
+    def is_stranded(self):
+        return self._is_stranded
+
+    def sorted(self):
+        return NotImplemented
+
+    @property
+    def position(self):
+        return self._position
+
+    @property
+    def chromosome(self):
+        return self._chromosome
+
+    def get_data_field(self, field_name: str):
+        return ComputationNode(getattr, [self._data_node, field_name])
+
+    @property
+    def strand(self):
+        if not self.is_stranded():
+            raise ValueError('Strand not supported on unstranded intervals')
+        return self._strand
+
+    def __getitem__(self, item):
+        return self.__class__(ComputationNode(lambda x, i: x[i], [self._data_node, item]), self._genome_context)
+
+    def get_windows(self, flank: int = None, window_size: int = None) -> 'GenomicIntervals':
+        """Create windows around the locations. 
+
+        `Flank specifies the flank on either side of the location. The full windows
+        will thus be `flank*2+1` wide
+
+        Parameters
+        ----------
+        flank : int
+            Flank on either side of the location
+
+        Returns
+        -------
+        GenomicIntervals
+            Window intervals
+
+        """
+        if flank is not None:
+            assert window_size is None
+            l_flank = flank
+            r_flank = flank + 1
+        else:
+            assert window_size is not None
+            l_flank = window_size//2
+            r_flank = window_size//2 + window_size % 2
+        if self.is_stranded():
+            intervals = ComputationNode(StrandedInterval, 
+                                        [self.chromosome,
+                                         self.position-l_flank,
+                                         self.position+r_flank, self.strand])
+        else:
+            intervals = ComputationNode(
+                Interval, [self.chromosome, self.position-l_flank,
+                           self.position+r_flank])
+        return GenomicIntervalsStreamed(intervals, self._genome_context,
+                                        is_stranded=self.is_stranded()).clip()
+
+    def _get_buffer(self, i):
+        return GenomicLocationGlobal(
+            LocationEntry(self.chromosome._get_buffer(i),
+                          self.position._get_buffer(i)),
+            self._genome_context)
 
 
 class GenomicIntervals(GenomicPlace):
@@ -276,8 +392,8 @@ class GenomicIntervals(GenomicPlace):
         'GenomicIntervals'
         """
         if isinstance(track, GenomicArrayNode):
-            return GenomicIntervalsStreamed(track.get_data(), track._genome_context)
-        return GenomicIntervalsFull(track.get_data(), track._genome_context)
+            return GenomicIntervalsStreamed(track.get_data(), track.genome_context)
+        return GenomicIntervalsFull(track.get_data(), track.genome_context)
 
     @classmethod
     def from_fields(cls, genome_context: GenomeContextBase, chromosome, start, stop, strand=None):
@@ -342,6 +458,13 @@ class GenomicIntervalsFull(GenomicIntervals):
         self._intervals = intervals
         self._is_stranded = is_stranded
         self._genome_context = genome_context
+
+    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+        if func == np.concatenate:
+            return self.__class__(np.concatenate([obj._intervals for obj in args[0]]), self._genome_context, self._is_stranded)
+            
+        return NotImplemented
+
 
     def __repr__(self):
         return f'Genomic Intervals on {self._genome_context}:\n{self._intervals.astype(Interval)}'
@@ -451,6 +574,10 @@ class GenomicIntervalsFull(GenomicIntervals):
         'GenomicIntervals'
         """
 
+        if distance > 0:
+            stream = self.as_stream()
+            return stream.merged(distance).compute()
+
         assert distance == 0, 'Distance might cross chromosome boundries so is not supported with current implementation'
         go = self._genome_context.global_offset
         global_intervals = go.from_local_interval(self._intervals)
@@ -517,7 +644,7 @@ class GenomicIntervalsFull(GenomicIntervals):
         return self._is_stranded
 
 
-class GenomicIntervalsStreamed(GenomicIntervals):
+class GenomicIntervalsStreamed(GenomicIntervals, Node):
     '''
     Class for representing intervals that are grouped by chromosome, and where only intervals
     for one chromosome at the time is kept in memory
@@ -603,7 +730,7 @@ class GenomicIntervalsStreamed(GenomicIntervals):
             4
         """
 
-        return self.__class__(ComputationNode(merge_intervals, [self._intervals_node]), self._genome_context)
+        return self.__class__(ComputationNode(merge_intervals, [self._intervals_node, distance]), self._genome_context)
 
     def get_pileup(self) -> GenomicArray:
         """Create a GenomicTrack of how many intervals covers each position in the genome
@@ -618,6 +745,7 @@ class GenomicIntervalsStreamed(GenomicIntervals):
         """
         return GenomicArrayNode(ComputationNode(get_pileup, [self._intervals_node, self._chrom_size_node]),
                                 self._genome_context)
+
     
     def get_mask(self) -> GenomicArray:
         return GenomicArrayNode(ComputationNode(get_boolean_mask, [self._intervals_node, self._chrom_size_node]),
@@ -634,5 +762,31 @@ class GenomicIntervalsStreamed(GenomicIntervals):
         chromosome, start, stop = compute((self.chromosome, self.start, self.stop))
         return GenomicIntervalsFull(Interval(chromosome, start, stop), self._genome_context)
 
+    def _get_buffer(self, i):
+        return GenomicIntervalsFull(Interval(self.chromosome._get_buffer(i),
+                                             self.start._get_buffer(i),
+                                             self.stop._get_buffer(i)),
+                                    self._genome_context)
+
     def as_stream(self):
         return self
+
+    def get_location(self, where: str = 'start') -> GenomicLocation:
+        """Get the genomic location of eitert 'start', 'stop' or 'center' of the intervals
+
+        Parameters
+        ----------
+        where : str
+            'start', 'stop' or 'center'
+
+        Returns
+        -------
+        GenomicLocation
+        """
+        assert where == 'start' and not self.is_stranded()
+        return GenomicLocationStreamed(self._intervals_node,
+                                       self._genome_context,
+                                       False,
+                                       {'chromosome': 'chromosome',
+                                        'position': 'start',
+                                        'strand': 'strand'})

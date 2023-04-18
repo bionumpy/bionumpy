@@ -162,6 +162,8 @@ class EncodedRaggedArray(RaggedArray):
         assert isinstance(self.ravel(), EncodedArray)
 
     def __repr__(self) -> str:
+        if len(self) == 0:
+            return ''
         if self.size>1000:
             rows = [str(row) for row in self[:5]]
         else:
@@ -393,6 +395,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         """
         if func == np.bincount:
             return np.bincount(args[0].data, *args[1:], **kwargs)
+        if func == np.argsort:
+            return np.argsort(args[0].data, *args[1:], **kwargs)
         if func == np.concatenate:
             return self.__class__(func([e.data for e in args[0]]), self.encoding)
         if func == np.where:
@@ -511,7 +515,9 @@ def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
             if not s.encoding.is_base_encoding():
                 if hasattr(s.encoding, 'get_alphabet') and hasattr(target_encoding, 'get_alphabet'):
                     m = s.raw().max()
-                    if s.encoding.get_alphabet()[:m] == target_encoding.get_alphabet()[:m]:
+                    if (s.encoding.get_alphabet()[:m] == target_encoding.get_alphabet()[:m]):
+                        if not m<len(target_encoding.get_alphabet()):
+                            raise EncodingException(f"Trying to encode already encoded array with encoding {s.encoding} to encoding {target_encoding}. However {s} contains {EncodedArray(m, s.encoding)}")
                         if isinstance(s, EncodedArray):
                             return s.__class__(s.raw(), target_encoding)
                         elif isinstance(s, EncodedRaggedArray):

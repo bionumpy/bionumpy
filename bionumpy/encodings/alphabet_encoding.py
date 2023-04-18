@@ -7,6 +7,7 @@ class AlphabetEncoding(OneToOneEncoding):
     def __init__(self, alphabet: str):
         self._raw_alphabet = [c.upper() for c in alphabet]
         self._is_initialized = False
+        self._alphabet_size = len(self._raw_alphabet)
 
     def _initialize(self):
         if self._is_initialized:
@@ -26,7 +27,7 @@ class AlphabetEncoding(OneToOneEncoding):
     def _encode(self, byte_array):
         self._initialize()
         ret = self._lookup[byte_array]
-        if np.any(ret == 255):
+        if np.any(ret >= self._alphabet_size):
             offset = np.flatnonzero(ret.ravel()==255)[0]
             tmp = [chr(c) for c in byte_array.ravel()[ret.ravel()==255]][:10]
             raise EncodingError(f"Error when encoding {''.join(chr(c) for c in byte_array.ravel()[0:100])} "

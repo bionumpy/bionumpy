@@ -86,6 +86,20 @@ def test_histogram(stream_data, data):
     solution = s.compute()
     assert_equal(true[0], solution[0])
 
+@pytest.mark.xfail
+def test_double_compute(stream_data, data):
+    stream_data = stream_data[0]
+    a = stream_data+1
+    b = stream_data+2
+    c = b+2
+    a_true = data[0]+1
+    b_true = data[0]+2
+    c_true = b_true+2
+    a, b, c = compute([a, b, c])
+    assert_equal(a, a_true)
+    assert_equal(b, b_true)
+    assert_equal(c, c_true)
+
 
 def test_double_reduce(stream_data, data):
     stream_data = stream_data[0]

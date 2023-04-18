@@ -21,6 +21,8 @@ from .computation_graph import compute
 from . import simulate
 from . import arithmetics
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
+from .plotting import plot
+from .io.matrix_dump import Matrix
 open = bnp_open
 
 
