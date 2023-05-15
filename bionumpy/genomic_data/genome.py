@@ -40,6 +40,10 @@ class Genome:
         return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
+    def from_dict(cls, chrom_sizes: Dict[str, int], *args, **kwargs):
+        return cls(chrom_sizes, *args, **kwargs)
+
+    @classmethod
     def from_file(cls, filename: str, sort_names: bool=False, filter_function=ignore_underscores) -> 'Genome':
         """Read genome information from a 'chrom.sizes' or 'fa.fai' file
 

@@ -31,6 +31,7 @@ def test_extract_windows(windows, track_stream, track_arrays):
     true = np.mean([track_arrays[w.chromosome.to_string()][w.start:w.stop] if w.strand == '+' else track_arrays[w.chromosome.to_string()][w.stop-1:w.start-1:-1] for w in windows], axis=0)
     assert_raggedarray_equal(result, true)
 
+
 def test_extract_windows_2(windows, track_stream, track_arrays):
     tmp = track_stream[windows]
     result = compute(tmp)

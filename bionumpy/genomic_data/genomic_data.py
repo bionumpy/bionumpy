@@ -22,6 +22,9 @@ class GenomicData:
             return self.extract_chromsome(idx)
         if (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome') and hasattr(idx, 'is_stranded')):
             return self.extract_intervals(idx, stranded=idx.is_stranded())
+        if (hasattr(idx, 'position') and hasattr(idx, 'chromosome')):
+            return self.extract_locations(idx, stranded=idx.is_stranded())
+
         if isinstance(idx, list):
             if len(idx) == 0:
                 return self.empty()
