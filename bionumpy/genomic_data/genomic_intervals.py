@@ -463,6 +463,10 @@ class GenomicIntervalsFull(GenomicIntervals):
         self._is_stranded = is_stranded
         self._genome_context = genome_context
 
+    @property
+    def data(self):
+        return self._intervals
+
     def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
         if func == np.concatenate:
             return self.__class__(np.concatenate([obj._intervals for obj in args[0]]), self._genome_context, self._is_stranded)
