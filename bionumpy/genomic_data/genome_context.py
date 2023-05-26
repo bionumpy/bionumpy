@@ -58,7 +58,7 @@ class GenomeContext(GenomeContextBase):
         return self._chrom_size_dict
 
     @property
-    def global_offset(self):
+    def global_offset(self) -> GlobalOffset:
         return self._global_offset
 
     def is_included(self, chromosomes):

@@ -62,7 +62,6 @@ def get_reverse_complement(sequence: EncodedArrayLike) -> EncodedArrayLike:
 
     """
     sequence = as_encoded_array(sequence)
-    print(np.max(sequence.raw()), sequence.encoding)
     return complement(sequence)[..., ::-1]
 
 

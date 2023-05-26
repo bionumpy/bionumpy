@@ -93,7 +93,7 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     Class for holding the the enitre genomic array in memory
     '''
     def __init__(self, global_track: GenomicRunLengthArray, genome_context: GenomeContextBase):
-        assert isinstance(global_track, GenomicRunLengthArray)
+        assert isinstance(global_track, GenomicRunLengthArray), global_track
         self._global_track = global_track
         self._genome_context = genome_context
 
@@ -201,6 +201,27 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         r = rle[:, ::-1]
         return np.where((intervals.strand.ravel() == '+')[:, np.newaxis],
                         rle, r)
+
+    def extract_locations(self, locations: 'GenomicLocation', stranded=None) -> RunLengthRaggedArray:
+        """Extract the data contained in a set of intervals
+
+        Parameters
+        ----------
+        intervals : Interval
+        stranded : bool
+
+        Returns
+        -------
+        RunLengthRaggedArray
+        """
+        global_intervals = self._genome_context.global_offset.from_local_coordinates(locations.chromosome, locations.position)
+        return self._global_track[global_intervals]
+        # if not stranded:
+        #     return rle
+        # r = rle[:, ::-1]
+        # return np.where((intervals.strand.ravel() == '+')[:, np.newaxis],
+        #                 rle, r)
+
 
     @classmethod
     def from_dict(cls, d: Dict[str, GenomicRunLengthArray], genome_context: GenomeContextBase) -> 'GenomicData':
