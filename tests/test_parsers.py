@@ -108,58 +108,6 @@ def test_fastq_buffer(fastq_buffer):
     assert from_encoded_array(seqs.sequence) == ["CTTGTTGA", "CGG"]
 
 
-def test_gfa_sequence_buffer(gfa_sequence_buffer):
-    buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
-    entries = list(buf.get_data())
-    true = [
-        SequenceEntry.single_entry("id1", "AACCTTGG"),
-        SequenceEntry.single_entry("id4", "ACTG")
-    ]
-    for entry, t in zip(entries, true):
-        assert_bnpdataclass_equal(entry, t)
-
-@pytest.mark.skip("Replaced")
-def test_vcf_buffer(vcf_buffer):
-    buf = VCFBuffer.from_raw_buffer(vcf_buffer)
-    snps = list(buf.get_snps())
-    true = [SNP("chr1", 88361, "A", "G"),
-            SNP("chr1", 887559, "A", "C"),
-            SNP("chr2", 8877, "A", "G")]
-    print(true)
-    print(snps)
-    assert snps == true
-
-@pytest.mark.skip("Replaced")
-def test_vcf_buffer2(vcf_buffer2):
-    buf = VCFBuffer.from_raw_buffer(vcf_buffer2)
-    variants = buf.get_variants()
-    print(variants)
-    true = [SNP("chr1", 88361, "A", "G"),
-            SNP("chr1", 887559, "A", "CAA"),
-            SNP("chr2", 8877, "AGG", "C")]
-    assert list(variants) == true
-
-
-def test_line_chunker(vcf_buffer2):
-    lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
-    true = data["vcf2"]
-    for line, t in zip(lines, true):
-        assert_bnpdataclass_equal(line, t)
-
-
-def test_read_chunk_after_read_chunks_returns_empty_dataclass():
-    file = bnp.open("example_data/reads.fq")
-    chunks = list(file.read_chunks())
-    new_chunk = file.read_chunk()
-    assert isinstance(new_chunk, type(chunks[0]))
-
-
-def test_read_gtf():
-    file = bnp.open("example_data/small.gtf")
-    chunk = file.read_chunk()
-    assert True
-
-
 @pytest.mark.skip("makingtrouble")
 @pytest.mark.parametrize("file_name", glob.glob("example_data/*"))
 def test_read_example_data(file_name):
@@ -189,6 +137,58 @@ def test_read_example_data(file_name):
     for chunk in file.read_chunks():
         continue
 
+    assert True
+
+def test_gfa_sequence_buffer(gfa_sequence_buffer):
+    buf = GfaSequenceBuffer.from_raw_buffer(gfa_sequence_buffer)
+    entries = list(buf.get_data())
+    true = [
+        SequenceEntry.single_entry("id1", "AACCTTGG"),
+        SequenceEntry.single_entry("id4", "ACTG")
+    ]
+    for entry, t in zip(entries, true):
+        assert_bnpdataclass_equal(entry, t)
+
+@pytest.mark.skip("Replaced")
+def test_vcf_buffer(vcf_buffer):
+    buf = VCFBuffer.from_raw_buffer(vcf_buffer)
+    snps = list(buf.get_snps())
+    true = [SNP("chr1", 88361, "A", "G"),
+            SNP("chr1", 887559, "A", "C"),
+            SNP("chr2", 8877, "A", "G")]
+    print(true)
+    print(snps)
+    assert snps == true
+
+
+@pytest.mark.skip("Replaced")
+def test_vcf_buffer2(vcf_buffer2):
+    buf = VCFBuffer.from_raw_buffer(vcf_buffer2)
+    variants = buf.get_variants()
+    print(variants)
+    true = [SNP("chr1", 88361, "A", "G"),
+            SNP("chr1", 887559, "A", "CAA"),
+            SNP("chr2", 8877, "AGG", "C")]
+    assert list(variants) == true
+
+
+def test_line_chunker(vcf_buffer2):
+    lines = list(chain.from_iterable(chunk_lines([VCFBuffer.from_raw_buffer(vcf_buffer2).get_data()], n_lines=1)))
+    true = data["vcf2"]
+    for line, t in zip(lines, true):
+        assert_bnpdataclass_equal(line, t)
+
+
+def test_read_chunk_after_read_chunks_returns_empty_dataclass():
+    file = bnp.open("example_data/reads.fq")
+    chunks = list(file.read_chunks())
+    new_chunk = file.read_chunk()
+    assert isinstance(new_chunk, type(chunks[0]))
+
+
+def test_read_gtf():
+    file = bnp.open("example_data/small.gtf")
+    chunk = file.read_chunk()
     assert True
 
 
