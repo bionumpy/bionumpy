@@ -23,6 +23,7 @@ from . import arithmetics
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
 from .plotting import plot
 from .io.matrix_dump import Matrix
+from .util.ragged_slice import ragged_slice
 open = bnp_open
 
 
