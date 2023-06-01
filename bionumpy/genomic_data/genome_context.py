@@ -29,9 +29,9 @@ class GenomeContext(GenomeContextBase):
         self._ignored = ignored
         if ignored is None:
             self._ignored = set([])
-        keys = [name for name in chrom_size_dict if name not in ignored] + list(ignored)
+        keys = [name for name in chrom_size_dict if name not in self._ignored] + list(self._ignored)
         chrom_size_dict = {key: chrom_size_dict[key] for key in keys}
-        self._included = [chrom for chrom in chrom_size_dict if chrom not in ignored]
+        self._included = [chrom for chrom in chrom_size_dict if chrom not in self._ignored]
         self._included_mask = np.array([chrom in self._included for chrom in chrom_size_dict])
         self._string_endcoding = StringEncoding(list(chrom_size_dict.keys()))
         self._chrom_size_dict = {key: value for key, value in chrom_size_dict.items() if key in self._included}

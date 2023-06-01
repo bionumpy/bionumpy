@@ -8,7 +8,6 @@ from . import testing
 from . import typing
 logger = logging.getLogger(__name__)
 
-
 def as_strided(arr, shape=None, strides=None, **kwargs):
     sys.stdout.flush()
     sys.stderr.flush()

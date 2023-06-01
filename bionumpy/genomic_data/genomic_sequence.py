@@ -73,3 +73,7 @@ class GenomicSequenceDict(GenomicSequence):
             [self._dict[interval.chromosome.to_string()][int(interval.start):int(interval.stop)]
              for interval in intervals],
             target_encoding=DNAEncoding)
+
+    @property
+    def genome_context(self):
+        return GenomeContext({name: len(sequence) for name, sequence in self._dict.items()})

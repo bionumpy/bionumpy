@@ -10,6 +10,8 @@ from bionumpy.simulate.rnaseq import get_transcript_copies, fragment_transcript_
 import bionumpy as bnp
 import numpy as np
 from itertools import chain
+
+from bionumpy.simulate.sequences import simulate_reads_from_genome
 from numpy.random import default_rng
 
 rng = default_rng()
@@ -98,4 +100,21 @@ def test_get_rnaseq_reads(sequences, read_length=3):
 def test_simualte_rnaseq(sequences, rnaseq_simulation_settings):
     result = simulate_rnaseq(sequences, rnaseq_simulation_settings)
     assert np.all([len(item.sequence) for item in result] == [rnaseq_simulation_settings.read_length] * len(result))
+
+
+
+
+def test_simulate_from_genome():
+    ref = "example_data/small_genome.fa"
+    genome = bnp.Genome.from_file(ref)
+    genome = genome.read_sequence(ref)
+
+    simulated_sequences = simulate_reads_from_genome(genome, length=10, n_reads=100,
+                                                     chunk_size=10, sequence_name_prefix="read")
+
+    for seq in simulated_sequences:
+        print(seq)
+
+    print(genome)
+
 
