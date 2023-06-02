@@ -1,6 +1,9 @@
 from ..streams import streamable
 from ..datatypes import BamEntry, Bed6
 from ..encoded_array import EncodedArray
+from ..encodings import BaseEncoding
+from .cigar import count_reference_length
+import numpy as np
 
 
 @streamable()
@@ -19,7 +22,7 @@ def alignment_to_interval(alignment: BamEntry) -> Bed6:
 
     """
     strand = alignment.flag & np.uint16(16)
-    strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None])
+    strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None], encoding=BaseEncoding)
     length = count_reference_length(alignment.cigar_op, alignment.cigar_length)
     return Bed6(alignment.chromosome,
                 alignment.position,
