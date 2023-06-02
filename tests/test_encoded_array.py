@@ -118,6 +118,12 @@ def test_object_array(ragged_string_list, dtype):
     object_array = np.array(ragged_string_list, dtype=dtype)
     encoded_array = as_encoded_array(object_array)
     assert_encoded_raggedarray_equal(encoded_array, ragged_string_list)
+
+
+@pytest.mark.xfail
+def test_encoded_array_index_single_element_to_string():
+    a = as_encoded_array("ACTG")
+    assert a[0].to_string() == "A"
     
 
 if __name__ == "__main__":
