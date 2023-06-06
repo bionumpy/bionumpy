@@ -12,7 +12,7 @@ import numpy as np
 from itertools import chain
 
 from bionumpy.simulate.sequences import simulate_reads_from_genome
-from bionumpy.simulate.variants import simulate_variants, simulate_variants2
+from bionumpy.simulate.variants import simulate_variants
 from numpy.random import default_rng
 
 rng = default_rng()
@@ -123,18 +123,10 @@ def test_simulate_variants():
     ref = "example_data/small_genome.fa"
     genome = bnp.Genome.from_file(ref)
     genome = genome.read_sequence(ref)
-    variants = simulate_variants(genome, snp_prob=0.01, small_indel_prob=0.01, sv_prob=0.001)
+    variants = simulate_variants(genome, snp_prob=0.01, small_indel_prob=0.01, sv_prob=0.01)
+
     for chunk in variants:
         print(chunk)
-
-
-def test_simulate_variants2():
-    ref = "example_data/small_genome.fa"
-    genome = bnp.Genome.from_file(ref)
-    genome = genome.read_sequence(ref)
-    variants = simulate_variants2(genome, snp_prob=0.01, small_indel_prob=0.01, sv_prob=0.01)
-
-    for chunk in variants:
         for variant in chunk:
             assert genome[str(variant.chromosome)][variant.position] == variant.ref_seq[0]
             if len(variant.ref_seq) >= 1 and len(variant.alt_seq) == 1:
