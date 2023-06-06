@@ -307,11 +307,11 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             if n_dims == 0:
                 return self.encoding.to_string(self.data)
             elif n_dims == 1:
-                data_to_show = data_to_show[0:20]
+                data_to_show = data_to_show# [0:20]
             elif n_dims == 2:
                 # show first columns and rows
                 #raise NotImplemented("Str for n_dims=2 not implemented")
-                return self.encoding.to_string(self.data[0:10, 0:10]) + "...."
+                return self.encoding.to_string(self.data[0:10])# + "...."
                 # data_to_show = None
             text = "[" + ", ".join(self.encoding.to_string(e).strip() for e in data_to_show) + "]"
             return text
@@ -327,13 +327,12 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
             if len(self.data.shape) == 0:
                 return chr(int(text))
             if len(self.data.shape) == 1:
-                return "".join(chr(n) for n in text[:20]) + "..."*(len(text)>20)
+                return "".join(chr(n) for n in text)#  + "..."*(len(text)>20)
 
             a = np.array([str(self.__class__(seq, self.encoding))
                           for seq in self.data.reshape(-1, self.data.shape[-1])]
                          ).reshape(self.data.shape[:-1])[:20]
             return str(a)
-
 
     def __getitem__(self, idx) -> "EncodedArray":
         """Delegate the indexing to the underlying numpy array
