@@ -20,9 +20,12 @@ from .util.cli import run_as_commandline
 from .computation_graph import compute
 from . import simulate
 from . import arithmetics
+from . import alignments
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
 from .plotting import plot
+
 from .io.matrix_dump import Matrix
+from .util.ragged_slice import ragged_slice
 open = bnp_open
 
 

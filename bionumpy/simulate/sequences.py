@@ -9,7 +9,7 @@ import npstructures as nps
 from ..datatypes import SequenceEntry
 from .. import EncodedRaggedArray, EncodedArray
 from ..encodings.alphabet_encoding import AlphabetEncoding
-from ..genomic_data.genomic_sequence import GenomicSequenceIndexedFasta
+from ..genomic_data.genomic_sequence import GenomicSequenceIndexedFasta, GenomicSequence
 from ..datatypes import SequenceEntry, Interval, SequenceEntryWithQuality
 
 
@@ -52,8 +52,9 @@ def simulate_sequences(alphabet: str, lengths: Dict[str, int], rng=default_rng()
     return se
  
 
-def simulate_reads_from_genome(genome: GenomicSequenceIndexedFasta, length: int = 150, n_reads: int = 100,
-                               chunk_size: int = 10000, sequence_name_prefix="", rng=default_rng()):
+def simulate_reads_from_genome(genome: GenomicSequence, length: int = 150, n_reads: int = 100,
+                               chunk_size: int = 10000, sequence_name_prefix="", rng=default_rng(),
+                               ignore_reads_with_n=False):
     """ Simulates reads on a genome. Yields chunks of SequenceEntryWithQuality objects
     """
     chromosomes = genome.genome_context.chrom_sizes
@@ -64,7 +65,7 @@ def simulate_reads_from_genome(genome: GenomicSequenceIndexedFasta, length: int 
         n_simulated = 0
         while n_simulated < n_reads_on_chromosome:
             n_to_simulate = min(n_reads_on_chromosome - n_simulated, chunk_size)
-            starts = np.random.randint(0, chromosome_size-length, size=n_to_simulate)
+            starts = rng.integers(0, chromosome_size-length, size=n_to_simulate)
             stops = starts + length
 
             chromosomes = as_encoded_array([chromosome] * n_to_simulate)
@@ -75,6 +76,12 @@ def simulate_reads_from_genome(genome: GenomicSequenceIndexedFasta, length: int 
             qualities = nps.RaggedArray(np.ones(sequences.size)*40, sequences.shape)
             sequence_entry = SequenceEntryWithQuality(
                 names, sequences, qualities)
+
+            if ignore_reads_with_n:
+                n_mask = sequences == "N"
+                n_mask = np.any(n_mask, axis=1)
+                sequence_entry = sequence_entry[~n_mask]
+
             yield sequence_entry
 
             n_simulated += n_to_simulate

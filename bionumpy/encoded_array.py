@@ -11,7 +11,6 @@ from typing import Tuple, List
 import numpy as np
 from abc import abstractmethod
 
-
 class Encoding:
     @abstractmethod
     def encode(self, *args, **kwargs):
@@ -254,7 +253,11 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if hasattr(self.encoding, "_decode"):
             # new system, can be used in all cases after refactoring
             data = self
-            return bytes(self.encoding.decode(data).raw()).decode('ascii')
+
+            raw = self.encoding.decode(data).raw()
+            raw = np.atleast_1d(np.asanyarray(raw, dtype=np.uint8))
+            text = bytes(raw).decode('ascii')
+            return text
             # return "".join([chr(c) for c in self.encoding.decode(data).raw()])
         else:
             data = self.data
@@ -477,7 +480,7 @@ def bnp_array_func_dispatch(func):
                     raise Exception
         return result
 
-def as_encoded_array(s, target_encoding: "Encoding" = None) -> EncodedArray:
+def as_encoded_array(s: object, target_encoding: "Encoding" = None) -> EncodedArray:
     """Main function used to create encoded arrays from e.g. strings orl lists.
     Can be called with already encoded arrays, and will then do nothing.
 

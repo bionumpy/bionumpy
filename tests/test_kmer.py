@@ -95,3 +95,4 @@ def test_count_kmers():
     counts = bnp.count_encoded(kmers, axis=None)
     assert counts["ACT"] == 1
     assert counts["GGG"] == 0
+

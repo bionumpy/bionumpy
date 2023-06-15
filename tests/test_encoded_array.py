@@ -66,8 +66,6 @@ def test_setitem3(dna_sequence):
     dna_sequence[2] = as_encoded_array('T')
     assert_encoded_array_equal(dna_sequence, 'ACTT')
 
-
-
 def test_equal_different_encoding(dna_sequence):
     diff = as_encoded_array(dna_sequence, bnp.DNAEncoding)
     assert np.all(diff == dna_sequence), (diff.raw(), dna_sequence.raw())
@@ -110,6 +108,8 @@ def test_insert_function(simple_sequence):
 def test_encoded_array_list_to_raggedarray(simple_sequence):
     array_list = as_encoded_array([simple_sequence, simple_sequence])
     str_list = as_encoded_array([simple_sequence.to_string(), simple_sequence.to_string()])
+    print(array_list)
+    print(str_list)
     assert_encoded_raggedarray_equal(array_list, str_list)
 
 
@@ -118,28 +118,13 @@ def test_object_array(ragged_string_list, dtype):
     object_array = np.array(ragged_string_list, dtype=dtype)
     encoded_array = as_encoded_array(object_array)
     assert_encoded_raggedarray_equal(encoded_array, ragged_string_list)
+
+
+#@pytest.mark.xfail
+def test_encoded_array_index_single_element_to_string():
+    a = as_encoded_array("ACTG")
+    assert a[0].to_string() == "A"
     
 
 if __name__ == "__main__":
     test_works_with_ragged()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
