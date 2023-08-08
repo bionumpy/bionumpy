@@ -231,12 +231,13 @@ class NpBufferedWriter:
                 #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
-
-
+        if len(data) == 0:
+            return
+            
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
-        self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
+        self._file_obj.write(bytes(bytes_array))  # .tfoile(self._file_obj)
         self._file_obj.flush()
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
