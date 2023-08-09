@@ -35,6 +35,9 @@ class GlobalOffset:
         return self._sizes[seq_name.raw()]
 
     def from_local_coordinates(self, sequence_name, local_offset):
+        mask = local_offset >= self.get_size(sequence_name)
+        if np.any(np.atleast_1d(mask)):
+            raise Exception('Coordinate outside of reference:', local_offset[mask], self.get_size(sequence_name)[mask])
         return self.get_offset(sequence_name) + local_offset
 
     def to_local_interval(self, global_interval):

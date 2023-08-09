@@ -26,6 +26,8 @@ def _get_power_array(n, mod):
 
 
 def get_ascii_hash(encoded_array, mod):
+    if len(encoded_array) == 0:
+        return np.array([], dtype=int)
     powers = _get_power_array(np.max(encoded_array.shape[-1]), mod)
     if isinstance(encoded_array, EncodedRaggedArray):
         col_indices = column_index_array(encoded_array.shape)
