@@ -6,7 +6,7 @@ import numpy as np
 from io import BytesIO
 import bionumpy as bnp
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
-from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
+from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality, VCFEntry
 from bionumpy.io.matrix_dump import matrix_to_csv, parse_matrix
 from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_array_equal, assert_encoded_raggedarray_equal
 from numpy.testing import assert_equal
@@ -153,3 +153,10 @@ def test_write_dna_fastq():
     result = buf_type.from_raw_buffer(buf_type.from_data(entry)).get_data()
     print(result)
     assert np.all(entry.sequence == result.sequence)
+
+
+def test_write_empty():
+    entry = VCFEntry([], [], [], [],
+                     [], [], [], [])
+    with bnp.open('tmp.vcf', 'w') as f:
+        f.write(entry)
