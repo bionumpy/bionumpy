@@ -84,6 +84,7 @@ class _GenotypeRowEncoding(Encoding):
     def __repr__(self):
         return "GenotypeRowEncoding"
 
+
 class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
     """Encoding that can be used when all records are phased
      and there is no missing data, i.e. every genotype is
@@ -110,5 +111,25 @@ class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
         return "PhasedGenotypeRowEncoding"
 
 
+class _PhasedHaplotypeRowEncoding(_GenotypeRowEncoding):
+    """Encoding that encodes each haplotype (not two haplotypes together as _PhasdGenotypeRowEncoding"""
+    _alleles = [str(i) for i in range(10)] + ["."]
+    _alphabet = _alleles
+    _reverse_alphabet_lookup = np.array([ord(c) for c in _alphabet], dtype=np.uint8)
+    _alphabet_lookup = np.zeros(256, dtype=np.uint8)
+    _alphabet_lookup[_reverse_alphabet_lookup] = np.arange(len(_reverse_alphabet_lookup))
+
+    def encode(self, genotype_rows):
+        data = self._preprocess_data_for_encoding(genotype_rows)
+        n_rows = len(genotype_rows)
+        first_haplotypes = self._alphabet_lookup[data[:, 0].raw()]
+        second_haplotypes = self._alphabet_lookup[data[:, 2].raw()]
+        out = np.zeros(len(first_haplotypes)*2, dtype=np.int8)
+        out[::2] = first_haplotypes
+        out[1::2] = second_haplotypes
+        return out.reshape(n_rows, len(out)//n_rows)
+
+
 PhasedGenotypeRowEncoding = _PhasedGenotypeRowEncoding()
+PhasedHaplotypeRowEncoding = _PhasedHaplotypeRowEncoding()
 GenotypeRowEncoding = _GenotypeRowEncoding()

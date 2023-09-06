@@ -2,7 +2,7 @@ import numpy as np
 
 import bionumpy as bnp
 import bionumpy.encoded_array
-from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
+from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 
 
 def test_vcf_matrix_buffer():
@@ -40,6 +40,21 @@ def test_phased_genotype_encoding():
     correct = np.array(
         [[0, 1, 2],
         [0, 1, 3]]
+    )
+    assert np.all(encoded == correct)
+
+
+def test_phased_haplotype_encoding():
+    data = bionumpy.encoded_array.as_encoded_array([
+        "0|0\t0|1\t2|0\t",
+        "0|0\t4|1\t1|1\t"
+    ])
+    encoded = PhasedHaplotypeRowEncoding.encode(data)
+    correct = np.array(
+        [
+            [0, 0, 0, 1, 2, 0],
+            [0, 0, 4, 1, 1, 1]
+        ]
     )
     assert np.all(encoded == correct)
 

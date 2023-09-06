@@ -57,6 +57,9 @@ def simulate_reads_from_genome(genome: GenomicSequence, length: int = 150, n_rea
                                ignore_reads_with_n=False):
     """ Simulates reads on a genome. Yields chunks of SequenceEntryWithQuality objects
     """
+    if isinstance(rng, int):
+        rng = default_rng(rng)
+
     chromosomes = genome.genome_context.chrom_sizes
     genome_size = sum([size for size in chromosomes.values()])
 

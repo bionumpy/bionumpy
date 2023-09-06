@@ -7,12 +7,12 @@ from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
                          GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
-                         GfaPath)
+                         GfaPath, PhasedVCFHaplotypeEntry)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding
 from ..encodings.exceptions import EncodingError
-from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding
+from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..encodings.alphabet_encoding import get_alphabet_encodings, DigitEncoding
 from ..encoded_array import get_base_encodings, BaseEncoding
 from ..util import is_subclass_or_instance
@@ -551,6 +551,13 @@ class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     dataclass = VCFEntry
     genotype_dataclass = PhasedVCFGenotypeEntry
     genotype_encoding = PhasedGenotypeRowEncoding
+
+
+class PhasedHaplotypeVCFMatrixBuffer(VCFMatrixBuffer):
+    """Encodes genotype info using one column per haplotype (not genotype)"""
+    dataclass = VCFEntry
+    genotype_dataclass = PhasedVCFHaplotypeEntry
+    genotype_encoding = PhasedHaplotypeRowEncoding
 
 
 class NarrowPeakBuffer(DelimitedBuffer):
