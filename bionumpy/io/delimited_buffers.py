@@ -170,7 +170,7 @@ class DelimitedBuffer(FileBuffer):
             keep seperator at end
         """
         self.validate_if_not()
-        assert col_start < col_end
+        assert col_start < col_end, (col_start, col_end)
         assert col_start < self._n_cols, self._n_cols
         assert col_end <= self._n_cols
 

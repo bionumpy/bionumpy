@@ -232,7 +232,8 @@ class NpBufferedWriter:
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
 
-
+        if len(data) == 0:
+            return
         bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()

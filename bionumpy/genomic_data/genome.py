@@ -194,11 +194,16 @@ class Genome:
         f = bnp_open(filename, buffer_type=buffer_type)
         data = f.read_chunks()
         if not stream:
-            data = np.concatenate(list(data))
+            data_list = list(data)
+            if len(data_list) == 0:
+                data = LocationEntry.empty()
+            else:
+                data = np.concatenate(data_list)
+
         return self.get_locations(data, has_numeric_chromosomes=has_numeric_chromosomes)
 
     def _mask_data_on_extra_chromosomes(self, data, chromosome_field_name='chromosome'):
-        if not isinstance(data, BNPDataClass):
+        if (not isinstance(data, BNPDataClass)) or len(data)==0:
             return data
         encoded_chromosomes = self._genome_context.encoding.encode(getattr(data, chromosome_field_name))
         data = replace(data, **{chromosome_field_name: encoded_chromosomes})

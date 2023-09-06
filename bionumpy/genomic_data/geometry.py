@@ -25,8 +25,7 @@ class GeometryBase:
         ----------
         chrom_sizes : ChromosomeSize
         """
-        return cls({chrom_size.name.to_string():chrom_size.size
-                    for chrom_size in chrom_sizes})
+        return cls({str(chrom_size.name): chrom_size.size for chrom_size in chrom_sizes})
 
     def chrom_size(self, chromsome: str) -> int:
         """Return the size of the given chromosome
