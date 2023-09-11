@@ -447,6 +447,8 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
                     col = self.get_integers(col_number).ravel()
                 elif field.type == float:
                     col = self.get_floats(col_number).ravel()
+                elif field.type == bool:
+                    col = self.get_integers(col_number).ravel().astype(bool)
                 elif field.type == List[int]:
                     col = self.get_split_ints(col_number)
                 elif field.type == List[bool]:

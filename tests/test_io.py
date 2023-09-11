@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
+from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality, VCFEntry
 from bionumpy.io.matrix_dump import matrix_to_csv, parse_matrix
@@ -160,3 +161,22 @@ def test_write_empty():
                      [], [], [], [])
     with bnp.open('tmp.vcf', 'w') as f:
         f.write(entry)
+
+
+def test_read_write_bool():
+    @bnpdataclass
+    class BoolDC:
+        param: bool
+
+    obj = BoolDC(param=[True, False, True])
+    buf_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(BoolDC, delimiter='\t', has_header=True)
+
+    with bnp.open('tmp_bool.tsv', 'w', buf_type) as f:
+        f.write(obj)
+
+    with bnp.open('tmp_bool.tsv', 'r', buf_type) as f:
+        obj2 = f.read()
+
+    assert np.array_equal(obj.param, obj2.param)
+
+    os.remove('tmp_bool.tsv')

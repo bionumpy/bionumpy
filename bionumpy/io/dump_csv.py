@@ -15,6 +15,7 @@ def str_func(column):
         return column.encoding.decode(column)
     assert False
 
+
 def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     """Put each field of the dataclass into a column in a buffer.
 
@@ -24,10 +25,11 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     """
 
     funcs = {int: ints_to_strings,
-             str: str_func,  #lambda x: x,
+             str: str_func,  # lambda x: x,
              List[int]: int_lists_to_strings,
              float: float_to_strings,
-             List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
+             List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),
+             bool: lambda x: ints_to_strings(x.astype(int))
              }
 
     def get_func_for_datatype(datatype):
@@ -38,6 +40,7 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
                 if isinstance(x, EncodedRaggedArray):
                     return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
                 return EncodedArray(encoding.decode(x), BaseEncoding)
+
             return dynamic
         else:
             return funcs[datatype]
@@ -46,10 +49,10 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     lengths = np.concatenate([((column.lengths if
                                 isinstance(column, RaggedArray)
                                 else np.array([
-                                            column.shape[-1] if len(column.shape) == 2 else 1
-                                              ]*len(column))) + 1
+                                                  column.shape[-1] if len(column.shape) == 2 else 1
+                                              ] * len(column))) + 1
                                )[:, np.newaxis]
-                              
+
                               for column in columns], axis=-1).ravel()
     lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8), BaseEncoding),
                                lengths)
