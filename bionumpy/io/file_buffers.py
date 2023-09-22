@@ -218,11 +218,10 @@ class OneLineBuffer(FileBuffer):
     @property
     def entries(self):
         if not hasattr(self, "__entries"):
-            lengths = np.diff(self._new_lines[::self.n_lines_per_entry])
-            lengths = np.insert(lengths, 0, self._new_lines[self.n_lines_per_entry-1])
+            lengths = np.diff(self._new_lines[self.n_lines_per_entry-1::self.n_lines_per_entry])
+            lengths = np.insert(lengths, 0, self._new_lines[self.n_lines_per_entry-1]+1)
             self.__entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
         return self.__entries
-
 
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
@@ -242,7 +241,9 @@ class OneLineBuffer(FileBuffer):
 
     def __getitem__(self, idx):
         data = self.entries[idx].ravel()
-        new_lines = self._new_lines.reshape(-1, self.n_lines_per_entry)[idx].ravel()
+        line_lens = self.lines.shape[-1].reshape(-1, self.n_lines_per_entry)[idx].ravel()
+        new_lines = np.cumsum(line_lens)-1
+        # new_lines = self._new_lines.reshape(-1, self.n_lines_per_entry)[idx].ravel()
         return self.__class__(data, new_lines)
 
     def count_entries(self) -> int:

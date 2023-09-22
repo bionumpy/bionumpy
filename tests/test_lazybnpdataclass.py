@@ -138,10 +138,10 @@ def fastq_pair():
 
 
 @pytest.mark.parametrize('pair', [get_pairwise_data('fasta')])
-def test_indexing(pair):
+@pytest.mark.parametrize('idx', [[0], [1]])
+def test_indexing(pair, idx):
     lazy, dataclass = pair
     assert_bnpdataclass_equal(lazy.get_data_object(), dataclass)
-    idx = [0]
     data_object = lazy[idx].get_data_object()
     print(data_object)
     assert_bnpdataclass_equal(data_object, dataclass[idx])

@@ -48,6 +48,9 @@ class DelimitedBuffer(FileBuffer):
         self._delimiters = delimiters
         self._header_data = header_data
 
+    def __getitem__(self, idx):
+        pass
+
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
         """Make EncodedArray of the chunk and extract all complete lines
