@@ -97,10 +97,10 @@ def test_bnp_lazy(lazy_bnp):
     lazy_bnp.a = [20]
     assert_array_equal(lazy_bnp.a, [20])
 
-@pytest.mark.xfail
+
 def test_lazy_with_fasta_buffer():
     text, data, bt = combos['fasta']
     b = bt.from_raw_buffer(bnp.as_encoded_array(text))
     lazy = create_lazy_class(bnp.datatypes.SequenceEntry)(ItemGetter(b, bnp.datatypes.SequenceEntry))
-    assert_encoded_raggedarray_equal(lazy.name, data.name)
+    assert_encoded_raggedarray_equal(lazy.name, [data.name for data in data])
 

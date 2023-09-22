@@ -172,6 +172,7 @@ class OneLineBuffer(FileBuffer):
 
     n_lines_per_entry = 2
     _buffer_divisor = 32
+    _line_offsets = (1, 0)
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
@@ -203,19 +204,29 @@ class OneLineBuffer(FileBuffer):
         chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)
 
+    @property
+    def lines(self):
+        if not hasattr(self, "__lines"):
+            starts = np.insert(self._new_lines, 0, -1)
+            lengths = np.diff(starts)
+            self.__lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
+        return self.__lines
+
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
         self.validate_if_not()
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        sequences = self.lines[1::self.n_lines_per_entry, :-1]
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
+        sequences = self.lines[1::self.n_lines_per_entry, :-1]
+
         return SequenceEntry(headers, sequences)
 
     def get_field_by_number(self, i: int, t: type=object):
         """ Get a field indexed by number"""
-        raise NotImplementedError
+        self.validate_if_not()
+        return self.lines[i::self.n_lines_per_entry, self._line_offsets[i]:-1]
 
     def count_entries(self) -> int:
         """Count number of entries in file"""
