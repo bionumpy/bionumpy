@@ -166,8 +166,8 @@ class FileBuffer:
         n_new_lines = sum(np.sum(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        raise NotImplementedError
+    #def get_field_by_number(self, field_nr: int, field_type: type=object):
+    #    raise NotImplementedError
 
 
 class OneLineBuffer(FileBuffer):
@@ -313,8 +313,10 @@ class FastQBuffer(OneLineBuffer):
     dataclass = SequenceEntryWithQuality
 
     def get_field_by_number(self, i: int, t: type=object):
-        if i == 3:
-            self.lines[3:: self.n_lines_per_entry, :-1]
+        if i == 2:
+            return self.lines[3:: self.n_lines_per_entry, :-1]
+        else:
+            return super().get_field_by_number(i, t)
 
     def get_data(self):
         seq_entry = super().get_data()

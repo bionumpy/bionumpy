@@ -225,6 +225,8 @@ class NpBufferedWriter:
                 if len(buf) > 0:
                     self.write(buf)
             return
+        if hasattr(data, 'get_data_object'):
+            data = data.get_data_object()
 
         if hasattr(self._buffer_type, 'make_header') and \
                 (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \

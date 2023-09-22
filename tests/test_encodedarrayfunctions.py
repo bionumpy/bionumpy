@@ -2,6 +2,8 @@ import pytest
 import dataclasses
 import bionumpy as bnp
 import numpy as np
+
+from bionumpy.bnpdataclass import replace
 from bionumpy.encodings.string_encodings import StringEncoding
 
 
@@ -36,7 +38,6 @@ def chrom_sizes():
 def test_interval_sort(intervals, chrom_sizes):
     truth = bnp.arithmetics.sort_intervals(intervals, sort_order=chrom_sizes.name.tolist())
     encoding = StringEncoding(chrom_sizes.name)
-    new_intervals = dataclasses.replace(intervals,
-                                        chromosome=encoding.encode(intervals.chromosome))
+    new_intervals = replace(intervals, chromosome=encoding.encode(intervals.chromosome))
     result = bnp.arithmetics.sort_intervals(new_intervals)
     np.testing.assert_array_equal(truth.start, result.start)

@@ -1,9 +1,10 @@
 import dataclasses
 import types
+from numbers import Number
 
 import numpy as np
 
-from bionumpy import EncodedRaggedArray
+# from bionumpy import EncodedRaggedArray
 
 
 def translate_types(input_type):
@@ -63,6 +64,8 @@ def create_lazy_class(dataclass):
         def __init__(self, item_getter, set_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
+            self._computed = False
+            self._data = None
 
         def __repr__(self):
             return self[:10].get_data_object().__repr__()
@@ -76,16 +79,32 @@ def create_lazy_class(dataclass):
             return self._itemgetter(var_name)
 
         def __setattr__(self, key, value):
-            if key in ['_itemgetter', '_set_values']:
+            if key in ['_itemgetter', '_set_values', '_computed', '_data']:
                 return super().__setattr__(key, value)
             self._set_values[key] = value
 
         def __getitem__(self, idx):
+            if isinstance(idx, Number):
+                idx = [idx]
+                return self[idx].get_data_object()[0]
+
             new_dict = {key: value[idx] for key, value in self._set_values.items()}
             return self.__class__(self._itemgetter[idx], new_dict)
 
+        def __replace__(self, **kwargs):
+            new_dict = {key: value for key, value in self._set_values.items()}
+            new_dict.update(kwargs)
+            return self.__class__(self._itemgetter, new_dict)
+
+        def __iter__(self):
+            return iter(self.get_data_object())
+
         def get_data_object(self):
-            return dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
+            if not self._computed:
+                self._data = dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
+                self._computed = True
+            return self._data
+
 
     NewClass.__name__ = dataclass.__name__
     NewClass.__qualname__ = dataclass.__qualname__

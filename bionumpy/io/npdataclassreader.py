@@ -3,6 +3,7 @@ from .parser import NumpyFileReader
 from ..bnpdataclass import BNPDataClass
 from .exceptions import FormatException
 from ..streams import NpDataclassStream
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 
 
 class NpDataclassReader:
@@ -40,7 +41,10 @@ class NpDataclassReader:
         4
 
         """
-        return self._reader.read().get_data()
+        chunk = self._reader.read()
+        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass') and False:
+            return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+        return chunk.get_data()
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
         """Read a single chunk into memory
