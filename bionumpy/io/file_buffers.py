@@ -35,6 +35,9 @@ class FileBuffer:
         self._is_validated = False
         self.size = self._data.size
 
+    def __getitem__(self, idx):
+        return NotImplemented
+
     def raise_if(condition, *args, **kwargs):
         if condition:
             raise FormatException(*args, **kwargs)
@@ -212,6 +215,15 @@ class OneLineBuffer(FileBuffer):
             self.__lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
         return self.__lines
 
+    @property
+    def entries(self):
+        if not hasattr(self, "__entries"):
+            lengths = np.diff(self._new_lines[::self.n_lines_per_entry])
+            lengths = np.insert(lengths, 0, self._new_lines[self.n_lines_per_entry-1])
+            self.__entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
+        return self.__entries
+
+
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
         self.validate_if_not()
@@ -227,6 +239,11 @@ class OneLineBuffer(FileBuffer):
         """ Get a field indexed by number"""
         self.validate_if_not()
         return self.lines[i::self.n_lines_per_entry, self._line_offsets[i]:-1]
+
+    def __getitem__(self, idx):
+        data = self.entries[idx].ravel()
+        new_lines = self._new_lines.reshape(-1, self.n_lines_per_entry)[idx].ravel()
+        return self.__class__(data, new_lines)
 
     def count_entries(self) -> int:
         """Count number of entries in file"""

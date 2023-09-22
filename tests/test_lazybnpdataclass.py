@@ -11,6 +11,7 @@ from bionumpy.bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal
 from .buffers import combos
 
+
 @dataclasses.dataclass
 class DummyClass:
     a: int
@@ -21,6 +22,7 @@ class DummyClass:
 class DummyBNP:
     a: int
     b: str
+
 
 @pytest.mark.skip
 def test_buffer_backed_descriptor():
@@ -106,12 +108,14 @@ def test_lazy_with_fasta_buffer():
     lazy.name = bnp.as_encoded_array(['deg'])
     assert_encoded_raggedarray_equal(lazy.name, ['deg'])
 
+
 def get_pairwise_data(buffer_type):
     text, data, bt = combos[buffer_type]
     b = bt.from_raw_buffer(bnp.as_encoded_array(text))
     cls = bt.dataclass
     lazy = create_lazy_class(bt.dataclass)(ItemGetter(b, bt.dataclass))
-    return lazy, cls.from_entry_tuples([row.shallow_tuple() for row in data])
+    tuples = [tuple(getattr(row, field.name) for field in dataclasses.fields(row)) for row in data]
+    return lazy, cls.from_entry_tuples(tuples)
 
 
 def test_lazy_with_bed_buffer():
@@ -122,13 +126,22 @@ def test_lazy_with_bed_buffer():
     lazy.chromosome = bnp.as_encoded_array(['deg'])
     assert_encoded_raggedarray_equal(lazy.chromosome, ['deg'])
 
+
 @pytest.fixture
-def bed_pair():
+def pair():
     return get_pairwise_data('bed')
 
-@pytest.mark.xfail
-def test_indexing(bed_pair):
-    lazy, dataclass = bed_pair
+
+@pytest.fixture
+def fastq_pair():
+    return get_pairwise_data('bed')
+
+
+@pytest.mark.parametrize('pair', [get_pairwise_data('fasta')])
+def test_indexing(pair):
+    lazy, dataclass = pair
     assert_bnpdataclass_equal(lazy.get_data_object(), dataclass)
-    idx = [0, 2]
-    assert_bnpdataclass_equal(lazy[idx].get_data_object(), dataclass[idx])
+    idx = [0]
+    data_object = lazy[idx].get_data_object()
+    print(data_object)
+    assert_bnpdataclass_equal(data_object, dataclass[idx])

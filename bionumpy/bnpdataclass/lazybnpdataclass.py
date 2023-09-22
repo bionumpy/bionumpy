@@ -53,6 +53,9 @@ class ItemGetter:
     def __call__(self, name):
         return self._buffer.get_field_by_number(self._field_dict[name][0], self._field_dict[name][1])
 
+    def __getitem__(self, idx):
+        return self.__class__(self._buffer[idx], self._dataclass)
+
 
 def create_lazy_class(dataclass):
     class NewClass(dataclass):
@@ -69,6 +72,9 @@ def create_lazy_class(dataclass):
             if key in ['_itemgetter', '_set_values']:
                 return super().__setattr__(key, value)
             self._set_values[key] = value
+
+        def __getitem__(self, idx):
+            return self.__class__(self._itemgetter[idx])
 
         def get_data_object(self):
             return dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
