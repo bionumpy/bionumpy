@@ -294,6 +294,10 @@ class FastQBuffer(OneLineBuffer):
     n_lines_per_entry = 4
     dataclass = SequenceEntryWithQuality
 
+    def get_field_by_number(self, i: int, t: type=object):
+        if i == 3:
+            self.lines[3:: self.n_lines_per_entry, :-1]
+
     def get_data(self):
         seq_entry = super().get_data()
         quality = self.lines[3 :: self.n_lines_per_entry, :-1]

@@ -70,6 +70,10 @@ def create_lazy_class(dataclass):
                 return super().__setattr__(key, value)
             self._set_values[key] = value
 
+        def get_data_object(self):
+            return dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
+
+
     NewClass.__name__ = dataclass.__name__
     NewClass.__qualname__ = dataclass.__qualname__
     return NewClass

@@ -273,22 +273,7 @@ class DelimitedBuffer(FileBuffer):
         columns = {}
         fields = dataclasses.fields(self.dataclass)
         for col_number, field in enumerate(fields):
-            if field.type is None:
-                col = None
-            elif field.type == str or is_subclass_or_instance(field.type, Encoding):
-                col = self.get_text(col_number, fixed_length=False)
-            elif field.type == int:
-                col = self.get_integers(col_number).ravel()
-            elif field.type == float:
-                col = self.get_floats(col_number).ravel()
-            elif field.type == -1:
-                col = self.get_integers(col_number).ravel() - 1
-            elif field.type == List[int]:
-                col = self.get_split_ints(col_number)
-            elif field.type == List[bool]:
-                col = self.get_split_ints(col_number, sep="").astype(bool)
-            else:
-                assert False, field
+            col = self._get_field_by_number(col_number, field)
             columns[field.name] = col
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
@@ -296,6 +281,32 @@ class DelimitedBuffer(FileBuffer):
         data = self.dataclass(**columns)
         data.set_context("header", self._header_data)
         return data
+
+    def _get_field_by_number(self, col_number, field):
+        if field.type is None:
+            col = None
+        elif field.type == str or is_subclass_or_instance(field.type, Encoding):
+            col = self.get_text(col_number, fixed_length=False)
+        elif field.type == int:
+            col = self.get_integers(col_number).ravel()
+        elif field.type == float:
+            col = self.get_floats(col_number).ravel()
+        elif field.type == -1:
+            col = self.get_integers(col_number).ravel() - 1
+        elif field.type == List[int]:
+            col = self.get_split_ints(col_number)
+        elif field.type == List[bool]:
+            col = self.get_split_ints(col_number, sep="").astype(bool)
+        else:
+            assert False, field
+        return col
+
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        self.validate_if_not()
+        return self._get_field_by_number(
+            field_nr, dataclasses.fields(self.dataclass)[field_nr])
+
+
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
