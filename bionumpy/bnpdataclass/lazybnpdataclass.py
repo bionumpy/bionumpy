@@ -60,9 +60,9 @@ class ItemGetter:
 
 def create_lazy_class(dataclass):
     class NewClass(dataclass):
-        def __init__(self, item_getter):
+        def __init__(self, item_getter, set_values=None):
             self._itemgetter = item_getter
-            self._set_values = {}
+            self._set_values = set_values or {}
 
         def __repr__(self):
             return self[:10].get_data_object().__repr__()
@@ -81,7 +81,8 @@ def create_lazy_class(dataclass):
             self._set_values[key] = value
 
         def __getitem__(self, idx):
-            return self.__class__(self._itemgetter[idx])
+            new_dict = {key: value[idx] for key, value in self._set_values.items()}
+            return self.__class__(self._itemgetter[idx], new_dict)
 
         def get_data_object(self):
             return dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))

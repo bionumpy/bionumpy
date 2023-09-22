@@ -143,9 +143,18 @@ def test_indexing(pair, idx):
     lazy, dataclass = pair
     assert_bnpdataclass_equal(lazy.get_data_object(), dataclass)
     data_object = lazy[idx].get_data_object()
-    print(data_object)
     assert_bnpdataclass_equal(data_object, dataclass[idx])
 
+
+@pytest.mark.parametrize('idx', [[0], [1], [0, 1]])
+def test_mutated_indexing(idx):
+    lazy, dataclass = get_pairwise_data('bed')
+    new_starts = np.full(len(dataclass), 100000)
+    lazy.start = new_starts
+    dataclass.start = new_starts
+    assert_bnpdataclass_equal(lazy.get_data_object(), dataclass)
+    data_object = lazy[idx].get_data_object()
+    assert_bnpdataclass_equal(data_object, dataclass[idx])
 
 @pytest.mark.parametrize('pair', [get_pairwise_data('fasta'), get_pairwise_data('bed')])
 def test_str(pair):
