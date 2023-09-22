@@ -163,6 +163,9 @@ class FileBuffer:
         n_new_lines = sum(np.sum(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        raise NotImplementedError
+
 
 class OneLineBuffer(FileBuffer):
     """ Base class for file formats where data fields are contained in lines."""
@@ -210,10 +213,9 @@ class OneLineBuffer(FileBuffer):
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
-    def get_field_by_number(self, i: int):
-        ''' Get a field indexed by number'''
-
-
+    def get_field_by_number(self, i: int, t: type=object):
+        """ Get a field indexed by number"""
+        raise NotImplementedError
 
     def count_entries(self) -> int:
         """Count number of entries in file"""

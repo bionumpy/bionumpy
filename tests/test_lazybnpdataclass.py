@@ -9,7 +9,7 @@ import pytest
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal
-
+from .buffers import combos
 
 @dataclasses.dataclass
 class DummyClass:
@@ -96,3 +96,11 @@ def test_bnp_lazy(lazy_bnp):
     assert_encoded_raggedarray_equal(lazy_bnp.b, ['hei'])
     lazy_bnp.a = [20]
     assert_array_equal(lazy_bnp.a, [20])
+
+@pytest.mark.xfail
+def test_lazy_with_fasta_buffer():
+    text, data, bt = combos['fasta']
+    b = bt.from_raw_buffer(bnp.as_encoded_array(text))
+    lazy = create_lazy_class(bnp.datatypes.SequenceEntry)(ItemGetter(b, bnp.datatypes.SequenceEntry))
+    assert_encoded_raggedarray_equal(lazy.name, data.name)
+
