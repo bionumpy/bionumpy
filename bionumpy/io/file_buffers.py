@@ -210,6 +210,11 @@ class OneLineBuffer(FileBuffer):
         headers = self.lines[:: self.n_lines_per_entry, 1:-1]
         return SequenceEntry(headers, sequences)
 
+    def get_field_by_number(self, i: int):
+        ''' Get a field indexed by number'''
+
+
+
     def count_entries(self) -> int:
         """Count number of entries in file"""
         return len(self._new_lines)//self.n_lines_per_entry

@@ -2,6 +2,7 @@ import numpy as np
 from npstructures import RunLengthArray
 from .genomic_data import GenomicArray, GenomicIntervals
 from .computation_graph import Node
+from .genomic_data.binned_genome import BinnedGenome
 from .io.matrix_dump import Matrix
 from .sequence.count_encoded import EncodedCounts
 from .encoded_array import EncodedRaggedArray
@@ -133,7 +134,7 @@ class Plotter:
         
     def _plot_single(self, data, ax=None, label=None):
         data = self._conversion(data)
-        if isinstance(data, GenomicArray):
+        if isinstance(data, (GenomicArray, BinnedGenome)):
             f, axes = self._subplots_for_genome(data.genome_context)
             # f, axes = self.plt.subplots(1, len(data.genome_context.chrom_sizes), sharey=True, sharex=True)
             for i, chromosome in enumerate(data.genome_context.chrom_sizes.keys()):
