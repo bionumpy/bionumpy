@@ -68,10 +68,10 @@ def create_lazy_class(dataclass):
             self._data = None
 
         def __repr__(self):
-            return self[:10].get_data_object().__repr__()
+            return self[:10].get_data_object().__repr__().replace('with 10 entries', f'with {len(self)} entries')
 
         def __str__(self):
-            return self[:10].get_data_object().__str__()
+            return self[:10].get_data_object().__str__().replace('with 10 entries', f'with {len(self)} entries')
 
         def __getattr__(self, var_name):
             if var_name in self._set_values:

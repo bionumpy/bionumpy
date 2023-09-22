@@ -314,7 +314,7 @@ class FastQBuffer(OneLineBuffer):
 
     def get_field_by_number(self, i: int, t: type=object):
         if i == 2:
-            return self.lines[3:: self.n_lines_per_entry, :-1]
+            return QualityEncoding.encode(self.lines[3:: self.n_lines_per_entry, :-1])
         else:
             return super().get_field_by_number(i, t)
 

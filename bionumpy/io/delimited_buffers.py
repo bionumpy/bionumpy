@@ -595,6 +595,14 @@ class VCFMatrixBuffer(VCFBuffer):
         genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
         return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
 
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        if field_nr != 9:
+            return super().get_field_by_number(field_nr, field_type)
+        else:
+            genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
+            genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
+            return genotypes
+
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     dataclass = VCFEntry
@@ -648,7 +656,6 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
 
     def _validate(self):
         self._validated = True
-
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
         delimiters_mask = data == self.DELIMITER

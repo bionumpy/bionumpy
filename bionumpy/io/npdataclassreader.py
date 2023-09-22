@@ -1,7 +1,10 @@
 from itertools import takewhile, repeat
+
+from .delimited_buffers import DelimitedBufferWithInernalComments
 from .parser import NumpyFileReader
 from ..bnpdataclass import BNPDataClass
 from .exceptions import FormatException
+from ..datatypes import GTFEntry, VCFGenotypeEntry
 from ..streams import NpDataclassStream
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 
@@ -42,8 +45,11 @@ class NpDataclassReader:
 
         """
         chunk = self._reader.read()
-        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass') and False :
-            return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
+            if not issubclass(chunk.dataclass, (GTFEntry)):
+                if not hasattr(chunk, 'genotype_dataclass') and not hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE'):
+                    if not isinstance(chunk, DelimitedBufferWithInernalComments):
+                        return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
         return chunk.get_data()
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
