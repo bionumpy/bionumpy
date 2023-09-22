@@ -25,6 +25,7 @@ class BufferBackedDescriptor:
     '''
     This class is made to access and parse parts of a text buffer lazily.v
     '''
+
     def __init__(self, buffer, index, dtype):
         self._buffer = buffer
         self._index = index
@@ -63,6 +64,12 @@ def create_lazy_class(dataclass):
             self._itemgetter = item_getter
             self._set_values = {}
 
+        def __repr__(self):
+            return self[:10].get_data_object().__repr__()
+
+        def __str__(self):
+            return self[:10].get_data_object().__str__()
+
         def __getattr__(self, var_name):
             if var_name in self._set_values:
                 return self._set_values[var_name]
@@ -78,7 +85,6 @@ def create_lazy_class(dataclass):
 
         def get_data_object(self):
             return dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
-
 
     NewClass.__name__ = dataclass.__name__
     NewClass.__qualname__ = dataclass.__qualname__

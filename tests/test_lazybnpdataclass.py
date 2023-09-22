@@ -145,3 +145,10 @@ def test_indexing(pair, idx):
     data_object = lazy[idx].get_data_object()
     print(data_object)
     assert_bnpdataclass_equal(data_object, dataclass[idx])
+
+
+@pytest.mark.parametrize('pair', [get_pairwise_data('fasta'), get_pairwise_data('bed')])
+def test_str(pair):
+    lazy, dataclass = pair
+    assert str(lazy) == str(dataclass)
+    assert repr(lazy) == str(dataclass)

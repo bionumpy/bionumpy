@@ -49,6 +49,7 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
 
     def __getitem__(self, idx):
+        self.validate_if_not()
         cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
         entries = self.entries[idx].ravel()
         delimiters = np.insert(np.cumsum(cell_lens)-1, 0, -1)
