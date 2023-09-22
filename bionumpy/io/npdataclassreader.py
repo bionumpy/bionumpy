@@ -42,7 +42,7 @@ class NpDataclassReader:
 
         """
         chunk = self._reader.read()
-        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass') and False:
+        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass') and False :
             return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
         return chunk.get_data()
 

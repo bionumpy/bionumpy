@@ -460,6 +460,13 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             self.fields = [next(field for field in fields if field.name == col) for col in columns]
             assert np.array_equal(columns, [field.name for field in self.fields])
 
+        def get_field_by_number(self, field_nr: int, field_type: type=object):
+            if self.fields is None:
+                return super().get_field_by_number(field_nr, field_type)
+            col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
+            return super().get_field_by_number(col_id, t)
+            # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+
         def get_data(self) -> _dataclass:
             """Parse the data in the buffer according to the fields in _dataclass
 
