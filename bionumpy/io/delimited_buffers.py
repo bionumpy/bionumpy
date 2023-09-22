@@ -2,7 +2,7 @@ import io
 import logging
 import dataclasses
 from typing import List
-from npstructures import RaggedArray, ragged_slice
+from npstructures import RaggedArray, ragged_slice, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
@@ -38,7 +38,7 @@ class DelimitedBuffer(FileBuffer):
     HAS_UNCOMMENTED_HEADER_LINE = False
     n_lines_per_entry = 1
 
-    def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None, header_data=None):
         super().__init__(data, new_lines)
         if delimiters is None:
             delimiters = np.concatenate(
@@ -49,7 +49,19 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
 
     def __getitem__(self, idx):
-        pass
+        cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
+        entries = self.entries[idx].ravel()
+        delimiters = np.insert(np.cumsum(cell_lens)-1, 0, -1)
+        new_lines = delimiters[self._n_cols:: self._n_cols]
+        return self.__class__(entries, new_lines, delimiters)
+
+    @property
+    def entries(self):
+        if not hasattr(self, "_entries"):
+            lengths = np.diff(self._new_lines)
+            lengths = np.insert(lengths, 0, self._new_lines[0]+1)
+            self._entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
+        return self._entries
 
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
