@@ -103,4 +103,17 @@ def test_lazy_with_fasta_buffer():
     b = bt.from_raw_buffer(bnp.as_encoded_array(text))
     lazy = create_lazy_class(bnp.datatypes.SequenceEntry)(ItemGetter(b, bnp.datatypes.SequenceEntry))
     assert_encoded_raggedarray_equal(lazy.name, [data.name for data in data])
+    lazy.name = bnp.as_encoded_array(['deg'])
+    assert_encoded_raggedarray_equal(lazy.name, ['deg'])
+
+
+@pytest.mark.xfail
+def test_lazy_with_bed_buffer():
+    text, data, bt = combos['bed']
+    b = bt.from_raw_buffer(bnp.as_encoded_array(text))
+    lazy = create_lazy_class(bnp.datatypes.Bed6)(ItemGetter(b, bnp.datatypes.Bed6))
+    assert_encoded_raggedarray_equal(lazy.chromosome, [data.chromosome for data in data])
+    lazy.chromosome = bnp.as_encoded_array(['deg'])
+    assert_encoded_raggedarray_equal(lazy.chromosome, ['deg'])
+
 
