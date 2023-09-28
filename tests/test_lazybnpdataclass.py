@@ -60,6 +60,10 @@ def simple_backend(var_name):
 
 
 class BufferMock:
+
+    def validate_if_not(self):
+        pass
+
     def get_field_by_number(self, i: int, t: type):
         if i == 0:
             return 10
@@ -75,6 +79,8 @@ class BetterBufferMock:
     def get_field_by_number(self, i, t):
         return self.data[i]
 
+    def validate_if_not(self):
+        pass
 
 @pytest.mark.parametrize('backend', [simple_backend, ItemGetter(BufferMock(), DummyClass)])
 def test_create_lazy_class(backend):

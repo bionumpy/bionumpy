@@ -108,7 +108,6 @@ class NumpyFileReader:
         complete_entry_found = False
         temp_chunks = []
         local_bytes_read = 0
-        local_lines_read = 0
         if len(self._prepend):
             temp_chunks.append(self._prepend)
         while not complete_entry_found:
@@ -119,7 +118,6 @@ class NumpyFileReader:
             if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
-            #local_lines_read += chunk.n_lines
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
             
         chunk = np.concatenate(temp_chunks)

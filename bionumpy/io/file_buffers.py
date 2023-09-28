@@ -43,6 +43,12 @@ class FileBuffer:
             raise FormatException(*args, **kwargs)
 
     @property
+    def header_data(self):
+        if hasattr(self, "_header_data"):
+            return self._header_data
+        return None
+
+    @property
     def n_lines(self):
         return len(self._new_lines)
 
@@ -286,6 +292,9 @@ class OneLineBuffer(FileBuffer):
         return buf
 
     def _validate(self):
+        if self._data.size == 0 and self._new_lines.size==0:
+            self._is_validated = True
+            return
         n_lines = self._new_lines.size
         assert n_lines % self.n_lines_per_entry == 0, "Wrong number of lines in buffer"
         header_idxs = (

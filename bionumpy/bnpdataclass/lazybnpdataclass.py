@@ -5,6 +5,7 @@ from numbers import Number
 import numpy as np
 
 from bionumpy.io.dump_csv import get_column, join_columns
+from bionumpy.io.exceptions import FormatException
 
 
 # from bionumpy import EncodedRaggedArray
@@ -53,13 +54,19 @@ class BaseClass:
 
 
 class ItemGetter:
-    def __init__(self, buffer: 'FileBuffer', dataclass: dataclasses.dataclass):
+    def __init__(self, buffer: 'FileBuffer', dataclass: dataclasses.dataclass, start_line=0):
         self._buffer = buffer
         self._dataclass = dataclass
         self._field_dict = {field.name: (i, field.type) for i, field in enumerate(dataclasses.fields(dataclass))}
+        self._buffer.validate_if_not()
+        self._start_line = start_line
 
     def __call__(self, name):
-        return self._buffer.get_field_by_number(self._field_dict[name][0], self._field_dict[name][1])
+        try:
+            return self._buffer.get_field_by_number(self._field_dict[name][0], self._field_dict[name][1])
+        except FormatException as e:
+            e.line_number += self._start_line
+            raise e
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer[idx], self._dataclass)
@@ -69,14 +76,18 @@ class ItemGetter:
         return self._buffer
 
 
-def create_lazy_class(dataclass):
+def create_lazy_class(dataclass, header=None):
     field_names = [field.name for field in dataclasses.fields(dataclass)]
+
+
     class NewClass(dataclass, LazyBNPDataClass):
         def __init__(self, item_getter, set_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
             self._computed = False
             self._data = None
+            if header is not None:
+                self.set_context('header', header)
 
         def __len__(self):
             return self._itemgetter.buffer.count_entries()

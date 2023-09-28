@@ -45,12 +45,20 @@ class NpDataclassReader:
 
         """
         chunk = self._reader.read()
+        should_be_lazy = self._should_be_lazy(chunk)
+        if should_be_lazy:
+            return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+        return chunk.get_data()
+
+    def _should_be_lazy(self, chunk):
+        should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
             if not issubclass(chunk.dataclass, (GTFEntry)):
-                if not hasattr(chunk, 'genotype_dataclass') and not (hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
+                if not hasattr(chunk, 'genotype_dataclass') and not (
+                        hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
                     if not isinstance(chunk, DelimitedBufferWithInernalComments):
-                        return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
-        return chunk.get_data()
+                        should_be_lazy = True
+        return should_be_lazy
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
         """Read a single chunk into memory
@@ -80,6 +88,9 @@ class NpDataclassReader:
         if chunk is None:
             return self._reader._buffer_type.dataclass.empty()
         try:
+            if self._should_be_lazy(chunk):
+                return create_lazy_class(chunk.dataclass, header=chunk.header_data)(ItemGetter(chunk, chunk.dataclass, n_lines_read))
+
             data = chunk.get_data()
         except FormatException as e:
             e.line_number += n_lines_read
