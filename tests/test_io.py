@@ -15,7 +15,8 @@ from numpy.testing import assert_equal
 
 
 @pytest.mark.parametrize("file_format", combos.keys())
-def test_read_write_roundtrip(file_format):
+@pytest.mark.parametrize("chunked", [False, True])
+def test_read_write_roundtrip(file_format, chunked):
     if file_format in ("multiline_fasta", "bed12", 'wig'):
         return
     _, _, buf_type = combos[file_format]
@@ -26,8 +27,11 @@ def test_read_write_roundtrip(file_format):
     out_obj = BytesIO(out_buffer)
     reader = NpDataclassReader(NumpyFileReader(in_obj, buffer_type=buf_type))
     writer = NpBufferedWriter(out_obj, buf_type)
-    for chunk in reader.read_chunks(200):
-        writer.write(chunk)
+    if chunked:
+        for chunk in reader.read_chunks(200):
+            writer.write(chunk)
+    else:
+        writer.write(reader.read())
     print(out_obj.getvalue())
     print(input_buffer)
     assert out_obj.getvalue() == input_buffer

@@ -4,6 +4,7 @@ import dataclasses
 from typing import List
 from npstructures import RaggedArray, ragged_slice, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
+from ..bnpdataclass.lazybnpdataclass import LazyBNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
                          GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
@@ -266,6 +267,8 @@ class DelimitedBuffer(FileBuffer):
         data : bnpdataclass
             Data
         """
+        if isinstance(data, LazyBNPDataClass):
+            return cls.from_data(data.get_data_object())
         data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
         return dump_csv(data_dict, cls.DELIMITER)
 
@@ -324,9 +327,7 @@ class DelimitedBuffer(FileBuffer):
         if field_type is None:
             field_type = dataclasses.fields(self.dataclass)[field_nr]
         return self._get_field_by_number(
-            field_nr, field_type) # ,
-
-
+            field_nr, field_type)
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -362,7 +363,7 @@ class DelimitedBuffer(FileBuffer):
 
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
-
+    SKIP_LAZY = True
     def get_data(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)

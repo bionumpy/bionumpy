@@ -4,6 +4,9 @@ from numbers import Number
 
 import numpy as np
 
+from bionumpy.io.dump_csv import get_column, join_columns
+
+
 # from bionumpy import EncodedRaggedArray
 
 
@@ -36,6 +39,9 @@ class BufferBackedDescriptor:
         return self._dtype(obj._buffer.get_field_by_number(self._index, self._dtype))
 
 
+class LazyBNPDataClass:
+    pass
+
 class BaseClass:
     def __init__(self, buffer):
         self._buffer = buffer
@@ -58,14 +64,22 @@ class ItemGetter:
     def __getitem__(self, idx):
         return self.__class__(self._buffer[idx], self._dataclass)
 
+    @property
+    def buffer(self):
+        return self._buffer
+
 
 def create_lazy_class(dataclass):
-    class NewClass(dataclass):
+    field_names = [field.name for field in dataclasses.fields(dataclass)]
+    class NewClass(dataclass, LazyBNPDataClass):
         def __init__(self, item_getter, set_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
             self._computed = False
             self._data = None
+
+        def __len__(self):
+            return self._itemgetter.buffer.count_entries()
 
         def __repr__(self):
             return self[:10].get_data_object().__repr__().replace('with 10 entries', f'with {len(self)} entries')
@@ -76,7 +90,9 @@ def create_lazy_class(dataclass):
         def __getattr__(self, var_name):
             if var_name in self._set_values:
                 return self._set_values[var_name]
-            return self._itemgetter(var_name)
+            if var_name in field_names:
+                return self._itemgetter(var_name)
+            return super().__getattr__(var_name)
 
         def __setattr__(self, key, value):
             if key in ['_itemgetter', '_set_values', '_computed', '_data']:
@@ -87,7 +103,6 @@ def create_lazy_class(dataclass):
             if isinstance(idx, Number):
                 idx = [idx]
                 return self[idx].get_data_object()[0]
-
             new_dict = {key: value[idx] for key, value in self._set_values.items()}
             return self.__class__(self._itemgetter[idx], new_dict)
 
@@ -104,6 +119,29 @@ def create_lazy_class(dataclass):
                 self._data = dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
                 self._computed = True
             return self._data
+
+        @classmethod
+        def empty(cls):
+            return dataclass.empty()
+
+        def __array_function__(self, func, types, args, kwargs):
+            assert all(issubclass(t, LazyBNPDataClass) for t in types), types
+            if func == np.concatenate:
+                objects = [a.get_data_object() for a in args[0]]
+                args = (objects, ) + args[1:]
+                return func(*args, **kwargs)
+            return NotImplemented
+
+        def get_buffer(self):
+            if not hasattr(self._itemgetter.buffer, 'get_column_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY'):
+                return self._itemgetter.buffer.from_data(self.get_data_object())
+            columns = []
+            for i, field in enumerate(dataclasses.fields(dataclass)):
+                if field.name in self._set_values:
+                    columns.append(get_column(self._set_values[field.name], field.type))
+                else:
+                    columns.append(self._itemgetter.buffer.get_column_range_as_text(i, i+1))
+            return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
 
 
     NewClass.__name__ = dataclass.__name__

@@ -16,23 +16,15 @@ def str_func(column):
     assert False
 
 
-def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
-    """Put each field of the dataclass into a column in a buffer.
-
-    Parameters
-    data : bnpdataclass
-        Data
-    """
-
-    funcs = {int: ints_to_strings,
-             str: str_func,  # lambda x: x,
-             List[int]: int_lists_to_strings,
-             float: float_to_strings,
-             List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),
-             bool: lambda x: ints_to_strings(x.astype(int))
-             }
-
+def get_column(values, field_type) -> EncodedRaggedArray:
     def get_func_for_datatype(datatype):
+        funcs = {int: ints_to_strings,
+                 str: str_func,  # lambda x: x,
+                 List[int]: int_lists_to_strings,
+                 float: float_to_strings,
+                 List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),
+                 bool: lambda x: ints_to_strings(x.astype(int))
+                 }
         if is_subclass_or_instance(datatype, Encoding):
             encoding = datatype
 
@@ -45,7 +37,23 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
         else:
             return funcs[datatype]
 
-    columns = [get_func_for_datatype(key)(value) for key, value in data_dict]
+    return get_func_for_datatype(field_type)(values)
+
+
+def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
+    """Put each field of the dataclass into a column in a buffer.
+
+    Parameters
+    data : bnpdataclass
+        Data
+    """
+
+    columns = [get_column(value, key) for key, value in data_dict]
+    lines = join_columns(columns, sep)
+    return lines.ravel()
+
+
+def join_columns(columns: List[EncodedRaggedArray], sep: str) -> EncodedRaggedArray:
     lengths = np.concatenate([((column.lengths if
                                 isinstance(column, RaggedArray)
                                 else np.array([
@@ -63,4 +71,4 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
         lines[i::n_columns, :-1] = column
     lines[:, -1] = sep
     lines[(n_columns - 1)::n_columns, -1] = "\n"
-    return lines.ravel()
+    return lines

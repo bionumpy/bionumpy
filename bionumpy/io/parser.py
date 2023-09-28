@@ -225,18 +225,25 @@ class NpBufferedWriter:
                 if len(buf) > 0:
                     self.write(buf)
             return
-        if hasattr(data, 'get_data_object'):
-            data = data.get_data_object()
 
         if hasattr(self._buffer_type, 'make_header') and \
                 (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
                 #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
-
         if len(data) == 0:
             return
-        bytes_array = self._buffer_type.from_data(data)
+
+        if hasattr(data, 'get_data_object'):
+            bytes_array = data.get_buffer()
+            # if not hasattr(self._buffer_type, 'get_column_range_as_text'):
+            #     data = data.get_data_object()
+            #     bytes_array = self._buffer_type.from_data(data)
+            # else:
+            #
+        else:
+            bytes_array = self._buffer_type.from_data(data)
+
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
