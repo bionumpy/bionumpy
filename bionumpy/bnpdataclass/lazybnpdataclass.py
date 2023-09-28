@@ -151,8 +151,9 @@ def create_lazy_class(dataclass, header=None):
                 if field.name in self._set_values:
                     columns.append(get_column(self._set_values[field.name], field.type))
                 else:
-                    columns.append(self._itemgetter.buffer.get_column_range_as_text(i, i+1))
-            return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
+                    columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i+1))
+            return self._itemgetter.buffer.join_fields(columns)
+            # return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
 
 
     NewClass.__name__ = dataclass.__name__

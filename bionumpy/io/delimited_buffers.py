@@ -21,7 +21,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
     ints_to_strings, split, str_to_int, str_to_float,
     int_lists_to_strings, float_to_strings)
-from .dump_csv import dump_csv
+from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
 
@@ -168,11 +168,17 @@ class DelimitedBuffer(FileBuffer):
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
 
+    def join_fields(self, fields_list: List[EncodedRaggedArray]):
+        return join_columns(fields_list, self.DELIMITER).ravel()
+
     def _col_starts(self, col):
         return self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
 
     def _col_ends(self, col):
         return self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+
+    def get_field_range_as_text(self, *args, **kwargs):
+        return self.get_column_range_as_text(*args, **kwargs)
 
     def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
         """Get multiple columns as text

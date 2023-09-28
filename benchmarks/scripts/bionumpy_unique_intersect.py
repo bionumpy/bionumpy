@@ -33,9 +33,6 @@ b = bnp.open(snakemake.input.b, buffer_type=bnp.Bed6Buffer).read()
 a = global_offset.from_local_interval(a)
 b = global_offset.from_local_interval(b)
 
-#chromosome_encoding = bnp.encodings.string_encodings.StringEncoding(chrom_sizes.name)
-#a = dataclasses.replace(a, chromosome=chromosome_encoding.encode(a.chromosome))
-# b = dataclasses.replace(b, chromosome=chromosome_encoding.encode(b.chromosome))
 result = bnp.arithmetics.unique_intersect(a, b, sum(chrom_sizes.size))
 result = global_offset.to_local_interval(result)
 with bnp.open(snakemake.output[0], "w", buffer_type=bnp.Bed6Buffer) as f:

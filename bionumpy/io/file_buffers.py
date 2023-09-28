@@ -256,6 +256,11 @@ class OneLineBuffer(FileBuffer):
         """Count number of entries in file"""
         return len(self._new_lines)//self.n_lines_per_entry
 
+    def get_field_range_as_text(self, start, end):
+        """Get a range of fields as text"""
+        assert end == start+1
+        return self.get_field_by_number(start)
+
     @classmethod
     def from_data(cls, entries: bnpdataclass) -> "OneLineBuffer":
         """Convert the data from the entries into a buffer that can be written to file
@@ -274,17 +279,21 @@ class OneLineBuffer(FileBuffer):
             A ASCII encoded buffer
         """
 
-        name_lengths = entries.name.lengths
-        sequence_lengths = entries.sequence.lengths
+        names = entries.name
+        sequences = entries.sequence
+        name_lengths = names.lengths
+
+
+        sequence_lengths = sequences.lengths
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
         ).ravel()
         buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
         lines = EncodedRaggedArray(buf, line_lengths)
         step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = entries.name
+        lines[0::step, 1:-1] = names
         lines[1::step, :-1] = EncodedRaggedArray(
-            EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()),  entries.sequence.encoding),entries.sequence.shape)
+            EncodedArray(sequences.encoding.decode(sequences.ravel()), sequences.encoding), sequences.shape)
 
         lines[0::step, 0] = ">"
 
