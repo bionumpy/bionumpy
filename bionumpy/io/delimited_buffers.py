@@ -168,8 +168,9 @@ class DelimitedBuffer(FileBuffer):
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
 
-    def join_fields(self, fields_list: List[EncodedRaggedArray]):
-        return join_columns(fields_list, self.DELIMITER).ravel()
+    @classmethod
+    def join_fields(cls, fields_list: List[EncodedRaggedArray]):
+        return join_columns(fields_list, cls.DELIMITER).ravel()
 
     def _col_starts(self, col):
         return self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1

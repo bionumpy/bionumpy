@@ -143,16 +143,20 @@ def create_lazy_class(dataclass, header=None):
                 return func(*args, **kwargs)
             return NotImplemented
 
-        def get_buffer(self):
-            if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY'):
+        def get_buffer(self, buffer_class=None):
+            if buffer_class is None:
+                buffer_class = self._itemgetter.buffer.__class__
+            if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY') or hasattr(buffer_class, 'SKIP_LAZY'):
                 return self._itemgetter.buffer.from_data(self.get_data_object())
             columns = []
+            if not self._set_values and self._itemgetter.buffer.__class__ == buffer_class:
+                return self._itemgetter.buffer._data.ravel()
             for i, field in enumerate(dataclasses.fields(dataclass)):
                 if field.name in self._set_values:
                     columns.append(get_column(self._set_values[field.name], field.type))
                 else:
                     columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i+1))
-            return self._itemgetter.buffer.join_fields(columns)
+            return buffer_class.join_fields(columns)
             # return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
 
 

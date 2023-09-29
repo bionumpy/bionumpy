@@ -25,6 +25,7 @@ def subsample_reads(input_filename, output_filename):
 
 def test():
     # filename = 'ENCFF689IPX.fq.gz'
-    filename = 'length150_nreads500000.fa'
+    # filename = 'length150_nreads500000.fa'
+    filename = 'length150_nreads5000000.fa'
     subsample_reads(f'benchmarks/results/dna_sequences/{filename}',
                     'tmp.fa')

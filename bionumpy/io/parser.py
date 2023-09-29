@@ -233,7 +233,7 @@ class NpBufferedWriter:
             return
 
         if hasattr(data, 'get_data_object'):
-            bytes_array = data.get_buffer()
+            bytes_array = data.get_buffer(buffer_class=self._buffer_type)
             # if not hasattr(self._buffer_type, 'get_column_range_as_text'):
             #     data = data.get_data_object()
             #     bytes_array = self._buffer_type.from_data(data)
