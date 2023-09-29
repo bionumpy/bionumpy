@@ -171,7 +171,7 @@ class FileBuffer:
 
     @classmethod
     def contains_complete_entry(cls, chunks):
-        n_new_lines = sum(np.sum(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
+        n_new_lines = sum(np.count_nonzero(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
     #def get_field_by_number(self, field_nr: int, field_type: type=object):
