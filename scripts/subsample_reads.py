@@ -22,12 +22,14 @@ def subsample_reads(input_filename, output_filename):
     assert n_entries_left == 0, n_entries_left
     out_file.close()
 
-def test_count_entries():
+def _test_count_entries():
+    assert False
     filename = 'length150_nreads5000000.fa'
     bnp.count_entries(f'benchmarks/results/dna_sequences/{filename}', buffer_type=bnp.TwoLineFastaBuffer)
 
 
-def test():
+def _test():
+    assert False
     # filename = 'ENCFF689IPX.fq.gz'
     # filename = 'length150_nreads500000.fa'
     filename = 'length150_nreads5000000.fa'
