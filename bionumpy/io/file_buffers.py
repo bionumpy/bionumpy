@@ -1,11 +1,13 @@
 import sys
+from typing import List
+
 import numpy as np
 from io import FileIO
 from npstructures import RaggedArray, RaggedView, RaggedShape
 from .exceptions import FormatException
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import SequenceEntry, SequenceEntryWithQuality
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..encodings import QualityEncoding, BaseEncoding
 
 NEWLINE = "\n"
@@ -182,6 +184,7 @@ class OneLineBuffer(FileBuffer):
     n_lines_per_entry = 2
     _buffer_divisor = 32
     _line_offsets = (1, 0)
+    _empty_lines = []
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
@@ -259,7 +262,7 @@ class OneLineBuffer(FileBuffer):
     def get_field_range_as_text(self, start, end):
         """Get a range of fields as text"""
         assert end == start+1
-        return self.get_field_by_number(start)
+        return self.get_text_field_by_number(start)
 
     @classmethod
     def from_data(cls, entries: bnpdataclass) -> "OneLineBuffer":
@@ -300,6 +303,23 @@ class OneLineBuffer(FileBuffer):
         lines[:, -1] = "\n"
         return buf
 
+    @classmethod
+    def join_fields(cls, fields: List[EncodedRaggedArray]):
+        field_lengths = np.hstack([field.shape[1][:, None] for field in fields])
+        line_lengths = field_lengths+1
+        for i in range(len(fields)):
+            line_lengths[:, i] += cls._line_offsets[i]
+        entry_lengths = line_lengths.sum(axis=-1)
+        buffer_size = entry_lengths.sum()
+        buf = EncodedArray(np.empty(buffer_size, dtype=np.uint8), BaseEncoding)
+        lines = EncodedRaggedArray(buf, line_lengths.ravel())
+        step = cls.n_lines_per_entry
+        for i, field in enumerate(fields):
+            lines[i::step, cls._line_offsets[i]:-1] = field
+        lines[0::step, 0] = cls.HEADER
+        lines[:, -1] = "\n"
+        return buf
+
     def _validate(self):
         if self._data.size == 0 and self._new_lines.size==0:
             self._is_validated = True
@@ -318,6 +338,9 @@ class OneLineBuffer(FileBuffer):
             raise FormatException(f"Expected header line to start with {self.HEADER}" % self._data, line_number=line_number)
         self._is_validated = True
 
+    def get_text_field_by_number(self, i):
+        return self.get_field_by_number(i)
+
 
 class TwoLineFastaBuffer(OneLineBuffer):
     HEADER = ">"# 62
@@ -329,6 +352,14 @@ class FastQBuffer(OneLineBuffer):
     HEADER = "@"
     n_lines_per_entry = 4
     dataclass = SequenceEntryWithQuality
+    _line_offsets = (1, 0, 0, 0)
+    _empty_lines = [2]
+
+    def get_text_field_by_number(self, i: int) -> EncodedRaggedArray:
+        if i == 2:
+            return self.lines[3:: self.n_lines_per_entry, :-1]
+        return super().get_text_field_by_number(i)
+
 
     def get_field_by_number(self, i: int, t: type=object):
         if i == 2:
@@ -366,7 +397,12 @@ class FastQBuffer(OneLineBuffer):
             entry_number = np.flatnonzero(self._data[self._new_lines[1::self.n_lines_per_entry] + 1] != "+")[0]
             line_number = 2+entry_number*self.n_lines_per_entry
             raise FormatException(f"Expected '+' at third line of entry in {self._data}", line_number=line_number)
-        
+
+    @classmethod
+    def join_fields(cls, fields: List[EncodedRaggedArray]):
+        plus_line = as_encoded_array(['+']*len(fields[0]))
+        return super().join_fields(fields[:2]+[plus_line]+fields[2:])
+
     @classmethod
     def from_data(cls, entries):
         line_lengths = cls._get_line_lens(entries)

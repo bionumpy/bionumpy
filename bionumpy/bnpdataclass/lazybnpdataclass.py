@@ -144,7 +144,7 @@ def create_lazy_class(dataclass, header=None):
             return NotImplemented
 
         def get_buffer(self):
-            if not hasattr(self._itemgetter.buffer, 'get_column_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY'):
+            if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY'):
                 return self._itemgetter.buffer.from_data(self.get_data_object())
             columns = []
             for i, field in enumerate(dataclasses.fields(dataclass)):
