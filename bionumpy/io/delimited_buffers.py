@@ -5,22 +5,18 @@ from typing import List
 from npstructures import RaggedArray, ragged_slice, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..bnpdataclass.lazybnpdataclass import LazyBNPDataClass
-from ..datatypes import (Interval, VCFGenotypeEntry,
-                         SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
-                         GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
-                         GfaPath, PhasedVCFHaplotypeEntry)
+from ..datatypes import (Interval, SequenceEntry, Bed12, Bed6, BedGraph,
+                         GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding
 from ..encodings.exceptions import EncodingError
-from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
-from ..encodings.alphabet_encoding import get_alphabet_encodings, DigitEncoding
-from ..encoded_array import get_base_encodings, BaseEncoding
+from ..encodings.alphabet_encoding import DigitEncoding
+from ..encoded_array import BaseEncoding
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
-    ints_to_strings, split, str_to_int, str_to_float,
-    int_lists_to_strings, float_to_strings)
+    split, str_to_int, str_to_float)
 from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
@@ -554,75 +550,6 @@ class Bed12Buffer(Bed6Buffer):
 
 class BdgBuffer(BedBuffer):
     dataclass = BedGraph
-
-
-class VCFBuffer(DelimitedBuffer):
-    dataclass = VCFEntry
-
-    def get_data(self):
-        data = super().get_data()
-        data.position -= 1
-        return data
-
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        val = super().get_field_by_number(field_nr, field_type)
-        if field_nr == 1:
-            val -= 1
-        return val
-
-    @classmethod
-    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
-        data = dataclasses.replace(data, position=data.position+1)
-        return super().from_data(data)
-
-
-class VCFMatrixBuffer(VCFBuffer):
-    dataclass = VCFEntry
-    genotype_dataclass = VCFGenotypeEntry
-    genotype_encoding = GenotypeRowEncoding
-
-    @classmethod
-    def __read_header(cls, file_object):
-        # NOT IMPLEMENTED version of read_header()
-        prev_line = None
-        for line in file_object:
-            line = line.decode()
-            if line[0] != cls.COMMENT:
-                file_object.seek(-len(line), 1)
-                break
-            prev_line = line
-        if prev_line is None:
-            return []
-
-        sample_names = prev_line.split("\t")[9:]
-        return sample_names
-
-    def get_data(self):
-        data = super().get_data()
-        genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
-        genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
-        return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
-
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        if field_nr != 9:
-            return super().get_field_by_number(field_nr, field_type)
-        else:
-            genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
-            genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
-            return genotypes
-
-
-class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
-    dataclass = VCFEntry
-    genotype_dataclass = PhasedVCFGenotypeEntry
-    genotype_encoding = PhasedGenotypeRowEncoding
-
-
-class PhasedHaplotypeVCFMatrixBuffer(VCFMatrixBuffer):
-    """Encodes genotype info using one column per haplotype (not genotype)"""
-    dataclass = VCFEntry
-    genotype_dataclass = PhasedVCFHaplotypeEntry
-    genotype_encoding = PhasedHaplotypeRowEncoding
 
 
 class NarrowPeakBuffer(DelimitedBuffer):
