@@ -20,6 +20,9 @@ def get_sorted_sequence_length_distribution(file_name):
 def test():
     get_sorted_sequence_length_distribution("example_data/big.fq.gz")
 
+def _test_2():
+    assert False
+    get_sorted_sequence_length_distribution("benchmarks/results/dna_sequences/ENCFF689IPX.fq.gz")
 
 if __name__ == "__main__":
     file_name = sys.argv[1]

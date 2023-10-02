@@ -195,10 +195,11 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     else:
                         val = pre_val
                 elif issubclass(field.type, BNPDataClass):
-                    assert isinstance(pre_val, (field.type, field.type._single_entry))
+                    assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
                     val = pre_val
                 else:
                     assert False, field.type
+
                 setattr(obj, field.name, val)
 
     NewClass.__name__ = base_class.__name__

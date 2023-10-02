@@ -72,6 +72,12 @@ def windows(genome_context):
 
 
 @pytest.fixture
+def location_entries():
+    return LocationEntry(
+        ['chr1', 'chr2', 'chr2'],
+        [19, 20, 50])
+
+@pytest.fixture
 def genomic_locations(genome_context):
     return GenomicLocation.from_fields(
         genome_context,

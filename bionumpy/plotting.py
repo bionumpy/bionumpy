@@ -1,28 +1,44 @@
 import numpy as np
 from npstructures import RunLengthArray
 from .genomic_data import GenomicArray, GenomicIntervals
-from .computation_graph import Node
+from .genomic_data.binned_genome import BinnedGenome
 from .io.matrix_dump import Matrix
 from .sequence.count_encoded import EncodedCounts
 from .encoded_array import EncodedRaggedArray
 import dataclasses
+
 
 @dataclasses.dataclass
 class Vector:
     data: np.ndarray
     names: list
 
+
 class Plotter:
-    def __init__(self, plt):
-        self.plt = plt
+    def __init__(self, plt=None):
+        self._plt = plt
         self._show = True
+        self._tried = False
+
+    @property
+    def plt(self):
+        if self._plt is None and not self._tried:
+            try:
+                import matplotlib.pyplot as _plt
+                plt.style.use('Solarize_Light2')
+                self._plt = _plt
+            except:
+                pass
+            self._tried = True
+        return self._plt
+
 
     def set_config(self, **kwargs):
         accepted_configs = {'show'}
         for key, value in kwargs.items():
             assert key in accepted_configs
             if key == 'show':
-                self._show =value
+                self._show = value
 
     def show(self, f=None):
         if not self._show:
@@ -55,7 +71,7 @@ class Plotter:
         data = np.asanyarray(matrix.data)
         n_rows, n_cols = data.shape
         im = ax.imshow(data)
-        
+
         # Show all ticks and label them with the respective list entries
 
         ax.set_xticks(np.arange(n_cols))
@@ -71,20 +87,19 @@ class Plotter:
                 ax.set_yticklabels(matrix.row_names.tolist())
             else:
                 ax.set_yticklabels(matrix.row_names)
-        
+
         # Rotate the tick labels and set their alignment.
         self.plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-                 rotation_mode="anchor")
-        
+                      rotation_mode="anchor")
+
         # Loop over data dimensions and create text annotations.
-        if n_rows*n_cols<100:
+        if n_rows * n_cols < 100:
             for i in range(n_rows):
                 for j in range(n_cols):
                     text = ax.text(j, i, data[i, j],
                                    ha="center", va="center", color="w")
         fig.tight_layout()
         self.show()
-
 
     def _plot_list(self, data_list):
         data_list = [self._conversion(data) for data in data_list]
@@ -99,7 +114,7 @@ class Plotter:
                 axes[i].title.set_text(chromosome)
             self.show(f)
         else:
-            raise NotImplementedError(f'{type(data)} not supported')        
+            raise NotImplementedError(f'{type(data)} not supported')
 
     def _plot_dict(self, data_dict):
         data_dict = {key: self._conversion(data) for key, data in data_dict.items()}
@@ -125,15 +140,15 @@ class Plotter:
             f.legend()
             self.show()
         else:
-            raise NotImplementedError(f'{type(data)} not supported')        
-        pass 
+            raise NotImplementedError(f'{type(data)} not supported')
+        pass
 
     def _subplots_for_genome(self, gc):
         return self.plt.subplots(len(gc.chrom_sizes), 1, sharey=True, sharex=True)
-        
+
     def _plot_single(self, data, ax=None, label=None):
         data = self._conversion(data)
-        if isinstance(data, GenomicArray):
+        if isinstance(data, (GenomicArray, BinnedGenome)):
             f, axes = self._subplots_for_genome(data.genome_context)
             # f, axes = self.plt.subplots(1, len(data.genome_context.chrom_sizes), sharey=True, sharex=True)
             for i, chromosome in enumerate(data.genome_context.chrom_sizes.keys()):
@@ -142,7 +157,7 @@ class Plotter:
             self.show(f)
         elif isinstance(data, RunLengthArray):
             if ax is None:
-                f, ax = self.plt.subplots()# self._subplots_for_genome(data.genome_context)
+                f, ax = self.plt.subplots()  # self._subplots_for_genome(data.genome_context)
                 ax.plot(np.asarray(data), label=label)
                 self.show()
             else:
@@ -160,7 +175,6 @@ class Plotter:
 
     def __call__(self, data):
         return self.plot(data)
-    
 
     def plot(self, data):
         if isinstance(data, list):
@@ -183,26 +197,40 @@ def convert_args_to_array(func):
         args = [convert(a) for a in args]
         kwargs = {key: convert(val) for key, val in kwargs.items()}
         return func(*args, **kwargs)
+
     return new_func
 
 
 class PXWrapper:
-    def __init__(self, px):
+    def __init__(self, px=None):
         self._px = px
+        self._tried = False
+
+    @property
+    def px(self):
+        if self._px is None and not self._tried:
+            try:
+                import plotly.express as _px
+                self._px = _px
+            except:
+                pass
+            self._tried = True
+        return self._px
 
     def __getattr__(self, name):
-        func = getattr(self._px, name)
+        func = getattr(self.px, name)
         return convert_args_to_array(func)
 
-try:
-    import plotly.express as _px
-    px = PXWrapper(_px)
-except:
-    px = None
-    
-try:
-    import matplotlib.pyplot as plt
-    plt.style.use('Solarize_Light2')
-    plot = Plotter(plt)
-except:
-    plot = None
+# px = PXWrapper()
+# try:
+#     import plotly.express as _px
+#     px = PXWrapper(_px)
+# except:
+#     px = None
+
+# try:
+#     import matplotlib.pyplot as plt
+#     plt.style.use('Solarize_Light2')
+plot = Plotter()
+# except:
+#     plot = None

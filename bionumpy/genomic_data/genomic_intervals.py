@@ -130,7 +130,7 @@ class GenomicLocationGlobal(GenomicLocation):
 
     def __replace__(self, **kwargs):
         kwargs = {self._field_dict[kw]: value for kw, value in kwargs.items()}
-        return self.__class__(dataclasses.replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
+        return self.__class__(replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
 
     @property
     def chromosome(self):
@@ -632,7 +632,7 @@ class GenomicIntervalsFull(GenomicIntervals):
                        stop=np.minimum(chrom_sizes, self.stop))
 
     def __replace__(self, **kwargs):
-        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context, self._is_stranded)
+        return self.__class__(replace(self._intervals, **kwargs), self._genome_context, self._is_stranded)
 
     def compute(self):
         return self
@@ -763,8 +763,8 @@ class GenomicIntervalsStreamed(GenomicIntervals, Node):
         return self.__class__(ComputationNode(clip, [self._intervals_node, self._chrom_size_node]), self._genome_context)
 
     def __replace__(self, **kwargs):
-        return self.__class__(ComputationNode(dataclasses.replace, [self._intervals_node], kwargs), self._genome_context)
-        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
+        return self.__class__(ComputationNode(replace, [self._intervals_node], kwargs), self._genome_context)
+        # return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
 
     def compute(self):
         chromosome, start, stop = compute((self.chromosome, self.start, self.stop))

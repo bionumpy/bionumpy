@@ -2,8 +2,9 @@ import io
 import logging
 import dataclasses
 from typing import List
-from npstructures import RaggedArray, ragged_slice
+from npstructures import RaggedArray, ragged_slice, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
+from ..bnpdataclass.lazybnpdataclass import LazyBNPDataClass
 from ..datatypes import (Interval, VCFGenotypeEntry,
                          SequenceEntry, VCFEntry, Bed12, Bed6, BedGraph,
                          GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, PhasedVCFGenotypeEntry,
@@ -20,7 +21,7 @@ from .file_buffers import FileBuffer, NEWLINE
 from .strops import (
     ints_to_strings, split, str_to_int, str_to_float,
     int_lists_to_strings, float_to_strings)
-from .dump_csv import dump_csv
+from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
 
@@ -38,7 +39,7 @@ class DelimitedBuffer(FileBuffer):
     HAS_UNCOMMENTED_HEADER_LINE = False
     n_lines_per_entry = 1
 
-    def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+    def __init__(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None, header_data=None):
         super().__init__(data, new_lines)
         if delimiters is None:
             delimiters = np.concatenate(
@@ -47,6 +48,22 @@ class DelimitedBuffer(FileBuffer):
             delimiters.sort(kind="mergesort")
         self._delimiters = delimiters
         self._header_data = header_data
+
+    def __getitem__(self, idx):
+        self.validate_if_not()
+        cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
+        entries = self.entries[idx].ravel()
+        delimiters = np.insert(np.cumsum(cell_lens)-1, 0, -1)
+        new_lines = delimiters[self._n_cols:: self._n_cols]
+        return self.__class__(entries, new_lines, delimiters)
+
+    @property
+    def entries(self):
+        if not hasattr(self, "_entries"):
+            lengths = np.diff(self._new_lines)
+            lengths = np.insert(lengths, 0, self._new_lines[0]+1)
+            self._entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
+        return self._entries
 
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
@@ -151,11 +168,18 @@ class DelimitedBuffer(FileBuffer):
         else:
             return self._move_intervals_to_ragged_array(starts, ends)
 
+    @classmethod
+    def join_fields(cls, fields_list: List[EncodedRaggedArray]):
+        return join_columns(fields_list, cls.DELIMITER).ravel()
+
     def _col_starts(self, col):
         return self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
 
     def _col_ends(self, col):
         return self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
+
+    def get_field_range_as_text(self, *args, **kwargs):
+        return self.get_column_range_as_text(*args, **kwargs)
 
     def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
         """Get multiple columns as text
@@ -250,6 +274,8 @@ class DelimitedBuffer(FileBuffer):
         data : bnpdataclass
             Data
         """
+        if isinstance(data, LazyBNPDataClass):
+            return cls.from_data(data.get_data_object())
         data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
         return dump_csv(data_dict, cls.DELIMITER)
 
@@ -273,22 +299,7 @@ class DelimitedBuffer(FileBuffer):
         columns = {}
         fields = dataclasses.fields(self.dataclass)
         for col_number, field in enumerate(fields):
-            if field.type is None:
-                col = None
-            elif field.type == str or is_subclass_or_instance(field.type, Encoding):
-                col = self.get_text(col_number, fixed_length=False)
-            elif field.type == int:
-                col = self.get_integers(col_number).ravel()
-            elif field.type == float:
-                col = self.get_floats(col_number).ravel()
-            elif field.type == -1:
-                col = self.get_integers(col_number).ravel() - 1
-            elif field.type == List[int]:
-                col = self.get_split_ints(col_number)
-            elif field.type == List[bool]:
-                col = self.get_split_ints(col_number, sep="").astype(bool)
-            else:
-                assert False, field
+            col = self._get_field_by_number(col_number, field.type)
             columns[field.name] = col
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
@@ -296,6 +307,34 @@ class DelimitedBuffer(FileBuffer):
         data = self.dataclass(**columns)
         data.set_context("header", self._header_data)
         return data
+
+    def _get_field_by_number(self, col_number, field_type):
+        if field_type is None:
+            col = None
+        elif field_type == str or is_subclass_or_instance(field_type, Encoding):
+            col = self.get_text(col_number, fixed_length=False)
+        elif field_type == int:
+            col = self.get_integers(col_number).ravel()
+        elif field_type == float:
+            col = self.get_floats(col_number).ravel()
+        elif field_type == bool:
+            col = self.get_integers(col_number).ravel().astype(bool)
+        elif field_type == -1:
+            col = self.get_integers(col_number).ravel() - 1
+        elif field_type == List[int]:
+            col = self.get_split_ints(col_number)
+        elif field_type == List[bool]:
+            col = self.get_split_ints(col_number, sep="").astype(bool)
+        else:
+            assert False, field_type
+        return col
+
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        self.validate_if_not()
+        if field_type is None:
+            field_type = dataclasses.fields(self.dataclass)[field_nr]
+        return self._get_field_by_number(
+            field_nr, field_type)
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -331,11 +370,14 @@ class DelimitedBuffer(FileBuffer):
 
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
-
+    SKIP_LAZY = True
     def get_data(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)
         return SequenceEntry(ids, sequences)
+
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        return super().get_field_by_number(field_nr+1, field_type)
 
     @classmethod
     def from_data(cls, data: SequenceEntry) -> EncodedArray:
@@ -426,6 +468,13 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             self.fields = [next(field for field in fields if field.name == col) for col in columns]
             assert np.array_equal(columns, [field.name for field in self.fields])
 
+        def get_field_by_number(self, field_nr: int, field_type: type=object):
+            if self.fields is None:
+                return super().get_field_by_number(field_nr, field_type)
+            col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
+            return super().get_field_by_number(col_id, t)
+            # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+
         def get_data(self) -> _dataclass:
             """Parse the data in the buffer according to the fields in _dataclass
 
@@ -515,6 +564,12 @@ class VCFBuffer(DelimitedBuffer):
         data.position -= 1
         return data
 
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        val = super().get_field_by_number(field_nr, field_type)
+        if field_nr == 1:
+            val -= 1
+        return val
+
     @classmethod
     def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
         data = dataclasses.replace(data, position=data.position+1)
@@ -547,6 +602,14 @@ class VCFMatrixBuffer(VCFBuffer):
         genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
         genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
         return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
+
+    def get_field_by_number(self, field_nr: int, field_type: type=object):
+        if field_nr != 9:
+            return super().get_field_by_number(field_nr, field_type)
+        else:
+            genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
+            genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
+            return genotypes
 
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
@@ -601,7 +664,6 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
 
     def _validate(self):
         self._validated = True
-
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
         delimiters_mask = data == self.DELIMITER

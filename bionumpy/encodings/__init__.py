@@ -1,4 +1,3 @@
-import numpy as np
 from ..encoded_array import BaseEncoding, Encoding, NumericEncoding
 from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
                                 AminoAcidEncoding, ACGTnEncoding,
@@ -6,7 +5,7 @@ from .alphabet_encoding import (AlphabetEncoding, DNAEncoding, RNAENcoding,
 
 
 __all__ = ["BaseEncoding", "Encoding",
-           "AlphabetEncoding", "ACTGEncoding", "AminoAcidEncoding"]# , "ACTGTwoBitEncoding"]
+           "AlphabetEncoding",  "AminoAcidEncoding"]
 
 
 # class StrandEncoding(Encoding):
