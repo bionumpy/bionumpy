@@ -1,0 +1,62 @@
+
+name: Manuscript
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1  # v1 to be compatible with snakemake checkout action (?)
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install git+https://github.com/bionumpy/npstructures.git/@dev
+
+      - name: Make manuscript
+        uses: snakemake/snakemake-github-action@v1
+        with:
+          directory: '.'
+          snakefile: 'Snakefile'
+          args: '--cores 1 --use-conda --conda-cleanup-pkgs cache'
+          stagein: |  # additional preliminary commands to run (can be multiline)
+            # merge dev into benchmark branch, commit changes and push to benchmarks
+            # does not affect or change dev branch
+            python -m pip install --upgrade pip setuptools wheel
+            
+            apt-get update && apt-get install make
+            apt-get install libglib2.0-dev
+            pip install -r requirements_dev.txt
+            pip install --upgrade pip
+            pip install .
+            cd docs_source
+
+      - name: Save benchmarks results
+        run: |
+          cp docs_source/_build/latex/bionumpymanuscript.pdf .
+          
+          git config --global user.email "github@action.com"
+          git config --global user.name "github action"
+          
+          git checkout --orphan manuscript
+          # we only want the files we created
+          git rm -r --cached .
+ 
+          git add -f bionumpymanuscript.pdf
+          git commit -am 'New build of manuscript'
+
+      - name: Push results to benchmark branch
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
+          force: true
+          branch: manuscript
+

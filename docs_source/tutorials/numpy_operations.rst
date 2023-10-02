@@ -1,12 +1,11 @@
-Using Numpy Functionality
+Using NumPy functionality
 -------------------------
 
-This is just some short examples to show how numpy concepts like indexing, broadcasting and reductions can be used effectively in bionumpy:
+This is a collection of short examples showing how NumPy concepts like indexing, broadcasting and reductions can be used effectively in BioNumPy:
 
 .. code-block:: python
 
     import bionumpy as bnp
-    from bionumpy.groupby import groupby
     import numpy as np
     import matplotlib.pyplot as plt
     

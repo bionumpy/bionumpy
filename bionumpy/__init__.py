@@ -2,80 +2,90 @@
 
 __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
-__version__ = "0.1.0"
+__version__ = '0.2.21'
 
-from .files import bnp_open as open
-from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
-from .files import count_entries
-from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-# from .sequences import Sequence, as_sequence_array, as_encoded_sequence_array
-from .kmers import KmerEncoding
-from .minimizers import Minimizers
-from .position_weight_matrix import PositionWeightMatrix
-from .counter import count_encoded
-from .npdataclassstream import mean, bincount, histogram, streamable
 import npstructures as nps
-from .file_buffers import (TwoLineFastaBuffer, FastQBuffer)
-from .delimited_buffers import (BedBuffer, VCFBuffer, VCFMatrixBuffer,
-                                GfaSequenceBuffer, get_bufferclass_for_datatype)
-from .datatypes import SAMEntry, GFFEntry, Bed6
-from .multiline_buffer import MultiLineFastaBuffer
+
+from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
+                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer, NarrowPeakBuffer,
+                 BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
+                 GfaSequenceBuffer, get_bufferclass_for_datatype)
+from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
+from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
+from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded, match_string)
+from .streams import mean, bincount, histogram, streamable, quantile, MultiStream, groupby
+from .datatypes import SAMEntry, GFFEntry, Bed6, Interval, LocationEntry
+from .bnpdataclass import replace
+from .io.strops import str_equal
+from .util.cli import run_as_commandline
+from .computation_graph import compute
+from . import simulate
+from . import arithmetics
+from . import alignments
+from .genomic_data import Genome, GenomicArray, GenomicIntervals
+from .plotting import plot
+
+from .io.matrix_dump import Matrix
+from .util.ragged_slice import ragged_slice
+open = bnp_open
 
 
 SAMBuffer = get_bufferclass_for_datatype(SAMEntry)
 GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
-Bed6Buffer = get_bufferclass_for_datatype(Bed6)
+# Bed6Buffer = get_bufferclass_for_datatype(Bed6)
 
-__all__ = ["EncodedArray", "as_encoded_array", "EncodedRaggedArray",
-           "KmerEncoding", "Minimizers", "PositionWeightMatrix", "mean",
-           "bincount", "streamable", "histogram", "count_entries",
-           "BedBuffer", "VCFBuffer", "VCFMatrixBuffer", "GfaSequenceBuffer",
-           "TwoLineFastaBuffer", "FastQBuffer",
+__all__ = ["EncodedArray", "EncodedRaggedArray",
+           "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
+           "bincount", "streamable", "histogram", "count_entries", "quantile",
+           "BedBuffer", "VCFBuffer", "PhasedVCFMatrixBuffer", "VCFMatrixBuffer",
+           "GfaSequenceBuffer",
+           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 
 
 def set_backend(lib):
-    import sys
+    def temp_insert(array, index, value):
+        assert index == 0
+        return lib.concatenate((lib.asarray([value], dtype=array.dtype), array))
+
+    lib.insert = temp_insert
 
     nps.set_backend(lib)
-    
     from npstructures.bitarray import BitArray
     from npstructures import RaggedArray
     from npstructures import RaggedShape, RaggedView
 
-    from bionumpy.cupy_compatible.sequences import CPSequence, CPSequences
-    from bionumpy.cupy_compatible.parser import CpBufferStream
-    from bionumpy.cupy_compatible.file_buffers import CPTwoLineFastaBuffer
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPACTGnEncoding
-    #from bionumpy.cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
-
-    sys.modules[__name__].Sequence = CPSequence
-    sys.modules[__name__].Sequences = CPSequences
-
-    from . import file_buffers
-    file_buffers.np = lib
-    file_buffers.TwoLineFastaBuffer = CPTwoLineFastaBuffer
-    #file_buffers.RaggedShape = RaggedShape
-    #file_buffers.RaggedView = RaggedView
-
-    from . import parser
-    parser.np = lib
-
-    from . import files
-    files.np = lib 
-    files.NpBufferStream = CpBufferStream
-    files.buffer_types[".fa"] = CPTwoLineFastaBuffer
-    files.buffer_types[".fasta"] = CPTwoLineFastaBuffer
+    if not hasattr(lib, "object_"):
+        # hack for cupy
+        lib.object_ = None
 
     from .encodings import set_backend as set_encoding_backend
     set_encoding_backend(lib)
 
-    from . import kmers
-    #kmers.ACTGEncoding = ACTGEncoding
-    kmers.BitArray = BitArray
+    from .sequence import set_backend as set_sequence_backend
+    set_sequence_backend(lib)
+
+    from bionumpy.cupy_compatible.parser import CupyFileReader
+
+    from .io import file_buffers
+    file_buffers.np = lib
+
+    from .io import parser
+    parser.np = lib
+    parser.NumpyFileReader = CupyFileReader
+
+    from .io import files
+    files.np = lib 
+    files.NumpyFileReader = CupyFileReader
+
+    from . import bnpdataclass
+    bnpdataclass.np = lib
+
+    from . import encoded_array
+    encoded_array.np = lib
+    encoded_array.get_NPSArray = lambda x: x
 
     from . import util
-    util.RaggedArray = RaggedArray
+    util.np = lib
+

@@ -23,19 +23,21 @@ jobs:
     
       - name: install dependencies
         run: |
-          pip install Sphinx==3.5.4
-          pip install numpy
           pip install npstructures
-          pip install sphinx_rtd_theme
-        
+          pip install numpy
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+
       - name: make html & commit the changes
         run: |
           sphinx-build -b html ./docs_source ./docs
+          git config --global user.email "github@action.com"
           git config user.name "knutrand"
-          git add ./docs
+          git add -f ./docs
           git commit -m 'update docs'
           
       - name: push changes to gh-pages to show automatically
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: gh-pages
+          force: true

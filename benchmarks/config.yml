@@ -1,0 +1,104 @@
+
+method_names:
+  bionumpy: "BioNumPy"
+  bedtools: "BEDTools"
+  seqtk: "Seqtk"
+  biopython: "Biopython"
+  biotite: "Biotite"
+  python: "Vanilla Python"
+  jellyfish: "Jellyfish"
+  awk: "AWK (one-liner)"
+  bcftools: "Bcftools"
+  vcfpy: "vcfpy"
+  pyvcf: "pyvcf"
+  pyranges: "pyranges"
+
+
+analysis:
+  reverse_complement:
+    name: "Reverse-complement"
+    tools: [ "bionumpy", "biopython", "python", "biotite", "seqtk" ]
+    output_file_ending: ".fa"
+    validate_equal: true
+    runs:
+      small: "length150_nreads100"
+      big: "length150_nreads500000"
+
+  translate:
+    name: "Translating DNA to protein"
+    tools: [ "bionumpy", "biopython", "python", "biotite" ]
+    output_file_ending: ".fa"
+    validate_equal: true
+    runs:
+      small: "length150_nreads100"
+      big: "length150_nreads500000"
+
+  subsample:
+    name: "Subsampling a FASTA-file"
+    tools: [ "bionumpy", "python", "seqtk" ]
+    validate_equal: false
+    output_file_ending: ".fa"
+    runs:
+      small: "length150_nreads200"
+      big: "length150_nreads5000000"
+
+  unique_intersect:
+    name: "Unique intersection of two BED-files"
+    tools: ["bionumpy", "bedtools"]
+    output_file_ending: ".bed"
+    validate_equal: true  # if true, it is asserted that all methods produce identical output
+    runs:
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF491EEI"
+      big: "ENCFF143HTO_mapped_reads_1m-vs-ENCFF491EEI"
+
+  jaccard_two_bed_files:
+    name: "Jaccard on two bed-files"
+    tools: ["bionumpy", "pyranges", "bedtools"]
+    validate_equal: false
+    output_file_ending: ".txt"
+    runs:
+      small: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
+      big: "ENCFF143HTO_mapped_reads_100k-vs-ENCFF227NIG_mapped_reads_100k"
+      #small: "ENCFF405ZPR-vs-ENCFF816AEF"
+      #big: "ENCFF405ZPR-vs-ENCFF816AEF"
+
+  jaccard_all_vs_all:
+    name: "Jaccard on multiple BED-files (all vs all)"
+    tools: ["bionumpy", "pyranges", "bedtools"]
+    validate_equal: false
+    output_file_ending: ".csv"
+    runs:
+      # number of transcription factors from encode
+      small: "ntfs10"
+      big: "ntfs50"
+
+
+  kmer_counts:
+    name: "Counting all kmers in a FASTA-file"
+    tools: ["bionumpy", "jellyfish", "python"]
+    validate_equal: true
+    runs:
+      small: "length150_nreads10000"
+      big: "length150_nreads10000000"
+    output_file_ending: ".csv"
+    benchmark_report_prefixes:
+      jellyfish:
+        ["count-", "dump-"]  # jellyfish has two benchmark files
+
+  vcf_filtering:
+    name: "Filtering VCF on allele frequency"
+    tools: ["bionumpy", "bcftools", "pyvcf"]
+    validate_equal: false
+    output_file_ending: ".filtered.csv"
+    runs:
+      small: "small"
+      big: "big"
+
+  sequence_length_distribution:
+    name: "Getting histogram of sequence lengths in a FASTQ-file"
+    tools: ["bionumpy", "python", "awk"]
+    validate_equal: true
+    output_file_ending: ".csv"
+    runs:
+      small: "small"  # small.fq.gz
+      big: "ENCFF689IPX"  # encode id of fastq file

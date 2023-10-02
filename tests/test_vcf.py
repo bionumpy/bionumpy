@@ -1,4 +1,4 @@
-from bionumpy.vcf import parse_header, parse_info_line
+from bionumpy.io.vcf_header import parse_header
 import pytest
 
 
@@ -54,10 +54,11 @@ lines = """\
 info_line = '''##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1)">'''
 
 
-#def test_parse_info():
-#    assert parse_info_line(info_line) == {"ID": "AF", "Number": "A", "Type": "Float"}
+@pytest.mark.skip
+def test_parse_info():
+    assert parse_info_line(info_line) == {"ID": "AF", "Number": "A", "Type": "Float"}
 
-@pytest.mark.skip("unimplemented")
+# @pytest.mark.skip("unimplemented")
 def test_parse_header():
     # INFO is not tested
     header = parse_header(lines)

@@ -1,5 +1,4 @@
 import bionumpy as bnp
-from bionumpy.groupby import groupby
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,8 +46,8 @@ plt.hist(g_count); plt.show()
 
 # searchsorted
 variants = bnp.open("example_data/few_variants.vcf").read()
-variants = dict(groupby(variants, "chromosome"))
-intervals = dict(groupby(intervals, "chromosome"))
+variants = dict(bnp.groupby(variants, "chromosome"))
+intervals = dict(bnp.groupby(intervals, "chromosome"))
 print(variants["1"])
 
 # print(np.where(reference_sequence == "T", bnp.as_sequence_array("U"), reference_sequence))

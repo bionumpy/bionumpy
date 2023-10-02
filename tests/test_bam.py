@@ -1,14 +1,20 @@
 import bionumpy as bnp
 import pytest
-from bionumpy.bam import alignment_to_interval
+from bionumpy.io.bam import BamIntervalBuffer
+from bionumpy.alignments import alignment_to_interval
 
 
-@pytest.mark.skip
+#@pytest.mark.skip
 def test_read():
-    filename = "/home/knut/Sources/bionumpy/example_data/test.bam"
+    filename = "example_data/test.bam"
     f = bnp.open(filename)
     d = f.read()
     print(d)
-    # d = np.concatenate(list(f.read_chunks(1000)))
-    print(alignment_to_interval(d))
-    # assert False
+    print(d.flag.dtype)
+
+
+def test_read_intervals():
+    filename = "example_data/test.bam"
+    f = bnp.open(filename, buffer_type=BamIntervalBuffer)
+    d = f.read()
+    print(d)

@@ -1,5 +1,5 @@
 from bionumpy.datatypes import Interval
-from bionumpy.bedgraph import get_pileup
+from bionumpy.arithmetics import get_pileup
 from numpy.testing import assert_array_equal
 import numpy as np
 import pytest
@@ -16,7 +16,7 @@ interval_list = [
 def raw_pileup(intervals, size):
     pileup = np.zeros(size, dtype=int)
     for interval in intervals:
-        pileup[interval.start:interval.end] += 1
+        pileup[interval.start:interval.stop] += 1
     return pileup
 
 

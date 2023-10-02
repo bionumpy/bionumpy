@@ -1,8 +1,11 @@
 import pytest
 from npstructures.testing import assert_raggedarray_equal
 import numpy as np
+import bionumpy as bnp
 from bionumpy import as_encoded_array
-from bionumpy.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float)
+from bionumpy.util.testing import assert_encoded_raggedarray_equal
+from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float, float_to_strings)
+from bionumpy.io.strops import _str_equal_two_encoded_ragged_arrays
 
 
 @pytest.fixture()
@@ -54,14 +57,23 @@ def test_str_to_float(floats):
     np.testing.assert_array_almost_equal([float(c) for c in floats], str_to_float(floats))
 
 
+#@pytest.mark.skip("Inaccurate float")
+def test_float_to_str(floats):
+    _floats = np.array([float(c) for c in floats])
+    ra = float_to_strings(_floats)
+    np.testing.assert_array_almost_equal([float(row.to_string()) for row in ra],
+                                         _floats)
+
+
 def test_scientific_str_to_float(scientific_floats):
     np.testing.assert_array_almost_equal([float(c) for c in scientific_floats], str_to_float(scientific_floats))
+
+
 def test_join(strings):
     seqs = as_encoded_array(strings)
-    print(seqs.shape, seqs._data)
     joined = join(seqs)
     true = as_encoded_array("\t".join(strings))
-    assert np.all(joined == as_encoded_array("\t".join(strings)))
+    assert np.all(joined == true)
 
 
 def test_split(strings):
@@ -74,6 +86,25 @@ def test_str_equal(strings):
     s = as_encoded_array(strings*2)
     mask = str_equal(s, "12")
     np.testing.assert_array_equal(mask, [False, False, True, False]*2)
+
+
+def test_str_equal_single(strings):
+    assert str_equal(strings[2], "12")
+    assert not str_equal(strings[3], "12")
+
+
+def test_str_equal_two_encoded_ragged_arrays():
+    r1 = as_encoded_array(["test1", "2", "test123"])
+    r2 = as_encoded_array(["test", "2", "test123"])
+    r3 = as_encoded_array(["", "", ""])
+    assert np.all(str_equal(r1, r2) == [False, True, True])
+    assert np.all(str_equal(r1, r3) == [False, False, False])
+
+
+def test_chromosome_str_equal():
+    bam = bnp.open("example_data/test.bam").read()
+    bam2 = bnp.open("example_data/test.bam").read()
+    assert np.all(str_equal(bam.chromosome, bam2.chromosome))
 
 
 if __name__ == "__main__":

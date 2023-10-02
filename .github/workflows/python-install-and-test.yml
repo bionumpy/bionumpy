@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "master", "dev" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "dev" ]
 
 permissions:
   contents: read
@@ -26,15 +26,16 @@ jobs:
       with:
         python-version: "${{ matrix.python-version }}"
     - name: Install npstructures dev
-      if: github.ref == 'refs/heads/dev'
+      if: github.ref != 'refs/heads/master'
       run: |
-        pip install git+https://github.com/knutdrand/npstructures.git/@dev
+        pip install git+https://github.com/bionumpy/npstructures.git/@dev
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install biopython
+        pip install -r requirements_dev.txt
+        #pip install matplotlib
         pip install .
-    - name: Test with pytest
+    - name: Run pytest and doctest
       run: |
-        pytest
-        pytest scripts/*_example.py
+        ./run_tests

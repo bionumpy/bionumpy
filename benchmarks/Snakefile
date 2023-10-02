@@ -1,0 +1,26 @@
+import itertools
+
+configfile: "config.yml"
+include: "rules/reports.smk"
+include: "rules/simulation.smk"
+include: "rules/translate.smk"
+include: "rules/kmer_counting.smk"
+include: "rules/reverse_complement.smk"
+include: "rules/interval_intersection.smk"
+include: "rules/subsample_sequences.smk"
+include: "rules/encode.smk"
+include: "rules/jaccard.smk"
+include: "rules/sequence_length_distribution.smk"
+include: "rules/vcf_filtering.smk"
+include: "rules/validation.smk"
+include: "rules/peak_calling.smk"
+
+
+#rule _all:
+#    input:
+#        "report_big.md",
+#        "report_small.md",
+#        "validation_report_small.md",
+#        "validation_report_big.md"
+
+

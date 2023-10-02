@@ -10,8 +10,8 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['numpy>=1.19',
-                'npstructures>=0.2.0']
+    requirements = ['numpy>=1.20',
+                    'npstructures>=0.2.9']
 # 'npstructures @ git+https://github.com/knutdrand/npstructures.git']
 
 test_requirements = ['pytest>=3', ]
@@ -45,7 +45,10 @@ setup(
     packages=find_packages(include=['bionumpy', 'bionumpy.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/knutdrand/bionumpy',
-    version='0.2.1',
+    url='https://github.com/bionumpy/bionumpy',
+    version='0.2.21',
     zip_safe=False,
 )
+
+# python -m build
+# twine upload dist/*

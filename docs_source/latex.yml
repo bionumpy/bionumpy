@@ -1,0 +1,8 @@
+
+channels:
+  - conda-forge
+
+dependencies:
+  - tectonic
+  #- texlive-core
+

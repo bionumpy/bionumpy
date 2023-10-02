@@ -21,6 +21,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+import doctest
 import bionumpy
 
 # -- General configuration ---------------------------------------------
@@ -31,10 +32,34 @@ import bionumpy
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.intersphinx', 'sphinx.ext.autosummary']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.doctest',
+              'sphinx.ext.coverage',
+              'sphinx_design',
+              'sphinxcontrib.bibtex']
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# for manuscript references
+bibtex_bibfiles = ['manuscript/refs.bib']
+bibtex_reference_style = 'label'
+bibtex_encoding = 'latin'
+
+doctest_global_setup = """
+import bionumpy as bnp
+import numpy as np
+import os
+if os.getcwd().endswith("docs_source"):
+    os.chdir("../")
+"""
+
+doctest_default_flags = (
+    doctest.ELLIPSIS
+    | doctest.IGNORE_EXCEPTION_DETAIL
+    | doctest.DONT_ACCEPT_TRUE_FOR_1
+    | doctest.NORMALIZE_WHITESPACE)
+
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -43,7 +68,7 @@ source_suffix = ['.rst', '.md']
 #source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'menu'
 
 # General information about the project.
 project = 'bionumpy'
@@ -55,7 +80,7 @@ author = "Knut Rand"
 # the built documents.
 #
 # The short X.Y version.
-# version = bionumpy.__version__
+version = bionumpy.__version__
 # The full version, including alpha/beta/rc tags.
 # release = bionumpy.__version__
 
@@ -69,7 +94,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '_templates']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -120,15 +145,6 @@ latex_elements = {
     # 'figure_align': 'htbp',
 }
 
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass
-# [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'bionumpy.tex',
-     'bionumpy Documentation',
-     'Knut Rand', 'manual'),
-]
-
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
@@ -159,3 +175,44 @@ numpydoc_show_class_members = False
 autodoc_default_flags = ['members', 'imported-member']
 autodoc_mock_imports = ["numpy", "npstructures"]
 autosummary_generate = True
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+
+"""
+extensions.append('autoapi.extension')
+autoapi_type = 'python'
+autoapi_dirs = ['../bionumpy/']
+autoapi_keep_files = True
+autoapi_root = 'autoapi/'
+"""
+
+
+# Latex manuscript settings
+
+
+latex_documents = [
+    ("manuscript/index", 'bionumpymanuscript.tex',
+     'BioNumPy: Fast and easy analysis of biological data with Python',
+     '', 'howto'),
+]
+
+text_add_secnumbers = False  # no numbering of sections
+
+latex_elements = {
+    "maketitle": "{\LARGE BioNumPy: Fast and easy analysis of biological data with Python}",
+    #"maketitle": "\maketitle",
+    "tableofcontents": "",
+    'preamble': r'''
+     \setcounter{secnumdepth}{0}
+     % make phantomsection empty inside figures (citation bug: https://github.com/sphinx-doc/sphinx/issues/2134)
+     \usepackage{etoolbox}
+     \AtBeginEnvironment{figure}{\pretocmd{\hyperlink}{\protect}{}{}}
+     \usepackage[T1]{fontenc}     % default is 'OT1'
+    %\usepackage[utf8]{inputenc} % needed if you have an older TeX distribution
+    \usepackage{lmodern}         % recommended
+    \setlength\parindent{0pt}    % just for this example
+    \usepackage[utf8]{inputenc}
+ '''
+}

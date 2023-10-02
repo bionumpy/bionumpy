@@ -1,0 +1,12 @@
+
+
+
+rule all:
+    conda:
+        "latex.yml"
+    output:
+        "_build/latex/bionumpymanuscript.pdf"
+    shell:
+        """
+        ./make_manuscript.sh
+        """

@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+
+dependencies:
+  - biotite==0.35.0
