@@ -1,5 +1,6 @@
 import dataclasses
 import types
+from functools import lru_cache
 from numbers import Number
 
 import numpy as np
@@ -61,6 +62,10 @@ class ItemGetter:
         self._buffer.validate_if_not()
         self._start_line = start_line
 
+    @lru_cache()
+    def n_entries(self):
+        return self._buffer.count_entries()
+
     def __call__(self, name):
         try:
             return self._buffer.get_field_by_number(self._field_dict[name][0], self._field_dict[name][1])
@@ -81,16 +86,17 @@ def create_lazy_class(dataclass, header=None):
 
 
     class NewClass(dataclass, LazyBNPDataClass):
-        def __init__(self, item_getter, set_values=None):
+        def __init__(self, item_getter, set_values=None, computed_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
+            self._computed_values = computed_values or {}
             self._computed = False
             self._data = None
             if header is not None:
                 self.set_context('header', header)
 
         def __len__(self):
-            return self._itemgetter.buffer.count_entries()
+            return self._itemgetter.n_entries()
 
         def __repr__(self):
             return self[:10].get_data_object().__repr__().replace('with 10 entries', f'with {len(self)} entries')
@@ -102,20 +108,25 @@ def create_lazy_class(dataclass, header=None):
             if var_name in self._set_values:
                 return self._set_values[var_name]
             if var_name in field_names:
-                return self._itemgetter(var_name)
+                if var_name not in self._computed_values:
+                    self._computed_values[var_name] = self._itemgetter(var_name)
+                return self._computed_values[var_name]
             return super().__getattr__(var_name)
 
         def __setattr__(self, key, value):
-            if key in ['_itemgetter', '_set_values', '_computed', '_data']:
+            if key in ['_itemgetter', '_set_values', '_computed', '_data', '_computed_values']:
                 return super().__setattr__(key, value)
             self._set_values[key] = value
+            if key in self._computed_values:
+                del self._computed_values[key]
 
         def __getitem__(self, idx):
             if isinstance(idx, Number):
                 idx = [idx]
                 return self[idx].get_data_object()[0]
             new_dict = {key: value[idx] for key, value in self._set_values.items()}
-            return self.__class__(self._itemgetter[idx], new_dict)
+            new_computed = {key: value[idx] for key, value in self._computed_values.items()}
+            return self.__class__(self._itemgetter[idx], new_dict, new_computed)
 
         def __replace__(self, **kwargs):
             new_dict = {key: value for key, value in self._set_values.items()}

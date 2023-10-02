@@ -23,8 +23,9 @@ rule unique_intersect_bionumpy:
         "results/bionumpy/unique_intersect/{a}-vs-{b}.bed"
     benchmark:
         "benchmarks/unique_intersect/bionumpy/{a}-vs-{b}.txt"
-    script:
-        "../scripts/bionumpy_unique_intersect.py"
+    shell:
+        "python ../scripts/unique_intersect_example.py {input} {output}"
+        #        "../scripts/bionumpy_unique_intersect.py"
 
 
 rule intersect_bionumpy:

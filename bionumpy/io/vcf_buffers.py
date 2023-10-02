@@ -1,5 +1,7 @@
 import dataclasses
 
+import numpy as np
+
 from ..encoded_array import EncodedArray
 from ..bnpdataclass import BNPDataClass
 from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry
@@ -61,6 +63,14 @@ class VCFMatrixBuffer(VCFBuffer):
             genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
             genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
             return genotypes
+
+
+#@bnpdataclass
+class Genotypes:
+    genotype: np.ndarray
+    phased: bool
+
+
 
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):

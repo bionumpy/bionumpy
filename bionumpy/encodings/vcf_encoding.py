@@ -85,6 +85,46 @@ class _GenotypeRowEncoding(Encoding):
         return "GenotypeRowEncoding"
 
 
+class GenotypeBuffer:
+    _lookup = np.zeros(256, dtype=np.uint8)
+    _lookup[[ord(c) for c in ('0', '1', '.')]] = np.array([0, 1, np.nan])
+
+    def __init__(self, data, field_starts):
+        self._data = data
+        self._field_starts = field_starts
+        self._genotype = None
+        self._phasing_status = None
+
+    def __getitem__(self, index):
+         return self.__class__(self._data, self._field_starts[index])
+
+    @property
+    def genotype(self):
+        if self._genotype is None:
+            self._genotype = self._lookup[self._field_starts[..., None]+[0, 2]]
+        return self._genotype
+
+    @property
+    def phasing_status(self):
+        if self._phasing_status is None:
+            self._phasing_status = self._lookup
+
+        return
+
+
+    def _preprocess_data_for_encoding(self, genotype_rows):
+        # split the row of genotype data
+        from ..io.strops import split, replace_inplace
+        data = genotype_rows.ravel()
+        # hack because the row sometime ends with \n and sometimes with \t
+        replace_inplace(data, "\n", "\t")
+        indices = np.flatnonzero(data == "\t")
+        indices = np.insert(indices, 0, -1)
+        return data[indices[:-1, np.newaxis] + np.array([1, 2, 3])]
+        #data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
+        #return data
+
+
 class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
     """Encoding that can be used when all records are phased
      and there is no missing data, i.e. every genotype is

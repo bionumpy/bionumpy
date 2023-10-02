@@ -548,6 +548,7 @@ class Bed6Buffer(BedBuffer):
 class Bed12Buffer(Bed6Buffer):
     dataclass = Bed12
 
+
 class BdgBuffer(BedBuffer):
     dataclass = BedGraph
 
