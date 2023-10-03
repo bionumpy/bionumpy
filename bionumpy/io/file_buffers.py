@@ -178,6 +178,10 @@ class FileBuffer:
     #    raise NotImplementedError
 
 
+class IncompleteEntryException(Exception):
+    pass
+
+
 class OneLineBuffer(FileBuffer):
     """ Base class for file formats where data fields are contained in lines."""
 
@@ -185,6 +189,15 @@ class OneLineBuffer(FileBuffer):
     _buffer_divisor = 32
     _line_offsets = (1, 0)
     _empty_lines = []
+
+    @classmethod
+    def contains_complete_entry(cls, chunks):
+        if len(chunks) == 1:
+            try:
+                return True, cls.from_raw_buffer(chunks[0])
+            except IncompleteEntryException:
+                return False
+        return super().contains_complete_entry(chunks)
 
     @classmethod
     def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
@@ -211,7 +224,8 @@ class OneLineBuffer(FileBuffer):
         chunk = EncodedArray(chunk, BaseEncoding)
         new_lines = np.flatnonzero(chunk == NEWLINE)
         n_lines = new_lines.size
-        assert n_lines >= cls.n_lines_per_entry, "No complete entry in buffer. Try increasing chunk_size."
+        if n_lines < cls.n_lines_per_entry:
+            raise IncompleteEntryException("No complete entry in buffer. Try increasing chunk_size.")
         new_lines = new_lines[: n_lines - (n_lines % cls.n_lines_per_entry)]
         chunk = chunk[: new_lines[-1] + 1]
         return cls(chunk[: new_lines[-1] + 1], new_lines)

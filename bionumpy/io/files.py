@@ -1,5 +1,6 @@
 from pathlib import PurePath
-import gzip
+from .gzip_reading import gzip
+# import gzip
 import dataclasses
 from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer

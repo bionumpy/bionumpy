@@ -48,6 +48,7 @@ setup(
     url='https://github.com/bionumpy/bionumpy',
     version='0.2.21',
     zip_safe=False,
+    extras_require={'full': ['isal']}
 )
 
 # python -m build

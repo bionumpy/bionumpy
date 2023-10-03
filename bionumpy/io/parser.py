@@ -110,20 +110,26 @@ class NumpyFileReader:
         local_bytes_read = 0
         if len(self._prepend):
             temp_chunks.append(self._prepend)
+        made_buffer = None
         while not complete_entry_found:
             chunk = self._get_buffer(min_chunk_size, max_chunk_size)
             if chunk is None:
                 return None
             temp_chunks.append(chunk)
-            if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
+            if max_chunk_size is not None and sum(chunk.size for chunk in temp_chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
-        if len(temp_chunks) == 1:
-            chunk = temp_chunks[0]
+            if isinstance(complete_entry_found, tuple):
+                complete_entry_found, made_buffer = complete_entry_found
+        if made_buffer is not None:
+            buff = made_buffer
         else:
-            chunk = np.concatenate(temp_chunks)
-        buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+            if len(temp_chunks) == 1:
+                chunk = temp_chunks[0]
+            else:
+                chunk = np.concatenate(temp_chunks)
+            buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
         self._prepend = []
         if not self._is_finished:
             if not self._do_prepend:
