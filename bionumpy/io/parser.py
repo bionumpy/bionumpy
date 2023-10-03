@@ -115,7 +115,7 @@ class NumpyFileReader:
             if chunk is None:
                 return None
             temp_chunks.append(chunk)
-            if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
+            if max_chunk_size is not None and sum(chunk.size for chunk in temp_chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
