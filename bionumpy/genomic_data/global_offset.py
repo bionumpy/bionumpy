@@ -53,6 +53,15 @@ class GlobalOffset:
                        stop=stop)
 
     def from_local_interval(self, interval, do_clip=False):
+        start_offsets, stop_offsets = self.start_ends_from_intervals(interval, do_clip)
+        zeros = EncodedArray(np.broadcast_to(np.array(0, dtype=np.uint8), (len(interval),)), global_encoding)
+        return replace(
+            interval,
+            chromosome=zeros,
+            start=start_offsets,
+            stop=stop_offsets)
+
+    def start_ends_from_intervals(self, interval, do_clip=False):
         chromosome = as_encoded_array(interval.chromosome, target_encoding=self._old_encoding)
         offsets = self.get_offset(chromosome)
         sizes = self.get_size(chromosome)
@@ -64,9 +73,6 @@ class GlobalOffset:
             stop = np.minimum(stop, sizes)
         else:
             assert np.all(stop <= sizes)
-        return replace(
-            interval,
-            chromosome=EncodedArray(
-                np.broadcast_to(np.array(0, dtype=np.uint8), (len(interval),)), global_encoding),
-            start=interval.start + offsets,
-            stop=stop + offsets)
+        start_offsets = interval.start + offsets
+        stop_offsets = stop + offsets
+        return start_offsets, stop_offsets

@@ -8,8 +8,7 @@ import npstructures as nps
 
 from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
                  TwoLineFastaBuffer, FastQBuffer, Bed6Buffer, NarrowPeakBuffer,
-                 BedBuffer, VCFBuffer, PhasedVCFMatrixBuffer, VCFMatrixBuffer,
-                 GfaSequenceBuffer, get_bufferclass_for_datatype)
+                 BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
 from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded, match_string)
@@ -19,7 +18,7 @@ from .bnpdataclass import replace
 from .io.strops import str_equal
 from .util.cli import run_as_commandline
 from .computation_graph import compute
-from . import simulate
+# from . import simulate, VCFBuffer, VCFMatrixBuffer, PhasedVCFMatrixBuffer
 from . import arithmetics
 from . import alignments
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
@@ -37,8 +36,7 @@ GFFBuffer = get_bufferclass_for_datatype(GFFEntry)
 __all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
-           "BedBuffer", "VCFBuffer", "PhasedVCFMatrixBuffer", "VCFMatrixBuffer",
-           "GfaSequenceBuffer",
+           "BedBuffer", "GfaSequenceBuffer",
            "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]

@@ -2,7 +2,7 @@ import bionumpy as bnp
 import numpy as np
 from bionumpy.streams.multistream import MultiStream
 from bionumpy.variants import count_mutation_types_genomic, count_mutation_types, MutationTypeEncoding
-from bionumpy.io.delimited_buffers import PhasedVCFMatrixBuffer
+from bionumpy.io import PhasedVCFMatrixBuffer
 from bionumpy.io.matrix_dump import matrix_to_csv, read_matrix
 from bionumpy import Genome
 import logging
