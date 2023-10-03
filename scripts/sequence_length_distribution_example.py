@@ -27,7 +27,7 @@ def test():
 def _test_2():
     get_sorted_sequence_length_distribution("benchmarks/results/dna_sequences/ENCFF689IPX.fq.gz")
 
-def _test_3():
+def test_3():
     filename = "benchmarks/results/dna_sequences/ENCFF689IPX.fq.gz"
     reader = NumpyFileReader(gzip.open(filename), buffer_type=bnp.FastQBuffer)
     reader.set_prepend_mode()

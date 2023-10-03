@@ -32,8 +32,12 @@ def get_ragged_changes(ragged_array):
 
 def join_groupbys(grouped_generator):
     double_grouped = itertools.groupby(itertools.chain.from_iterable(grouped_generator), lambda x: x[0])
-    return grouped_stream(((key, np.concatenate([g[1] for g in groups]))
-                           for key, groups in double_grouped),
+    def f(groups):
+        groups_ = [g[1] for g in groups]
+        return np.concatenate(groups_)
+
+    grouped_ = ((key, f(groups)) for key, groups in double_grouped)
+    return grouped_stream(grouped_,
                           grouped_generator.attribute_name if hasattr(grouped_generator, "attribute_name") else None)
 
 

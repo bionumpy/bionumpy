@@ -48,13 +48,12 @@ class NpDataclassReader:
         chunk = self._reader.read()
         should_be_lazy = self._should_be_lazy(chunk)
         if should_be_lazy:
-
             return self._get_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
         return chunk.get_data()
 
-    def _get_lazy_class(self, dataclass):
+    def _get_lazy_class(self, dataclass, header=None):
         if self.__lazy_class is None:
-            self.__lazy_class = create_lazy_class(dataclass)
+            self.__lazy_class = create_lazy_class(dataclass, header=header)
         return self.__lazy_class
 
     def _should_be_lazy(self, chunk):
@@ -96,7 +95,7 @@ class NpDataclassReader:
             return self._reader._buffer_type.dataclass.empty()
         try:
             if self._should_be_lazy(chunk):
-                return create_lazy_class(chunk.dataclass, header=chunk.header_data)(ItemGetter(chunk, chunk.dataclass, n_lines_read))
+                return self._get_lazy_class(chunk.dataclass, header=chunk.header_data)(ItemGetter(chunk, chunk.dataclass, n_lines_read))
 
             data = chunk.get_data()
         except FormatException as e:
