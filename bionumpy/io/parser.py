@@ -119,8 +119,10 @@ class NumpyFileReader:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
             complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
-            
-        chunk = np.concatenate(temp_chunks)
+        if len(temp_chunks) == 1:
+            chunk = temp_chunks[0]
+        else:
+            chunk = np.concatenate(temp_chunks)
         buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
         self._prepend = []
         if not self._is_finished:
