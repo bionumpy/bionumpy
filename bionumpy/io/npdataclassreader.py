@@ -19,6 +19,7 @@ class NpDataclassReader:
     """
     def __init__(self, numpyfilereader: NumpyFileReader):
         self._reader = numpyfilereader
+        self.__lazy_class = None
 
     def __enter__(self):
         return self
@@ -47,8 +48,14 @@ class NpDataclassReader:
         chunk = self._reader.read()
         should_be_lazy = self._should_be_lazy(chunk)
         if should_be_lazy:
-            return create_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+
+            return self._get_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
         return chunk.get_data()
+
+    def _get_lazy_class(self, dataclass):
+        if self.__lazy_class is None:
+            self.__lazy_class = create_lazy_class(dataclass)
+        return self.__lazy_class
 
     def _should_be_lazy(self, chunk):
         should_be_lazy = False
