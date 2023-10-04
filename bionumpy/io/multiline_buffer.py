@@ -11,6 +11,7 @@ from ..encodings import BaseEncoding
 class MultiLineBuffer(FileBuffer):
     SKIP_LAZY = True
 
+
 class MultiLineFastaBuffer(MultiLineBuffer):
     _new_entry_marker = ">"
     n_characters_per_line = 80

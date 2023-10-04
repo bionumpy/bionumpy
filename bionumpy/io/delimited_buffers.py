@@ -14,7 +14,7 @@ from ..encodings.exceptions import EncodingError
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encoded_array import BaseEncoding
 from ..util import is_subclass_or_instance
-from .file_buffers import FileBuffer, NEWLINE
+from .file_buffers import FileBuffer, NEWLINE, TextBufferExtractor
 from .strops import (
     split, str_to_int, str_to_float)
 from .dump_csv import dump_csv, join_columns
@@ -44,6 +44,19 @@ class DelimitedBuffer(FileBuffer):
             delimiters.sort(kind="mergesort")
         self._delimiters = delimiters
         self._header_data = header_data
+        self.__buffer_extractor = None
+
+    @property
+    def _buffer_extractor(self):
+        if self.__buffer_extractor is None:
+            self.__buffer_extractor = self._get_buffer_extractor()
+        return self.__buffer_extractor
+
+    def _get_buffer_extractor(self) -> TextBufferExtractor:
+        self.validate_if_not()
+        starts = self._delimiters[:-1].reshape(-1, self._n_cols)+1
+        ends = self._delimiters[1:].reshape(-1, self._n_cols)
+        return TextBufferExtractor(self._data, starts, ends)
 
     def __getitem__(self, idx):
         self.validate_if_not()
@@ -585,10 +598,10 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
         return start_delimiters+1, end_delimiters
 
     def _col_ends(self, col):
-        return self.__col_ends[:, col]
+        return self._wig_col_ends[:, col]
 
     def _col_starts(self, col):
-        return self.__col_starts[:, col]
+        return self._wig_col_starts[:, col]
 
     def _validate(self):
         self._validated = True
@@ -601,8 +614,11 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
         starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
         n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
         self._n_cols = n_fields
-        self.__col_starts = starts.reshape(-1, n_fields)
-        self.__col_ends = ends.reshape(-1, n_fields)
+        self._wig_col_starts = starts.reshape(-1, n_fields)
+        self._wig_col_ends = ends.reshape(-1, n_fields)
+
+    def _get_buffer_extractor(self) -> TextBufferExtractor:
+        return TextBufferExtractor(self._data, self._wig_col_starts, self._wig_col_ends)
 
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":

@@ -279,25 +279,18 @@ class OneLineBuffer(FileBuffer):
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
         self.validate_if_not()
-        starts = np.insert(self._new_lines, 0, -1)
-        lengths = np.diff(starts)
-        # self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
         headers, sequences = [self._buffer_extractor.get_field_by_number(i) for i in (0, 1)]
-        #headers = self.lines[:: self.n_lines_per_entry, 1:-1]
-        # sequences = self.lines[1::self.n_lines_per_entry, :-1]
-
         return SequenceEntry(headers, sequences)
 
     def get_field_by_number(self, i: int, t: type=object):
         """ Get a field indexed by number"""
         self.validate_if_not()
-        return self.lines[i::self.n_lines_per_entry, self._line_offsets[i]:-1]
+        return self._buffer_extractor.get_field_by_number(i)
 
     def __getitem__(self, idx):
         data = self.entries[idx].ravel()
         line_lens = self.lines.shape[-1].reshape(-1, self.n_lines_per_entry)[idx].ravel()
         new_lines = np.cumsum(line_lens)-1
-        # new_lines = self._new_lines.reshape(-1, self.n_lines_per_entry)[idx].ravel()
         return self.__class__(data, new_lines)
 
     def count_entries(self) -> int:
@@ -330,8 +323,6 @@ class OneLineBuffer(FileBuffer):
         names = entries.name
         sequences = entries.sequence
         name_lengths = names.lengths
-
-
         sequence_lengths = sequences.lengths
         line_lengths = np.hstack(
             (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
@@ -402,23 +393,20 @@ class FastQBuffer(OneLineBuffer):
 
     def get_text_field_by_number(self, i: int) -> EncodedRaggedArray:
         if i == 2:
-            return self.lines[3:: self.n_lines_per_entry, :-1]
+            return self._buffer_extractor.get_field_by_number(3)
         return super().get_text_field_by_number(i)
-
 
     def get_field_by_number(self, i: int, t: type=object):
         if i == 2:
-            return QualityEncoding.encode(self.lines[3:: self.n_lines_per_entry, :-1])
+            return QualityEncoding.encode(self.get_text_field_by_number(i))
         else:
             return super().get_field_by_number(i, t)
 
     def get_data(self):
         seq_entry = super().get_data()
-        quality = self.lines[3 :: self.n_lines_per_entry, :-1]
+        quality = self.get_field_by_number(2, QualityEncoding)
         return SequenceEntryWithQuality(
-            seq_entry.name, seq_entry.sequence,
-            #quality)
-            QualityEncoding.encode(quality))
+            seq_entry.name, seq_entry.sequence,quality)
 
     @classmethod
     def _get_line_lens(cls, entries):
