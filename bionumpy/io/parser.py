@@ -2,6 +2,8 @@ import logging
 import numpy as np
 from typing.io import IO
 from npstructures import npdataclass
+
+from .exceptions import FormatException
 from ..streams import BnpStream
 from ..encoded_array import EncodedArray
 from ..streams.grouped import grouped_stream
@@ -119,9 +121,14 @@ class NumpyFileReader:
             if max_chunk_size is not None and sum(chunk.size for chunk in temp_chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
-            complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
+            try:
+                complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
+            except FormatException as e:
+                e.line_number += self.n_lines_read
+                raise e
             if isinstance(complete_entry_found, tuple):
                 complete_entry_found, made_buffer = complete_entry_found
+
         if made_buffer is not None:
             buff = made_buffer
         else:
@@ -129,7 +136,12 @@ class NumpyFileReader:
                 chunk = temp_chunks[0]
             else:
                 chunk = np.concatenate(temp_chunks)
-            buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+            try:
+                buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+            except FormatException as e:
+                e.line_number += self.n_lines_read
+                raise e
+
         self._prepend = []
         if not self._is_finished:
             if not self._do_prepend:
