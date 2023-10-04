@@ -182,6 +182,26 @@ class IncompleteEntryException(Exception):
     pass
 
 
+class TextBufferExtractor:
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray):
+        '''
+        field_starts: n_entries x n_fields
+        field_ends: n_entries x n_fields
+        '''
+        self._data = data
+        self._field_starts = field_starts
+        self._field_ends = field_ends
+        self._field_lens = field_ends-field_starts
+        self._n_fields = field_starts.shape[1]
+
+    def __getitem__(self, idx):
+        return self.__class__(self._data, field_starts=self._field_starts[idx], field_ends=self._field_ends[idx])
+
+    def get_field_by_number(self, field_nr: int):
+        e = EncodedRaggedArray(self._data, RaggedView(self._field_starts.ravel(), self._field_lens.ravel()))
+        return e[field_nr::self._n_fields]
+
+
 class OneLineBuffer(FileBuffer):
     """ Base class for file formats where data fields are contained in lines."""
 
@@ -189,6 +209,16 @@ class OneLineBuffer(FileBuffer):
     _buffer_divisor = 32
     _line_offsets = (1, 0)
     _empty_lines = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._buffer_extractor = self._get_buffer_extractor()
+
+    def _get_buffer_extractor(self):
+        tmp = np.insert(self._new_lines, 0, -1)
+        ends = tmp[1:].reshape(-1, self.n_lines_per_entry)
+        starts = tmp[:-1].reshape(-1, self.n_lines_per_entry)+(np.array(self._line_offsets)+1)
+        return TextBufferExtractor(self._data, starts, ends)
 
     @classmethod
     def contains_complete_entry(cls, chunks):
@@ -252,8 +282,9 @@ class OneLineBuffer(FileBuffer):
         starts = np.insert(self._new_lines, 0, -1)
         lengths = np.diff(starts)
         # self.lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        headers = self.lines[:: self.n_lines_per_entry, 1:-1]
-        sequences = self.lines[1::self.n_lines_per_entry, :-1]
+        headers, sequences = [self._buffer_extractor.get_field_by_number(i) for i in (0, 1)]
+        #headers = self.lines[:: self.n_lines_per_entry, 1:-1]
+        # sequences = self.lines[1::self.n_lines_per_entry, :-1]
 
         return SequenceEntry(headers, sequences)
 
