@@ -3,6 +3,7 @@ import numpy as np
 from ..encodings.string_encodings import StringEncoding
 from ..encoded_array import EncodedArray, as_encoded_array
 from ..bnpdataclass import replace
+
 global_encoding = StringEncoding(["global"])
 
 
@@ -35,20 +36,32 @@ class GlobalOffset:
         return self._sizes[seq_name.raw()]
 
     def from_local_coordinates(self, sequence_name, local_offset):
+        mask = local_offset >= self.get_size(sequence_name)
+        if np.any(np.atleast_1d(mask)):
+            raise Exception('Coordinate outside of reference:', local_offset[mask], self.get_size(sequence_name)[mask])
         return self.get_offset(sequence_name) + local_offset
 
     def to_local_interval(self, global_interval):
-        chromosome_idxs = np.searchsorted(self._offset, global_interval.start, side="right")-1
-        start = global_interval.start-self._offset[chromosome_idxs]
-        stop = global_interval.stop-self._offset[chromosome_idxs]
+        chromosome_idxs = np.searchsorted(self._offset, global_interval.start, side="right") - 1
+        start = global_interval.start - self._offset[chromosome_idxs]
+        stop = global_interval.stop - self._offset[chromosome_idxs]
         assert np.all(stop <= self._sizes[chromosome_idxs])
         chromosome = EncodedArray(chromosome_idxs, self._old_encoding)
-        return dataclasses.replace(global_interval,
-                                   chromosome=chromosome,
-                                   start=start,
-                                   stop=stop)
+        return replace(global_interval,
+                       chromosome=chromosome,
+                       start=start,
+                       stop=stop)
 
     def from_local_interval(self, interval, do_clip=False):
+        start_offsets, stop_offsets = self.start_ends_from_intervals(interval, do_clip)
+        zeros = EncodedArray(np.broadcast_to(np.array(0, dtype=np.uint8), (len(interval),)), global_encoding)
+        return replace(
+            interval,
+            chromosome=zeros,
+            start=start_offsets,
+            stop=stop_offsets)
+
+    def start_ends_from_intervals(self, interval, do_clip=False):
         chromosome = as_encoded_array(interval.chromosome, target_encoding=self._old_encoding)
         offsets = self.get_offset(chromosome)
         sizes = self.get_size(chromosome)
@@ -60,9 +73,6 @@ class GlobalOffset:
             stop = np.minimum(stop, sizes)
         else:
             assert np.all(stop <= sizes)
-        return replace(
-            interval,
-            chromosome=EncodedArray(
-                np.broadcast_to(np.array(0,dtype=np.uint8), (len(interval), )), global_encoding),
-            start=interval.start+offsets,
-            stop=stop+offsets)
+        start_offsets = interval.start + offsets
+        stop_offsets = stop + offsets
+        return start_offsets, stop_offsets

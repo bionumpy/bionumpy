@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
+from collections import namedtuple
+
 import numpy as np
 from typing import List, Iterable, Tuple, Dict
 from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
@@ -6,7 +8,7 @@ from ..encodings import StrandEncoding
 from .genomic_track import GenomicArray, GenomicArrayNode
 from .genome_context_base import GenomeContextBase
 from ..datatypes import Interval, Bed6, StrandedInterval, LocationEntry, StrandedLocationEntry
-from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask
+from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask, RawInterval
 from ..computation_graph import StreamNode, Node, ComputationNode, compute
 import dataclasses
 
@@ -130,7 +132,7 @@ class GenomicLocationGlobal(GenomicLocation):
 
     def __replace__(self, **kwargs):
         kwargs = {self._field_dict[kw]: value for kw, value in kwargs.items()}
-        return self.__class__(dataclasses.replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
+        return self.__class__(replace(self._locations, **kwargs), self._genome_context, self._is_stranded, self._field_dict)
 
     @property
     def chromosome(self):
@@ -614,8 +616,9 @@ class GenomicIntervalsFull(GenomicIntervals):
         GenomicArray
             Genomic mask
         """
-        go = self._genome_context.global_offset.from_local_interval(self._intervals)
-        global_mask = get_boolean_mask(go, self._genome_context.size)
+        I = RawInterval
+        starts, stops = self._genome_context.global_offset.start_ends_from_intervals(self._intervals)
+        global_mask = get_boolean_mask(I(starts, stops), self._genome_context.size)
         return GenomicArray.from_global_data(global_mask, self._genome_context)
 
     def clip(self) -> 'GenomicIntervalsFull':
@@ -632,7 +635,7 @@ class GenomicIntervalsFull(GenomicIntervals):
                        stop=np.minimum(chrom_sizes, self.stop))
 
     def __replace__(self, **kwargs):
-        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context, self._is_stranded)
+        return self.__class__(replace(self._intervals, **kwargs), self._genome_context, self._is_stranded)
 
     def compute(self):
         return self
@@ -763,8 +766,8 @@ class GenomicIntervalsStreamed(GenomicIntervals, Node):
         return self.__class__(ComputationNode(clip, [self._intervals_node, self._chrom_size_node]), self._genome_context)
 
     def __replace__(self, **kwargs):
-        return self.__class__(ComputationNode(dataclasses.replace, [self._intervals_node], kwargs), self._genome_context)
-        return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
+        return self.__class__(ComputationNode(replace, [self._intervals_node], kwargs), self._genome_context)
+        # return self.__class__(dataclasses.replace(self._intervals, **kwargs), self._genome_context)
 
     def compute(self):
         chromosome, start, stop = compute((self.chromosome, self.start, self.stop))

@@ -5,27 +5,33 @@ import pytest
 import numpy as np
 from io import BytesIO
 import bionumpy as bnp
+from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
-from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality
+from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality, VCFEntry
 from bionumpy.io.matrix_dump import matrix_to_csv, parse_matrix
-from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_array_equal, assert_encoded_raggedarray_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_array_equal, \
+    assert_encoded_raggedarray_equal
 from numpy.testing import assert_equal
 
 
 @pytest.mark.parametrize("file_format", combos.keys())
-def test_read_write_roundtrip(file_format):
+@pytest.mark.parametrize("chunked", [False, True])
+def test_read_write_roundtrip(file_format, chunked):
     if file_format in ("multiline_fasta", "bed12", 'wig'):
         return
     _, _, buf_type = combos[file_format]
-    buffer_text = buffer_texts[file_format]*100
+    buffer_text = buffer_texts[file_format] * 100
     input_buffer = bytes(buffer_text, encoding="utf8")
     in_obj = BytesIO(input_buffer)
     out_buffer = bytes()
     out_obj = BytesIO(out_buffer)
     reader = NpDataclassReader(NumpyFileReader(in_obj, buffer_type=buf_type))
     writer = NpBufferedWriter(out_obj, buf_type)
-    for chunk in reader.read_chunks(200):
-        writer.write(chunk)
+    if chunked:
+        for chunk in reader.read_chunks(200):
+            writer.write(chunk)
+    else:
+        writer.write(reader.read())
     print(out_obj.getvalue())
     print(input_buffer)
     assert out_obj.getvalue() == input_buffer
@@ -49,13 +55,14 @@ def integers():
 @pytest.fixture
 def matrix_text(header, integers):
     sep = '\t'
-    return sep.join(header) + "\n" + "\n".join(sep.join(str(i) for i in row) for row in integers)+"\n"
+    return sep.join(header) + "\n" + "\n".join(sep.join(str(i) for i in row) for row in integers) + "\n"
 
 
 @pytest.fixture
 def matrix_text2(header, integers, row_names):
     sep = '\t'
-    return sep.join(['type'] + header) + "\n" + "\n".join(sep.join([row_name] + [str(i) for i in row]) for row_name, row in zip(row_names,integers))+"\n"
+    return sep.join(['type'] + header) + "\n" + "\n".join(
+        sep.join([row_name] + [str(i) for i in row]) for row_name, row in zip(row_names, integers)) + "\n"
 
 
 def test_matrix_to_csv(header, integers, row_names):
@@ -63,11 +70,12 @@ def test_matrix_to_csv(header, integers, row_names):
     integers = np.arange(20).reshape(4, 5)
     text = matrix_to_csv(integers, header=header)
 
-    assert text.to_string() == ",".join(header) + "\n" + "\n".join(",".join(str(i) for i in row) for row in integers)+"\n"
+    assert text.to_string() == ",".join(header) + "\n" + "\n".join(
+        ",".join(str(i) for i in row) for row in integers) + "\n"
 
 
 def test_read_matrix(header, integers, matrix_text):
-    matrix = parse_matrix(matrix_text, rowname_type=None,field_type=int)
+    matrix = parse_matrix(matrix_text, rowname_type=None, field_type=int)
     assert_encoded_raggedarray_equal(matrix.col_names, header)
     assert_equal(integers, matrix.data)
 
@@ -79,15 +87,14 @@ def test_read_matrix_with_row_names(header, integers, matrix_text2, row_names):
     assert_encoded_raggedarray_equal(matrix.row_names, row_names)
 
 
-
-@pytest.mark.parametrize("buffer_name", ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta", 'wig'])
+@pytest.mark.parametrize("buffer_name",
+                         ["bed", "vcf2", "vcf", "fastq", "fasta", "gfa_sequence", "multiline_fasta", 'wig'])
 def test_buffer_read(buffer_name):
     _, true_data, buf_type = combos[buffer_name]
     text = buffer_texts[buffer_name]
     io_obj = BytesIO(bytes(text, encoding="utf8"))
     data = NpDataclassReader(NumpyFileReader(io_obj, buf_type)).read()
     for line, true_line in zip(data, true_data):
-        # print("#####", line, true_line)
         assert_bnpdataclass_equal(line, true_line)
 
 
@@ -103,7 +110,7 @@ def test_buffer_read_chunks(buffer_name, min_chunk_size):
 
 
 def test_read_big_fastq():
-    io_obj = BytesIO(bytes(big_fastq_text*20, encoding="utf8"))
+    io_obj = BytesIO(bytes(big_fastq_text * 20, encoding="utf8"))
     for b in NpDataclassReader(NumpyFileReader(io_obj, combos["fastq"][2])).read_chunks(min_chunk_size=1000):
         print(b)
 
@@ -147,9 +154,35 @@ def test_append_to_file(buffer_name):
 
 
 def test_write_dna_fastq():
-    _, data, buf_type= combos["fastq"]
+    _, data, buf_type = combos["fastq"]
     entry = SequenceEntryWithQuality(["name"], ["ACGT"], ["!!!!"])
     entry.sequence = bnp.as_encoded_array(entry.sequence, bnp.DNAEncoding)
     result = buf_type.from_raw_buffer(buf_type.from_data(entry)).get_data()
     print(result)
     assert np.all(entry.sequence == result.sequence)
+
+
+def test_write_empty():
+    entry = VCFEntry([], [], [], [],
+                     [], [], [], [])
+    with bnp.open('tmp.vcf', 'w') as f:
+        f.write(entry)
+
+
+def test_read_write_bool():
+    @bnpdataclass
+    class BoolDC:
+        param: bool
+
+    obj = BoolDC(param=[True, False, True])
+    buf_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(BoolDC, delimiter='\t', has_header=True)
+
+    with bnp.open('tmp_bool.tsv', 'w', buf_type) as f:
+        f.write(obj)
+
+    with bnp.open('tmp_bool.tsv', 'r', buf_type) as f:
+        obj2 = f.read()
+
+    assert np.array_equal(obj.param, obj2.param)
+
+    os.remove('tmp_bool.tsv')

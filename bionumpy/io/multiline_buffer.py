@@ -9,7 +9,8 @@ from ..encodings import BaseEncoding
 
 
 class MultiLineBuffer(FileBuffer):
-    pass
+    SKIP_LAZY = True
+
 
 class MultiLineFastaBuffer(MultiLineBuffer):
     _new_entry_marker = ">"

@@ -1,12 +1,14 @@
 from pathlib import PurePath
-import gzip
+from .gzip_reading import gzip
+# import gzip
 import dataclasses
 from .file_buffers import FastQBuffer, FileBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer, BamIntervalBuffer
-from .delimited_buffers import (VCFBuffer, BedBuffer, GfaSequenceBuffer,
+from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,
                                 GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
                                 NarrowPeakBuffer, BdgBuffer, GTFBuffer)
+from .vcf_buffers import VCFBuffer
 from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter
 from .exceptions import FormatException

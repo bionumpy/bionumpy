@@ -1,6 +1,10 @@
+import gzip
+
 import bionumpy as bnp
 import numpy as np
 import sys
+
+from bionumpy.io.parser import NumpyFileReader
 
 
 @bnp.streamable()
@@ -20,6 +24,15 @@ def get_sorted_sequence_length_distribution(file_name):
 def test():
     get_sorted_sequence_length_distribution("example_data/big.fq.gz")
 
+def _test_2():
+    get_sorted_sequence_length_distribution("benchmarks/results/dna_sequences/ENCFF689IPX.fq.gz")
+
+def _test_3():
+    filename = "benchmarks/results/dna_sequences/ENCFF689IPX.fq.gz"
+    reader = NumpyFileReader(gzip.open(filename), buffer_type=bnp.FastQBuffer)
+    reader.set_prepend_mode()
+    for chunk in reader.read_chunks():
+        pass
 
 if __name__ == "__main__":
     file_name = sys.argv[1]

@@ -78,7 +78,7 @@ DigitEncoding = AlphabetEncoding("0123456789")
 DNAEncoding = ACGTEncoding
 ACUGEncoding = AlphabetEncoding("ACUG")
 RNAENcoding = ACUGEncoding
-AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY')
+AminoAcidEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*')
 BamEncoding = AlphabetEncoding("=ACMGRSVTWYHKDBN")
 CigarOpEncoding = AlphabetEncoding("MIDNSHP=X")
 

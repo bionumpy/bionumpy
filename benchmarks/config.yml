@@ -87,7 +87,7 @@ analysis:
 
   vcf_filtering:
     name: "Filtering VCF on allele frequency"
-    tools: ["bionumpy", "bcftools", "pyvcf"]
+    tools: ["bionumpy", "bcftools"]
     validate_equal: false
     output_file_ending: ".filtered.csv"
     runs:

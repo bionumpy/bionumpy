@@ -112,7 +112,7 @@ chr2\t20\t30
     npfilereader = NumpyFileReader(fobj, buffer_type=BedBuffer)
     reader = NpDataclassReader(npfilereader)
     with pytest.raises(FormatException) as e:
-        for _ in reader.read_chunks(200):
-            pass
+        for chunk in reader.read_chunks(200):
+            chunk.stop
     assert e.value.line_number == 4*100+line_number
 

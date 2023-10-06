@@ -2,6 +2,8 @@ import logging
 import numpy as np
 from typing.io import IO
 from npstructures import npdataclass
+
+from .exceptions import FormatException
 from ..streams import BnpStream
 from ..encoded_array import EncodedArray
 from ..streams.grouped import grouped_stream
@@ -108,22 +110,38 @@ class NumpyFileReader:
         complete_entry_found = False
         temp_chunks = []
         local_bytes_read = 0
-        local_lines_read = 0
         if len(self._prepend):
             temp_chunks.append(self._prepend)
+        made_buffer = None
         while not complete_entry_found:
             chunk = self._get_buffer(min_chunk_size, max_chunk_size)
             if chunk is None:
                 return None
             temp_chunks.append(chunk)
-            if max_chunk_size is not None and sum(chunk.size for chunk in chunks) > max_chunk_size:
+            if max_chunk_size is not None and sum(chunk.size for chunk in temp_chunks) > max_chunk_size:
                 raise Exception("No complete entry found")
             local_bytes_read += chunk.size
-            #local_lines_read += chunk.n_lines
-            complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
-            
-        chunk = np.concatenate(temp_chunks)
-        buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+            try:
+                complete_entry_found = self._buffer_type.contains_complete_entry(temp_chunks)
+            except FormatException as e:
+                e.line_number += self.n_lines_read
+                raise e
+            if isinstance(complete_entry_found, tuple):
+                complete_entry_found, made_buffer = complete_entry_found
+
+        if made_buffer is not None:
+            buff = made_buffer
+        else:
+            if len(temp_chunks) == 1:
+                chunk = temp_chunks[0]
+            else:
+                chunk = np.concatenate(temp_chunks)
+            try:
+                buff = self._buffer_type.from_raw_buffer(chunk, header_data=self._header_data)
+            except FormatException as e:
+                e.line_number += self.n_lines_read
+                raise e
+
         self._prepend = []
         if not self._is_finished:
             if not self._do_prepend:
@@ -231,9 +249,19 @@ class NpBufferedWriter:
                 #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
             header_array = self._buffer_type.make_header(data)
             self._file_obj.write(header_array)
+        if len(data) == 0:
+            return
 
+        if hasattr(data, 'get_data_object'):
+            bytes_array = data.get_buffer(buffer_class=self._buffer_type)
+            # if not hasattr(self._buffer_type, 'get_column_range_as_text'):
+            #     data = data.get_data_object()
+            #     bytes_array = self._buffer_type.from_data(data)
+            # else:
+            #
+        else:
+            bytes_array = self._buffer_type.from_data(data)
 
-        bytes_array = self._buffer_type.from_data(data)
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)

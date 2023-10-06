@@ -4,7 +4,8 @@ import pytest
 import numpy as np
 from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
-from bionumpy.io.delimited_buffers import BedBuffer, VCFBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
+from bionumpy.io.delimited_buffers import BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
+from bionumpy.io import VCFBuffer
 from bionumpy.io.files import bnp_open
 from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal
 from .buffers import fastq_buffer, twoline_fasta_buffer, bed_buffer, vcf_buffer, vcf_buffer2, gfa_sequence_buffer, combos, data
@@ -183,7 +184,8 @@ def test_read_chunk_after_read_chunks_returns_empty_dataclass():
     file = bnp.open("example_data/reads.fq")
     chunks = list(file.read_chunks())
     new_chunk = file.read_chunk()
-    assert isinstance(new_chunk, type(chunks[0]))
+    assert isinstance(chunks[0],
+                      type(new_chunk))
 
 
 def test_read_gtf():

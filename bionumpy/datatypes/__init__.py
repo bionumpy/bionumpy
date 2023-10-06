@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
                          CigarEncoding, StrandEncoding)
-from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
+from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
 
@@ -115,6 +115,11 @@ class VCFGenotypeEntry(VCFEntry):
 @bnpdataclass
 class PhasedVCFGenotypeEntry(VCFEntry):
     genotypes: PhasedGenotypeRowEncoding
+
+
+@bnpdataclass
+class PhasedVCFHaplotypeEntry(VCFEntry):
+    genotypes: PhasedHaplotypeRowEncoding
 
 
 class SNP(Variant):

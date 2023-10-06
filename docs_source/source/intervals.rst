@@ -13,10 +13,9 @@ Independent Operations
 Independent operations covers any thing we want to do with a set of intervals that can be done one interval at a time. This covers simple geometric operations such as shifting and resizing; filtering based on properties of intervals. Since both the start and stop (and strand) attribute are numpy arrays, we can implement alot of functionality simply by using numpy indexing and ufuncs:
 
     >>> import bionumpy as bnp
-    >>> from dataclasses import replace
     >>> intervals = bnp.open("example_data/small_interval.bed").read()
-    >>> extended_right = replace(intervals, stop=intervals.stop+10)
-    >>> shifted = replace(intervals, start=intervals.start+5, stop=intervals.stop+5)
+    >>> extended_right = bnp.replace(intervals, stop=intervals.stop+10)
+    >>> shifted = bnp.replace(intervals, start=intervals.start+5, stop=intervals.stop+5)
     >>> small = intervals[(intervals.stop-intervals.start)<50]
 
 Even though it is possible to write these kinds of functions using simple numpy functionality, it is often better to wrap them in functions with instructive names. In the `bnp.interval` module, a set of utility funcitons ffor working with intervals is provided.

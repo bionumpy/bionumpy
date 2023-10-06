@@ -15,6 +15,31 @@ def str_func(column):
         return column.encoding.decode(column)
     assert False
 
+
+def get_column(values, field_type) -> EncodedRaggedArray:
+    def get_func_for_datatype(datatype):
+        funcs = {int: ints_to_strings,
+                 str: str_func,  # lambda x: x,
+                 List[int]: int_lists_to_strings,
+                 float: float_to_strings,
+                 List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),
+                 bool: lambda x: ints_to_strings(x.astype(int))
+                 }
+        if is_subclass_or_instance(datatype, Encoding):
+            encoding = datatype
+
+            def dynamic(x):
+                if isinstance(x, EncodedRaggedArray):
+                    return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
+                return EncodedArray(encoding.decode(x), BaseEncoding)
+
+            return dynamic
+        else:
+            return funcs[datatype]
+
+    return get_func_for_datatype(field_type)(values)
+
+
 def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     """Put each field of the dataclass into a column in a buffer.
 
@@ -23,33 +48,19 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
         Data
     """
 
-    funcs = {int: ints_to_strings,
-             str: str_func,  #lambda x: x,
-             List[int]: int_lists_to_strings,
-             float: float_to_strings,
-             List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep="")
-             }
+    columns = [get_column(value, key) for key, value in data_dict]
+    lines = join_columns(columns, sep)
+    return lines.ravel()
 
-    def get_func_for_datatype(datatype):
-        if is_subclass_or_instance(datatype, Encoding):
-            encoding = datatype
 
-            def dynamic(x):
-                if isinstance(x, EncodedRaggedArray):
-                    return EncodedRaggedArray(EncodedArray(encoding.decode(x.ravel()), BaseEncoding), x.shape)
-                return EncodedArray(encoding.decode(x), BaseEncoding)
-            return dynamic
-        else:
-            return funcs[datatype]
-
-    columns = [get_func_for_datatype(key)(value) for key, value in data_dict]
+def join_columns(columns: List[EncodedRaggedArray], sep: str) -> EncodedRaggedArray:
     lengths = np.concatenate([((column.lengths if
                                 isinstance(column, RaggedArray)
                                 else np.array([
-                                            column.shape[-1] if len(column.shape) == 2 else 1
-                                              ]*len(column))) + 1
+                                                  column.shape[-1] if len(column.shape) == 2 else 1
+                                              ] * len(column))) + 1
                                )[:, np.newaxis]
-                              
+
                               for column in columns], axis=-1).ravel()
     lines = EncodedRaggedArray(EncodedArray(np.empty(lengths.sum(), dtype=np.uint8), BaseEncoding),
                                lengths)
@@ -60,4 +71,4 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
         lines[i::n_columns, :-1] = column
     lines[:, -1] = sep
     lines[(n_columns - 1)::n_columns, -1] = "\n"
-    return lines.ravel()
+    return lines

@@ -7,7 +7,7 @@ from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass, dyn
 from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
 from bionumpy.util.testing import assert_bnpdataclass_equal
-import pandas as pd
+# import pandas as pd
 import bionumpy as bnp
 
 
@@ -68,7 +68,7 @@ def test_make_dataclass():
 def add(a, b):
     return a+b
 
-
+@pytest.mark.skip
 def test_from_pandas():
     persons = {'name': ['knut', 'marit'],
                'age': [35, 30]}

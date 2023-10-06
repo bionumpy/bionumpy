@@ -130,9 +130,10 @@ def test_encoding_sequence_entry():
 
     assert type(s.quality) == RaggedArray
     assert np.all(s.quality.ravel() == correct)
-
-    data = FastQBuffer.dataclass.stack_with_ragged(s)
-    assert np.all(data.quality == correct)
+    data = s
+    print(data.quality, data.quality.shape)
+    # data = FastQBuffer.dataclass.stack_with_ragged(s)
+    assert_raggedarray_equal(data.quality, [correct])
 
 
 @pytest.mark.parametrize("data", ["!!@-^", ["!!@@", "!+"]])

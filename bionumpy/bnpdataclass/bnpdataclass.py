@@ -173,7 +173,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
             """
             for field in dataclasses.fields(obj):
                 pre_val = getattr(obj, field.name)
-                if field.type in (int, float):
+                if field.type in (int, float, bool):
                     val = np.asanyarray(pre_val)
                 elif field.type == str:
                     assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val))
@@ -195,10 +195,11 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     else:
                         val = pre_val
                 elif issubclass(field.type, BNPDataClass):
-                    assert isinstance(pre_val, (field.type, field.type._single_entry))
+                    assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
                     val = pre_val
                 else:
                     assert False, field.type
+
                 setattr(obj, field.name, val)
 
     NewClass.__name__ = base_class.__name__

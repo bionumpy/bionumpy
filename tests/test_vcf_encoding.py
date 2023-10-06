@@ -2,12 +2,13 @@ import numpy as np
 
 import bionumpy as bnp
 import bionumpy.encoded_array
-from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding
+import bionumpy.io.vcf_buffers
+from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 
 
 def test_vcf_matrix_buffer():
     f = bnp.open("example_data/variants_with_header.vcf",
-                 buffer_type=bnp.io.delimited_buffers.PhasedVCFMatrixBuffer)
+                 buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
     out = bnp.open("test1.vcf", mode="w")
 
@@ -22,7 +23,7 @@ def test_vcf_matrix_buffer():
 
 def test_vcf_matrix_buffer_stream():
     f = bnp.open("example_data/variants_with_header.vcf",
-                 buffer_type=bnp.io.delimited_buffers.PhasedVCFMatrixBuffer)
+                 buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
     out = bnp.open("test1.vcf", mode="w")
     out.write(f.read_chunks())
@@ -40,6 +41,21 @@ def test_phased_genotype_encoding():
     correct = np.array(
         [[0, 1, 2],
         [0, 1, 3]]
+    )
+    assert np.all(encoded == correct)
+
+
+def test_phased_haplotype_encoding():
+    data = bionumpy.encoded_array.as_encoded_array([
+        "0|0\t0|1\t2|0\t",
+        "0|0\t4|1\t1|1\t"
+    ])
+    encoded = PhasedHaplotypeRowEncoding.encode(data)
+    correct = np.array(
+        [
+            [0, 0, 0, 1, 2, 0],
+            [0, 0, 4, 1, 1, 1]
+        ]
     )
     assert np.all(encoded == correct)
 
@@ -62,11 +78,11 @@ def test_genotype_encoding():
 
 def test_parse_unphased_vcf():
     # example_data/variants.vcf has messy unphased and missing genotypes
-    f = bnp.open("example_data/variants.vcf", buffer_type=bnp.VCFMatrixBuffer)
+    f = bnp.open("example_data/variants.vcf", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
     data = f.read()
     decoded = GenotypeRowEncoding.decode(data.genotypes)
     print(repr(decoded))
-    out_file = bnp.open("test.tmp", "w", buffer_type=bnp.VCFMatrixBuffer)
+    out_file = bnp.open("test.tmp", "w", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
     out_file.write(data)
 
     written = open("test.tmp").read().split("\n")
@@ -75,7 +91,7 @@ def test_parse_unphased_vcf():
 
 
 def test_parse_phased_vcf():
-    f = bnp.open("example_data/variants_phased.vcf", buffer_type=bnp.PhasedVCFMatrixBuffer)
+    f = bnp.open("example_data/variants_phased.vcf", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
     data = f.read()
     data = data.genotypes.raw()
     print(data)

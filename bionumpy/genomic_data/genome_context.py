@@ -68,6 +68,8 @@ class GenomeContext(GenomeContextBase):
         encoded_chromosomes = as_encoded_array(getattr(data, chromosome_field_name), self.encoding)
         data = replace(data, **{chromosome_field_name: encoded_chromosomes})
         mask = self.is_included(encoded_chromosomes)
+        if np.all(mask):
+            return data
         return data[mask]
 
     @classmethod

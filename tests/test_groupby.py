@@ -62,3 +62,12 @@ def test_join_groupbys(ragged_array, grouped, do_encode):
             true = EncodedRaggedArray(EncodedArray(true.ravel(), bnp.encodings.BaseEncoding), true.shape)
 
         assert_raggedarray_equal(g, true)
+
+
+#@pytest.mark.xfail
+def test_groupby_many_chunks():
+    file = "example_data/variants_with_header.vcf"
+    chunks = bnp.open(file).read_chunks(100)
+    for chromosome, variants in bnp.groupby(chunks, "chromosome"):
+        print(chromosome)
+        print(variants)

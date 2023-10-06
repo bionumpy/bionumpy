@@ -1,8 +1,12 @@
 from itertools import takewhile, repeat
+
+from .delimited_buffers import DelimitedBufferWithInernalComments
 from .parser import NumpyFileReader
 from ..bnpdataclass import BNPDataClass
 from .exceptions import FormatException
+from ..datatypes import GTFEntry, VCFGenotypeEntry
 from ..streams import NpDataclassStream
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 
 
 class NpDataclassReader:
@@ -15,6 +19,7 @@ class NpDataclassReader:
     """
     def __init__(self, numpyfilereader: NumpyFileReader):
         self._reader = numpyfilereader
+        self.__lazy_class = None
 
     def __enter__(self):
         return self
@@ -40,7 +45,26 @@ class NpDataclassReader:
         4
 
         """
-        return self._reader.read().get_data()
+        chunk = self._reader.read()
+        should_be_lazy = self._should_be_lazy(chunk)
+        if should_be_lazy:
+            return self._get_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+        return chunk.get_data()
+
+    def _get_lazy_class(self, dataclass, header=None):
+        if self.__lazy_class is None:
+            self.__lazy_class = create_lazy_class(dataclass, header=header)
+        return self.__lazy_class
+
+    def _should_be_lazy(self, chunk):
+        should_be_lazy = False
+        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
+            if not issubclass(chunk.dataclass, (GTFEntry)):
+                if not hasattr(chunk, 'genotype_dataclass') and not (
+                        hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
+                    if not isinstance(chunk, DelimitedBufferWithInernalComments):
+                        should_be_lazy = True
+        return should_be_lazy
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
         """Read a single chunk into memory
@@ -70,6 +94,9 @@ class NpDataclassReader:
         if chunk is None:
             return self._reader._buffer_type.dataclass.empty()
         try:
+            if self._should_be_lazy(chunk):
+                return self._get_lazy_class(chunk.dataclass, header=chunk.header_data)(ItemGetter(chunk, chunk.dataclass, n_lines_read))
+
             data = chunk.get_data()
         except FormatException as e:
             e.line_number += n_lines_read

@@ -4,3 +4,4 @@ from .genome import Genome
 from .annotation import GenomicAnnotation
 from .genomic_sequence import GenomicSequence
 from .genome_context import GenomeContext, keep_all, ignore_underscores
+from .binned_genome import BinnedGenome
