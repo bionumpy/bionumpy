@@ -18,7 +18,6 @@ class OneLineBuffer(FileBuffer):
     _empty_lines = []
 
     def __init__(self, buffer_extractor: TextBufferExtractor):
-        self._is_validated=False
         self._buffer_extractor = buffer_extractor
         self._is_validated = True
 

@@ -38,7 +38,7 @@ class FileBuffer:
 
     @property
     def data(self):
-        return self._data
+        return self._buffer_extractor.data
 
     def __getitem__(self, idx):
         return NotImplemented
@@ -55,6 +55,7 @@ class FileBuffer:
 
     @property
     def n_lines(self):
+        return NotImplemented
         return len(self._new_lines)
 
     @classmethod
@@ -191,6 +192,8 @@ class TextBufferExtractor:
         self._data = data
         self._field_starts = field_starts
         self._field_ends = field_ends
+        if self._field_ends.size > 0:
+            assert self._field_ends[-1, -1] <=self._data.size, (self._field_ends[-1], self._data)
         self._field_lens = field_ends-field_starts
         self._n_fields = field_starts.shape[1]
 
@@ -205,7 +208,13 @@ class TextBufferExtractor:
         return self.__class__(self._data, field_starts=self._field_starts[idx], field_ends=self._field_ends[idx])
 
     def get_field_by_number(self, field_nr: int):
+        assert field_nr < self._n_fields, (field_nr, self._n_fields)
         e = EncodedRaggedArray(self._data, RaggedView(self._field_starts.ravel(), self._field_lens.ravel()))
-        return e[field_nr::self._n_fields]
+        values = e[field_nr::self._n_fields]
+        assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
+        return values
 
+    def get_fixed_length_field(self, field_nr: int, field_length: int):
+        indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
+        return self._data[indices]
 

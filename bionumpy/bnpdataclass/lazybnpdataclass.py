@@ -138,7 +138,8 @@ def create_lazy_class(dataclass, header=None):
 
         def get_data_object(self):
             if not self._computed:
-                self._data = dataclass(*(getattr(self, field.name) for field in dataclasses.fields(dataclass)))
+                fields = [getattr(self, field.name) for field in dataclasses.fields(dataclass)]
+                self._data = dataclass(*fields)
                 self._computed = True
             return self._data
 

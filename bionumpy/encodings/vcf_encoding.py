@@ -1,6 +1,8 @@
 import itertools
 
 import numpy as np
+
+from ..encoded_array import EncodedArray
 from bionumpy.encodings import Encoding
 
 
@@ -50,6 +52,8 @@ class _GenotypeRowEncoding(Encoding):
         return encoded
 
     def _preprocess_data_for_encoding(self, genotype_rows):
+        if isinstance(genotype_rows, EncodedArray) and genotype_rows.ndim==3:
+            return genotype_rows.reshape(-1, 3)
         # split the row of genotype data
         from ..io.strops import split, replace_inplace
         data = genotype_rows.ravel()
@@ -161,6 +165,8 @@ class _PhasedHaplotypeRowEncoding(_GenotypeRowEncoding):
 
     def encode(self, genotype_rows):
         data = self._preprocess_data_for_encoding(genotype_rows)
+        n_rows = len(genotype_rows)
+        # data = self._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)
         first_haplotypes = self._alphabet_lookup[data[:, 0].raw()]
         second_haplotypes = self._alphabet_lookup[data[:, 2].raw()]

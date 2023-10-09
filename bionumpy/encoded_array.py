@@ -272,6 +272,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.data.size
 
     @property
+    def ndim(self) -> int:
+        return self.data.ndim
+
+    @property
     def shape(self) -> Tuple[int]:
         return self.data.shape
 

@@ -21,6 +21,14 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         super().__init__(data, new_lines)
         self._new_entries = new_entries
 
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def n_lines(self):
+        return len(self._new_lines)
+
     @classmethod
     def contains_complete_entry(cls, chunks):
         ends_with_new_line = False

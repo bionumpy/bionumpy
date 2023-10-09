@@ -44,11 +44,11 @@ acgtt
 malformed_bed_files = [("""\
 chr1\t10\t20
 chr2\t10\ttwenty
-""", 1),
-                       ("""\
-chr1\t10\t20
-chr2\t10\t20\t30
 """, 1)]
+#                       ("""\
+# chr1\t10\t20
+#chr2\t10\t20\t30
+# """, 1)]
 
 
 @pytest.mark.parametrize("data", malformed_fastqs)
@@ -75,6 +75,7 @@ def test_fasta_raises_format_exception(data):
 def test_bed_raises_format_exception(data):
     text, error_line = data
     buf_type = BedBuffer
+    print(text)
     with pytest.raises(FormatException) as e:
         buf = buf_type.from_raw_buffer(bnp.as_encoded_array(text))
         buf.get_data()

@@ -35,7 +35,12 @@ class DelimitedBuffer(FileBuffer):
     HAS_UNCOMMENTED_HEADER_LINE = False
     n_lines_per_entry = 1
 
-    def __init__(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None, header_data=None):
+    def __init__(self, buffer_extractor: TextBufferExtractor, header_data=None):
+        self._buffer_extractor = buffer_extractor
+        self._header_data = header_data
+        self._is_validated = True
+
+    def __init___(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None, header_data=None, buffer_extractor=None):
         super().__init__(data, new_lines)
         if delimiters is None:
             delimiters = np.concatenate(
@@ -44,8 +49,7 @@ class DelimitedBuffer(FileBuffer):
             delimiters.sort(kind="mergesort")
         self._delimiters = delimiters
         self._header_data = header_data
-        self.__buffer_extractor = None
-
+        self.__buffer_extractor = buffer_extractor
 
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
@@ -76,22 +80,25 @@ class DelimitedBuffer(FileBuffer):
             raise
         new_lines = delimiters[(n_fields - 1)::n_fields]
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
-        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
-
+        buffer_extractor = cls._get_buffer_extractor(
+            chunk[:new_lines[-1]+1], delimiters, n_fields)
+        return cls(buffer_extractor, header_data)
+        # return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data, buffer_extractor=buffer_extractor)
 
     @property
-    def _buffer_extractor(self):
+    def __buffer_extractor(self):
         if self.__buffer_extractor is None:
             self.__buffer_extractor = self._get_buffer_extractor()
         return self.__buffer_extractor
 
-    def _get_buffer_extractor(self) -> TextBufferExtractor:
-        self.validate_if_not()
-        starts = self._delimiters[:-1].reshape(-1, self._n_cols)+1
-        ends = self._delimiters[1:].reshape(-1, self._n_cols)
-        return TextBufferExtractor(self._data, starts, ends)
+    @classmethod
+    def _get_buffer_extractor(cls, data, delimiters, n_cols) -> TextBufferExtractor:
+        starts = delimiters[:-1].reshape(-1, n_cols)+1
+        ends = delimiters[1:].reshape(-1, n_cols)
+        return TextBufferExtractor(data, starts, ends)
 
     def __getitem__(self, idx):
+        return self.__class__(self._buffer_extractor[idx], self._header_data)
         self.validate_if_not()
         cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
         entries = self.entries[idx].ravel()
@@ -136,12 +143,6 @@ class DelimitedBuffer(FileBuffer):
     def join_fields(cls, fields_list: List[EncodedRaggedArray]):
         return join_columns(fields_list, cls.DELIMITER).ravel()
 
-    def _col_starts(self, col):
-        return self._delimiters[:-1].reshape(-1, self._n_cols)[:, col] + 1
-
-    def _col_ends(self, col):
-        return self._delimiters[1:].reshape(-1, self._n_cols)[:, col]
-
     def get_field_range_as_text(self, *args, **kwargs):
         return self.get_column_range_as_text(*args, **kwargs)
 
@@ -158,9 +159,11 @@ class DelimitedBuffer(FileBuffer):
             keep seperator at end
         """
         self.validate_if_not()
+        assert col_end == col_start+1
+        return self._buffer_extractor.get_field_by_number(col_start)
         assert col_start < col_end, (col_start, col_end)
-        assert col_start < self._n_cols, self._n_cols
-        assert col_end <= self._n_cols
+        # assert col_start < self._buffer_extractor.self._n_cols, self._n_cols
+        # assert col_end <= self._n_cols
 
         starts = self._col_starts(col_start)
         ends = self._col_ends(col_end-1)
@@ -169,37 +172,38 @@ class DelimitedBuffer(FileBuffer):
 
         return self._move_intervals_to_ragged_array(starts, ends)
 
-    def get_text_range(self, col, start=0, end=None) -> np.ndarray:
-        """Get substrings of a column
-
-        Extract the text from start to end of each entry in column
-
-        Parameters
-        ----------
-        col : int
-            column index
-        start : int
-            start of substring
-        end : int
-            end of substring
-
-        Returns
-        -------
-        np.ndarray
-            array containing the extracted substrings
-
-        Examples
-        --------
-        FIXME: Add docs.
-
-        """
-        self.validate_if_not()
-        starts = self._col_starts(col) + start
-        if end is not None:
-            return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
-        else:
-            ends = self._col_ends(col)
-        return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
+    # def get_text_range(self, col, start=0, end=None) -> np.ndarray:
+    #     """Get substrings of a column
+    #
+    #     Extract the text from start to end of each entry in column
+    #
+    #     Parameters
+    #     ----------
+    #     col : int
+    #         column index
+    #     start : int
+    #         start of substring
+    #     end : int
+    #         end of substring
+    #
+    #     Returns
+    #     -------
+    #     np.ndarray
+    #         array containing the extracted substrings
+    #
+    #     Examples
+    #     --------
+    #     FIXME: Add docs.
+    #
+    #     """
+    #
+    #     self.validate_if_not()
+    #     starts = self._col_starts(col) + start
+    #     if end is not None:
+    #         return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
+    #     else:
+    #         ends = self._col_ends(col)
+    #     return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
@@ -275,10 +279,13 @@ class DelimitedBuffer(FileBuffer):
             return None
         self.validate_if_not()
         text: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
+
         for f, parser in parsers:
             if field_type == f:
                 try:
-                    return parser(text)
+                    parsed = parser(text)
+                    assert len(parsed)==len(text)
+                    return parsed
                 except EncodingError as e:
                     row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
                     raise FormatException(e.args[0], line_number=row_number)
@@ -304,12 +311,17 @@ class DelimitedBuffer(FileBuffer):
 
     def count_entries(self) -> int:
         """Count the number of entries in the buffer"""
-        return len(self._new_lines)
+        return len(self._buffer_extractor)
+
+    @property
+    def n_lines(self):
+        return len(self._buffer_extractor)
 
 
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
-    SKIP_LAZY = True
+    # SKIP_LAZY = True
+
     def get_data(self):
         ids = self.get_text(1, fixed_length=False)
         sequences = self.get_text(col=2, fixed_length=False)
@@ -369,9 +381,10 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
         HAS_UNCOMMENTED_HEADER_LINE = has_header
         dataclass = _dataclass
         fields = None
-
-        def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data: List[str] = None):
-            super().__init__(data, new_lines, delimiters, header_data)
+        # data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None,
+        def __init__(self, buffer_extractor, header_data: List[str] = None):
+            super().__init__(buffer_extractor, header_data)
+            # super().__init__(data, new_lines, delimiters, header_data)
             self.set_fields_from_header(header_data)
 
         @classmethod
@@ -442,7 +455,8 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
 class BedBuffer(DelimitedBuffer):
     dataclass = Interval
 
-    def get_integers(self, cols: list) -> np.ndarray:
+    def __get_integers(self, cols: list) -> np.ndarray:
+        ''' This is maybe a quicker way to parse ints than the default'''
         """Get integers from integer string
 
         Extract integers from the specified columns
@@ -455,6 +469,7 @@ class BedBuffer(DelimitedBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
+        assert cols.size ==1
         integer_starts = self._col_starts(cols)
         integer_ends = self._col_ends(cols)
         array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
@@ -465,8 +480,6 @@ class BedBuffer(DelimitedBuffer):
             raise FormatException(e.args[0], line_number=row_number)
         powers = 10**np.arange(digits.shape[-1])[::-1]
         return digits.dot(powers).reshape(-1, cols.size)
-        #integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
-        #return integers.reshape(-1, cols.size)
 
 
 class Bed6Buffer(BedBuffer):
@@ -499,12 +512,14 @@ class ChromosomeSizeBuffer(DelimitedBuffer):
 
 
 class DelimitedBufferWithInernalComments(DelimitedBuffer):
-    def _calculate_col_starts_and_ends(self, data, delimiters):
-        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == self.COMMENT)
+
+    @classmethod
+    def _calculate_col_starts_and_ends(cls, data, delimiters):
+        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == cls.COMMENT)
         comment_mask = np.flatnonzero(comment_mask)
         start_delimiters = np.delete(delimiters, comment_mask)[:-1]
         end_delimiters = np.delete(delimiters, comment_mask+1)
-        if data[0] != self.COMMENT:
+        if data[0] != cls.COMMENT:
             start_delimiters = np.insert(start_delimiters, 0, -1)
         else:
             end_delimiters=end_delimiters[1:]
@@ -519,19 +534,32 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
     def _validate(self):
         self._validated = True
 
-    def __init__(self, data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
-        delimiters_mask = data == self.DELIMITER
+    def __init__(self, buffer_extractor: TextBufferExtractor, header_data=None):
+        self._buffer_extractor = buffer_extractor
+        self._header_data = header_data
+        self._is_validated = True
+
+        #data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+        #delimiters_mask = data == self.DELIMITER
+        #delimiters_mask[new_lines] = True
+        #delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
+        # super().__init__(data, new_lines, delimiters, header_data)
+        #starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
+        #n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
+        #self._n_cols = n_fields
+        # self._wig_col_starts = starts.reshape(-1, n_fields)
+        # self._wig_col_ends = ends.reshape(-1, n_fields)
+
+    @classmethod
+    def _get_buffer_extractor(cls, data, new_lines) -> TextBufferExtractor:
+        delimiters_mask = (data == cls.DELIMITER)
         delimiters_mask[new_lines] = True
         delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
-        super().__init__(data, new_lines, delimiters, header_data)
-        starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
+        starts, ends = cls._calculate_col_starts_and_ends(data, delimiters)
         n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
-        self._n_cols = n_fields
-        self._wig_col_starts = starts.reshape(-1, n_fields)
-        self._wig_col_ends = ends.reshape(-1, n_fields)
-
-    def _get_buffer_extractor(self) -> TextBufferExtractor:
-        return TextBufferExtractor(self._data, self._wig_col_starts, self._wig_col_ends)
+        return TextBufferExtractor(data,
+                                   starts.reshape(-1, n_fields),
+                                   ends.reshape(-1, n_fields))
 
     @classmethod
     def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
@@ -554,9 +582,11 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
         """
         chunk = EncodedArray(chunk, BaseEncoding)
         new_lines = np.flatnonzero(chunk == '\n')
-        return cls(chunk[:new_lines[-1]+1], new_lines[:-1], header_data)
+        extractor = cls._get_buffer_extractor(
+            chunk[:new_lines[-1] + 1], new_lines[:-1])
+        return cls(extractor, header_data)
 
-    def get_integers(self, cols: list) -> np.ndarray:
+    def __get_integers(self, cols: list) -> np.ndarray:
         """Get integers from integer string
 
         Extract integers from the specified columns
