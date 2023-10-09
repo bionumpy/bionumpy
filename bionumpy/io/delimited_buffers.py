@@ -46,6 +46,39 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
         self.__buffer_extractor = None
 
+
+    @classmethod
+    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
+        """Make EncodedArray of the chunk and extract all complete lines
+
+        Also find all delimiters in the buffer
+
+        Parameters
+        ----------
+        chunk : np.ndarray
+            Raw bytes chunk as array
+        header_data : 6
+            Any header data that was read in `read_header`
+
+        Returns
+        -------
+        DelimitedBuffer
+            DelimitedBuffer object of all complete lines
+
+        """
+        chunk = EncodedArray(chunk, BaseEncoding)
+        mask = chunk == NEWLINE
+        mask |= chunk == cls.DELIMITER
+        delimiters = np.flatnonzero(mask)
+        n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
+        if n_fields is None:
+            logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
+            raise
+        new_lines = delimiters[(n_fields - 1)::n_fields]
+        delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
+        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
+
+
     @property
     def _buffer_extractor(self):
         if self.__buffer_extractor is None:
@@ -74,39 +107,6 @@ class DelimitedBuffer(FileBuffer):
             self._entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
         return self._entries
 
-    @classmethod
-    def from_raw_buffer(cls, chunk: np.ndarray, header_data=None) -> "DelimitedBuffer":
-        """Make EncodedArray of the chunk and extract all complete lines
-
-        Also find all delimiters in the buffer
-
-        Parameters
-        ----------
-        chunk : np.ndarray
-            Raw bytes chunk as array
-        header_data : 6
-            Any header data that was read in `read_header`
-
-        Returns
-        -------
-        DelimitedBuffer
-            DelimitedBuffer object of all complete lines
-
-        """
-        chunk = EncodedArray(chunk, BaseEncoding)
-        mask = chunk == NEWLINE
-        mask |= chunk == cls.DELIMITER
-        delimiters = np.flatnonzero(mask)
-        n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
-        if n_fields is None:
-            logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
-            raise 
-        new_lines = delimiters[(n_fields - 1)::n_fields]
-        #if not all(chunk[new_lines] == "\n"):
-        #     raise FormatException("Irregular number of columns in file")
-        delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
-        return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data)
-
     def get_integers(self, cols: list) -> np.ndarray:
         """Get integers from integer string
 
@@ -119,11 +119,8 @@ class DelimitedBuffer(FileBuffer):
 
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
-        cols = np.asanyarray(cols)
-        integer_starts = self._col_starts(cols)
-        integer_ends = self._col_ends(cols)
-        integers = self._extract_integers(integer_starts.ravel(), integer_ends.ravel())
-        return integers.reshape(-1, cols.size)
+        col = np.atleast_1d(cols)[0]
+        return str_to_int(self._buffer_extractor.get_field_by_number(col))
 
     def get_floats(self, cols) -> np.ndarray:
         """Get floats from float string
@@ -147,6 +144,9 @@ class DelimitedBuffer(FileBuffer):
         return floats.reshape(-1, cols.size)
 
     def get_text(self, col, fixed_length=True, keep_sep=False):
+        assert not fixed_length and not keep_sep
+        if not fixed_length and not keep_sep:
+            return self._buffer_extractor.get_field_by_number(col)
         """Extract text from a column
 
         Extract strings from the specified column into either a 2d
@@ -166,16 +166,7 @@ class DelimitedBuffer(FileBuffer):
         FIXME: Add docs.
 
         """
-        self.validate_if_not()
-        assert np.max(col) < self._n_cols, (col, self._n_cols, self._data, self.__class__, self.dataclass)
-        starts = self._col_starts(col)
-        ends = self._col_ends(col)
-        if keep_sep:
-            ends += 1
-        if fixed_length:
-            return self._move_intervals_to_2d_array(starts, ends)
-        else:
-            return self._move_intervals_to_ragged_array(starts, ends)
+
 
     @classmethod
     def join_fields(cls, fields_list: List[EncodedRaggedArray]):
@@ -251,7 +242,7 @@ class DelimitedBuffer(FileBuffer):
         try:
             strs = str_to_int(rows)
         except EncodingError as e:
-            row_number = np.searchsorted(rows._shape.starts, e.offset, side="right")-1
+            row_number = np.searchsorted(rows._shape.starts, e.offset, side="right") - 1
             raise FormatException(e.args[0], line_number=row_number)
         return strs
 
@@ -318,25 +309,27 @@ class DelimitedBuffer(FileBuffer):
         return data
 
     def _get_field_by_number(self, col_number, field_type):
+        parsers = [(str, lambda x: x),
+                   (Encoding, lambda x: as_encoded_array(x, field_type)),
+                   (int, str_to_int),
+                   (bool, lambda x: str_to_int(x).astype(bool)),
+                   (float, str_to_float),
+                   (List[int], self._parse_split_ints),
+                   (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
         if field_type is None:
-            col = None
-        elif field_type == str or is_subclass_or_instance(field_type, Encoding):
-            col = self.get_text(col_number, fixed_length=False)
-        elif field_type == int:
-            col = self.get_integers(col_number).ravel()
-        elif field_type == float:
-            col = self.get_floats(col_number).ravel()
-        elif field_type == bool:
-            col = self.get_integers(col_number).ravel().astype(bool)
-        elif field_type == -1:
-            col = self.get_integers(col_number).ravel() - 1
-        elif field_type == List[int]:
-            col = self.get_split_ints(col_number)
-        elif field_type == List[bool]:
-            col = self.get_split_ints(col_number, sep="").astype(bool)
-        else:
-            assert False, field_type
-        return col
+            return None
+        self.validate_if_not()
+        text: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
+        for f, parser in parsers:
+            if field_type == f:
+                try:
+                    return parser(text)
+                except EncodingError as e:
+                    row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
+                    raise FormatException(e.args[0], line_number=row_number)
+        if is_subclass_or_instance(field_type, Encoding):
+            return as_encoded_array(text, field_type)
+        assert False, (self.__class__, field_type)
 
     def get_field_by_number(self, field_nr: int, field_type: type=object):
         self.validate_if_not()
@@ -344,6 +337,15 @@ class DelimitedBuffer(FileBuffer):
             field_type = dataclasses.fields(self.dataclass)[field_nr]
         return self._get_field_by_number(
             field_nr, field_type)
+
+    def _parse_split_ints(self, text, sep=','):
+        if len(sep):
+            text[:, -1] = sep
+            int_strings = split(text.ravel()[:-1], sep=sep)
+            return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
+        else:
+            mask = as_encoded_array(text.ravel(), DigitEncoding).raw()
+            return RaggedArray(mask, text.shape)
 
     def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
         """Split a column of separated integers into a raggedarray
@@ -581,8 +583,6 @@ class SAMBuffer(DelimitedBuffer):
 
 class ChromosomeSizeBuffer(DelimitedBuffer):
     dataclass = ChromosomeSize
-
-
 
 
 class DelimitedBufferWithInernalComments(DelimitedBuffer):
