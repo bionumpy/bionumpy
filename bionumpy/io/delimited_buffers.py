@@ -107,42 +107,6 @@ class DelimitedBuffer(FileBuffer):
             self._entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
         return self._entries
 
-    def get_integers(self, cols: list) -> np.ndarray:
-        """Get integers from integer string
-
-        Extract integers from the specified columns
-
-        Parameters
-        ----------
-        cols : list
-            list of columns containing integers
-
-        """
-        assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
-        col = np.atleast_1d(cols)[0]
-        return str_to_int(self._buffer_extractor.get_field_by_number(col))
-
-    def get_floats(self, cols) -> np.ndarray:
-        """Get floats from float string
-
-        Extract floats from the specified columns
-
-        Parameters
-        ----------
-        cols : list
-            list of columns containing integers
-
-        Examples
-        --------
-        FIXME: Add docs.
-
-        """
-        cols = np.asanyarray(cols)
-        float_starts = self._col_starts(cols)
-        float_ends = self._col_ends(cols)
-        floats = str_to_float(ragged_slice(self._data, float_starts, float_ends))
-        return floats.reshape(-1, cols.size)
-
     def get_text(self, col, fixed_length=True, keep_sep=False):
         assert not fixed_length and not keep_sep
         if not fixed_length and not keep_sep:
@@ -237,15 +201,6 @@ class DelimitedBuffer(FileBuffer):
             ends = self._col_ends(col)
         return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
 
-    def _extract_integers(self, integer_starts, integer_ends):
-        rows = self._data[integer_starts:integer_ends]
-        try:
-            strs = str_to_int(rows)
-        except EncodingError as e:
-            row_number = np.searchsorted(rows._shape.starts, e.offset, side="right") - 1
-            raise FormatException(e.args[0], line_number=row_number)
-        return strs
-
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
         powers = np.uint8(10) ** np.arange(n_digits)[::-1]
@@ -339,33 +294,6 @@ class DelimitedBuffer(FileBuffer):
             field_nr, field_type)
 
     def _parse_split_ints(self, text, sep=','):
-        if len(sep):
-            text[:, -1] = sep
-            int_strings = split(text.ravel()[:-1], sep=sep)
-            return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
-        else:
-            mask = as_encoded_array(text.ravel(), DigitEncoding).raw()
-            return RaggedArray(mask, text.shape)
-
-    def get_split_ints(self, col: int, sep: str = ",") -> RaggedArray:
-        """Split a column of separated integers into a raggedarray
-
-        Parameters
-        ----------
-        col : int
-            Column number
-        sep : 5
-            Characted used to separate the integers
-
-        Examples
-        --------
-        7
-
-        """
-        self.validate_if_not()
-        starts = self._col_starts(col)
-        ends = self._col_ends(col)
-        text = self._data[starts:ends]
         if len(sep):
             text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
@@ -499,22 +427,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             columns = {}
             fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
             for col_number, field in enumerate(fields):
-                if field.type is None:
-                    col = None
-                elif field.type == str or is_subclass_or_instance(field.type, Encoding):
-                    col = self.get_text(col_number, fixed_length=False)
-                elif field.type == int:
-                    col = self.get_integers(col_number).ravel()
-                elif field.type == float:
-                    col = self.get_floats(col_number).ravel()
-                elif field.type == bool:
-                    col = self.get_integers(col_number).ravel().astype(bool)
-                elif field.type == List[int]:
-                    col = self.get_split_ints(col_number)
-                elif field.type == List[bool]:
-                    col = self.get_split_ints(col_number, sep="").astype(bool)
-                else:
-                    assert False, field
+                col = self._get_field_by_number(col_number, field.type)
                 columns[field.name] = col
             n_entries = len(next(col for col in columns if col is not None))
             columns = {c: value if c is not None else np.empty((n_entries, 0))
