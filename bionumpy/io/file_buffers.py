@@ -7,7 +7,7 @@ from npstructures import RaggedArray, RaggedView, RaggedShape
 from .exceptions import FormatException
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import SequenceEntry, SequenceEntryWithQuality
-from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, change_encoding
 from ..encodings import QualityEncoding, BaseEncoding
 
 NEWLINE = "\n"
@@ -181,9 +181,6 @@ class FileBuffer:
         n_new_lines = sum(np.count_nonzero(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
-    #def get_field_by_number(self, field_nr: int, field_type: type=object):
-    #    raise NotImplementedError
-
 
 class IncompleteEntryException(Exception):
     pass
@@ -287,22 +284,6 @@ class OneLineBuffer(FileBuffer):
         cls._validate(data, new_lines)
         return cls(cls._get_buffer_extractor(data, new_lines))
 
-    @property
-    def lines(self):
-        if not hasattr(self, "__lines"):
-            starts = np.insert(self._new_lines, 0, -1)
-            lengths = np.diff(starts)
-            self.__lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        return self.__lines
-
-    @property
-    def entries(self):
-        if not hasattr(self, "__entries"):
-            lengths = np.diff(self._new_lines[self.n_lines_per_entry-1::self.n_lines_per_entry])
-            lengths = np.insert(lengths, 0, self._new_lines[self.n_lines_per_entry-1]+1)
-            self.__entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        return self.__entries
-
     def get_data(self) -> bnpdataclass:
         """Get and parse fields from each line"""
         headers, sequences = [self._buffer_extractor.get_field_by_number(i) for i in (0, 1)]
@@ -344,22 +325,9 @@ class OneLineBuffer(FileBuffer):
 
         names = entries.name
         sequences = entries.sequence
-        name_lengths = names.lengths
-        sequence_lengths = sequences.lengths
-        line_lengths = np.hstack(
-            (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
-        ).ravel()
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
-        lines = EncodedRaggedArray(buf, line_lengths)
-        step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = names
-        lines[1::step, :-1] = EncodedRaggedArray(
-            EncodedArray(sequences.encoding.decode(sequences.ravel()), sequences.encoding), sequences.shape)
-
-        lines[0::step, 0] = ">"
-
-        lines[:, -1] = "\n"
-        return buf
+        if entries.sequence.encoding != BaseEncoding:
+            sequences = change_encoding(sequences, BaseEncoding)
+        return cls.join_fields([names, sequences])
 
     @classmethod
     def join_fields(cls, fields: List[EncodedRaggedArray]):
@@ -433,22 +401,6 @@ class FastQBuffer(OneLineBuffer):
             seq_entry.name, seq_entry.sequence,quality)
 
     @classmethod
-    def _get_line_lens(cls, entries):
-        name_lengths = entries.name.lengths[:, None]
-        sequence_lengths = entries.sequence.lengths[:, None]
-        return (
-            np.hstack(
-                (
-                    name_lengths + 1,
-                    sequence_lengths,
-                    np.ones_like(sequence_lengths),
-                    sequence_lengths,
-                )
-            ).ravel()
-            + 1
-        )
-
-    @classmethod
     def _validate(cls, data, new_lines):
         super()._validate(data, new_lines)
         n_lines_per_entry = cls.n_lines_per_entry
@@ -459,20 +411,13 @@ class FastQBuffer(OneLineBuffer):
 
     @classmethod
     def join_fields(cls, fields: List[EncodedRaggedArray]):
-        plus_line = as_encoded_array(['+']*len(fields[0]))
+        plus_line = as_encoded_array(['+'] * len(fields[0]))
         return super().join_fields(fields[:2]+[plus_line]+fields[2:])
 
     @classmethod
     def from_data(cls, entries):
-        line_lengths = cls._get_line_lens(entries)
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
-        lines = EncodedRaggedArray(buf, line_lengths)
-        step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = entries.name
-        lines[1::step, :-1] = EncodedRaggedArray(EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()), BaseEncoding), entries.sequence.shape)
-        lines[2::step, 0] = "+"
-        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding)
-        lines[0::step, 0] = cls.HEADER
-        lines[:, -1] = "\n"
-
-        return buf
+        quality_field = EncodedRaggedArray(EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding),
+                                           entries.quality.shape)
+        sequence_field = change_encoding(entries.sequence, BaseEncoding) if entries.sequence.encoding != BaseEncoding else entries.sequence
+        return cls.join_fields([entries.name, sequence_field,
+                                quality_field])
