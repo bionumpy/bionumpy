@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from bionumpy.io.file_buffers import FastQBuffer, TwoLineFastaBuffer
+from bionumpy.io import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.io.parser import NumpyFileReader
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.io.exceptions import FormatException

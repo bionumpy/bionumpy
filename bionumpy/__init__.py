@@ -7,8 +7,8 @@ __version__ = '0.2.21'
 import npstructures as nps
 
 from .io import (count_entries, open_indexed, MultiLineFastaBuffer, bnp_open,
-                 TwoLineFastaBuffer, FastQBuffer, Bed6Buffer, NarrowPeakBuffer,
-                 BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype)
+                 Bed6Buffer, NarrowPeakBuffer, TwoLineFastaBuffer,
+                 BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype, FastQBuffer)
 from .encodings.alphabet_encoding import (DNAEncoding, RNAENcoding, AminoAcidEncoding)
 from .encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array, OneToOneEncoding, BaseEncoding, change_encoding
 from .sequence import (get_kmers, get_minimizers, get_motif_scores, count_encoded, match_string)
@@ -37,7 +37,7 @@ __all__ = ["EncodedArray", "EncodedRaggedArray",
            "KmerEncoder", "Minimizers", "PositionWeightMatrix", "mean",
            "bincount", "streamable", "histogram", "count_entries", "quantile",
            "BedBuffer", "GfaSequenceBuffer",
-           "TwoLineFastaBuffer", "FastQBuffer", "open_indexed", "groupby",
+           "open_indexed", "groupby",
            "SAMBuffer", "GFFBuffer", "Bed6Buffer", "MultiLineFastaBuffer",
            "count_encoded", "DNAEncoding", "RNAENcoding", "AminoAcidEncoding"]
 

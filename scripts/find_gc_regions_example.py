@@ -6,6 +6,8 @@ For now, not identical.
 import bionumpy as bnp
 import numpy as np
 
+import bionumpy.io.one_line_buffer
+
 
 def _get_continous_regions(a, min_width=20):
     d = np.diff(a, axis=-1, prepend=0, append=0)
@@ -31,7 +33,7 @@ def get_gc_regions(chunk, min_width=20):
 
 
 def _test():
-    f = bnp.open("example_data/big.fa.gz", buffer_type=bnp.TwoLineFastaBuffer)
+    f = bnp.open("example_data/big.fa.gz", buffer_type=bionumpy.io.one_line_buffer.TwoLineFastaBuffer)
     get_gc_regions(f.read())
 
 

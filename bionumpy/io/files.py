@@ -2,7 +2,8 @@ from pathlib import PurePath
 from .gzip_reading import gzip
 # import gzip
 import dataclasses
-from .file_buffers import FastQBuffer, FileBuffer
+from .file_buffers import FileBuffer
+from .fastq_buffer import FastQBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,

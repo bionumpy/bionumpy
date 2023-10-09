@@ -1,15 +1,17 @@
 import numpy as np
 import bionumpy as bnp
+import bionumpy.io.one_line_buffer
+
 snakemake = None
 
 
 def subsample_reads(input_filename, output_filename):
-    n_entries = bnp.count_entries(input_filename, buffer_type=bnp.TwoLineFastaBuffer)
+    n_entries = bnp.count_entries(input_filename, buffer_type=bionumpy.io.one_line_buffer.TwoLineFastaBuffer)
     n_to_subsample = n_entries // 2
     n_entries_left = n_entries
     n_samples_left = n_to_subsample
-    out_file = bnp.open(output_filename, "w", buffer_type=bnp.TwoLineFastaBuffer)
-    for chunk in bnp.open(input_filename, buffer_type=bnp.TwoLineFastaBuffer).read_chunks():
+    out_file = bnp.open(output_filename, "w", buffer_type=bionumpy.io.one_line_buffer.TwoLineFastaBuffer)
+    for chunk in bnp.open(input_filename, buffer_type=bionumpy.io.one_line_buffer.TwoLineFastaBuffer).read_chunks():
         if n_entries_left > len(chunk):
             n_samples_in_this_chunk = np.random.hypergeometric(len(chunk), n_entries_left - len(chunk), n_samples_left)
         else:
@@ -25,7 +27,7 @@ def subsample_reads(input_filename, output_filename):
 def _test_count_entries():
     assert False
     filename = 'length150_nreads5000000.fa'
-    bnp.count_entries(f'benchmarks/results/dna_sequences/{filename}', buffer_type=bnp.TwoLineFastaBuffer)
+    bnp.count_entries(f'benchmarks/results/dna_sequences/{filename}', buffer_type=bionumpy.io.one_line_buffer.TwoLineFastaBuffer)
 
 
 def _test():
