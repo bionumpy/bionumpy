@@ -60,8 +60,7 @@ class NpDataclassReader:
         should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
             if not issubclass(chunk.dataclass, (GTFEntry)):
-                if not hasattr(chunk, 'genotype_dataclass') and not (
-                        hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
+                if (hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
                     if not isinstance(chunk, DelimitedBufferWithInernalComments):
                         should_be_lazy = True
         return should_be_lazy
