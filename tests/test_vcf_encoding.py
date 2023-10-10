@@ -3,6 +3,7 @@ import numpy as np
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
+import pytest
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 
 
@@ -109,3 +110,12 @@ def test_parse_phased_vcf():
                       [0, 2, 3, 3],
                       [1, 2, 1, 3]
                   ])
+
+
+@pytest.mark.xfail
+def test_read_biallelic_vcf():
+    file_name = "example_data/small_phased_biallelic.vcf"
+    vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
+    for chunk in vcf.read_chunks():
+        print(chunk)
+        
