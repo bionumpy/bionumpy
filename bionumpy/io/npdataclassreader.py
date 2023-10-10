@@ -60,8 +60,8 @@ class NpDataclassReader:
         should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
             if not issubclass(chunk.dataclass, (GTFEntry)):
-                if (hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
-                    should_be_lazy = True
+                # if (hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
+                should_be_lazy = True
         return should_be_lazy
 
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:

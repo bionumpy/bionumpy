@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from ..encoded_array import EncodedArray
+from ..encoded_array import EncodedArray, BaseEncoding
 from bionumpy.encodings import Encoding
 
 
@@ -55,7 +55,11 @@ class _GenotypeRowEncoding(Encoding):
         if isinstance(genotype_rows, EncodedArray) and genotype_rows.ndim==3:
             return genotype_rows.reshape(-1, 3)
         # split the row of genotype data
-        from ..io.strops import split, replace_inplace
+        from ..io.strops import replace_inplace
+        if isinstance(genotype_rows, list):
+            assert len(genotype_rows) ==0
+            genotype_rows = EncodedArray(np.zeros((0, 3)), BaseEncoding)
+        # genotype_rows = as_encoded_array(genotype_rows)
         data = genotype_rows.ravel()
         # hack because the row sometime ends with \n and sometimes with \t
         replace_inplace(data, "\n", "\t")
@@ -145,10 +149,12 @@ class _PhasedGenotypeRowEncoding(_GenotypeRowEncoding):
             for genotype in self.genotypes], dtype=np.uint8)
 
     def encode(self, genotype_rows):
+        if len(genotype_rows) == 0:
+            return np.zeros((0, 1), dtype=np.uint8)
         data = self._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)
         encoded = (data[:, 0] == "1") * 2 + (data[:, 2] == "1")
-        encoded = encoded.reshape(n_rows, len(encoded)//n_rows).astype(np.int8)
+        encoded = encoded.reshape(n_rows, -1).astype(np.int8)
         return encoded
 
     def __repr__(self):

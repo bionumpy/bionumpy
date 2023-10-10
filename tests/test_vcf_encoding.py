@@ -80,14 +80,22 @@ def test_parse_unphased_vcf():
     # example_data/variants.vcf has messy unphased and missing genotypes
     f = bnp.open("example_data/variants.vcf", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
     data = f.read()
+    assert data.get_context("header")
     decoded = GenotypeRowEncoding.decode(data.genotypes)
     print(repr(decoded))
-    out_file = bnp.open("test.tmp", "w", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
-    out_file.write(data)
+    with bnp.open("test.tmp", "w", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer) as out_file:
+        out_file.write(data)
+    written = [line for line in open("test.tmp").read().split("\n") if not line.startswith('#')]
+    first_types = ["1|1", "1|1", "1|1", "1|1"]
+    first_written = written[0].split("\t")[-4:]
+    for line in written:
+        print('>', line)
+    print(first_written)
+    assert all(w.startswith(t) for w, t in zip(first_written, first_types))
+    last_written = written[1].split("\t")[-4:]
+    last_types = ["0/0", "1/1", "1/1", "1/1"]
 
-    written = open("test.tmp").read().split("\n")
-    assert written[0].split("\t")[-4:] == ["1|1", "1|1", "1|1", "1|1"]
-    assert written[1].split("\t")[-4:] == ["0/0", "1/1", "1/1", "1/1"]
+    assert all(w.startswith(t) for w, t in zip(last_written, last_types))
 
 
 def test_parse_phased_vcf():

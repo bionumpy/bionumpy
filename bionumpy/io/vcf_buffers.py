@@ -19,13 +19,8 @@ class GenotypeBufferExtractor(TextBufferExtractor):
 class VCFBuffer(DelimitedBuffer):
     dataclass = VCFEntry
 
-    def get_data(self):
-        data = super().get_data()
-        data.position -= 1
-        return data
-
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        val = super().get_field_by_number(field_nr, field_type)
+    def _get_field_by_number(self, field_nr: int, field_type: type=object):
+        val = super()._get_field_by_number(field_nr, field_type)
         if field_nr == 1:
             val -= 1
         return val
@@ -37,8 +32,8 @@ class VCFBuffer(DelimitedBuffer):
 
 
 class VCFMatrixBuffer(VCFBuffer):
-    dataclass = VCFEntry
-    genotype_dataclass = VCFGenotypeEntry
+    dataclass = VCFGenotypeEntry
+    # genotype_dataclass = VCFGenotypeEntry
     genotype_encoding = GenotypeRowEncoding
 
     @classmethod
@@ -57,20 +52,19 @@ class VCFMatrixBuffer(VCFBuffer):
         sample_names = prev_line.split("\t")[9:]
         return sample_names
 
-    def get_data(self):
+    def __get_data(self):
         data = super().get_data()
-        # genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
+        #genotype_data = self._buffer_extractor.get_fixed_length_field(slice(9, None), 3)
+        #genotypes = EncodedArray(self.genotype_encoding.encode(genotype_data), self.genotype_encoding)
+        # return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
+
+    def _get_field_by_number(self, field_nr: int, field_type: type=object):
+        if field_nr != 8:
+            assert field_nr < 8, (field_nr, field_type)
+            return super()._get_field_by_number(field_nr, field_type)
         genotype_data = self._buffer_extractor.get_fixed_length_field(slice(9, None), 3)
         genotypes = EncodedArray(self.genotype_encoding.encode(genotype_data), self.genotype_encoding)
-        return self.genotype_dataclass(*data.shallow_tuple(), genotypes)
-
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        if field_nr != 9:
-            return super().get_field_by_number(field_nr, field_type)
-        else:
-            genotypes = self.get_column_range_as_text(9, self._n_cols, keep_sep=True)
-            genotypes = EncodedArray(self.genotype_encoding.encode(genotypes), self.genotype_encoding)
-            return genotypes
+        return genotypes
 
 
 #@bnpdataclass
@@ -80,13 +74,11 @@ class Genotypes:
 
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
-    dataclass = VCFEntry
-    genotype_dataclass = PhasedVCFGenotypeEntry
+    dataclass = PhasedVCFGenotypeEntry
     genotype_encoding = PhasedGenotypeRowEncoding
 
 
 class PhasedHaplotypeVCFMatrixBuffer(VCFMatrixBuffer):
     """Encodes genotype info using one column per haplotype (not genotype)"""
-    dataclass = VCFEntry
-    genotype_dataclass = PhasedVCFHaplotypeEntry
+    dataclass = PhasedVCFHaplotypeEntry
     genotype_encoding = PhasedHaplotypeRowEncoding
