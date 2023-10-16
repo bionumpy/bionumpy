@@ -15,8 +15,11 @@ def test_vcf_matrix_buffer():
 
     for chunk in f:
         header = chunk.get_context("header")
+        assert header
         out.write(chunk)
 
+    filestart = open('test1.vcf').read(100)
+    assert filestart.startswith('#'), filestart
     # check that header was written
     chunk = bnp.open("test1.vcf").read_chunk()
     assert chunk.get_context("header") != "" and chunk.get_context("header") == header
@@ -31,6 +34,12 @@ def test_vcf_matrix_buffer_stream():
     # check that header was written
     chunk = bnp.open("test1.vcf").read_chunk()
     assert chunk.get_context("header") != ""
+
+def test_context_state():
+    f = bnp.open("example_data/variants_with_header.vcf").read()
+    assert f.get_context("header")
+    f2 = bnp.open("example_data/variants.vcf").read()
+    assert not f2.get_context("header")
 
 
 def test_phased_genotype_encoding():
@@ -79,9 +88,11 @@ def test_genotype_encoding():
 
 def test_parse_unphased_vcf():
     # example_data/variants.vcf has messy unphased and missing genotypes
-    f = bnp.open("example_data/variants.vcf", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
+    filename = "example_data/variants.vcf"
+    print(open(filename).read())
+    f = bnp.open(filename, buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
     data = f.read()
-    assert data.get_context("header")
+    # assert data.get_context("header")
     decoded = GenotypeRowEncoding.decode(data.genotypes)
     print(repr(decoded))
     with bnp.open("test.tmp", "w", buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer) as out_file:
@@ -89,9 +100,6 @@ def test_parse_unphased_vcf():
     written = [line for line in open("test.tmp").read().split("\n") if not line.startswith('#')]
     first_types = ["1|1", "1|1", "1|1", "1|1"]
     first_written = written[0].split("\t")[-4:]
-    for line in written:
-        print('>', line)
-    print(first_written)
     assert all(w.startswith(t) for w, t in zip(first_written, first_types))
     last_written = written[1].split("\t")[-4:]
     last_types = ["0/0", "1/1", "1/1", "1/1"]
@@ -116,6 +124,10 @@ def test_parse_phased_vcf():
 def test_read_biallelic_vcf():
     file_name = "example_data/small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
-    for chunk in vcf.read_chunks():
-        print(chunk)
+    chunk = vcf.read()
+    chunk.genotypes
+    str(chunk.genotypes)
+
+    #for chunk in vcf.read_chunks():
+    #    print(chunk)
         

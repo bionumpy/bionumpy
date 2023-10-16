@@ -48,7 +48,7 @@ class NpDataclassReader:
         chunk = self._reader.read()
         should_be_lazy = self._should_be_lazy(chunk)
         if should_be_lazy:
-            return self._get_lazy_class(chunk.dataclass)(ItemGetter(chunk, chunk.dataclass))
+            return self._get_lazy_class(chunk.dataclass, chunk.header_data)(ItemGetter(chunk, chunk.dataclass))
         return chunk.get_data()
 
     def _get_lazy_class(self, dataclass, header=None):
@@ -60,7 +60,6 @@ class NpDataclassReader:
         should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
             if not issubclass(chunk.dataclass, (GTFEntry)):
-                # if (hasattr(chunk, 'HAS_UNCOMMENTED_HEADER_LINE') and chunk.HAS_UNCOMMENTED_HEADER_LINE):
                 should_be_lazy = True
         return should_be_lazy
 

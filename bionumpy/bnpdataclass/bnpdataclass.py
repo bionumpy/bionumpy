@@ -12,7 +12,6 @@ from ..util import is_subclass_or_instance
 
 
 class BNPDataClass(NpDataClass):
-    _context = {}
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
@@ -94,13 +93,17 @@ class BNPDataClass(NpDataClass):
         return self[np.argsort(getattr(self, field_name))]
 
     def set_context(self, name, value):
+        if not hasattr(self, '_context'):
+            self._context = dict()
         self._context[name] = value
 
     def get_context(self, name):
+        if not hasattr(self, '_context'):
+            self._context = dict()
         return self._context[name]
 
     def has_context(self, name):
-        return name in self._context
+        return hasattr(self, '_context') and name in self._context
 
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:

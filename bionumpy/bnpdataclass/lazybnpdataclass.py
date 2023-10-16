@@ -92,8 +92,9 @@ def create_lazy_class(dataclass, header=None):
             self._computed_values = computed_values or {}
             self._computed = False
             self._data = None
-            if header is not None:
-                self.set_context('header', header)
+            self._header = header
+            #if header is not None:
+            # self.set_context('header', header)
 
         def __len__(self):
             return self._itemgetter.n_entries()
@@ -114,7 +115,7 @@ def create_lazy_class(dataclass, header=None):
             return super().__getattr__(var_name)
 
         def __setattr__(self, key, value):
-            if key in ['_itemgetter', '_set_values', '_computed', '_data', '_computed_values']:
+            if key in ['_itemgetter', '_set_values', '_computed', '_data', '_computed_values', '_header']:
                 return super().__setattr__(key, value)
             self._set_values[key] = value
             if key in self._computed_values:
@@ -170,6 +171,13 @@ def create_lazy_class(dataclass, header=None):
                     columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i+1))
             return buffer_class.join_fields(columns)
             # return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
+
+        def get_context(self, name):
+            if name == 'header':
+                return self._header
+
+        def has_context(self, name):
+            return name == 'header'
 
 
     NewClass.__name__ = dataclass.__name__
