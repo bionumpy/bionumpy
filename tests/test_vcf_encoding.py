@@ -120,7 +120,6 @@ def test_parse_phased_vcf():
                   ])
 
 
-@pytest.mark.xfail
 def test_read_biallelic_vcf():
     file_name = "example_data/small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
