@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Set, Tuple, List, Mapping, Optional
 
 import re
@@ -14,7 +14,7 @@ class VCFHeader:
     reference: str = None
     FILTER: Mapping[str, Any] = None
     FORMAT: Mapping[str, Any] = None
-    INFO: Mapping[str, Any] = None
+    INFO: Mapping[str, Any] = field(default_factory=dict)
     contig: Mapping[str, Any] = None
     optional: Mapping[str, List[Any]] = None
 
@@ -216,9 +216,9 @@ def parse_header(lines: str) -> VCFHeader:
             headers[optional_identifier][identifier].append(content)
     
     optional_identifier = 'optional'
-    for identifier, contents in headers[optional_identifier].items():
-        if len(contents) > 1:
-            message = f"Duplicated values for {identifier} ({len(contents)} values)"
-            warnings.warn(message, RuntimeWarning)    
+    # for identifier, contents in headers[optional_identifier].items():
+    #     if len(contents) > 1:
+    #         message = f"Duplicated values for {identifier} ({len(contents)} values)"
+    #         warnings.warn(message, RuntimeWarning)
 
     return VCFHeader(**headers)

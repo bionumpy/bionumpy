@@ -136,7 +136,7 @@ class VCFBuffer(DelimitedBuffer):
 
     def _get_info_field(self):
         text = self._buffer_extractor.get_field_by_number(7)
-        if not self._header_data:
+        if (not self._header_data) or ('##INFO' not in self._header_data):
             logger.warning('No header data found. Cannot parse INFO field. Returning as string')
             return text
         delimiters = np.flatnonzero(text.ravel() == ';') + 1

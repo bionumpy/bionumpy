@@ -173,7 +173,9 @@ class _PhasedHaplotypeRowEncoding(_GenotypeRowEncoding):
     def encode(self, genotype_rows):
         data = self._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)
-        # data = self._preprocess_data_for_encoding(genotype_rows)
+        if n_rows == 0:
+            return np.zeros((0, 1), dtype=np.uint8)
+
         n_rows = len(genotype_rows)
         raw = data[:, 0].raw()
         first_haplotypes = self._alphabet_lookup[raw]
