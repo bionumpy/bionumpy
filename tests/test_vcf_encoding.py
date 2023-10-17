@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.testing import assert_array_equal
 
 import bionumpy as bnp
 import bionumpy.encoded_array
@@ -130,6 +131,15 @@ def test_read_info_field():
     assert chunk.info.NS[0] == 2548
     assert chunk.info.NS[1] == 2548
     assert chunk.info.EX_TARGET[0] == False
+
+@pytest.mark.skip('missing data')
+def test_read_info_field2():
+    vcf_filename = "example_data/info_flag.vcf"
+    f = bnp.open(vcf_filename,
+                 buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
+    chunk = f.read_chunk()
+    assert_array_equal(chunk.info.TCGA_DRIVER, [False]*6)
+
 
 
 # @pytest.mark.xfail
