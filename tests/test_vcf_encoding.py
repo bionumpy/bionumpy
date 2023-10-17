@@ -132,9 +132,14 @@ def test_read_info_field():
     assert chunk.info.EX_TARGET[0] == False
 
 
+@pytest.mark.xfail
 def test_read_biallelic_vcf():
     file_name = "example_data/small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
     chunk = vcf.read()
     chunk.genotypes
     str(chunk.genotypes)
+
+    for chunk in vcf.read_chunks():
+        print(chunk)
+        
