@@ -279,19 +279,21 @@ class DelimitedBuffer(FileBuffer):
             return None
         self.validate_if_not()
         text: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
-
+        parsed = None
         for f, parser in parsers:
             if field_type == f:
                 try:
                     parsed = parser(text)
-                    assert len(parsed)==len(text)
-                    return parsed
+                    assert len(parsed) == len(text)
+                    #return parsed
                 except EncodingError as e:
                     row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
                     raise FormatException(e.args[0], line_number=row_number)
         if is_subclass_or_instance(field_type, Encoding):
-            return as_encoded_array(text, field_type)
-        assert False, (self.__class__, field_type)
+            parsed = as_encoded_array(text, field_type)
+        if parsed is None:
+            assert False, (self.__class__, field_type)
+        return parsed
 
     def get_field_by_number(self, field_nr: int, field_type: type=object):
         self.validate_if_not()

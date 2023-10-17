@@ -169,6 +169,7 @@ class _PhasedHaplotypeRowEncoding(_GenotypeRowEncoding):
     _alphabet_lookup = np.zeros(256, dtype=np.uint8)
     _alphabet_lookup[_reverse_alphabet_lookup] = np.arange(len(_reverse_alphabet_lookup))
     _alphabet_size = len(_alphabet)
+
     def encode(self, genotype_rows):
         data = self._preprocess_data_for_encoding(genotype_rows)
         n_rows = len(genotype_rows)

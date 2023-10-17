@@ -44,6 +44,7 @@ class BufferBackedDescriptor:
 class LazyBNPDataClass:
     pass
 
+
 class BaseClass:
     def __init__(self, buffer):
         self._buffer = buffer
@@ -58,9 +59,15 @@ class ItemGetter:
     def __init__(self, buffer: 'FileBuffer', dataclass: dataclasses.dataclass, start_line=0):
         self._buffer = buffer
         self._dataclass = dataclass
-        self._field_dict = {field.name: (i, field.type) for i, field in enumerate(dataclasses.fields(dataclass))}
+        self._field_dict = {field.name: (i, field.type)
+                            for i, field in
+                            enumerate(dataclasses.fields(dataclass))}
         self._buffer.validate_if_not()
         self._start_line = start_line
+
+    def concatenate(self, itemgetters):
+        return self.__class__(self._buffer.concatenate([i._buffer for i in itemgetters]),
+                              itemgetters[0]._dataclass, itemgetters[0]._start_line)
 
     @lru_cache()
     def n_entries(self):
@@ -84,7 +91,6 @@ class ItemGetter:
 def create_lazy_class(dataclass, header=None):
     field_names = [field.name for field in dataclasses.fields(dataclass)]
 
-
     class NewClass(dataclass, LazyBNPDataClass):
         def __init__(self, item_getter, set_values=None, computed_values=None):
             self._itemgetter = item_getter
@@ -93,7 +99,7 @@ def create_lazy_class(dataclass, header=None):
             self._computed = False
             self._data = None
             self._header = header
-            #if header is not None:
+            # if header is not None:
             # self.set_context('header', header)
 
         def __len__(self):
@@ -151,15 +157,22 @@ def create_lazy_class(dataclass, header=None):
         def __array_function__(self, func, types, args, kwargs):
             assert all(issubclass(t, LazyBNPDataClass) for t in types), types
             if func == np.concatenate:
+                values = args[0]
+                if hasattr(values[0]._itemgetter.buffer, 'concatenate'):
+                    if all(not a._set_values for a in values):
+                        return self.__class__(self._itemgetter.concatenate([a._itemgetter for a in values]))
+
                 objects = [a.get_data_object() for a in args[0]]
-                args = (objects, ) + args[1:]
+                args = (objects,) + args[1:]
                 return func(*args, **kwargs)
             return NotImplemented
 
         def get_buffer(self, buffer_class=None):
             if buffer_class is None:
                 buffer_class = self._itemgetter.buffer.__class__
-            if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer, 'SKIP_LAZY') or hasattr(buffer_class, 'SKIP_LAZY'):
+            if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer,
+                                                                                          'SKIP_LAZY') or hasattr(
+                    buffer_class, 'SKIP_LAZY'):
                 return self._itemgetter.buffer.from_data(self.get_data_object())
             columns = []
             if not self._set_values and self._itemgetter.buffer.__class__ == buffer_class:
@@ -168,9 +181,8 @@ def create_lazy_class(dataclass, header=None):
                 if field.name in self._set_values:
                     columns.append(get_column(self._set_values[field.name], field.type))
                 else:
-                    columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i+1))
+                    columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i + 1))
             return buffer_class.join_fields(columns)
-            # return join_columns(columns, self._itemgetter.buffer.DELIMITER).ravel()
 
         def get_context(self, name):
             if name == 'header':
@@ -178,7 +190,6 @@ def create_lazy_class(dataclass, header=None):
 
         def has_context(self, name):
             return name == 'header'
-
 
     NewClass.__name__ = dataclass.__name__
     NewClass.__qualname__ = dataclass.__qualname__

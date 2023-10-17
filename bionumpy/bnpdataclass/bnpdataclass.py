@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Type, Dict, Iterable
+from typing import List, Type, Dict, Iterable, Union
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
@@ -176,7 +176,17 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
             """
             for field in dataclasses.fields(obj):
                 pre_val = getattr(obj, field.name)
-                if field.type in (int, float, bool):
+                if field.type== Union[BNPDataClass, str]:
+                    if isinstance(pre_val,
+                        (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or \
+                            hasattr(pre_val, 'to_numpy'):
+                        val = as_encoded_array(pre_val)
+                    elif True or isinstance(pre_val, BNPDataClass):
+                        val = pre_val
+                    else:
+                        assert False, (field.type, type(pre_val))
+
+                elif field.type in (int, float, bool):
                     val = np.asanyarray(pre_val)
                 elif field.type == str:
                     assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val))

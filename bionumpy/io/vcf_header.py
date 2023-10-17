@@ -4,18 +4,19 @@ from typing import Any, Callable, Dict, Set, Tuple, List, Mapping, Optional
 
 import re
 import warnings
+
 @dataclass
 class VCFHeader:
     """VCFHeader"""
-    fileformat: str
-    source: str
-    fileDate: str
-    reference: str
-    FILTER: Mapping[str, Any]
-    FORMAT: Mapping[str, Any]
-    INFO: Mapping[str, Any]
-    contig: Mapping[str, Any]
-    optional: Mapping[str, List[Any]]
+    fileformat: str = None
+    source: str = None
+    fileDate: str = None
+    reference: str = None
+    FILTER: Mapping[str, Any] = None
+    FORMAT: Mapping[str, Any] = None
+    INFO: Mapping[str, Any] = None
+    contig: Mapping[str, Any] = None
+    optional: Mapping[str, List[Any]] = None
 
 def preprocess_number(x: str) -> Optional[int]:
     """Preprocess the number in field such as Number. Return None if x
@@ -161,6 +162,7 @@ class HeaderReflection:
     @classmethod
     def is_mapping_identifier(cls, field: str) -> bool:
         return field in cls.mapping_identifiers
+
 
 def parse_header(lines: str) -> VCFHeader:
     """Parse the VCF header.

@@ -1,6 +1,8 @@
 import numpy as np
 from io import FileIO
 from npstructures import RaggedView
+from npstructures.raggedshape import RaggedView2
+
 from .exceptions import FormatException
 from ..bnpdataclass import bnpdataclass
 from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -209,7 +211,8 @@ class TextBufferExtractor:
 
     def get_field_by_number(self, field_nr: int):
         assert field_nr < self._n_fields, (field_nr, self._n_fields)
-        e = EncodedRaggedArray(self._data, RaggedView(self._field_starts.ravel(), self._field_lens.ravel()))
+        e = EncodedRaggedArray(self._data,
+                               RaggedView2(self._field_starts.ravel(), self._field_lens.ravel()))
         values = e[field_nr::self._n_fields]
         assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
         return values

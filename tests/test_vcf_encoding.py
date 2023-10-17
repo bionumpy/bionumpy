@@ -120,13 +120,21 @@ def test_parse_phased_vcf():
                   ])
 
 
+def test_read_info_field():
+    vcf_filename = "example_data/variants_with_header.vcf"
+    f = bnp.open(vcf_filename,
+                 buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
+    chunk = f.read_chunk()
+    assert hasattr(chunk.info, 'AC')
+    assert chunk.info.AC[0] == 240
+    assert chunk.info.NS[0] == 2548
+    assert chunk.info.NS[1] == 2548
+    assert chunk.info.EX_TARGET[0] == False
+
+
 def test_read_biallelic_vcf():
     file_name = "example_data/small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
     chunk = vcf.read()
     chunk.genotypes
     str(chunk.genotypes)
-
-    #for chunk in vcf.read_chunks():
-    #    print(chunk)
-        
