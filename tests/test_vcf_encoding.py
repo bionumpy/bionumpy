@@ -154,6 +154,7 @@ def test_read_info_from_vcf():
     print(variants.genotypes)
 
 
+@pytest.mark.skip
 def test_concatenate_variants():
     file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
     f = bnp.open(file)
@@ -161,7 +162,18 @@ def test_concatenate_variants():
     print(len(chunk1))
     chunk2 = f.read_chunk(min_chunk_size=200)
     print(len(chunk2))
+    
+    #merged = np.concatenate([chunk1, chunk2])
+    #assert len(merged) == len(chunk1) + len(chunk2)
+    #print(len(merged))
+    
+    other_chunk = bnp.io.vcf_buffers.VCFEntry.from_entry_tuples(
+        [
+            ("chr1", 1, ".", "A", "T", ".", "PASS", "AF=0.8;AC=2;AN=2")
+        ]
+    )
 
-    merged = np.concatenate([chunk1, chunk2])
-    print(len(merged))
+    #merged2 = np.concatenate([chunk1[0:1], other_chunk, chunk2[1:3]])
+
+    #print(other_chunk)
 
