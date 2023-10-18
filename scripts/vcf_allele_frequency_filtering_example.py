@@ -16,20 +16,22 @@ def filter_on_allele_count(chunk, min_ac=10):
 
 
 def filter_file_on_allele_count(input_file, output_file, min_ac=10):
-    f = bnp.open(input_file, buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
-    output_file = bnp.open(output_file, "w", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
-    chunks = f.read_chunks(min_chunk_size=200000000)  # [f.read()]
-    for chunk in chunks:
-        filtered = filter_on_allele_count(chunk, min_ac=min_ac)
-        output_file.write(filtered)
+    with bnp.open(output_file, "w", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer) as output_file:
+        for chunk in bnp.open(input_file, buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer).read_chunks():
+            output_file.write(chunk[chunk.info.AC>=min_ac])
+
+    # output_file = bnp.open(output_file, "w", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
+    # chunks = f.read_chunks(min_chunk_size=200000000)  # [f.read()]
+    # for chunk in chunks:
+    #     filtered = filter_on_allele_count(chunk, min_ac=min_ac)
+    #     output_file.write(filtered)
 
 
 def test():
-    filter_file_on_allele_count("example_data/variants_phased.vcf", "test.vcf.tmp", min_ac=1)
+    filter_file_on_allele_count("example_data/variants_with_header.vcf", "test.vcf.tmp", min_ac=1)
 
 def _test_profile():
     filter_file_on_allele_count("../benchmarks/results/vcfs/big_phased.vcf.gz", "test.vcf.tmp", min_ac=10)
-
 
 
 if __name__ == "__main__":

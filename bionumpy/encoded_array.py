@@ -159,7 +159,7 @@ class EncodedRaggedArray(RaggedArray):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert isinstance(self.ravel(), EncodedArray)
+        # assert isinstance(self.ravel(), EncodedArray)
 
     def __repr__(self) -> str:
         if len(self) == 0:

@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import numpy as np
 from io import FileIO
 from npstructures import RaggedView
@@ -35,6 +37,7 @@ class FileBuffer:
         self._is_validated = False
 
     @property
+    @lru_cache()
     def size(self):
         return self.data.size
 
@@ -207,7 +210,9 @@ class TextBufferExtractor:
         return len(self._field_starts)
 
     def __getitem__(self, idx):
-        return self.__class__(self._data, field_starts=self._field_starts[idx], field_ends=self._field_ends[idx])
+        return self.__class__(self._data,
+                              field_starts=self._field_starts[idx],
+                              field_ends=self._field_ends[idx])
 
     def get_field_by_number(self, field_nr: int):
         assert field_nr < self._n_fields, (field_nr, self._n_fields)
@@ -220,4 +225,38 @@ class TextBufferExtractor:
     def get_fixed_length_field(self, field_nr: int, field_length: int):
         indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
         return self._data[indices]
+
+
+class TextThroughputExtractor(TextBufferExtractor):
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray, entry_starts: np.ndarray, entry_ends:np.ndarray, is_contiguous=True):
+        super().__init__(data, field_starts, field_ends)
+        self._entry_starts = entry_starts
+        self._entry_ends = entry_ends
+        self._is_contiguous = is_contiguous
+
+    def __getitem__(self, idx):
+        return self.__class__(self._data,
+                              field_starts=self._field_starts[idx],
+                              field_ends=self._field_ends[idx],
+                              entry_starts=self._entry_starts[idx],
+                              entry_ends=self._entry_ends[idx], is_contiguous=False)
+
+    def _make_contigous(self):
+        lens = self._entry_ends - self._entry_starts
+        new_starts = np.insert(np.cumsum(lens), 0, 0)
+        offsets = self._entry_starts - new_starts[:-1]
+        self._data = EncodedRaggedArray(self._data, RaggedView2(self._entry_starts, lens)).ravel()
+        self._entry_starts = new_starts[:-1]
+        self._entry_ends = new_starts[1:]
+        self._field_starts = self._field_starts-offsets[:, None]
+        self._field_ends = self._field_ends-offsets[:, None]
+        self._is_contiguous = True
+
+    @property
+    def data(self):
+        if not self._is_contiguous:
+            self._make_contigous()
+        return self._data
+        # return EncodedRaggedArray(self._data,
+        #                           RaggedView2(self._entry_starts, self._entry_ends-self._entry_starts)).ravel()
 

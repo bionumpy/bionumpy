@@ -1,4 +1,6 @@
 from pathlib import PurePath
+from typing import Union
+
 from .gzip_reading import gzip
 # import gzip
 import dataclasses
@@ -68,7 +70,7 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename: str, mode: str = None, buffer_type=None) -> NpDataclassReader:
+def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDataclassReader, NpBufferedWriter]:
     """Open a file according to its suffix
 
     Open a `NpDataclassReader` file object, that can be used to read the file,
