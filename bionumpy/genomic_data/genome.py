@@ -27,7 +27,7 @@ class Genome:
     will usually be the same as either what is provided in the `chrom.sizes` file, or a simple alphabetic
     ordering. If sort order errors occur, try using `sort_names=True` when creating the `Genome` object.
     '''
-    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False, filter_function=ignore_underscores):
+    def __init__(self, chrom_sizes: Dict[str, int], fasta_filename: str = None, sort_names=False, filter_function=lambda x: True):
         if isinstance(chrom_sizes, GenomeContext):
             self._genome_context = chrom_sizes
         else:
