@@ -20,8 +20,8 @@ class GenomicData:
     def __getitem__(self, idx: GenomeIndex):
         if isinstance(idx, str):
             return self.extract_chromsome(idx)
-        if (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome') and hasattr(idx, 'is_stranded')):
-            return self.extract_intervals(idx, stranded=idx.is_stranded())
+        if (hasattr(idx, 'start') and hasattr(idx, 'stop') and hasattr(idx, 'chromosome')):
+            return self.extract_intervals(idx, stranded=hasattr(idx, 'is_stranded') and idx.is_stranded())
         if (hasattr(idx, 'position') and hasattr(idx, 'chromosome')):
             return self.extract_locations(idx, stranded=idx.is_stranded())
 
