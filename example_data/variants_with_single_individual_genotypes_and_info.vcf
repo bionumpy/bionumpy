@@ -1,0 +1,100 @@
+##fileformat=VCFv4.1
+##FILTER=<ID=PASS,Description="All filters passed">
+##reference=data/sacCer3/medium/reference.fa
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=TARGETPOS,Number=1,Type=String,Description="Target position for duplications.">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=DUP,Description="Duplication">
+##contig=<ID=chrI,length=230218>
+##contig=<ID=chrII,length=813184>
+##contig=<ID=chrIII,length=316620>
+##contig=<ID=chrIV,length=1531933>
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1)">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##bcftools_viewVersion=1.4.1+htslib-1.4.1
+##bcftools_viewCommand=view --samples-file data/sacCer3/medium/0.01/0.001/0/0.3/0.8/unfiltered_population.random_sample_number_1.txt -o data/sacCer3/medium/0.01/0.001/0/0.3/0.8/1/individual.vcf data/sacCer3/medium/0.01/0.001/0/0.3/0.8/unfiltered_population.vcf.gz; Date=Sun Oct 15 21:23:13 2023
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	simulated_1963
+chrI	500	simulated4	T	G	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	842	simulated5	G	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	949	simulated6	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	971	simulated7	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1196	simulated8	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1393	simulated9	T	C	.	PASS	AF=0.81;AC=1;AN=2	GT	0|1
+chrI	1422	simulated10	T	C	.	PASS	AF=0.81;AC=1;AN=2	GT	1|0
+chrI	1432	simulated11	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1537	simulated12	C	G	.	PASS	AF=0.79;AC=1;AN=2	GT	1|0
+chrI	1574	simulated13	T	C	.	PASS	AF=0.81;AC=1;AN=2	GT	1|0
+chrI	1583	simulated14	G	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1757	simulated15	GTTAATTTTCAATTTCTATGGAAACCCGTTCGTAAAATTGGC	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1792	simulated16	A	G	.	PASS	AF=0.79;AC=2;AN=2	GT	1|1
+chrI	1810	simulated17	G	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1820	simulated18	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	1861	simulated19	C	T	.	PASS	AF=0.81;AC=2;AN=2	GT	1|1
+chrI	1987	simulated20	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2049	simulated21	A	ACATGAGCGT	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2056	simulated22	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2062	simulated23	C	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2182	simulated24	G	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2333	simulated25	T	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2363	simulated26	TCATTATCTCTATGGAGATGCTCTTGTTTCTGAACGAATCATAAATC	T	.	PASS	AF=0.8;AC=1;AN=2	GT	0|1
+chrI	2491	simulated27	A	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2493	simulated28	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2497	simulated29	G	C	.	PASS	AF=0.8;AC=1;AN=2	GT	1|0
+chrI	2498	simulated30	C	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2499	simulated31	C	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2526	simulated32	T	G	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	2538	simulated33	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2718	simulated34	C	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2813	simulated35	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	2840	simulated36	G	A	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	2879	simulated37	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3013	simulated38	A	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3053	simulated39	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3143	simulated40	C	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3172	simulated41	A	G	.	PASS	AF=0.81;AC=2;AN=2	GT	1|1
+chrI	3242	simulated42	T	A	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	3293	simulated43	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3418	simulated44	A	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3423	simulated45	C	A	.	PASS	AF=0.79;AC=2;AN=2	GT	1|1
+chrI	3496	simulated46	T	A	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	3515	simulated47	G	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	3628	simulated48	A	C	.	PASS	AF=0.8;AC=1;AN=2	GT	0|1
+chrI	3741	simulated49	G	T	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	3749	simulated50	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4123	simulated51	G	T	.	PASS	AF=0.8;AC=1;AN=2	GT	0|1
+chrI	4195	simulated52	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4228	simulated53	A	C	.	PASS	AF=0.8;AC=1;AN=2	GT	1|0
+chrI	4242	simulated54	A	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4336	simulated55	C	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4579	simulated56	A	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4667	simulated57	TATTATGGTGGTAGTATCTCAAATATCTG	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4690	simulated58	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4717	simulated59	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4803	simulated60	G	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4842	simulated61	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	4936	simulated62	C	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5152	simulated63	A	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5209	simulated64	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5242	simulated65	GATAAATCAATAATTTATGTT	G	.	PASS	AF=0.8;AC=1;AN=2	GT	0|1
+chrI	5278	simulated66	G	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5394	simulated67	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5460	simulated68	T	C	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5516	simulated69	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5558	simulated70	A	G	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	5610	simulated71	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5626	simulated72	A	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5669	simulated73	A	G	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	5689	simulated74	ACAAAGGGCAGACAACTTGAGAACTTTCATGCGTGCAA	A	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	5691	simulated75	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5814	simulated76	C	T	.	PASS	AF=0.8;AC=2;AN=2	GT	1|1
+chrI	5929	simulated77	A	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5992	simulated78	C	T	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	5998	simulated79	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	6067	simulated80	T	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	6116	simulated81	C	G	.	PASS	AF=0.81;AC=2;AN=2	GT	1|1
+chrI	6152	simulated82	G	A	.	PASS	AF=0;AC=0;AN=2	GT	0|0
+chrI	6250	simulated83	T	G	.	PASS	AF=0;AC=0;AN=2	GT	0|0

@@ -152,4 +152,13 @@ def test_read_biallelic_vcf():
 
     for chunk in vcf.read_chunks():
         print(chunk)
-        
+
+
+@pytest.mark.xfail
+def test_read_info_from_vcf():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    variants = bnp.open(file).read()
+
+    print(variants.info)
+    print(variants.info.AC[0])
+    print(variants.genotypes)
