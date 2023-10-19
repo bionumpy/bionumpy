@@ -247,8 +247,10 @@ class NpBufferedWriter:
         if hasattr(self._buffer_type, 'make_header') and \
                 (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
                 #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
-            header_array = self._buffer_type.make_header(data)
-            self._file_obj.write(header_array)
+            if not self._header_written:
+                header_array = self._buffer_type.make_header(data)
+                self._file_obj.write(header_array)
+                self._header_written = True
         if len(data) == 0:
             return
 
