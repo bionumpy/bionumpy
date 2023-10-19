@@ -1,4 +1,5 @@
 from bionumpy.io.vcf_header import parse_header
+import bionumpy as bnp
 import pytest
 
 
@@ -85,3 +86,8 @@ def test_parse_header():
         assert header_ans[field][key] == target[key]
 
 
+@pytest.mark.skip
+def test_vcf_info_field():
+    variants = bnp.open("example_data/lof_file.vcf").read()
+    lof = variants.info.LoF
+    assert len(lof)==len(variants)
