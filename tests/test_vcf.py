@@ -98,5 +98,14 @@ def test_vcf_info_field_data_object():
     n_variants = len(variants)
     assert len(lof) == n_variants
     assert_encoded_array_equal(lof, [''] * (n_variants - 34) + ['HC'] * 34)
+    assert (lof.lengths > 0).sum() == 34
     assert len(variants.info.ONCOGENE) == n_variants
     assert variants.info.ONCOGENE.sum() == 12
+
+
+@pytest.mark.xfail
+def test_vcf_filtering_chunk():
+    with bnp.open('tmp.vcf', 'w') as f:
+        for chunk in bnp.open("example_data/lof_file.vcf").read_chunks():
+            f.write(chunk[(chunk.info.LoF.lengths > 0) & chunk.info.ONCOGENE])
+    assert bnp.count_entries('tmp.vcf') == 2
