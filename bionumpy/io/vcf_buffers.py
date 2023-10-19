@@ -6,6 +6,7 @@ import numpy as np
 from npstructures import RaggedView, RaggedArray
 from npstructures.raggedshape import RaggedView2
 
+from .exceptions import FormatException
 from .file_buffers import TextBufferExtractor, FileBuffer
 from .vcf_header import parse_header
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
@@ -65,9 +66,22 @@ class NamedBufferExtractor(TextBufferExtractor):
         if not np.any(mask):
             logger.warning(f"Field: {name} not found in buffer")
             return np.full(len(self._field_starts), np.nan)
+        reshaped_mask = RaggedArray(mask, self._field_starts.shape)
+        line_sums = reshaped_mask.sum(axis=-1)
+        if np.any(line_sums > 1):
+            raise FormatException(f"Field: {name} found multiple times in buffer", line_number=np.flatnonzero(line_sums > 1)[0])
+        present_mask = reshaped_mask.any(axis=-1)
+
         field_starts = self._field_starts.ravel()[mask] + len(name) + 1
         field_ends = self._field_ends.ravel()[mask]
-        text = EncodedRaggedArray(self._data, RaggedView2(field_starts, field_ends - field_starts))
+        lens = field_ends - field_starts
+        starts = np.zeros(len(self._field_starts), dtype=int)
+        starts[present_mask] = field_starts
+        starts = np.maximum.accumulate(starts)
+        #starts = np.maximum.accumulate(np.where(present_mask, field_starts, 0))
+        all_lens = np.zeros(len(self._field_starts), dtype=int)
+        all_lens[present_mask] = lens
+        text = EncodedRaggedArray(self._data, RaggedView2(starts, all_lens))
         return text
 
     def has_field_mask(self, name):
