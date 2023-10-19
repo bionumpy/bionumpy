@@ -92,7 +92,7 @@ def test_parse_header():
             assert header_ans[field][key] == target[key]
 
 
-def test_vcf_info_field_data_object():
+def test_vcf_lof():
     variants = bnp.open("example_data/lof_file.vcf").read()
     lof = variants.info.LoF
     n_variants = len(variants)
@@ -103,7 +103,12 @@ def test_vcf_info_field_data_object():
     assert variants.info.ONCOGENE.sum() == 12
 
 
-@pytest.mark.xfail
+def test_vcf_info_data_object():
+    variants = bnp.open("example_data/lof_file.vcf").read()
+    info = variants.info.get_data_object()
+    print(str(info))
+    print(variants)
+
 def test_vcf_filtering_chunk():
     with bnp.open('tmp.vcf', 'w') as f:
         for chunk in bnp.open("example_data/lof_file.vcf").read_chunks():

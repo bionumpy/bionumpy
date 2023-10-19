@@ -1,7 +1,7 @@
 import io
 import logging
 import dataclasses
-from typing import List
+from typing import List, Optional
 from npstructures import RaggedArray, ragged_slice, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..bnpdataclass.lazybnpdataclass import LazyBNPDataClass
@@ -14,9 +14,9 @@ from ..encodings.exceptions import EncodingError
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encoded_array import BaseEncoding
 from ..util import is_subclass_or_instance
-from .file_buffers import FileBuffer, NEWLINE, TextBufferExtractor
+from .file_buffers import FileBuffer, NEWLINE, TextBufferExtractor, TextThroughputExtractor
 from .strops import (
-    split, str_to_int, str_to_float)
+    split, str_to_int, str_to_float, str_to_int_with_missing, str_to_float_with_missing)
 from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
@@ -92,10 +92,12 @@ class DelimitedBuffer(FileBuffer):
         return self.__buffer_extractor
 
     @classmethod
-    def _get_buffer_extractor(cls, data, delimiters, n_cols) -> TextBufferExtractor:
+    def _get_buffer_extractor(cls, data, delimiters, n_cols) -> TextThroughputExtractor:
         starts = delimiters[:-1].reshape(-1, n_cols)+1
         ends = delimiters[1:].reshape(-1, n_cols)
-        return TextBufferExtractor(data, starts, ends)
+        entry_starts = starts[:, 0]
+        entry_ends = ends[:, -1]+1
+        return TextThroughputExtractor(data, starts, ends, entry_starts, entry_ends)
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)
@@ -271,14 +273,17 @@ class DelimitedBuffer(FileBuffer):
         parsers = [(str, lambda x: x),
                    (Encoding, lambda x: as_encoded_array(x, field_type)),
                    (int, str_to_int),
+                   (Optional[int], str_to_int_with_missing),
                    (bool, lambda x: str_to_int(x).astype(bool)),
                    (float, str_to_float),
+                   (Optional[float], str_to_float_with_missing),
                    (List[int], self._parse_split_ints),
                    (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
         if field_type is None:
             return None
         self.validate_if_not()
         text: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
+        assert isinstance(text, EncodedRaggedArray),text
         parsed = None
         for f, parser in parsers:
             if field_type == f:

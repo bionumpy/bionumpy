@@ -1,5 +1,6 @@
 import dataclasses
-from typing import List, Type, Dict, Iterable, Union
+import inspect
+from typing import List, Type, Dict, Iterable, Union, Optional
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass
 from npstructures import RaggedArray
@@ -176,7 +177,9 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
             """
             for field in dataclasses.fields(obj):
                 pre_val = getattr(obj, field.name)
-                if field.type== Union[BNPDataClass, str]:
+                numeric_types = (int, float, bool)
+                optional_numeric_types = tuple(Optional[t] for t in numeric_types)
+                if field.type == Union[BNPDataClass, str]:
                     if isinstance(pre_val,
                         (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or \
                             hasattr(pre_val, 'to_numpy'):
@@ -186,7 +189,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     else:
                         assert False, (field.type, type(pre_val))
 
-                elif field.type in (int, float, bool):
+                elif field.type in numeric_types+optional_numeric_types:
                     val = np.asanyarray(pre_val)
                 elif field.type == str:
                     assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val))
@@ -207,7 +210,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                         val = RaggedArray(pre_val)
                     else:
                         val = pre_val
-                elif issubclass(field.type, BNPDataClass):
+                elif inspect.isclass(field.type) and issubclass(field.type, BNPDataClass):
                     assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
                     val = pre_val
                 else:

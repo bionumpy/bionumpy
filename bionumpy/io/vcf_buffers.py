@@ -10,7 +10,7 @@ from .exceptions import FormatException
 from .file_buffers import TextBufferExtractor, FileBuffer
 from .vcf_header import parse_header
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
 from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
@@ -65,7 +65,7 @@ class NamedBufferExtractor(TextBufferExtractor):
         mask = self.has_field_mask(name)
         if not np.any(mask):
             logger.warning(f"Field: {name} not found in buffer")
-            return np.full(len(self._field_starts), np.nan)
+            return EncodedRaggedArray(as_encoded_array(''), np.zeros(len(self._field_starts), dtype=int))
         reshaped_mask = RaggedArray(mask, self._field_starts.shape)
         line_sums = reshaped_mask.sum(axis=-1)
         if np.any(line_sums > 1):
