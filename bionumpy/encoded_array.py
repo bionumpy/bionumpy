@@ -167,7 +167,7 @@ class EncodedRaggedArray(RaggedArray):
         return lambda data, shape: self.__class__(EncodedArray(data, self._encoding), shape)
 
     def _set_data_range(self, idx, data):
-        super()._set_data_range(idx, as_encoded_array(data).raw())
+        super()._set_data_range(idx, as_encoded_array(data, self._encoding).raw())
 
     def _get_data_range(self, idx):
         return EncodedArray(super()._get_data_range(idx), self._encoding)

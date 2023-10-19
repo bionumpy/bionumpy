@@ -114,3 +114,34 @@ def test_vcf_filtering_chunk():
         for chunk in bnp.open("example_data/lof_file.vcf").read_chunks():
             f.write(chunk[(chunk.info.LoF.lengths > 0) & chunk.info.ONCOGENE])
     assert bnp.count_entries('tmp.vcf') == 2
+
+
+def test_locations():
+    k = 5
+    # Read genome and variants
+    genome = bnp.Genome.from_file("example_data/sacCer3.fa", filter_function=None)
+    variants_file = "example_data/sacCer3_sample_variants.vcf.gz"
+    print(bnp.open(variants_file).read())
+
+    variants = genome.read_locations(variants_file, has_numeric_chromosomes=False)
+
+    # get only snps from vcf
+    snp_mask = (variants.get_data_field('ref_seq').shape[-1] == 1) & (variants.get_data_field('alt_seq').shape[-1] == 1)
+    print(snp_mask)
+    variants = variants[snp_mask]
+    # Get windows around these snps
+    print(variants)
+    windows = variants.get_windows(flank=k-1)
+    print(windows)
+    # Use the windows to extract sequences (kmers)
+    sequences = genome.read_sequence()[windows]
+    print(sequences)
+    sequences = bnp.as_encoded_array(sequences, bnp.DNAEncoding)
+    reference_kmers = bnp.get_kmers(sequences, k)
+    assert_encoded_array_equal(sequences[:, k - 1], variants.get_data_field('ref_seq').ravel())
+    sequences[:, k-1] = variants.get_data_field('alt_seq').ravel()
+    assert_encoded_array_equal(sequences[:, k - 1], variants.get_data_field('alt_seq').ravel())
+    print(sequences)
+    sequences = bnp.as_encoded_array(sequences, bnp.DNAEncoding)
+    alt_kmers = bnp.get_kmers(sequences, k)
+    print(alt_kmers[0:3])
