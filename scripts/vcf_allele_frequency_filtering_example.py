@@ -19,7 +19,7 @@ def filter_on_allele_count(chunk, min_ac=10):
 def filter_file_on_allele_count(input_file, output_file, min_ac=10):
     with bnp.open(output_file, "w") as output_file:
         chunks = bnp.open(input_file).read_chunks()
-        for chunk in islice(chunks, 0, 40):
+        for chunk in islice(chunks, 0, None):
             output_file.write(chunk[chunk.info.AC >= min_ac])
 
 
@@ -27,7 +27,7 @@ def test():
     filter_file_on_allele_count("example_data/variants_with_header.vcf", "test.vcf", min_ac=1)
 
 
-def test_profile():
+def _test_profile():
     filter_file_on_allele_count("../benchmarks/results/vcfs/big_phased.vcf.gz", "tmp.test.vcf", min_ac=10)
 
 

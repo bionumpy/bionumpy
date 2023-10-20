@@ -196,17 +196,13 @@ class TextBufferExtractor:
         '''
         self._data = data
         self._field_starts = field_starts
-        #self._field_ends = field_ends
-        #if self._field_ends.size > 0:
-        #    assert self._field_ends[-1, -1] <= self._data.size, (self._field_ends[-1], self._data)
+
         if field_lens is None:
             assert field_ends is not None
             self._field_lens = field_ends-field_starts
-            self._field_ends = field_ends
         else:
             assert field_ends is None
             self._field_lens = field_lens
-            self._field_ends = field_starts+field_lens
         self._n_fields = field_starts.shape[1]
 
     @property
@@ -219,7 +215,6 @@ class TextBufferExtractor:
     def __getitem__(self, idx):
         return self.__class__(self._data,
                               field_starts=self._field_starts[idx],
-                              #field_ends = self._field_ends[idx])
                               field_lens=self._field_lens[idx])
 
     def get_field_by_number(self, field_nr: int):
