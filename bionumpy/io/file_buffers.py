@@ -189,17 +189,24 @@ class IncompleteEntryException(Exception):
 
 
 class TextBufferExtractor:
-    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray):
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens: np.ndarray=None):
         '''
         field_starts: n_entries x n_fields
         field_ends: n_entries x n_fields
         '''
         self._data = data
         self._field_starts = field_starts
-        self._field_ends = field_ends
-        if self._field_ends.size > 0:
-            assert self._field_ends[-1, -1] <= self._data.size, (self._field_ends[-1], self._data)
-        self._field_lens = field_ends-field_starts
+        #self._field_ends = field_ends
+        #if self._field_ends.size > 0:
+        #    assert self._field_ends[-1, -1] <= self._data.size, (self._field_ends[-1], self._data)
+        if field_lens is None:
+            assert field_ends is not None
+            self._field_lens = field_ends-field_starts
+            self._field_ends = field_ends
+        else:
+            assert field_ends is None
+            self._field_lens = field_lens
+            self._field_ends = field_starts+field_lens
         self._n_fields = field_starts.shape[1]
 
     @property
@@ -212,7 +219,8 @@ class TextBufferExtractor:
     def __getitem__(self, idx):
         return self.__class__(self._data,
                               field_starts=self._field_starts[idx],
-                              field_ends=self._field_ends[idx])
+                              #field_ends = self._field_ends[idx])
+                              field_lens=self._field_lens[idx])
 
     def get_field_by_number(self, field_nr: int):
         assert field_nr < self._n_fields, (field_nr, self._n_fields)
@@ -229,7 +237,7 @@ class TextBufferExtractor:
 
 class TextThroughputExtractor(TextBufferExtractor):
     def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray, entry_starts: np.ndarray, entry_ends:np.ndarray, is_contiguous=True):
-        super().__init__(data, field_starts, field_ends)
+        super().__init__(data, field_starts, field_lens=field_ends-field_starts)
         self._entry_starts = entry_starts
         self._entry_ends = entry_ends
         self._is_contiguous = is_contiguous

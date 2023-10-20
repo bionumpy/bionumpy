@@ -26,8 +26,8 @@ class GenotypeBufferExtractor(TextBufferExtractor):
 
 
 class NamedBufferExtractor(TextBufferExtractor):
-    def __init__(self, data, field_starts, field_ends, names):
-        super().__init__(data, field_starts, field_ends)
+    def __init__(self, data, field_starts, field_lens, names):
+        super().__init__(data, field_starts, field_lens=field_lens)
         self._names = names
 
     @classmethod
@@ -36,11 +36,11 @@ class NamedBufferExtractor(TextBufferExtractor):
         offsets = np.insert(np.cumsum(sizes), 0, 0)
         data = np.concatenate([b._data for b in buffers])
         starts = np.concatenate([b._field_starts + offset for b, offset in zip(buffers, offsets)])
-        ends = np.concatenate([b._field_ends + offset for b, offset in zip(buffers, offsets)])
-        return cls(data, starts, ends, buffers[0]._names)
+        lens = np.concatenate([b._field_lens for b in buffers])
+        return cls(data, starts, field_lens=lens, names=buffers[0]._names)
 
     def __getitem__(self, idx):
-        return self.__class__(self._data, field_starts=self._field_starts[idx], field_ends=self._field_ends[idx], names=self._names)
+        return self.__class__(self._data, field_starts=self._field_starts[idx], field_lens=self._field_lens[idx], names=self._names)
 
     def get_field_by_number(self, number):
         name = self._names[number]
@@ -52,8 +52,7 @@ class NamedBufferExtractor(TextBufferExtractor):
 
     def has_field_name(self, name):
         starts = self._field_starts.ravel()
-        ends = self._field_ends.ravel()
-        mask = ends-starts == len(name)
+        mask = self._field_lens.ravel() == len(name)
         if np.any(mask):
             array = RaggedArray(self._data,
                                 RaggedView2(starts[mask], np.full(mask.sum(), len(name)))).to_numpy_array()
@@ -70,11 +69,10 @@ class NamedBufferExtractor(TextBufferExtractor):
         line_sums = reshaped_mask.sum(axis=-1)
         if np.any(line_sums > 1):
             raise FormatException(f"Field: {name} found multiple times in buffer", line_number=np.flatnonzero(line_sums > 1)[0])
-        present_mask = reshaped_mask.any(axis=-1)
+        present_mask = reshaped_mask.any(axis=-1)#line_sums.astype(bool)#
 
         field_starts = self._field_starts.ravel()[mask] + len(name) + 1
-        field_ends = self._field_ends.ravel()[mask]
-        lens = field_ends - field_starts
+        lens = self._field_lens.ravel()[mask]-len(name)-1# - field_starts
         starts = np.zeros(len(self._field_starts), dtype=int)
         starts[present_mask] = field_starts
         starts = np.maximum.accumulate(starts)
@@ -163,10 +161,11 @@ class VCFBuffer(DelimitedBuffer):
         # starts[:, :-1] = starts[:, :-1] + 1
         ends[:, :-1] = ends[:, :-1] - 1
         dataclass = self.info_dataclass
+        lens = ends - starts
         extractor = NamedBufferExtractor(
             text.ravel(),
             starts,
-            ends,
+            lens,
             [f.name for f in dataclasses.fields(dataclass)])
         buf = InfoBuffer(extractor, dataclass)
         item_getter = ItemGetter(buf, dataclass)

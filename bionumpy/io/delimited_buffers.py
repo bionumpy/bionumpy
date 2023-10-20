@@ -74,10 +74,13 @@ class DelimitedBuffer(FileBuffer):
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
-        n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
-        if n_fields is None:
+        n_fields = np.flatnonzero(chunk[delimiters]=='\n')
+        #n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
+        #if n_fields is None:
+        if n_fields.size ==0:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise
+        n_fields = n_fields[0]+1
         new_lines = delimiters[(n_fields - 1)::n_fields]
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         buffer_extractor = cls._get_buffer_extractor(
