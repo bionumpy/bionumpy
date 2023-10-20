@@ -100,7 +100,7 @@ class DelimitedBuffer(FileBuffer):
         ends = delimiters[1:].reshape(-1, n_cols)
         entry_starts = starts[:, 0]
         entry_ends = ends[:, -1]+1
-        return TextThroughputExtractor(data, starts, ends, entry_starts, entry_ends)
+        return TextThroughputExtractor(data, starts, field_ends=ends, entry_starts=entry_starts, entry_ends=entry_ends)
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)

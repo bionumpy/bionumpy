@@ -236,8 +236,10 @@ class TextBufferExtractor:
 
 
 class TextThroughputExtractor(TextBufferExtractor):
-    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray, entry_starts: np.ndarray, entry_ends:np.ndarray, is_contiguous=True):
-        super().__init__(data, field_starts, field_lens=field_ends-field_starts)
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens=None, entry_starts: np.ndarray=None, entry_ends:np.ndarray=None, is_contiguous=True):
+        if field_lens is None:
+            field_lens = field_ends-field_starts
+        super().__init__(data, field_starts, field_lens=field_lens)
         self._entry_starts = entry_starts
         self._entry_ends = entry_ends
         self._is_contiguous = is_contiguous
@@ -245,7 +247,7 @@ class TextThroughputExtractor(TextBufferExtractor):
     def __getitem__(self, idx):
         return self.__class__(self._data,
                               field_starts=self._field_starts[idx],
-                              field_ends=self._field_ends[idx],
+                              field_lens=self._field_lens[idx],
                               entry_starts=self._entry_starts[idx],
                               entry_ends=self._entry_ends[idx], is_contiguous=False)
 
@@ -258,7 +260,8 @@ class TextThroughputExtractor(TextBufferExtractor):
         self._entry_starts = new_starts[:-1]
         self._entry_ends = new_starts[1:]
         self._field_starts = self._field_starts-offsets[:, None]
-        self._field_ends = self._field_ends-offsets[:, None]
+
+        # self._field_ends = self._field_ends-offsets[:, None]
         self._is_contiguous = True
 
     @property

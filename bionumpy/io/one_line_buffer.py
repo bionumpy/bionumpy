@@ -36,7 +36,11 @@ class OneLineBuffer(FileBuffer):
         field_starts = tmp[:-1].reshape(-1, cls.n_lines_per_entry)+(np.array(cls._line_offsets)+1)
         entry_starts = tmp[:-1:cls.n_lines_per_entry]+1
         entry_ends = tmp[::cls.n_lines_per_entry][1:]+1
-        return TextThroughputExtractor(data, field_starts, field_ends, entry_starts, entry_ends)
+        return TextThroughputExtractor(data,
+                                       field_starts,
+                                       field_ends=field_ends,
+                                       entry_starts=entry_starts,
+                                       entry_ends=entry_ends)
 
     @classmethod
     def contains_complete_entry(cls, chunks):
