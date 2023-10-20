@@ -617,3 +617,23 @@ def change_encoding(encoded_array, new_encoding):
         return EncodedArray(new_data, new_encoding)
     elif isinstance(encoded_array, EncodedRaggedArray):
         return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array._shape)
+
+
+class EncodedLookup:
+    def __init__(self, lookup: np.ndarray, encoding: Encoding):
+        self._lookup = lookup
+        self._encoding = encoding
+
+    def __getitem__(self, key):
+        key = self._translate_key(key)
+        return self._lookup[key]
+
+    def __setitem__(self, key, value):
+        self._lookup[key]=value
+
+    def _translate_key(self, key):
+        if isinstance(key, tuple):
+            key = tuple(as_encoded_array(i, self._encoding).raw() for i in key)
+        else:
+            key = as_encoded_array(key, self._encoding).raw()
+        return key

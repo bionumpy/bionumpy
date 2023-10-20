@@ -198,7 +198,7 @@ class TextBufferExtractor:
         self._field_starts = field_starts
         self._field_ends = field_ends
         if self._field_ends.size > 0:
-            assert self._field_ends[-1, -1] <=self._data.size, (self._field_ends[-1], self._data)
+            assert self._field_ends[-1, -1] <= self._data.size, (self._field_ends[-1], self._data)
         self._field_lens = field_ends-field_starts
         self._n_fields = field_starts.shape[1]
 
@@ -242,6 +242,7 @@ class TextThroughputExtractor(TextBufferExtractor):
                               entry_ends=self._entry_ends[idx], is_contiguous=False)
 
     def _make_contigous(self):
+        assert not self._is_contiguous
         lens = self._entry_ends - self._entry_starts
         new_starts = np.insert(np.cumsum(lens), 0, 0)
         offsets = self._entry_starts - new_starts[:-1]
