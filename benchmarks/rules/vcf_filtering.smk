@@ -34,7 +34,6 @@ rule bionumpy_vcf_filtering:
         """
 
 
-
 # not used, similar to pyvcf
 rule vcfpy_vcf_filtering:
     input:
