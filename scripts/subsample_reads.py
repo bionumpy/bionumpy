@@ -39,7 +39,7 @@ def test_count_entries():
     bnp.count_entries(f'../benchmarks/results/dna_sequences/{filename}', buffer_type=TwoLineFastaBuffer)
 
 
-def test():
+def _test():
     # filename = 'ENCFF689IPX.fq.gz'
     # filename = 'length150_nreads500000.fa'
     filename = 'length150_nreads5000000.fa'
@@ -50,9 +50,7 @@ def test():
     #                                                                                   buffer_type=TwoLineFastaBuffer) // 2
 
 
-test()
+if __name__ == '__main__':
+    import sys
 
-#if __name__ == '__main__':
-#    import sys
-
-#    subsample_reads(sys.argv[1], sys.argv[2])
+    subsample_reads(sys.argv[1], sys.argv[2])
