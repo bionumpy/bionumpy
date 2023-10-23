@@ -64,7 +64,7 @@ analysis:
 
   jaccard_all_vs_all:
     name: "Jaccard on multiple BED-files (all vs all)"
-    tools: ["bionumpy", "pyranges", "bedtools"]
+    tools: ["bionumpy", "pyranges"]
     validate_equal: false
     output_file_ending: ".csv"
     runs:

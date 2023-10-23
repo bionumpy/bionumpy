@@ -267,7 +267,7 @@ class NpBufferedWriter:
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
-        self._file_obj.flush()
+        # self._file_obj.flush()
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
