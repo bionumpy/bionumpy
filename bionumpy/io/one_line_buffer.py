@@ -171,6 +171,6 @@ class OneLineBuffer(FileBuffer):
 
 
 class TwoLineFastaBuffer(OneLineBuffer):
-    HEADER = ">"# 62
+    HEADER = ">"  # 62
     n_lines_per_entry = 2
     dataclass = SequenceEntry

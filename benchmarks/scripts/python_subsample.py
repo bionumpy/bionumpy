@@ -6,5 +6,6 @@ n_to_subsample = n_entries // 2
 rows = set(np.random.choice(np.arange(n_entries), n_to_subsample, replace=False))
 with open(snakemake.output[0], "w") as f:
     for i, entry in enumerate(grouper(open(snakemake.input[0]), 2)):
+        assert entry[0][0] == '>'
         if i in rows:
             f.write(''.join(entry))
