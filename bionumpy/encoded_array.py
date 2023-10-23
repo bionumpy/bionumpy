@@ -157,9 +157,20 @@ class IncompatibleEncodingsException(Exception):
 class EncodedRaggedArray(RaggedArray):
     """ Class to represnt EnocedArray with different row lengths """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        assert isinstance(self.ravel(), EncodedArray)
+    def __init__(self, data: 'EncodedArray', shape):
+        assert isinstance(data, EncodedArray), data
+        super().__init__(data.raw(), shape)
+        self._encoding = data.encoding
+
+    @property
+    def _cls(self):
+        return lambda data, shape: self.__class__(EncodedArray(data, self._encoding), shape)
+
+    def _set_data_range(self, idx, data):
+        super()._set_data_range(idx, as_encoded_array(data, self._encoding).raw())
+
+    def _get_data_range(self, idx):
+        return EncodedArray(super()._get_data_range(idx), self._encoding)
 
     def __repr__(self) -> str:
         if len(self) == 0:
@@ -181,7 +192,8 @@ class EncodedRaggedArray(RaggedArray):
     @property
     def encoding(self):
         """Make the encoding of the underlying data avaible"""
-        return self.ravel().encoding
+        return self._encoding
+        # return self.ravel().encoding
 
     def raw(self):
         return RaggedArray(self.ravel().raw(), self._shape)
@@ -201,6 +213,8 @@ class EncodedRaggedArray(RaggedArray):
     def tolist(self):
         return [row.to_string() for row in self]
 
+    def ravel(self):
+        return EncodedArray(super().ravel(), self._encoding)
 
 def get_NPSArray(array):
     return array.view(NPSArray)
@@ -603,3 +617,23 @@ def change_encoding(encoded_array, new_encoding):
         return EncodedArray(new_data, new_encoding)
     elif isinstance(encoded_array, EncodedRaggedArray):
         return EncodedRaggedArray(EncodedArray(new_data, new_encoding), encoded_array._shape)
+
+
+class EncodedLookup:
+    def __init__(self, lookup: np.ndarray, encoding: Encoding):
+        self._lookup = lookup
+        self._encoding = encoding
+
+    def __getitem__(self, key):
+        key = self._translate_key(key)
+        return self._lookup[key]
+
+    def __setitem__(self, key, value):
+        self._lookup[key]=value
+
+    def _translate_key(self, key):
+        if isinstance(key, tuple):
+            key = tuple(as_encoded_array(i, self._encoding).raw() for i in key)
+        else:
+            key = as_encoded_array(key, self._encoding).raw()
+        return key

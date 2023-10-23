@@ -1,4 +1,6 @@
 import logging
+import types
+
 from .stream import BnpStream
 
 logger = logging.getLogger("streamable")
@@ -90,7 +92,7 @@ class streamable:
 
             """
             
-            stream_args = [i for i, arg in enumerate(args) if isinstance(arg, BnpStream)]
+            stream_args = [i for i, arg in enumerate(args) if isinstance(arg, (BnpStream, types.GeneratorType))]
             if len(stream_args) == 0:
                 return func(*args, **kwargs)
 

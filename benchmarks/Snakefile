@@ -15,7 +15,9 @@ include: "rules/vcf_filtering.smk"
 include: "rules/validation.smk"
 include: "rules/peak_calling.smk"
 
-
+rule bionumpy_all:
+    input:
+        
 #rule _all:
 #    input:
 #        "report_big.md",

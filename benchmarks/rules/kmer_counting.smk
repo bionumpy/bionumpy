@@ -1,4 +1,3 @@
-
 rule jellyfish_count:
     input:
         "results/dna_sequences/{filename}.fa"
@@ -39,8 +38,9 @@ rule bionumpy_count:
         "results/bionumpy/kmer_counts/{filename}.csv"
     benchmark:
         "benchmarks/kmer_counts/bionumpy/{filename}.txt"
-    script:
-        "../scripts/bionumpy_count_kmers.py"
+    shell:
+        'python ../scripts/kmer_counting_example.py {input} {output}'
+        #         "../scripts/bionumpy_count_kmers.py"
 
 
 rule python_count:

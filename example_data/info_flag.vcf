@@ -1,0 +1,709 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=PON,Description="Filter PON variant">
+##FILTER=<ID=PONArtefact,Description="Filter PON artefact">
+##FILTER=<ID=dedupIndel,Description="Variant duplicate SNV/MNV vs INDEL">
+##FILTER=<ID=dedupMatch,Description="Variant duplicate with different read contexts">
+##FILTER=<ID=dedupMixedGermlineSomatic,Description="Variant duplicate mixed somatic/germline">
+##FILTER=<ID=dedupMnv,Description="Filter duplicate MNV">
+##FILTER=<ID=dedupSnvMnv,Description="Variant duplicate MNV vs SNV">
+##FILTER=<ID=maxGermlineAltSupport,Description="Excess germline alt support">
+##FILTER=<ID=maxGermlineRelRawBaseQual,Description="Excess germline relative quality">
+##FILTER=<ID=maxGermlineVAF,Description="Excess germline VAF">
+##FILTER=<ID=minGermlineDepth,Description="Insufficient germline depth">
+##FILTER=<ID=minTumorQual,Description="Insufficient tumor quality">
+##FILTER=<ID=minTumorVAF,Description="Insufficient tumor VAF">
+##FILTER=<ID=strandBias,Description="Variant exceeds strand bias limit">
+##INFO=<ID=BIALLELIC,Number=0,Type=Flag,Description="Variant is biallelic">
+##INFO=<ID=HOTSPOT,Number=0,Type=Flag,Description="Site is at a known hotspot location">
+##INFO=<ID=IMPACT,Number=10,Type=String,Description="Variant Impact [Gene, Transcript, CanonicalEffect, CanonicalCodingEffect, SpliceRegion, HgvsCodingImpact, HgvsProteinImpact, OtherReportableEffects, WorstCodingEffect, GenesAffected]">
+##INFO=<ID=KT,Number=1,Type=String,Description="Forward/reverse kataegis id">
+##INFO=<ID=LPS,Number=1,Type=Integer,Description="Local Phase Set">
+##INFO=<ID=LPS_RC,Number=.,Type=Integer,Description="Local Phase Set Read Count">
+##INFO=<ID=MAPPABILITY,Number=1,Type=Float,Description="GEM mappability in 150 base window">
+##INFO=<ID=MH,Number=1,Type=String,Description="Microhomology">
+##INFO=<ID=MSG,Number=1,Type=Integer,Description="Mixed Somatic and Germline variants">
+##INFO=<ID=NEAR_HOTSPOT,Number=0,Type=Flag,Description="Variant within 5 bases of hotspot">
+##INFO=<ID=PAVE_TI,Number=.,Type=String,Description="Transcript impact [Gene|GeneName|Transcript|Effects|SpliceRegion|HGVS.c|HGVS.p]">
+##INFO=<ID=PON_COUNT,Number=1,Type=Integer,Description="Cohort frequency for variant">
+##INFO=<ID=PON_MAX,Number=1,Type=Integer,Description="Max read depth in any sample with variant">
+##INFO=<ID=PURPLE_AF,Number=1,Type=Float,Description="Purity adjusted variant allelic frequency">
+##INFO=<ID=PURPLE_CN,Number=1,Type=Float,Description="Purity adjusted copy number surrounding variant location">
+##INFO=<ID=PURPLE_GERMLINE,Number=1,Type=String,Description="Germline classification surrounding variant location">
+##INFO=<ID=PURPLE_MACN,Number=1,Type=Float,Description="Purity adjusted minor allele ploidy surrounding variant location">
+##INFO=<ID=PURPLE_VCN,Number=1,Type=Float,Description="Purity adjusted variant copy number">
+##INFO=<ID=RC,Number=1,Type=String,Description="Read context core">
+##INFO=<ID=RC_IDX,Number=1,Type=Integer,Description="Read context index">
+##INFO=<ID=RC_LF,Number=1,Type=String,Description="Read context left flank">
+##INFO=<ID=RC_MH,Number=1,Type=String,Description="Micro-homology at read context">
+##INFO=<ID=RC_NM,Number=1,Type=Integer,Description="Minimum number of events in read">
+##INFO=<ID=RC_REPC,Number=1,Type=Integer,Description="Repeat count at read context">
+##INFO=<ID=RC_REPS,Number=1,Type=String,Description="Repeat sequence at read context">
+##INFO=<ID=RC_RF,Number=1,Type=String,Description="Read context right flank">
+##INFO=<ID=REPORTED,Number=0,Type=Flag,Description="Variant is reported in the driver catalog">
+##INFO=<ID=REP_C,Number=1,Type=Integer,Description="Repeat sequence count">
+##INFO=<ID=REP_S,Number=1,Type=String,Description="Repeat sequence">
+##INFO=<ID=SUBCL,Number=1,Type=Float,Description="Non-zero subclonal likelihood">
+##INFO=<ID=TIER,Number=1,Type=String,Description="Tier: [HOTSPOT, PANEL, HIGH_CONFIDENCE, LOW_CONFIDENCE]">
+##INFO=<ID=TNC,Number=1,Type=String,Description="Tri-nucleotide context">
+##contig=<ID=1,length=248956422,assembly=hg38.fa>
+##contig=<ID=10,length=133797422,assembly=hg38.fa>
+##contig=<ID=10_GL383545v1_alt,length=179254,assembly=hg38.fa>
+##contig=<ID=10_GL383546v1_alt,length=309802,assembly=hg38.fa>
+##contig=<ID=10_KI270824v1_alt,length=181496,assembly=hg38.fa>
+##contig=<ID=10_KI270825v1_alt,length=188315,assembly=hg38.fa>
+##contig=<ID=11,length=135086622,assembly=hg38.fa>
+##contig=<ID=11_GL383547v1_alt,length=154407,assembly=hg38.fa>
+##contig=<ID=11_JH159136v1_alt,length=200998,assembly=hg38.fa>
+##contig=<ID=11_JH159137v1_alt,length=191409,assembly=hg38.fa>
+##contig=<ID=11_KI270721v1_random,length=100316,assembly=hg38.fa>
+##contig=<ID=11_KI270826v1_alt,length=186169,assembly=hg38.fa>
+##contig=<ID=11_KI270827v1_alt,length=67707,assembly=hg38.fa>
+##contig=<ID=11_KI270829v1_alt,length=204059,assembly=hg38.fa>
+##contig=<ID=11_KI270830v1_alt,length=177092,assembly=hg38.fa>
+##contig=<ID=11_KI270831v1_alt,length=296895,assembly=hg38.fa>
+##contig=<ID=11_KI270832v1_alt,length=210133,assembly=hg38.fa>
+##contig=<ID=11_KI270902v1_alt,length=106711,assembly=hg38.fa>
+##contig=<ID=11_KI270903v1_alt,length=214625,assembly=hg38.fa>
+##contig=<ID=11_KI270927v1_alt,length=218612,assembly=hg38.fa>
+##contig=<ID=12,length=133275309,assembly=hg38.fa>
+##contig=<ID=12_GL383549v1_alt,length=120804,assembly=hg38.fa>
+##contig=<ID=12_GL383550v2_alt,length=169178,assembly=hg38.fa>
+##contig=<ID=12_GL383551v1_alt,length=184319,assembly=hg38.fa>
+##contig=<ID=12_GL383552v1_alt,length=138655,assembly=hg38.fa>
+##contig=<ID=12_GL383553v2_alt,length=152874,assembly=hg38.fa>
+##contig=<ID=12_GL877875v1_alt,length=167313,assembly=hg38.fa>
+##contig=<ID=12_GL877876v1_alt,length=408271,assembly=hg38.fa>
+##contig=<ID=12_KI270833v1_alt,length=76061,assembly=hg38.fa>
+##contig=<ID=12_KI270834v1_alt,length=119498,assembly=hg38.fa>
+##contig=<ID=12_KI270835v1_alt,length=238139,assembly=hg38.fa>
+##contig=<ID=12_KI270836v1_alt,length=56134,assembly=hg38.fa>
+##contig=<ID=12_KI270837v1_alt,length=40090,assembly=hg38.fa>
+##contig=<ID=12_KI270904v1_alt,length=572349,assembly=hg38.fa>
+##contig=<ID=13,length=114364328,assembly=hg38.fa>
+##contig=<ID=13_KI270838v1_alt,length=306913,assembly=hg38.fa>
+##contig=<ID=13_KI270839v1_alt,length=180306,assembly=hg38.fa>
+##contig=<ID=13_KI270840v1_alt,length=191684,assembly=hg38.fa>
+##contig=<ID=13_KI270841v1_alt,length=169134,assembly=hg38.fa>
+##contig=<ID=13_KI270842v1_alt,length=37287,assembly=hg38.fa>
+##contig=<ID=13_KI270843v1_alt,length=103832,assembly=hg38.fa>
+##contig=<ID=14,length=107043718,assembly=hg38.fa>
+##contig=<ID=14_GL000009v2_random,length=201709,assembly=hg38.fa>
+##contig=<ID=14_GL000194v1_random,length=191469,assembly=hg38.fa>
+##contig=<ID=14_GL000225v1_random,length=211173,assembly=hg38.fa>
+##contig=<ID=14_KI270722v1_random,length=194050,assembly=hg38.fa>
+##contig=<ID=14_KI270723v1_random,length=38115,assembly=hg38.fa>
+##contig=<ID=14_KI270724v1_random,length=39555,assembly=hg38.fa>
+##contig=<ID=14_KI270725v1_random,length=172810,assembly=hg38.fa>
+##contig=<ID=14_KI270726v1_random,length=43739,assembly=hg38.fa>
+##contig=<ID=14_KI270844v1_alt,length=322166,assembly=hg38.fa>
+##contig=<ID=14_KI270845v1_alt,length=180703,assembly=hg38.fa>
+##contig=<ID=14_KI270846v1_alt,length=1351393,assembly=hg38.fa>
+##contig=<ID=14_KI270847v1_alt,length=1511111,assembly=hg38.fa>
+##contig=<ID=15,length=101991189,assembly=hg38.fa>
+##contig=<ID=15_GL383554v1_alt,length=296527,assembly=hg38.fa>
+##contig=<ID=15_GL383555v2_alt,length=388773,assembly=hg38.fa>
+##contig=<ID=15_KI270727v1_random,length=448248,assembly=hg38.fa>
+##contig=<ID=15_KI270848v1_alt,length=327382,assembly=hg38.fa>
+##contig=<ID=15_KI270849v1_alt,length=244917,assembly=hg38.fa>
+##contig=<ID=15_KI270850v1_alt,length=430880,assembly=hg38.fa>
+##contig=<ID=15_KI270851v1_alt,length=263054,assembly=hg38.fa>
+##contig=<ID=15_KI270852v1_alt,length=478999,assembly=hg38.fa>
+##contig=<ID=15_KI270905v1_alt,length=5161414,assembly=hg38.fa>
+##contig=<ID=15_KI270906v1_alt,length=196384,assembly=hg38.fa>
+##contig=<ID=16,length=90338345,assembly=hg38.fa>
+##contig=<ID=16_GL383556v1_alt,length=192462,assembly=hg38.fa>
+##contig=<ID=16_GL383557v1_alt,length=89672,assembly=hg38.fa>
+##contig=<ID=16_KI270728v1_random,length=1872759,assembly=hg38.fa>
+##contig=<ID=16_KI270853v1_alt,length=2659700,assembly=hg38.fa>
+##contig=<ID=16_KI270854v1_alt,length=134193,assembly=hg38.fa>
+##contig=<ID=16_KI270855v1_alt,length=232857,assembly=hg38.fa>
+##contig=<ID=16_KI270856v1_alt,length=63982,assembly=hg38.fa>
+##contig=<ID=17,length=83257441,assembly=hg38.fa>
+##contig=<ID=17_GL000205v2_random,length=185591,assembly=hg38.fa>
+##contig=<ID=17_GL000258v2_alt,length=1821992,assembly=hg38.fa>
+##contig=<ID=17_GL383563v3_alt,length=375691,assembly=hg38.fa>
+##contig=<ID=17_GL383564v2_alt,length=133151,assembly=hg38.fa>
+##contig=<ID=17_GL383565v1_alt,length=223995,assembly=hg38.fa>
+##contig=<ID=17_GL383566v1_alt,length=90219,assembly=hg38.fa>
+##contig=<ID=17_JH159146v1_alt,length=278131,assembly=hg38.fa>
+##contig=<ID=17_JH159147v1_alt,length=70345,assembly=hg38.fa>
+##contig=<ID=17_JH159148v1_alt,length=88070,assembly=hg38.fa>
+##contig=<ID=17_KI270729v1_random,length=280839,assembly=hg38.fa>
+##contig=<ID=17_KI270730v1_random,length=112551,assembly=hg38.fa>
+##contig=<ID=17_KI270857v1_alt,length=2877074,assembly=hg38.fa>
+##contig=<ID=17_KI270858v1_alt,length=235827,assembly=hg38.fa>
+##contig=<ID=17_KI270859v1_alt,length=108763,assembly=hg38.fa>
+##contig=<ID=17_KI270860v1_alt,length=178921,assembly=hg38.fa>
+##contig=<ID=17_KI270861v1_alt,length=196688,assembly=hg38.fa>
+##contig=<ID=17_KI270862v1_alt,length=391357,assembly=hg38.fa>
+##contig=<ID=17_KI270907v1_alt,length=137721,assembly=hg38.fa>
+##contig=<ID=17_KI270908v1_alt,length=1423190,assembly=hg38.fa>
+##contig=<ID=17_KI270909v1_alt,length=325800,assembly=hg38.fa>
+##contig=<ID=17_KI270910v1_alt,length=157099,assembly=hg38.fa>
+##contig=<ID=18,length=80373285,assembly=hg38.fa>
+##contig=<ID=18_GL383567v1_alt,length=289831,assembly=hg38.fa>
+##contig=<ID=18_GL383568v1_alt,length=104552,assembly=hg38.fa>
+##contig=<ID=18_GL383569v1_alt,length=167950,assembly=hg38.fa>
+##contig=<ID=18_GL383570v1_alt,length=164789,assembly=hg38.fa>
+##contig=<ID=18_GL383571v1_alt,length=198278,assembly=hg38.fa>
+##contig=<ID=18_GL383572v1_alt,length=159547,assembly=hg38.fa>
+##contig=<ID=18_KI270863v1_alt,length=167999,assembly=hg38.fa>
+##contig=<ID=18_KI270864v1_alt,length=111737,assembly=hg38.fa>
+##contig=<ID=18_KI270911v1_alt,length=157710,assembly=hg38.fa>
+##contig=<ID=18_KI270912v1_alt,length=174061,assembly=hg38.fa>
+##contig=<ID=19,length=58617616,assembly=hg38.fa>
+##contig=<ID=19_GL000209v2_alt,length=177381,assembly=hg38.fa>
+##contig=<ID=19_GL383573v1_alt,length=385657,assembly=hg38.fa>
+##contig=<ID=19_GL383574v1_alt,length=155864,assembly=hg38.fa>
+##contig=<ID=19_GL383575v2_alt,length=170222,assembly=hg38.fa>
+##contig=<ID=19_GL383576v1_alt,length=188024,assembly=hg38.fa>
+##contig=<ID=19_GL949746v1_alt,length=987716,assembly=hg38.fa>
+##contig=<ID=19_GL949747v2_alt,length=729520,assembly=hg38.fa>
+##contig=<ID=19_GL949748v2_alt,length=1064304,assembly=hg38.fa>
+##contig=<ID=19_GL949749v2_alt,length=1091841,assembly=hg38.fa>
+##contig=<ID=19_GL949750v2_alt,length=1066390,assembly=hg38.fa>
+##contig=<ID=19_GL949751v2_alt,length=1002683,assembly=hg38.fa>
+##contig=<ID=19_GL949752v1_alt,length=987100,assembly=hg38.fa>
+##contig=<ID=19_GL949753v2_alt,length=796479,assembly=hg38.fa>
+##contig=<ID=19_KI270865v1_alt,length=52969,assembly=hg38.fa>
+##contig=<ID=19_KI270866v1_alt,length=43156,assembly=hg38.fa>
+##contig=<ID=19_KI270867v1_alt,length=233762,assembly=hg38.fa>
+##contig=<ID=19_KI270868v1_alt,length=61734,assembly=hg38.fa>
+##contig=<ID=19_KI270882v1_alt,length=248807,assembly=hg38.fa>
+##contig=<ID=19_KI270883v1_alt,length=170399,assembly=hg38.fa>
+##contig=<ID=19_KI270884v1_alt,length=157053,assembly=hg38.fa>
+##contig=<ID=19_KI270885v1_alt,length=171027,assembly=hg38.fa>
+##contig=<ID=19_KI270886v1_alt,length=204239,assembly=hg38.fa>
+##contig=<ID=19_KI270887v1_alt,length=209512,assembly=hg38.fa>
+##contig=<ID=19_KI270888v1_alt,length=155532,assembly=hg38.fa>
+##contig=<ID=19_KI270889v1_alt,length=170698,assembly=hg38.fa>
+##contig=<ID=19_KI270890v1_alt,length=184499,assembly=hg38.fa>
+##contig=<ID=19_KI270891v1_alt,length=170680,assembly=hg38.fa>
+##contig=<ID=19_KI270914v1_alt,length=205194,assembly=hg38.fa>
+##contig=<ID=19_KI270915v1_alt,length=170665,assembly=hg38.fa>
+##contig=<ID=19_KI270916v1_alt,length=184516,assembly=hg38.fa>
+##contig=<ID=19_KI270917v1_alt,length=190932,assembly=hg38.fa>
+##contig=<ID=19_KI270918v1_alt,length=123111,assembly=hg38.fa>
+##contig=<ID=19_KI270919v1_alt,length=170701,assembly=hg38.fa>
+##contig=<ID=19_KI270920v1_alt,length=198005,assembly=hg38.fa>
+##contig=<ID=19_KI270921v1_alt,length=282224,assembly=hg38.fa>
+##contig=<ID=19_KI270922v1_alt,length=187935,assembly=hg38.fa>
+##contig=<ID=19_KI270923v1_alt,length=189352,assembly=hg38.fa>
+##contig=<ID=19_KI270929v1_alt,length=186203,assembly=hg38.fa>
+##contig=<ID=19_KI270930v1_alt,length=200773,assembly=hg38.fa>
+##contig=<ID=19_KI270931v1_alt,length=170148,assembly=hg38.fa>
+##contig=<ID=19_KI270932v1_alt,length=215732,assembly=hg38.fa>
+##contig=<ID=19_KI270933v1_alt,length=170537,assembly=hg38.fa>
+##contig=<ID=19_KI270938v1_alt,length=1066800,assembly=hg38.fa>
+##contig=<ID=1_GL383518v1_alt,length=182439,assembly=hg38.fa>
+##contig=<ID=1_GL383519v1_alt,length=110268,assembly=hg38.fa>
+##contig=<ID=1_GL383520v2_alt,length=366580,assembly=hg38.fa>
+##contig=<ID=1_KI270706v1_random,length=175055,assembly=hg38.fa>
+##contig=<ID=1_KI270707v1_random,length=32032,assembly=hg38.fa>
+##contig=<ID=1_KI270708v1_random,length=127682,assembly=hg38.fa>
+##contig=<ID=1_KI270709v1_random,length=66860,assembly=hg38.fa>
+##contig=<ID=1_KI270710v1_random,length=40176,assembly=hg38.fa>
+##contig=<ID=1_KI270711v1_random,length=42210,assembly=hg38.fa>
+##contig=<ID=1_KI270712v1_random,length=176043,assembly=hg38.fa>
+##contig=<ID=1_KI270713v1_random,length=40745,assembly=hg38.fa>
+##contig=<ID=1_KI270714v1_random,length=41717,assembly=hg38.fa>
+##contig=<ID=1_KI270759v1_alt,length=425601,assembly=hg38.fa>
+##contig=<ID=1_KI270760v1_alt,length=109528,assembly=hg38.fa>
+##contig=<ID=1_KI270761v1_alt,length=165834,assembly=hg38.fa>
+##contig=<ID=1_KI270762v1_alt,length=354444,assembly=hg38.fa>
+##contig=<ID=1_KI270763v1_alt,length=911658,assembly=hg38.fa>
+##contig=<ID=1_KI270764v1_alt,length=50258,assembly=hg38.fa>
+##contig=<ID=1_KI270765v1_alt,length=185285,assembly=hg38.fa>
+##contig=<ID=1_KI270766v1_alt,length=256271,assembly=hg38.fa>
+##contig=<ID=1_KI270892v1_alt,length=162212,assembly=hg38.fa>
+##contig=<ID=2,length=242193529,assembly=hg38.fa>
+##contig=<ID=20,length=64444167,assembly=hg38.fa>
+##contig=<ID=20_GL383577v2_alt,length=128386,assembly=hg38.fa>
+##contig=<ID=20_KI270869v1_alt,length=118774,assembly=hg38.fa>
+##contig=<ID=20_KI270870v1_alt,length=183433,assembly=hg38.fa>
+##contig=<ID=20_KI270871v1_alt,length=58661,assembly=hg38.fa>
+##contig=<ID=21,length=46709983,assembly=hg38.fa>
+##contig=<ID=21_GL383578v2_alt,length=63917,assembly=hg38.fa>
+##contig=<ID=21_GL383579v2_alt,length=201197,assembly=hg38.fa>
+##contig=<ID=21_GL383580v2_alt,length=74653,assembly=hg38.fa>
+##contig=<ID=21_GL383581v2_alt,length=116689,assembly=hg38.fa>
+##contig=<ID=21_KI270872v1_alt,length=82692,assembly=hg38.fa>
+##contig=<ID=21_KI270873v1_alt,length=143900,assembly=hg38.fa>
+##contig=<ID=21_KI270874v1_alt,length=166743,assembly=hg38.fa>
+##contig=<ID=22,length=50818468,assembly=hg38.fa>
+##contig=<ID=22_GL383582v2_alt,length=162811,assembly=hg38.fa>
+##contig=<ID=22_GL383583v2_alt,length=96924,assembly=hg38.fa>
+##contig=<ID=22_KB663609v1_alt,length=74013,assembly=hg38.fa>
+##contig=<ID=22_KI270731v1_random,length=150754,assembly=hg38.fa>
+##contig=<ID=22_KI270732v1_random,length=41543,assembly=hg38.fa>
+##contig=<ID=22_KI270733v1_random,length=179772,assembly=hg38.fa>
+##contig=<ID=22_KI270734v1_random,length=165050,assembly=hg38.fa>
+##contig=<ID=22_KI270735v1_random,length=42811,assembly=hg38.fa>
+##contig=<ID=22_KI270736v1_random,length=181920,assembly=hg38.fa>
+##contig=<ID=22_KI270737v1_random,length=103838,assembly=hg38.fa>
+##contig=<ID=22_KI270738v1_random,length=99375,assembly=hg38.fa>
+##contig=<ID=22_KI270739v1_random,length=73985,assembly=hg38.fa>
+##contig=<ID=22_KI270875v1_alt,length=259914,assembly=hg38.fa>
+##contig=<ID=22_KI270876v1_alt,length=263666,assembly=hg38.fa>
+##contig=<ID=22_KI270877v1_alt,length=101331,assembly=hg38.fa>
+##contig=<ID=22_KI270878v1_alt,length=186262,assembly=hg38.fa>
+##contig=<ID=22_KI270879v1_alt,length=304135,assembly=hg38.fa>
+##contig=<ID=22_KI270928v1_alt,length=176103,assembly=hg38.fa>
+##contig=<ID=2_GL383521v1_alt,length=143390,assembly=hg38.fa>
+##contig=<ID=2_GL383522v1_alt,length=123821,assembly=hg38.fa>
+##contig=<ID=2_GL582966v2_alt,length=96131,assembly=hg38.fa>
+##contig=<ID=2_KI270715v1_random,length=161471,assembly=hg38.fa>
+##contig=<ID=2_KI270716v1_random,length=153799,assembly=hg38.fa>
+##contig=<ID=2_KI270767v1_alt,length=161578,assembly=hg38.fa>
+##contig=<ID=2_KI270768v1_alt,length=110099,assembly=hg38.fa>
+##contig=<ID=2_KI270769v1_alt,length=120616,assembly=hg38.fa>
+##contig=<ID=2_KI270770v1_alt,length=136240,assembly=hg38.fa>
+##contig=<ID=2_KI270771v1_alt,length=110395,assembly=hg38.fa>
+##contig=<ID=2_KI270772v1_alt,length=133041,assembly=hg38.fa>
+##contig=<ID=2_KI270773v1_alt,length=70887,assembly=hg38.fa>
+##contig=<ID=2_KI270774v1_alt,length=223625,assembly=hg38.fa>
+##contig=<ID=2_KI270775v1_alt,length=138019,assembly=hg38.fa>
+##contig=<ID=2_KI270776v1_alt,length=174166,assembly=hg38.fa>
+##contig=<ID=2_KI270893v1_alt,length=161218,assembly=hg38.fa>
+##contig=<ID=2_KI270894v1_alt,length=214158,assembly=hg38.fa>
+##contig=<ID=3,length=198295559,assembly=hg38.fa>
+##contig=<ID=3_GL000221v1_random,length=155397,assembly=hg38.fa>
+##contig=<ID=3_GL383526v1_alt,length=180671,assembly=hg38.fa>
+##contig=<ID=3_JH636055v2_alt,length=173151,assembly=hg38.fa>
+##contig=<ID=3_KI270777v1_alt,length=173649,assembly=hg38.fa>
+##contig=<ID=3_KI270778v1_alt,length=248252,assembly=hg38.fa>
+##contig=<ID=3_KI270779v1_alt,length=205312,assembly=hg38.fa>
+##contig=<ID=3_KI270780v1_alt,length=224108,assembly=hg38.fa>
+##contig=<ID=3_KI270781v1_alt,length=113034,assembly=hg38.fa>
+##contig=<ID=3_KI270782v1_alt,length=162429,assembly=hg38.fa>
+##contig=<ID=3_KI270783v1_alt,length=109187,assembly=hg38.fa>
+##contig=<ID=3_KI270784v1_alt,length=184404,assembly=hg38.fa>
+##contig=<ID=3_KI270895v1_alt,length=162896,assembly=hg38.fa>
+##contig=<ID=3_KI270924v1_alt,length=166540,assembly=hg38.fa>
+##contig=<ID=3_KI270934v1_alt,length=163458,assembly=hg38.fa>
+##contig=<ID=3_KI270935v1_alt,length=197351,assembly=hg38.fa>
+##contig=<ID=3_KI270936v1_alt,length=164170,assembly=hg38.fa>
+##contig=<ID=3_KI270937v1_alt,length=165607,assembly=hg38.fa>
+##contig=<ID=4,length=190214555,assembly=hg38.fa>
+##contig=<ID=4_GL000008v2_random,length=209709,assembly=hg38.fa>
+##contig=<ID=4_GL000257v2_alt,length=586476,assembly=hg38.fa>
+##contig=<ID=4_GL383527v1_alt,length=164536,assembly=hg38.fa>
+##contig=<ID=4_GL383528v1_alt,length=376187,assembly=hg38.fa>
+##contig=<ID=4_KI270785v1_alt,length=119912,assembly=hg38.fa>
+##contig=<ID=4_KI270786v1_alt,length=244096,assembly=hg38.fa>
+##contig=<ID=4_KI270787v1_alt,length=111943,assembly=hg38.fa>
+##contig=<ID=4_KI270788v1_alt,length=158965,assembly=hg38.fa>
+##contig=<ID=4_KI270789v1_alt,length=205944,assembly=hg38.fa>
+##contig=<ID=4_KI270790v1_alt,length=220246,assembly=hg38.fa>
+##contig=<ID=4_KI270896v1_alt,length=378547,assembly=hg38.fa>
+##contig=<ID=4_KI270925v1_alt,length=555799,assembly=hg38.fa>
+##contig=<ID=5,length=181538259,assembly=hg38.fa>
+##contig=<ID=5_GL000208v1_random,length=92689,assembly=hg38.fa>
+##contig=<ID=5_GL339449v2_alt,length=1612928,assembly=hg38.fa>
+##contig=<ID=5_GL383530v1_alt,length=101241,assembly=hg38.fa>
+##contig=<ID=5_GL383531v1_alt,length=173459,assembly=hg38.fa>
+##contig=<ID=5_GL383532v1_alt,length=82728,assembly=hg38.fa>
+##contig=<ID=5_GL949742v1_alt,length=226852,assembly=hg38.fa>
+##contig=<ID=5_KI270791v1_alt,length=195710,assembly=hg38.fa>
+##contig=<ID=5_KI270792v1_alt,length=179043,assembly=hg38.fa>
+##contig=<ID=5_KI270793v1_alt,length=126136,assembly=hg38.fa>
+##contig=<ID=5_KI270794v1_alt,length=164558,assembly=hg38.fa>
+##contig=<ID=5_KI270795v1_alt,length=131892,assembly=hg38.fa>
+##contig=<ID=5_KI270796v1_alt,length=172708,assembly=hg38.fa>
+##contig=<ID=5_KI270897v1_alt,length=1144418,assembly=hg38.fa>
+##contig=<ID=5_KI270898v1_alt,length=130957,assembly=hg38.fa>
+##contig=<ID=6,length=170805979,assembly=hg38.fa>
+##contig=<ID=6_GL000250v2_alt,length=4672374,assembly=hg38.fa>
+##contig=<ID=6_GL000251v2_alt,length=4795265,assembly=hg38.fa>
+##contig=<ID=6_GL000252v2_alt,length=4604811,assembly=hg38.fa>
+##contig=<ID=6_GL000253v2_alt,length=4677643,assembly=hg38.fa>
+##contig=<ID=6_GL000254v2_alt,length=4827813,assembly=hg38.fa>
+##contig=<ID=6_GL000255v2_alt,length=4606388,assembly=hg38.fa>
+##contig=<ID=6_GL000256v2_alt,length=4929269,assembly=hg38.fa>
+##contig=<ID=6_GL383533v1_alt,length=124736,assembly=hg38.fa>
+##contig=<ID=6_KB021644v2_alt,length=185823,assembly=hg38.fa>
+##contig=<ID=6_KI270758v1_alt,length=76752,assembly=hg38.fa>
+##contig=<ID=6_KI270797v1_alt,length=197536,assembly=hg38.fa>
+##contig=<ID=6_KI270798v1_alt,length=271782,assembly=hg38.fa>
+##contig=<ID=6_KI270799v1_alt,length=152148,assembly=hg38.fa>
+##contig=<ID=6_KI270800v1_alt,length=175808,assembly=hg38.fa>
+##contig=<ID=6_KI270801v1_alt,length=870480,assembly=hg38.fa>
+##contig=<ID=6_KI270802v1_alt,length=75005,assembly=hg38.fa>
+##contig=<ID=7,length=159345973,assembly=hg38.fa>
+##contig=<ID=7_GL383534v2_alt,length=119183,assembly=hg38.fa>
+##contig=<ID=7_KI270803v1_alt,length=1111570,assembly=hg38.fa>
+##contig=<ID=7_KI270804v1_alt,length=157952,assembly=hg38.fa>
+##contig=<ID=7_KI270805v1_alt,length=209988,assembly=hg38.fa>
+##contig=<ID=7_KI270806v1_alt,length=158166,assembly=hg38.fa>
+##contig=<ID=7_KI270807v1_alt,length=126434,assembly=hg38.fa>
+##contig=<ID=7_KI270808v1_alt,length=271455,assembly=hg38.fa>
+##contig=<ID=7_KI270809v1_alt,length=209586,assembly=hg38.fa>
+##contig=<ID=7_KI270899v1_alt,length=190869,assembly=hg38.fa>
+##contig=<ID=8,length=145138636,assembly=hg38.fa>
+##contig=<ID=8_KI270810v1_alt,length=374415,assembly=hg38.fa>
+##contig=<ID=8_KI270811v1_alt,length=292436,assembly=hg38.fa>
+##contig=<ID=8_KI270812v1_alt,length=282736,assembly=hg38.fa>
+##contig=<ID=8_KI270813v1_alt,length=300230,assembly=hg38.fa>
+##contig=<ID=8_KI270814v1_alt,length=141812,assembly=hg38.fa>
+##contig=<ID=8_KI270815v1_alt,length=132244,assembly=hg38.fa>
+##contig=<ID=8_KI270816v1_alt,length=305841,assembly=hg38.fa>
+##contig=<ID=8_KI270817v1_alt,length=158983,assembly=hg38.fa>
+##contig=<ID=8_KI270818v1_alt,length=145606,assembly=hg38.fa>
+##contig=<ID=8_KI270819v1_alt,length=133535,assembly=hg38.fa>
+##contig=<ID=8_KI270820v1_alt,length=36640,assembly=hg38.fa>
+##contig=<ID=8_KI270821v1_alt,length=985506,assembly=hg38.fa>
+##contig=<ID=8_KI270822v1_alt,length=624492,assembly=hg38.fa>
+##contig=<ID=8_KI270900v1_alt,length=318687,assembly=hg38.fa>
+##contig=<ID=8_KI270901v1_alt,length=136959,assembly=hg38.fa>
+##contig=<ID=8_KI270926v1_alt,length=229282,assembly=hg38.fa>
+##contig=<ID=9,length=138394717,assembly=hg38.fa>
+##contig=<ID=9_GL383539v1_alt,length=162988,assembly=hg38.fa>
+##contig=<ID=9_GL383540v1_alt,length=71551,assembly=hg38.fa>
+##contig=<ID=9_GL383541v1_alt,length=171286,assembly=hg38.fa>
+##contig=<ID=9_GL383542v1_alt,length=60032,assembly=hg38.fa>
+##contig=<ID=9_KI270717v1_random,length=40062,assembly=hg38.fa>
+##contig=<ID=9_KI270718v1_random,length=38054,assembly=hg38.fa>
+##contig=<ID=9_KI270719v1_random,length=176845,assembly=hg38.fa>
+##contig=<ID=9_KI270720v1_random,length=39050,assembly=hg38.fa>
+##contig=<ID=9_KI270823v1_alt,length=439082,assembly=hg38.fa>
+##contig=<ID=M,length=16569,assembly=hg38.fa>
+##contig=<ID=Un_GL000195v1,length=182896,assembly=hg38.fa>
+##contig=<ID=Un_GL000213v1,length=164239,assembly=hg38.fa>
+##contig=<ID=Un_GL000214v1,length=137718,assembly=hg38.fa>
+##contig=<ID=Un_GL000216v2,length=176608,assembly=hg38.fa>
+##contig=<ID=Un_GL000218v1,length=161147,assembly=hg38.fa>
+##contig=<ID=Un_GL000219v1,length=179198,assembly=hg38.fa>
+##contig=<ID=Un_GL000220v1,length=161802,assembly=hg38.fa>
+##contig=<ID=Un_GL000224v1,length=179693,assembly=hg38.fa>
+##contig=<ID=Un_GL000226v1,length=15008,assembly=hg38.fa>
+##contig=<ID=Un_KI270302v1,length=2274,assembly=hg38.fa>
+##contig=<ID=Un_KI270303v1,length=1942,assembly=hg38.fa>
+##contig=<ID=Un_KI270304v1,length=2165,assembly=hg38.fa>
+##contig=<ID=Un_KI270305v1,length=1472,assembly=hg38.fa>
+##contig=<ID=Un_KI270310v1,length=1201,assembly=hg38.fa>
+##contig=<ID=Un_KI270311v1,length=12399,assembly=hg38.fa>
+##contig=<ID=Un_KI270312v1,length=998,assembly=hg38.fa>
+##contig=<ID=Un_KI270315v1,length=2276,assembly=hg38.fa>
+##contig=<ID=Un_KI270316v1,length=1444,assembly=hg38.fa>
+##contig=<ID=Un_KI270317v1,length=37690,assembly=hg38.fa>
+##contig=<ID=Un_KI270320v1,length=4416,assembly=hg38.fa>
+##contig=<ID=Un_KI270322v1,length=21476,assembly=hg38.fa>
+##contig=<ID=Un_KI270329v1,length=1040,assembly=hg38.fa>
+##contig=<ID=Un_KI270330v1,length=1652,assembly=hg38.fa>
+##contig=<ID=Un_KI270333v1,length=2699,assembly=hg38.fa>
+##contig=<ID=Un_KI270334v1,length=1368,assembly=hg38.fa>
+##contig=<ID=Un_KI270335v1,length=1048,assembly=hg38.fa>
+##contig=<ID=Un_KI270336v1,length=1026,assembly=hg38.fa>
+##contig=<ID=Un_KI270337v1,length=1121,assembly=hg38.fa>
+##contig=<ID=Un_KI270338v1,length=1428,assembly=hg38.fa>
+##contig=<ID=Un_KI270340v1,length=1428,assembly=hg38.fa>
+##contig=<ID=Un_KI270362v1,length=3530,assembly=hg38.fa>
+##contig=<ID=Un_KI270363v1,length=1803,assembly=hg38.fa>
+##contig=<ID=Un_KI270364v1,length=2855,assembly=hg38.fa>
+##contig=<ID=Un_KI270366v1,length=8320,assembly=hg38.fa>
+##contig=<ID=Un_KI270371v1,length=2805,assembly=hg38.fa>
+##contig=<ID=Un_KI270372v1,length=1650,assembly=hg38.fa>
+##contig=<ID=Un_KI270373v1,length=1451,assembly=hg38.fa>
+##contig=<ID=Un_KI270374v1,length=2656,assembly=hg38.fa>
+##contig=<ID=Un_KI270375v1,length=2378,assembly=hg38.fa>
+##contig=<ID=Un_KI270376v1,length=1136,assembly=hg38.fa>
+##contig=<ID=Un_KI270378v1,length=1048,assembly=hg38.fa>
+##contig=<ID=Un_KI270379v1,length=1045,assembly=hg38.fa>
+##contig=<ID=Un_KI270381v1,length=1930,assembly=hg38.fa>
+##contig=<ID=Un_KI270382v1,length=4215,assembly=hg38.fa>
+##contig=<ID=Un_KI270383v1,length=1750,assembly=hg38.fa>
+##contig=<ID=Un_KI270384v1,length=1658,assembly=hg38.fa>
+##contig=<ID=Un_KI270385v1,length=990,assembly=hg38.fa>
+##contig=<ID=Un_KI270386v1,length=1788,assembly=hg38.fa>
+##contig=<ID=Un_KI270387v1,length=1537,assembly=hg38.fa>
+##contig=<ID=Un_KI270388v1,length=1216,assembly=hg38.fa>
+##contig=<ID=Un_KI270389v1,length=1298,assembly=hg38.fa>
+##contig=<ID=Un_KI270390v1,length=2387,assembly=hg38.fa>
+##contig=<ID=Un_KI270391v1,length=1484,assembly=hg38.fa>
+##contig=<ID=Un_KI270392v1,length=971,assembly=hg38.fa>
+##contig=<ID=Un_KI270393v1,length=1308,assembly=hg38.fa>
+##contig=<ID=Un_KI270394v1,length=970,assembly=hg38.fa>
+##contig=<ID=Un_KI270395v1,length=1143,assembly=hg38.fa>
+##contig=<ID=Un_KI270396v1,length=1880,assembly=hg38.fa>
+##contig=<ID=Un_KI270411v1,length=2646,assembly=hg38.fa>
+##contig=<ID=Un_KI270412v1,length=1179,assembly=hg38.fa>
+##contig=<ID=Un_KI270414v1,length=2489,assembly=hg38.fa>
+##contig=<ID=Un_KI270417v1,length=2043,assembly=hg38.fa>
+##contig=<ID=Un_KI270418v1,length=2145,assembly=hg38.fa>
+##contig=<ID=Un_KI270419v1,length=1029,assembly=hg38.fa>
+##contig=<ID=Un_KI270420v1,length=2321,assembly=hg38.fa>
+##contig=<ID=Un_KI270422v1,length=1445,assembly=hg38.fa>
+##contig=<ID=Un_KI270423v1,length=981,assembly=hg38.fa>
+##contig=<ID=Un_KI270424v1,length=2140,assembly=hg38.fa>
+##contig=<ID=Un_KI270425v1,length=1884,assembly=hg38.fa>
+##contig=<ID=Un_KI270429v1,length=1361,assembly=hg38.fa>
+##contig=<ID=Un_KI270435v1,length=92983,assembly=hg38.fa>
+##contig=<ID=Un_KI270438v1,length=112505,assembly=hg38.fa>
+##contig=<ID=Un_KI270442v1,length=392061,assembly=hg38.fa>
+##contig=<ID=Un_KI270448v1,length=7992,assembly=hg38.fa>
+##contig=<ID=Un_KI270465v1,length=1774,assembly=hg38.fa>
+##contig=<ID=Un_KI270466v1,length=1233,assembly=hg38.fa>
+##contig=<ID=Un_KI270467v1,length=3920,assembly=hg38.fa>
+##contig=<ID=Un_KI270468v1,length=4055,assembly=hg38.fa>
+##contig=<ID=Un_KI270507v1,length=5353,assembly=hg38.fa>
+##contig=<ID=Un_KI270508v1,length=1951,assembly=hg38.fa>
+##contig=<ID=Un_KI270509v1,length=2318,assembly=hg38.fa>
+##contig=<ID=Un_KI270510v1,length=2415,assembly=hg38.fa>
+##contig=<ID=Un_KI270511v1,length=8127,assembly=hg38.fa>
+##contig=<ID=Un_KI270512v1,length=22689,assembly=hg38.fa>
+##contig=<ID=Un_KI270515v1,length=6361,assembly=hg38.fa>
+##contig=<ID=Un_KI270516v1,length=1300,assembly=hg38.fa>
+##contig=<ID=Un_KI270517v1,length=3253,assembly=hg38.fa>
+##contig=<ID=Un_KI270518v1,length=2186,assembly=hg38.fa>
+##contig=<ID=Un_KI270519v1,length=138126,assembly=hg38.fa>
+##contig=<ID=Un_KI270521v1,length=7642,assembly=hg38.fa>
+##contig=<ID=Un_KI270522v1,length=5674,assembly=hg38.fa>
+##contig=<ID=Un_KI270528v1,length=2983,assembly=hg38.fa>
+##contig=<ID=Un_KI270529v1,length=1899,assembly=hg38.fa>
+##contig=<ID=Un_KI270530v1,length=2168,assembly=hg38.fa>
+##contig=<ID=Un_KI270538v1,length=91309,assembly=hg38.fa>
+##contig=<ID=Un_KI270539v1,length=993,assembly=hg38.fa>
+##contig=<ID=Un_KI270544v1,length=1202,assembly=hg38.fa>
+##contig=<ID=Un_KI270548v1,length=1599,assembly=hg38.fa>
+##contig=<ID=Un_KI270579v1,length=31033,assembly=hg38.fa>
+##contig=<ID=Un_KI270580v1,length=1553,assembly=hg38.fa>
+##contig=<ID=Un_KI270581v1,length=7046,assembly=hg38.fa>
+##contig=<ID=Un_KI270582v1,length=6504,assembly=hg38.fa>
+##contig=<ID=Un_KI270583v1,length=1400,assembly=hg38.fa>
+##contig=<ID=Un_KI270584v1,length=4513,assembly=hg38.fa>
+##contig=<ID=Un_KI270587v1,length=2969,assembly=hg38.fa>
+##contig=<ID=Un_KI270588v1,length=6158,assembly=hg38.fa>
+##contig=<ID=Un_KI270589v1,length=44474,assembly=hg38.fa>
+##contig=<ID=Un_KI270590v1,length=4685,assembly=hg38.fa>
+##contig=<ID=Un_KI270591v1,length=5796,assembly=hg38.fa>
+##contig=<ID=Un_KI270593v1,length=3041,assembly=hg38.fa>
+##contig=<ID=Un_KI270741v1,length=157432,assembly=hg38.fa>
+##contig=<ID=Un_KI270742v1,length=186739,assembly=hg38.fa>
+##contig=<ID=Un_KI270743v1,length=210658,assembly=hg38.fa>
+##contig=<ID=Un_KI270744v1,length=168472,assembly=hg38.fa>
+##contig=<ID=Un_KI270745v1,length=41891,assembly=hg38.fa>
+##contig=<ID=Un_KI270746v1,length=66486,assembly=hg38.fa>
+##contig=<ID=Un_KI270747v1,length=198735,assembly=hg38.fa>
+##contig=<ID=Un_KI270748v1,length=93321,assembly=hg38.fa>
+##contig=<ID=Un_KI270749v1,length=158759,assembly=hg38.fa>
+##contig=<ID=Un_KI270750v1,length=148850,assembly=hg38.fa>
+##contig=<ID=Un_KI270751v1,length=150742,assembly=hg38.fa>
+##contig=<ID=Un_KI270752v1,length=27745,assembly=hg38.fa>
+##contig=<ID=Un_KI270753v1,length=62944,assembly=hg38.fa>
+##contig=<ID=Un_KI270754v1,length=40191,assembly=hg38.fa>
+##contig=<ID=Un_KI270755v1,length=36723,assembly=hg38.fa>
+##contig=<ID=Un_KI270756v1,length=79590,assembly=hg38.fa>
+##contig=<ID=Un_KI270757v1,length=71251,assembly=hg38.fa>
+##contig=<ID=X,length=156040895,assembly=hg38.fa>
+##contig=<ID=X_KI270880v1_alt,length=284869,assembly=hg38.fa>
+##contig=<ID=X_KI270881v1_alt,length=144206,assembly=hg38.fa>
+##contig=<ID=X_KI270913v1_alt,length=274009,assembly=hg38.fa>
+##contig=<ID=Y,length=57227415,assembly=hg38.fa>
+##contig=<ID=Y_KI270740v1_random,length=37240,assembly=hg38.fa>
+##liftOverProgram=CrossMap,version=0.6.6,website=https://crossmap.readthedocs.io/en/latest/
+##liftOverChainFile=/data/sumanak/hg19ToHg38.over.chain.gz
+##originalFile=CPCT02020719T.vcf
+##targetRefGenome=/data/sumanak/hg38.fa
+##liftOverDate=September17,2023
+##bcftools_viewVersion=1.10.2+htslib-1.10.2
+##bcftools_viewCommand=view /data/sumanak/hartwig_hg38/breast/CPCT02020719T_sorted.vcf.gz; Date=Thu Sep 21 13:35:58 2023
+##bcftools_viewCommand=view --regions chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY,chrM,chrMT,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,M,MT /data/sumanak/hartwig_hg38/CPCT02020719T_sorted.pcgr_ready.tmp3.vcf.gz; Date=Thu Sep 21 13:36:00 2023
+##VEP="v105" time="2023-09-21 13:36:02" cache="/data/common/pcgr/data/grch38/.vep/homo_sapiens/105_GRCh38" ensembl-io=105.2a0a40c ensembl=105.f357e33 ensembl-variation=105.ac8178e ensembl-funcgen=105.660df8f 1000genomes="phase3" COSMIC="92" ClinVar="202106" ESP="V2-SSA137" HGMD-PUBLIC="20204" assembly="GRCh38.p13" dbSNP="154" gencode="GENCODE 39" genebuild="2014-07" gnomAD="r2.1.1" polyphen="2.2.2" regbuild="1.0" sift="sift5.2.2"
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT_CLASS|SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELECT|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|ENSP|SWISSPROT|TREMBL|UNIPARC|UNIPROT_ISOFORM|RefSeq|DOMAINS|HGVS_OFFSET|gnomAD_AF|gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|CHECK_REF|NearestExonJB|LoF|LoF_filter|LoF_flags|LoF_info">
+##NearestExonJB=Nearest Exon Junction Boundary (coding sequence variants only). Format:ExonID+distance+start/end+length
+##LoF=Loss-of-function annotation (HC = High Confidence; LC = Low Confidence)
+##LoF_filter=Reason for LoF not being HC
+##LoF_flags=Possible warning flags for LoF
+##LoF_info=Info used for LoF annotation
+##INFO=<ID=CLINVAR_MSID,Number=1,Type=Integer,Description="ClinVar - Measureset/Variant ID">
+##INFO=<ID=CLINVAR_CLNSIG,Number=.,Type=String,Description="ClinVar - clinical significance">
+##INFO=<ID=CLINVAR_CLNSIG_SOMATIC,Number=.,Type=String,Description="ClinVar - clinical significance - somatic state">
+##INFO=<ID=CLINVAR_PMID,Number=.,Type=Integer,Description="ClinVar - PubMed IDs - germline state">
+##INFO=<ID=CLINVAR_ENTREZGENE,Number=.,Type=String,Description="ClinVar - record Entrez gene ID">
+##INFO=<ID=CLINVAR_PMID_SOMATIC,Number=.,Type=Integer,Description="ClinVar - PubMed IDs - somatic state">
+##INFO=<ID=CLINVAR_CONFLICTED,Number=1,Type=Integer,Description="ClinVar - conflicting interpretations of record">
+##INFO=<ID=CLINVAR_VARIANT_ORIGIN,Number=.,Type=String,Description="ClinVar - variant origin">
+##INFO=<ID=CLINVAR_NUM_SUBMITTERS,Number=1,Type=Integer,Description="ClinVar - number of submitters for variant record">
+##INFO=<ID=CLINVAR_UMLS_CUI,Number=.,Type=String,Description="ClinVar - Associated UMLS concept unique identifiers (CUI) - germline state">
+##INFO=<ID=CLINVAR_UMLS_CUI_SOMATIC,Number=.,Type=String,Description="ClinVar - Associated UMLS concept unique identifiers - somatic state (CUI)">
+##INFO=<ID=CLINVAR_CLASSIFICATION,Number=.,Type=String,Description="ClinVar - Clinical significance of variant on a five-tiered scale">
+##INFO=<ID=CLINVAR_ALLELE_ID,Number=1,Type=Integer,Description="ClinVaR - allele ID">
+##INFO=<ID=CLINVAR_HGVSP,Number=.,Type=String,Description="ClinVar - Protein variant identifier - HGVS nomenclature">
+##INFO=<ID=CLINVAR_MOLECULAR_EFFECT,Number=.,Type=String,Description="ClinVar - Molecular effect(s) of variant">
+##INFO=<ID=CLINVAR_REVIEW_STATUS_STARS,Number=1,Type=Integer,Description="ClinVar - Rating of the variant (0-4 stars) with respect to level of review">
+##SOURCE_TCGA=release37_20230329
+##INFO=<ID=TCGA_PANCANCER_COUNT,Number=1,Type=Integer,Description="Raw variant count across all tumor types">
+##INFO=<ID=TCGA_FREQUENCY,Number=.,Type=String,Description="Frequency of variant across TCGA cancer subtypes. Format: subtype|percent affected|affected cases|total cases">
+##INFO=<ID=TCGA_DRIVER_MUTATION,Number=.,Type=String,Description="Putative cancer driver mutation discovered by multiple approaches (Bailey et al., Cell, 2018). Format: symbol:hgvsp:ensembl_transcript_ids:discovery_approaches">
+##INFO=<ID=DOCM_DISEASE,Number=.,Type=String,Description="Disease associated with variant as found in the DoCM database">
+##INFO=<ID=DOCM_ID,Number=.,Type=String,Description="DoCM variant identifier (HGVS)">
+##INFO=<ID=DOCM_PMID,Number=.,Type=String,Description="PubMed IDs supporting variant-disease association in DoCM database">
+##INFO=<ID=GWAS_HIT,Number=.,Type=String,Description="SNP associated with disease phenotype from genome-wide association study, format: rsid|risk_allele|pmid|tag_snp|p_value|efo_id">
+##INFO=<ID=DBMTS,Number=.,Type=String,Description="Gain/loss of microRNA target site in 3'UTR regions according to data in dbMTS. Format: <ensembl_transcript_id>|<microRNA_id>|<consensus_algorithms>|<algorithms_call>|<consensus_call>. Algorithms are miRanda (M), RNAHybrid (R), TargetScan (T). L = Loss, S = Substitution, G = gain. Minimum agreement between two algorithms are required (gain/loss).">
+##INFO=<ID=DBNSFP,Number=.,Type=String,Description="Annotation string from dbNSFP v4.4. (T = Tolerated, D = Damaging, PD = Possibly Damaging, SN = Splicing Neutral, AS = Affect Splicing). Format: refAA|altAA|codonpos|ensembl_gene_id|ensembl_trans_id|proteinpos|SIFT_pred|LRT_pred|Mutationtaster_pred|MutationAssessor_pred|FATHMM_pred|FATHMM_MKL_coding_pred|PROVEAN_pred|M-CAP_pred|MutPred_score|GERP_rs_score|PrimateAI_pred|DEOGEN2_pred|LIST_S2_pred|BayesDEL_addAF_pred|Aloft_pred|metaRNN_pred|splice_site_ada_pred|splice_site_rf_pred">
+##INFO=<ID=SIMPLEREPEATS_HIT,Number=0,Type=Flag,Description="Overlap with UCSC repeat track simpleRepeats">
+##INFO=<ID=WINMASKER_HIT,Number=0,Type=Flag,Description="Overlap with UCSC repeat track windowmaskerSdust">
+##INFO=<ID=RMSK_HIT,Number=.,Type=String,Description="Overlap with DNA sequence repeat structure, as identified by RepeatMasker (Name|Class|Family)">
+##INFO=<ID=GENE_TRANSCRIPT_XREF,Number=.,Type=String,Description="Functional PCGR transcript annotations. Format: <ensembl_transcript_id>|<ensembl_gene_id>|<ensembl_protein_id>|<symbol>|<entrezgene>|<uniprot_id>|<uniprot_acc>|<refseq_mrna>|<refseq_peptide>|<principal_isoform_flag>|<gencode_tag>|<gencode_transcript_biotype>|<actionable_gene>|<tsg>|<tsg_support>|<tsg_rank>|<oncogene>|<oncogene_support>|<oncogene_rank>|<driver>|<driver_support>|<cgc_tier>|<cgc_somatic>|<cgc_germline>|<intogen_role>|<tcga_driver>|<ncg_driver>|<cpg_source>|<cpg_cancer_cui>|<cpg_syndrome_cui>|<cpg_moi>|<cpg_mod>|<ge_panel_id>|<mim_phenotype_id>. Cancer syndrome/susceptibility annotations are listed with MedGen/UMLS concept identifiers. The panel IDs from Genomics England PanelApp are formatted as <panel_id>:<confidence_level>:<panel_version>:<mechanism_of_inheritance>, multiple entries are separated by '&'">
+##INFO=<ID=ACTIONABLE_GENE,Number=0,Type=Flag,Description="Indicates that gene is either a cancer predisposition gene or present in cancer biomarker databases (CIViC/CGI)">
+##INFO=<ID=AFR_AF_GNOMAD,Number=1,Type=Float,Description="African/African American allele frequency - gnomAD exome populations">
+##INFO=<ID=AFR_AF_GNOMADg,Number=1,Type=Float,Description="African/African American allele frequency - gnomAD genome populations">
+##INFO=<ID=ALLELE_NUM,Number=.,Type=String,Description="Allele number from input; 0 is reference, 1 is first alternate etc - VEP">
+##INFO=<ID=AMINO_ACID_END,Number=1,Type=Integer,Description="End position of amino acid subject to alteration">
+##INFO=<ID=AMINO_ACID_START,Number=1,Type=Integer,Description="Start position of amino acid subject to alteration">
+##INFO=<ID=AMI_AF_GNOMADg,Number=1,Type=Float,Description="Amish allele frequency - gnomad genome populations">
+##INFO=<ID=AMR_AF_GNOMAD,Number=1,Type=Float,Description="American allele frequency - gnomAD exome populations">
+##INFO=<ID=AMR_AF_GNOMADg,Number=1,Type=Float,Description="American allele frequency - gnomAD genome populations">
+##INFO=<ID=APPRIS,Number=.,Type=String,Description="Indicates principal isoform class of picked transcript, from APPRIS database (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=ASJ_AF_GNOMAD,Number=1,Type=Float,Description="Ashkenazi Jewish allele frequency - gnomAD exome populations">
+##INFO=<ID=ASJ_AF_GNOMADg,Number=1,Type=Float,Description="Ashkenazi Jewish allele frequency - gnomAD genome populations">
+##INFO=<ID=Amino_acids,Number=.,Type=String,Description="Only given if the variant affects the protein-coding sequence (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=BIOMARKER_MATCH,Number=.,Type=String,Description="Match of variant (by HGVSp/codon/HGVSc/exon/gene and consequence type) against known biomarkers (CIViC/CGI). Format: <source_db>|<variant_origin>|<variant_id>|<clinical_evidence_items_id>">
+##INFO=<ID=BIOTYPE,Number=.,Type=String,Description="Biotype of transcript or regulatory feature (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CANONICAL,Number=.,Type=String,Description="A flag indicating if the transcript is denoted as the canonical transcript for this gene (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CCDS,Number=.,Type=String,Description="The CCDS identifier for this transcript, where applicable (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CDS_CHANGE,Number=.,Type=String,Description="Coding, transcript-specific sequence annotation (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=CDS_position,Number=.,Type=String,Description="Relative position of base pair in coding sequence (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CELL_TYPE,Number=.,Type=String,Description="List of cell types and classifications for regulatory feature (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CGC_GERMLINE,Number=0,Type=Flag,Description="Member of Cancer Gene Census (CGC) - germline set">
+##INFO=<ID=CGC_SOMATIC,Number=0,Type=Flag,Description="Member of Cancer Gene Census (CGC) - somatic set">
+##INFO=<ID=CGC_TIER,Number=.,Type=String,Description="Cancer Gene Census tier (1/2)">
+##INFO=<ID=CODING_STATUS,Number=.,Type=String,Description="Coding (protein-altering, including canonical splice donor/acceptor) vs. noncoding status for primary variant consequence">
+##INFO=<ID=COSMIC_MUTATION_ID,Number=.,Type=String,Description="Identifiers in the COSMIC database (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=CPG_SOURCE,Number=.,Type=String,Description="Cancer predisposition gene source">
+##INFO=<ID=Codons,Number=.,Type=String,Description="The alternative codons with the variant base in upper case (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=Consequence,Number=.,Type=String,Description="Impact modifier for the consequence type (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=DBNSFP_ALOFTPRED,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (ALoFT)">
+##INFO=<ID=DBNSFP_BAYESDEL_ADDAF,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (BayesDel)">
+##INFO=<ID=DBNSFP_DEOGEN2,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (Deogen2)">
+##INFO=<ID=DBNSFP_FATHMM,Number=.,Type=String,Description="Protein variant effect prediction (FATHMM)">
+##INFO=<ID=DBNSFP_FATHMM_MKL,Number=.,Type=String,Description="Protein variant effect prediction (FATHMM_MKL)">
+##INFO=<ID=DBNSFP_GERP,Number=.,Type=String,Description="Evolutionary constraint score from dbNSFP (GERP - Genomic Evolutionary Rate Profiling)">
+##INFO=<ID=DBNSFP_LIST_S2,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (LIST-S2)">
+##INFO=<ID=DBNSFP_META_RNN,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (Ensemble prediction using deep learning)">
+##INFO=<ID=DBNSFP_MUTATIONASSESSOR,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (MutationAssessor)">
+##INFO=<ID=DBNSFP_MUTATIONTASTER,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (MutationTaster)">
+##INFO=<ID=DBNSFP_MUTPRED,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (MutPred)">
+##INFO=<ID=DBNSFP_M_CAP,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (M-CAP - Mendelian Clinically Applicable Pathogenicity)">
+##INFO=<ID=DBNSFP_PRIMATEAI,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (PrimateAI)">
+##INFO=<ID=DBNSFP_PROVEAN,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (PROVEAN)">
+##INFO=<ID=DBNSFP_SIFT,Number=.,Type=String,Description="Protein variant effect prediction from dbNSFP (SIFT - Sorting Intolerant from Tolerant)">
+##INFO=<ID=DBNSFP_SPLICE_SITE_ADA,Number=.,Type=String,Description="Splice site variant effect prediction from dbNSFP - adaptive boosting">
+##INFO=<ID=DBNSFP_SPLICE_SITE_RF,Number=.,Type=String,Description="Splice site variant effect prediction from dbNSFP - random forest classifier">
+##INFO=<ID=DBSNPRSID,Number=.,Type=String,Description="dbSNP reference ID">
+##INFO=<ID=DISTANCE,Number=.,Type=String,Description="Shortest distance from variant to transcript (picked by VEP's --flag_pick_allele option). For each ALT allele, in the same order as listed">
+##INFO=<ID=DOMAINS,Number=.,Type=String,Description="The source and identifier of any overlapping protein domains (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=EAS_AF_GNOMAD,Number=1,Type=Float,Description="East Asian allele frequency - gnomAD exome populations">
+##INFO=<ID=EAS_AF_GNOMADg,Number=1,Type=Float,Description="East Asian allele frequency - gnomAD genome populations">
+##INFO=<ID=EFFECT_PREDICTIONS,Number=.,Type=String,Description="All variant effect predictions from different algorithms, as provided by dbNSFP">
+##INFO=<ID=ENSEMBL_GENE_ID,Number=.,Type=String,Description="Ensembl gene_identifier">
+##INFO=<ID=ENSEMBL_PROTEIN_ID,Number=.,Type=String,Description="Ensembl protein identifier">
+##INFO=<ID=ENSEMBL_TRANSCRIPT_ID,Number=.,Type=String,Description="Ensembl transcript identifier">
+##INFO=<ID=ENSP,Number=1,Type=String,Description="The Ensembl protein identifier of the affected transcript (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=ENTREZGENE,Number=.,Type=String,Description="Entrez gene identifier">
+##INFO=<ID=ESSENTIAL_GENE_CRISPR,Number=1,Type=String,Description="dbNSFP_gene: Essential (E) or Non-essential phenotype-changing (N) based on large scale CRISPR experiments. from doi: 10.1126/science.aac7041">
+##INFO=<ID=ESSENTIAL_GENE_CRISPR2,Number=1,Type=String,Description="dbNSFP_gene: Essential (E), context-Specific essential (S), or Non-essential phenotype-changing (N) based on large scale CRISPR experiments. from http://dx.doi.org/10.1016/j.cell.2015.11.015">
+##INFO=<ID=EXON,Number=.,Type=String,Description="The exon number (out of total number) (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=EXONIC_STATUS,Number=.,Type=String,Description="Exonic (protein-altering and silent variants, including canonical splice donor/acceptor) vs. nonexonic status for primary variant consequence">
+##INFO=<ID=EXON_POSITION,Number=.,Type=String,Description="Relative position of exon variant to nearest intron/exon junction">
+##INFO=<ID=Existing_variation,Number=.,Type=String,Description="Database identifiers for existing variants (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=FIN_AF_GNOMAD,Number=1,Type=Float,Description="Finnish allele frequency - gnomAD exome populations">
+##INFO=<ID=FIN_AF_GNOMADg,Number=1,Type=Float,Description="Finnish allele frequency - gnomAD genome populations">
+##INFO=<ID=FLAGS,Number=.,Type=String,Description="Transcript quality flags: cds_start_NF: CDS 5', incomplete cds_end_NF: CDS 3' incomplete (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=Feature,Number=.,Type=String,Description="Ensembl stable ID of feature (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=Feature_type,Number=.,Type=String,Description="Type of feature. Currently one of Transcript, RegulatoryFeature, MotifFeature (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=GENCODE_TAG,Number=.,Type=String,Description="GENCODE transcript tags (basic etc)">
+##INFO=<ID=GENCODE_TRANSCRIPT_TYPE,Number=.,Type=String,Description="GENCODE transcript type">
+##INFO=<ID=GENE_PHENO,Number=.,Type=String,Description="Indicates if overlapped gene is associated with a phenotype, disease or trait - VEP">
+##INFO=<ID=GERP_SCORE,Number=.,Type=String,Description="Genomic conservation score based on the GERP (Genomic Evolutionary Rate Profiling) algorithm. Range from -12.3 to 6.17 (most conserved)">
+##INFO=<ID=GLOBAL_AF_GNOMAD,Number=1,Type=Float,Description="Adjusted Global allele frequency - gnomAD exome populations">
+##INFO=<ID=GLOBAL_AF_GNOMADg,Number=1,Type=Float,Description="Adjusted Global allele frequency - gnomAD genome populations">
+##INFO=<ID=Gene,Number=.,Type=String,Description="Ensembl stable ID of affected gene (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=HGNC_ID,Number=.,Type=String,Description="HGNC gene identifier">
+##INFO=<ID=HGVS_OFFSET,Number=.,Type=String,Description="Indicates by how many bases the HGVS notations for this variant have been shifted (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=HGVSc,Number=.,Type=String,Description="The HGVS coding sequence name (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=HGVSp,Number=.,Type=String,Description="The HGVS protein sequence name (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=HGVSp_short,Number=.,Type=String,Description="The HGVS protein sequence name, short version (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=HIGH_INF_POS,Number=.,Type=String,Description="A flag indicating if the variant falls in a high information position of a transcription factor binding profile (TFBP) (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=INTOGEN_DRIVER,Number=.,Type=String,Description="Indicates whether gene is predicted as cancer driver from IntoGen's cancer driver prediction algorithm (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=INTOGEN_ROLE,Number=.,Type=String,Description="Cancer driver gene prediction by IntOGen - roles as driver gene">
+##INFO=<ID=INTRON,Number=.,Type=String,Description="The intron number (out of total number) (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=INTRON_POSITION,Number=.,Type=String,Description="Relative position of intron variant to nearest intron/exon junction">
+##INFO=<ID=LAST_EXON,Number=0,Type=Flag,Description="Indication of last exon (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=LAST_INTRON,Number=0,Type=Flag,Description="Indication of last exon (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=LoF,Number=1,Type=String,Description="Indicates Loss-of-function variant, as assessed by the LOFTEE VEP plugin (https://github.com/konradjk/loftee)">
+##INFO=<ID=LoF_filter,Number=1,Type=String,Description="Filters underlying low confidence (LC) LoF calls, as assessed by the LOFTEE VEP plugin (https://github.com/konradjk/loftee)">
+##INFO=<ID=LoF_flags,Number=1,Type=String,Description="LOFTEE flags, see (https://github.com/konradjk/loftee)">
+##INFO=<ID=LoF_info,Number=1,Type=String,Description="LOFTEE info, see (https://github.com/konradjk/loftee)">
+##INFO=<ID=MANE_SELECT,Number=.,Type=String,Description="Indicating if the transcript is the MANE Select or MANE Plus Clinical transcript for the gene (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=MID_AF_GNOMADg,Number=1,Type=Float,Description="Mid-eastern allele frequency - gnomAD genome populations">
+##INFO=<ID=MOTIF_NAME,Number=.,Type=String,Description="The source and identifier of a transcription factor binding profile aligned at this position (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=MOTIF_POS,Number=.,Type=String,Description="The relative position of the variation in the aligned TFBP (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=MOTIF_SCORE_CHANGE,Number=.,Type=String,Description="The difference in motif score of the reference and variant sequences for the TFBP (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=MUTATION_HOTSPOT,Number=.,Type=String,Description="Known cancer mutation hotspot, as found in cancerhotspots.org. Format: GeneSymbol|Entrez_ID|CodonRefAA|Alt_AA|Q-value">
+##INFO=<ID=MUTATION_HOTSPOT_CANCERTYPE,Number=.,Type=String,Description="Tumor types associated with mutation hotspot. Format: TumorSite|SiteFrequency|VariantFrequency">
+##INFO=<ID=MUTATION_HOTSPOT_MATCH,Number=.,Type=String,Description="Type of hotspot match (by_hgvsp_principal, by_hgvsc_principal, by_hgvsp_nonprincipal, by_hgvsc_nonprincipal, by_codon_principal, by_codon_nonprincipal)">
+##INFO=<ID=NCG_DRIVER,Number=0,Type=Flag,Description="Cancer driver gene prediction by Network of Cancer Genes (NCG)">
+##INFO=<ID=NFE_AF_GNOMAD,Number=1,Type=Float,Description="Non-Finnish European allele frequency - gnomAD exome populations">
+##INFO=<ID=NFE_AF_GNOMADg,Number=1,Type=Float,Description="Non-Finnish European allele frequency - gnomAD genome populations">
+##INFO=<ID=NULL_VARIANT,Number=0,Type=Flag,Description="Frameshift or stop-gained variant">
+##INFO=<ID=NearestExonJB,Number=.,Type=String,Description="Ensembl identifier of the exon, the distance to the exon boundary, the boundary type (start or end of exon) and the total length in nucleotides of the exon">
+##INFO=<ID=ONCOGENE,Number=0,Type=Flag,Description="Indicates status of gene being proto-oncogenic (support from multiple sources)">
+##INFO=<ID=ONCOGENE_RANK,Number=.,Type=String,Description="Relative strength of support for gene having a proto-oncogenic role - percent rank from 0 to 100 (100 strongest rank)">
+##INFO=<ID=ONCOGENE_SUPPORT,Number=.,Type=String,Description="Source evidence for gene being proto-oncogenic. Format: CGC_TIER<1/2>&NCG&CancerMine:num_citations">
+##INFO=<ID=ONCOGENICITY_CLASSIFICATION,Number=.,Type=String,Description="Oncogenicity classification (ClinGen/VICC guidelines, Horak et al, Genet Med, 2022)">
+##INFO=<ID=ONCOGENICITY_CLASSIFICATION_CODE,Number=.,Type=String,Description="Oncogenicity classification codes (ClinGen/VICC guidelines, Horak et al, Genet Med, 2022)">
+##INFO=<ID=ONCOGENICITY_SCORE,Number=.,Type=Float,Description="Accumulated oncogenicity score (ClinGen/VICC guidelines, Horak et al, Genet Med, 2022)">
+##INFO=<ID=OTH_AF_GNOMAD,Number=1,Type=Float,Description="Other allele frequency - gnomAD exome populations">
+##INFO=<ID=OTH_AF_GNOMADg,Number=1,Type=Float,Description="Other allele frequency - gnomAD genome populations">
+##INFO=<ID=PFAM_DOMAIN,Number=.,Type=String,Description="Pfam domain identfier (from VEP)">
+##INFO=<ID=PHENO,Number=.,Type=String,Description="Indicates if existing variant is associated with a phenotype, disease or trait - VEP">
+##INFO=<ID=PICK,Number=1,Type=String,Description="Indicates if this block of consequence data was picked by VEP's --flag_pick_allele option">
+##INFO=<ID=PRINCIPAL_ISOFORM_FLAG,Number=.,Type=String,Description="Indicates principal isoform flag from APPRIS database (pcgr in-house annotation)">
+##INFO=<ID=PROB_EXAC_LOF_INTOLERANT,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants) based on ExAC r0.3 data">
+##INFO=<ID=PROB_EXAC_LOF_INTOLERANT_HOM,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being intolerant of homozygous, but not heterozygous lof variants based on ExAC r0.3 data">
+##INFO=<ID=PROB_EXAC_LOF_TOLERANT_NULL,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being tolerant of both heterozygous and homozygous lof variants based on ExAC r0.3 data">
+##INFO=<ID=PROB_EXAC_NONTCGA_LOF_INTOLERANT,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants) based on ExAC r0.3 nonTCGA subset">
+##INFO=<ID=PROB_EXAC_NONTCGA_LOF_INTOLERANT_HOM,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being intolerant of homozygous, but not heterozygous lof variants based on ExAC r0.3 nonTCGA subset">
+##INFO=<ID=PROB_EXAC_NONTCGA_LOF_TOLERANT_NULL,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being tolerant of both heterozygous and homozygous lof variants based on ExAC r0.3 nonTCGA subset">
+##INFO=<ID=PROB_GNOMAD_LOF_INTOLERANT,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants based on gnomAD 2.1 data">
+##INFO=<ID=PROB_GNOMAD_LOF_INTOLERANT_HOM,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being intolerant of homozygous, but not heterozygous lof variants based on gnomAD 2.1 data">
+##INFO=<ID=PROB_GNOMAD_LOF_TOLERANT_NULL,Number=1,Type=Float,Description="dbNSFP_gene: the probability of being tolerant of both heterozygous and homozygous lof variants based on gnomAD 2.1 data">
+##INFO=<ID=PROB_HAPLOINSUFFICIENCY,Number=1,Type=Float,Description="dbNSFP_gene: Estimated probability of haploinsufficiency of the gene (from doi:10.1371/journal.pgen.1001154)">
+##INFO=<ID=PUBMED,Number=.,Type=String,Description="PubMed ID(s) of publications that cite existing variant - VEP">
+##INFO=<ID=Protein_position,Number=.,Type=String,Description="Relative position of amino acid in protein (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=REFSEQ_MRNA,Number=.,Type=String,Description="RefSeq transcript identifier">
+##INFO=<ID=REFSEQ_PEPTIDE,Number=.,Type=String,Description="RefSeq protein/peptide identifier">
+##INFO=<ID=RefSeq,Number=.,Type=String,Description="Output aligned RefSeq mRNA identifier for transcript (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=SAS_AF_GNOMAD,Number=1,Type=Float,Description="South Asian allele frequency - gnomAD exome populations">
+##INFO=<ID=SAS_AF_GNOMADg,Number=1,Type=Float,Description="South Asian allele frequency - gnomAD genome populations">
+##INFO=<ID=SIGNALING_PATHWAY,Number=1,Type=String,Description="Indicates membership in one of ten core signaling pathways in cancer">
+##INFO=<ID=SPLICE_DONOR_RELEVANT,Number=0,Type=Flag,Description="Splice site variant located at the +3/4/5 position of the intron; reference nucleotide is a G or A at position +3, A at position +4, or G at position +5">
+##INFO=<ID=STRAND,Number=1,Type=String,Description="The DNA strand (1 or -1) on which the transcript/feature lies (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=SWISSPROT,Number=.,Type=String,Description="Best match UniProtKB/Swiss-Prot accession of protein product (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=SYMBOL,Number=.,Type=String,Description="Gene symbol (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=SYMBOL_ENTREZ,Number=1,Type=String,Description="Official gene symbol as provided by NCBI's Entrez gene - may deviate from old (i.e. GENCODE v19)  SYMBOL provided by VEP">
+##INFO=<ID=SYMBOL_SOURCE,Number=.,Type=String,Description="The source of the gene symbol (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=TCGA_DRIVER,Number=0,Type=Flag,Description="Cancer driver gene prediction by TCGA - Bailey et al., Cell, 2018 (TCGA pan-cancer study)">
+##INFO=<ID=TRANSCRIPTION_FACTORS,Number=.,Type=String,Description="Associated transcription factors for binding site (picked by VEP's flag_pick_allele_gene option).">
+##INFO=<ID=TRANSCRIPT_MANE_PLUS_CLINICAL,Number=.,Type=String,Description="MANE Plus Clinical transcript identifier - transcripts chosen to supplement MANE Select when needed for clinical variant reporting">
+##INFO=<ID=TRANSCRIPT_MANE_SELECT,Number=.,Type=String,Description="MANE select transcript identifer - one high-quality representative transcript per protein-coding gene that is well-supported by experimental data and represents the biology of the gene">
+##INFO=<ID=TREMBL,Number=.,Type=String,Description="Best match UniProtKB/TrEMBL accession of protein product (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=TSG,Number=0,Type=Flag,Description="Indicates status of gene carrying a tumor suppressive role (support from multiple sources)">
+##INFO=<ID=TSG_RANK,Number=.,Type=String,Description="Relative strength of support for gene having a tumor suppressive role - percent rank from 0 to 100 (100 strongest rank)">
+##INFO=<ID=TSG_SUPPORT,Number=.,Type=String,Description="Source evidence for gene carrying a tumor suppressive role. Format: CGC_TIER<1/2>&NCG&CancerMine:num_citations">
+##INFO=<ID=TSL,Number=.,Type=String,Description="Transcript support level (picked by VEP's --flag_pick_allele option)">
+##INFO=<ID=UNIPARC,Number=.,Type=String,Description="Best match UniParc accession of protein product (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=UNIPROT_ACC,Number=.,Type=String,Description="UniprotKB accession identifiers">
+##INFO=<ID=UNIPROT_ID,Number=.,Type=String,Description="UniProt KB identifier (picked by VEP's --flag_pick_allele_option)">
+##INFO=<ID=VARIANT_CLASS,Number=.,Type=String,Description="Sequence Ontology variant class (picked by VEP's --flag_pick_allele option).">
+##INFO=<ID=VEP_ALL_CSQ,Number=.,Type=String,Description="All transcript consequences (Consequence:SYMBOL:Feature_type:Feature:BIOTYPE) - VEP">
+##INFO=<ID=cDNA_position,Number=.,Type=String,Description="Relative position of base pair in cDNA sequence (picked by VEP's --flag_pick_allele option).">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	902382	.	G	C	575	PASS	MAPPABILITY=1;PURPLE_AF=0.4305;PURPLE_CN=2.1;PURPLE_GERMLINE=DIPLOID;PURPLE_MACN=0.006962;PURPLE_VCN=0.906;RC=CTCGC;RC_IDX=2;RC_LF=GACGGCCATT;RC_NM=1;RC_REPC=2;RC_REPS=TC;RC_RF=CAACACTGAC;REP_C=2;REP_S=G;SUBCL=0;TIER=HIGH_CONFIDENCE;TNC=TGG;CSQ=C|upstream_gene_variant|MODIFIER||ENSG00000272438|Transcript|ENST00000607769|lncRNA|||||||||||1|2452|1||1|SNV|||YES|||4||||||||||||||||||||||||||||;GENE_TRANSCRIPT_XREF=ENST00000607769|ENSG00000272438||ENSG00000272438|||||||basic&Ensembl_canonical|lncRNA||||||||||||||||||||||;Consequence=upstream_gene_variant;IMPACT=MODIFIER;SYMBOL=ENSG00000272438;Gene=ENSG00000272438;Feature_type=Transcript;Feature=ENST00000607769;ENSEMBL_TRANSCRIPT_ID=ENST00000607769;ENSEMBL_GENE_ID=ENSG00000272438;GENCODE_TAG=basic&Ensembl_canonical;BIOTYPE=lncRNA;ALLELE_NUM=1;DISTANCE=2452;STRAND=1;PICK=1;VARIANT_CLASS=SNV;CANONICAL=YES;TSL=4;CODING_STATUS=noncoding;EXONIC_STATUS=nonexonic;INTRON_POSITION=0;EXON_POSITION=0;CDS_CHANGE=.;HGVSp_short=.;VEP_ALL_CSQ=upstream_gene_variant:.:.:.:.:.:Transcript:ENST00000607769:lncRNA;ONCOGENICITY_SCORE=1;ONCOGENICITY_CLASSIFICATION=VUS;ONCOGENICITY_CLASSIFICATION_CODE=CLINGEN_VICC_OP4
+1	927100	.	C	T	601	PASS	IMPACT=MODIFIER;LPS=2;LPS_RC=10;MAPPABILITY=1;PAVE_TI=ENSG00000187634|SAMD11|ENST00000420190|intron_variant|false|c.72+1087C>T|,ENSG00000187634|SAMD11|ENST00000437963|intron_variant|false|c.72+1087C>T|,ENSG00000187634|SAMD11|ENST00000342066|intron_variant|false|c.72+1087C>T|;PURPLE_AF=0.6024;PURPLE_CN=2.1;PURPLE_GERMLINE=DIPLOID;PURPLE_MACN=0.006962;PURPLE_VCN=1.27;RC=CATCCA;RC_IDX=2;RC_LF=AGCCGCACCT;RC_NM=1;RC_RF=TGTGCCCACC;REP_C=3;REP_S=C;SUBCL=0;TIER=HIGH_CONFIDENCE;TNC=ACC;CSQ=T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000342066|protein_coding||2/13|ENST00000342066.8:c.72+1087C>T||||||||1||1|||SNV|HGNC|HGNC:28706||||5||CCDS2.2|ENSP00000342313|Q96NU1.134||UPI0000D61E04|Q96NU1-3|NM_152486.4||||||||||||||||||||,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000616016|protein_coding||2/13|ENST00000616016.5:c.609+1087C>T||||||||1||1||1|SNV|HGNC|HGNC:28706|YES|NM_001385641.1||5|A2||ENSP00000478421||I7G285.48|UPI0015DA7BD7||NM_001385641.1||||||||||||||||||||,T|intron_variant|MODIFIER|SAMD11|ENSG00000187634|Transcript|ENST00000618323|protein_coding||2/13|ENST00000618323.5:c.609+1087C>T||||||||1||1|||SNV|HGNC|HGNC:28706||||5|P5||ENSP00000480678||A0A087WX24.28|UPI0015DAE665||NM_001385640.1||||||||||||||||||||;GENE_TRANSCRIPT_XREF=ENST00000616016|ENSG00000187634|ENSP00000478421.2|SAMD11|148398|||NM_001385641|NP_001372570|ALTERNATIVE:2|CAGE_supported_TSS&RNA_Seq_supported_partial&basic&Ensembl_canonical&MANE_Select&appris_alternative_2|protein_coding||||||||||||||||||||||,ENST00000618323|ENSG00000187634|ENSP00000480678.2|SAMD11|148398|||NM_001385640|NP_001372569|PRINCIPAL:4|CAGE_supported_TSS&basic&appris_principal_5|protein_coding||||||||||||||||||||||,ENST00000437963|ENSG00000187634|ENSP00000393181.1|SAMD11|148398||||||alternative_5_UTR&mRNA_end_NF&cds_end_NF|protein_coding||||||||||||||||||||||,ENST00000342066|ENSG00000187634|ENSP00000342313.3|SAMD11|148398|SAM11_HUMAN|Q96NU1|NM_152486|NP_689699||basic&CCDS|protein_coding||||||||||||||||||||||,ENST00000616125|ENSG00000187634|ENSP00000484643.1|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||,ENST00000618779|ENSG00000187634|ENSP00000484256.1|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||,ENST00000622503|ENSG00000187634|ENSP00000482138.1|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||,ENST00000618181|ENSG00000187634|ENSP00000480870.1|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||,ENST00000617307|ENSG00000187634|ENSP00000482090.2|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||,ENST00000341065|ENSG00000187634|ENSP00000349216.4|SAMD11|148398||||||mRNA_start_NF&cds_start_NF|protein_coding||||||||||||||||||||||;Consequence=intron_variant;SYMBOL=SAMD11;Gene=ENSG00000187634;Feature_type=Transcript;Feature=ENST00000616016;ENSEMBL_TRANSCRIPT_ID=ENST00000616016;ENSEMBL_GENE_ID=ENSG00000187634;ENSEMBL_PROTEIN_ID=ENSP00000478421.2;ENTREZGENE=148398;REFSEQ_MRNA=NM_001385641;REFSEQ_PEPTIDE=NP_001372570;PRINCIPAL_ISOFORM_FLAG=ALTERNATIVE:2;GENCODE_TAG=CAGE_supported_TSS&RNA_Seq_supported_partial&basic&Ensembl_canonical&MANE_Select&appris_alternative_2;BIOTYPE=protein_coding;INTRON=2/13;HGVSc=ENST00000616016.5:c.609+1087C>T;ALLELE_NUM=1;STRAND=1;PICK=1;VARIANT_CLASS=SNV;SYMBOL_SOURCE=HGNC;HGNC_ID=HGNC:28706;CANONICAL=YES;MANE_SELECT=NM_001385641.1;TSL=5;APPRIS=A2;ENSP=ENSP00000478421;TREMBL=I7G285.48;UNIPARC=UPI0015DA7BD7;RefSeq=NM_001385641.1;CODING_STATUS=noncoding;EXONIC_STATUS=nonexonic;INTRON_POSITION=1087;EXON_POSITION=0;CDS_CHANGE=.;HGVSp_short=.;VEP_ALL_CSQ=intron_variant:SAMD11:148398:c.72+1087C>T:.:.:Transcript:ENST00000342066:protein_coding,intron_variant:SAMD11:148398:c.609+1087C>T:.:.:Transcript:ENST00000616016:protein_coding,intron_variant:SAMD11:148398:c.609+1087C>T:.:.:Transcript:ENST00000618323:protein_coding;ONCOGENICITY_SCORE=1;ONCOGENICITY_CLASSIFICATION=VUS;ONCOGENICITY_CLASSIFICATION_CODE=CLINGEN_VICC_OP4
+1	958468	.	T	C	515	PASS	IMPACT=MODIFIER;LPS=3;LPS_RC=3;MAPPABILITY=1;PAVE_TI=ENSG00000188976|NOC2L|ENST00000327044|intron_variant|false|c.179+461A>G|,ENSG00000188976|NOC2L|ENST00000477976|upstream_gene_variant|false||,ENSG00000188976|NOC2L|ENST00000487214|intron_variant|false|n.248+461A>G|,ENSG00000188976|NOC2L|ENST00000469563|non_coding_transcript_exon_variant|false|n.656A>G|;PURPLE_AF=0.5728;PURPLE_CN=2.1;PURPLE_GERMLINE=DIPLOID;PURPLE_MACN=0.006962;PURPLE_VCN=1.21;RC=TCCCG;RC_IDX=2;RC_LF=GTCAGGCTGG;RC_NM=1;RC_REPC=3;RC_REPS=C;RC_RF=AATTCCTGAC;REP_C=2;REP_S=TC;SUBCL=0;TIER=HIGH_CONFIDENCE;TNC=CTC;CSQ=C|intron_variant|MODIFIER|NOC2L|ENSG00000188976|Transcript|ENST00000327044|protein_coding||2/18|ENST00000327044.7:c.179+461A>G||||||||1||-1||1|SNV|HGNC|HGNC:24517|YES|NM_015658.4||1|P1|CCDS3.1|ENSP00000317992|Q9Y3T9.182||UPI000041820C||NM_015658.4||||||||||||||||||||,C|upstream_gene_variant|MODIFIER|KLHL17|ENSG00000187961|Transcript|ENST00000338591|protein_coding|||||||||||1|2116|1||1|SNV|HGNC|HGNC:24023|YES|NM_198317.3||1|P1|CCDS30550.1|ENSP00000343930|Q6TDP4.141||UPI00001DFBF0||NM_198317.3||||||||||||||||||||;WINMASKER_HIT;RMSK_HIT=AluSx1|SINE|Alu;GENE_TRANSCRIPT_XREF=ENST00000327044|ENSG00000188976|ENSP00000317992.6|NOC2L|26155|NOC2L_HUMAN|Q9Y3T9|NM_015658|NP_056473|PRINCIPAL:1|basic&Ensembl_canonical&MANE_Select&appris_principal_1&CCDS|protein_coding||||||||||||||||||||||,ENST00000477976|ENSG00000188976||NOC2L|26155|||||||retained_intron||||||||||||||||||||||,ENST00000487214|ENSG00000188976||NOC2L|26155|||||||processed_transcript||||||||||||||||||||||,ENST00000469563|ENSG00000188976||NOC2L|26155|||||||retained_intron||||||||||||||||||||||,ENST00000338591|ENSG00000187961|ENSP00000343930.3|KLHL17|339451|KLH17_HUMAN|Q6TDP4|NM_198317|NP_938073|PRINCIPAL:1|basic&Ensembl_canonical&MANE_Select&appris_principal_1&CCDS|protein_coding||||||||||||||||||||||,ENST00000463212|ENSG00000187961||KLHL17|339451|||||||retained_intron||||||||||||||||||||||,ENST00000466300|ENSG00000187961|ENSP00000463694.1|KLHL17|339451||||||mRNA_start_NF&cds_start_NF|nonsense_mediated_decay||||||||||||||||||||||;Consequence=intron_variant;SYMBOL=NOC2L;Gene=ENSG00000188976;Feature_type=Transcript;Feature=ENST00000327044;ENSEMBL_TRANSCRIPT_ID=ENST00000327044;ENSEMBL_GENE_ID=ENSG00000188976;ENSEMBL_PROTEIN_ID=ENSP00000317992.6;ENTREZGENE=26155;UNIPROT_ID=NOC2L_HUMAN;UNIPROT_ACC=Q9Y3T9;REFSEQ_MRNA=NM_015658;REFSEQ_PEPTIDE=NP_056473;PRINCIPAL_ISOFORM_FLAG=PRINCIPAL:1;GENCODE_TAG=basic&Ensembl_canonical&MANE_Select&appris_principal_1&CCDS;BIOTYPE=protein_coding;INTRON=2/18;HGVSc=ENST00000327044.7:c.179+461A>G;ALLELE_NUM=1;STRAND=-1;PICK=1;VARIANT_CLASS=SNV;SYMBOL_SOURCE=HGNC;HGNC_ID=HGNC:24517;CANONICAL=YES;MANE_SELECT=NM_015658.4;TSL=1;APPRIS=P1;CCDS=CCDS3.1;ENSP=ENSP00000317992;SWISSPROT=Q9Y3T9.182;UNIPARC=UPI000041820C;RefSeq=NM_015658.4;CODING_STATUS=noncoding;EXONIC_STATUS=nonexonic;INTRON_POSITION=461;EXON_POSITION=0;CDS_CHANGE=.;HGVSp_short=.;VEP_ALL_CSQ=intron_variant:NOC2L:26155:c.179+461A>G:.:.:Transcript:ENST00000327044:protein_coding,upstream_gene_variant:KLHL17:339451:.:.:.:Transcript:ENST00000338591:protein_coding;ONCOGENICITY_SCORE=1;ONCOGENICITY_CLASSIFICATION=VUS;ONCOGENICITY_CLASSIFICATION_CODE=CLINGEN_VICC_OP4
+1	1131934	.	A	C	301	PASS	MAPPABILITY=1;PURPLE_AF=0.247;PURPLE_CN=2.1;PURPLE_GERMLINE=DIPLOID;PURPLE_MACN=0.006962;PURPLE_VCN=0.52;RC=TCCGGGGA;RC_IDX=2;RC_LF=ACAGGCAAAG;RC_NM=1;RC_REPC=2;RC_REPS=C;RC_RF=CTATTTTAAT;REP_C=4;REP_S=G;SUBCL=0.995;TIER=HIGH_CONFIDENCE;TNC=CAG;CSQ=C|intergenic_variant|MODIFIER||||||||||||||||1||||1|SNV||||||||||||||||||||||||||||||||||;Consequence=intergenic_variant;IMPACT=MODIFIER;ALLELE_NUM=1;PICK=1;VARIANT_CLASS=SNV;CODING_STATUS=noncoding;EXONIC_STATUS=nonexonic;INTRON_POSITION=0;EXON_POSITION=0;CDS_CHANGE=.;HGVSp_short=.;VEP_ALL_CSQ=intergenic_variant:.:.:.:.:.:::;ONCOGENICITY_SCORE=1;ONCOGENICITY_CLASSIFICATION=VUS;ONCOGENICITY_CLASSIFICATION_CODE=CLINGEN_VICC_OP4
+1	1161862	.	A	T	348	PASS	LPS=1;LPS_RC=13;MAPPABILITY=1;PURPLE_AF=0.4452;PURPLE_CN=2.1;PURPLE_GERMLINE=DIPLOID;PURPLE_MACN=0.006962;PURPLE_VCN=0.937;RC=TCCCTGA;RC_IDX=4;RC_LF=CTGACCGAGC;RC_NM=1;RC_RF=GCTCATTATG;REP_C=2;REP_S=AG;SUBCL=0;TIER=HIGH_CONFIDENCE;TNC=CAG;CSQ=T|intergenic_variant|MODIFIER||||||||||||||||1||||1|SNV||||||||||||||||||||||||||||||||||;Consequence=intergenic_variant;IMPACT=MODIFIER;ALLELE_NUM=1;PICK=1;VARIANT_CLASS=SNV;CODING_STATUS=noncoding;EXONIC_STATUS=nonexonic;INTRON_POSITION=0;EXON_POSITION=0;CDS_CHANGE=.;HGVSp_short=.;VEP_ALL_CSQ=intergenic_variant:.:.:.:.:.:::;ONCOGENICITY_SCORE=1;ONCOGENICITY_CLASSIFICATION=VUS;ONCOGENICITY_CLASSIFICATION_CODE=CLINGEN_VICC_OP4
+1	1266908	.	G	C	586	PASS	IMPACT=MODIFIER;MAPPABILITY=1;PAVE_TI=ENSG00000160087|UBE2J2|ENST

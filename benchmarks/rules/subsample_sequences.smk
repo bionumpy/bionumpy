@@ -19,8 +19,9 @@ rule bionumpy_subsample:
         "results/bionumpy/subsample/{filename}.fa"
     benchmark:
         "benchmarks/subsample/bionumpy/{filename}.txt"
-    script:
-        "../scripts/bionumpy_subsample.py"
+    shell:
+        'python3 ../scripts/subsample_reads.py {input} {output}'
+        #"../scripts/bionumpy_subsample.py"
 
 
 rule python_subsample:

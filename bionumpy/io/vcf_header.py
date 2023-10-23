@@ -53,7 +53,7 @@ def preprocess_type(x: str) -> type:
     type
         the corresponding class type.
     """
-    mapping = {'Float': float, 'Integer': int, 'Flag': bool, 'String': str}
+    mapping = {'Float': Optional[float], 'Integer': Optional[int], 'Flag': bool, 'String': str}
     return mapping[x]
 
 
