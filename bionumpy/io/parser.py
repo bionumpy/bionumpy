@@ -107,10 +107,10 @@ class NumpyFileReader:
         FIXME: Add docs.
 
         """
-        if self._do_prepend:
-            # This means gzip file. Should be renamed
-            min_chunk_size = min_chunk_size//10
-            max_chunk_size = max_chunk_size//10 if max_chunk_size is not None else None
+        #if self._do_prepend:
+        #    # This means gzip file. Should be renamed
+        #    min_chunk_size = min_chunk_size//10
+        #    max_chunk_size = max_chunk_size//10 if max_chunk_size is not None else None
         complete_entry_found = False
         temp_chunks = []
         local_bytes_read = 0
