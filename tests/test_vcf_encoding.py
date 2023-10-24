@@ -162,3 +162,37 @@ def test_read_info_from_vcf():
     print(variants.info)
     print(variants.info.AC[0])
     print(variants.genotypes)
+
+
+@pytest.mark.skip
+def test_concatenate_variants():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    f = bnp.open(file)
+    chunk1 = f.read_chunk(min_chunk_size=200)
+    print(len(chunk1))
+    chunk2 = f.read_chunk(min_chunk_size=200)
+    print(len(chunk2))
+    
+    #merged = np.concatenate([chunk1, chunk2])
+    #assert len(merged) == len(chunk1) + len(chunk2)
+    #print(len(merged))
+    
+    other_chunk = bnp.io.vcf_buffers.VCFEntry.from_entry_tuples(
+        [
+            ("chr1", 1, ".", "A", "T", ".", "PASS", "AF=0.8;AC=2;AN=2")
+        ]
+    )
+
+    #merged2 = np.concatenate([chunk1[0:1], other_chunk, chunk2[1:3]])
+
+    #print(other_chunk)
+
+
+# fails because comma in info field
+@pytest.mark.xfail
+def test_vcf_with_messy_info_field():
+    file = "example_data/vcf_symbolic_sequences.vcf"
+    data = bnp.open(file).read()
+
+    for line in data:
+        print(line)
