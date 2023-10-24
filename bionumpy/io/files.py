@@ -202,7 +202,7 @@ def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type)
     if is_gzip:
         file_reader.set_prepend_mode()
-    chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks())
+    chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks(min_chunk_size=500000))
     return sum(chunk_counts)
 
 

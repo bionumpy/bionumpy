@@ -31,11 +31,11 @@ class OneLineBuffer(FileBuffer):
 
     @classmethod
     def _get_buffer_extractor(cls, data, new_lines):
-        tmp = np.insert(new_lines, 0, -1)
-        field_ends = tmp[1:].reshape(-1, cls.n_lines_per_entry)
-        field_starts = tmp[:-1].reshape(-1, cls.n_lines_per_entry)+(np.array(cls._line_offsets)+1)
-        entry_starts = tmp[:-1:cls.n_lines_per_entry]+1
-        entry_ends = tmp[::cls.n_lines_per_entry][1:]+1
+        tmp = np.insert(new_lines, 0, -1)+1
+        field_ends = new_lines.reshape(-1, cls.n_lines_per_entry)
+        field_starts = tmp[:-1].reshape(-1, cls.n_lines_per_entry)+(np.array(cls._line_offsets))
+        entry_starts = tmp[:-1:cls.n_lines_per_entry]
+        entry_ends = tmp[::cls.n_lines_per_entry][1:]
         return TextThroughputExtractor(data,
                                        field_starts,
                                        field_ends=field_ends,

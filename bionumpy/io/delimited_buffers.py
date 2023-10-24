@@ -166,49 +166,6 @@ class DelimitedBuffer(FileBuffer):
         self.validate_if_not()
         assert col_end == col_start+1
         return self._buffer_extractor.get_field_by_number(col_start)
-        assert col_start < col_end, (col_start, col_end)
-        # assert col_start < self._buffer_extractor.self._n_cols, self._n_cols
-        # assert col_end <= self._n_cols
-
-        starts = self._col_starts(col_start)
-        ends = self._col_ends(col_end-1)
-        if keep_sep:
-            ends += 1
-
-        return self._move_intervals_to_ragged_array(starts, ends)
-
-    # def get_text_range(self, col, start=0, end=None) -> np.ndarray:
-    #     """Get substrings of a column
-    #
-    #     Extract the text from start to end of each entry in column
-    #
-    #     Parameters
-    #     ----------
-    #     col : int
-    #         column index
-    #     start : int
-    #         start of substring
-    #     end : int
-    #         end of substring
-    #
-    #     Returns
-    #     -------
-    #     np.ndarray
-    #         array containing the extracted substrings
-    #
-    #     Examples
-    #     --------
-    #     FIXME: Add docs.
-    #
-    #     """
-    #
-    #     self.validate_if_not()
-    #     starts = self._col_starts(col) + start
-    #     if end is not None:
-    #         return self._data[starts[..., np.newaxis] + np.arange(end - start)].reshape(-1, end - start)
-    #     else:
-    #         ends = self._col_ends(col)
-    #     return self._move_intervals_to_2d_array(starts.ravel(), ends.ravel())
 
     @staticmethod
     def _move_ints_to_digit_array(ints, n_digits):
@@ -275,7 +232,7 @@ class DelimitedBuffer(FileBuffer):
     def _get_field_by_number(self, col_number, field_type):
         parsers = [(str, lambda x: x),
                    (Encoding, lambda x: as_encoded_array(x, field_type)),
-                   (int, str_to_int),
+                   (int, lambda x: str_to_int(*x)),
                    (Optional[int], str_to_int_with_missing),
                    (bool, lambda x: str_to_int(x).astype(bool)),
                    (float, str_to_float),
@@ -285,20 +242,28 @@ class DelimitedBuffer(FileBuffer):
         if field_type is None:
             return None
         self.validate_if_not()
-        text: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
-        assert isinstance(text, EncodedRaggedArray),text
+        if field_type == int:
+            subresult = self._buffer_extractor.get_digit_array(col_number)
+            text = subresult[0]
+        else:
+            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
+            text = subresult
+        assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
         parsed = None
         for f, parser in parsers:
             if field_type == f:
                 try:
-                    parsed = parser(text)
+                    parsed = parser(subresult)
                     assert len(parsed) == len(text)
                     #return parsed
                 except EncodingError as e:
-                    row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
+                    if isinstance(text, EncodedArray):
+                        row_number= e.offset//text.shape[1]
+                    else:
+                        row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
                     raise FormatException(e.args[0], line_number=row_number)
         if is_subclass_or_instance(field_type, Encoding):
-            parsed = as_encoded_array(text, field_type)
+            parsed = as_encoded_array(subresult, field_type)
         if parsed is None:
             assert False, (self.__class__, field_type)
         return parsed

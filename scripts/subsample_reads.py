@@ -34,7 +34,7 @@ def sample_from_chunk(chunk, state):
     return subset
 
 
-def _test_count_entries():
+def test_count_entries():
     filename = 'length150_nreads5000000.fa'
     out = 'tmp.fa'
     input_filename = f'/home/knut/Sources/bionumpy/benchmarks/results/dna_sequences/{filename}'
