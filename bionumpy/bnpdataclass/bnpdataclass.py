@@ -2,7 +2,7 @@ import dataclasses
 import inspect
 from typing import List, Type, Dict, Iterable, Union, Optional
 from numpy.typing import ArrayLike
-from npstructures.npdataclasses import npdataclass, NpDataClass
+from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
 import numpy as np
 from ..encoded_array import EncodedArray, EncodedRaggedArray
@@ -13,6 +13,11 @@ from ..util import is_subclass_or_instance
 
 
 class BNPDataClass(NpDataClass):
+
+    def tolist(self):
+        converter = lambda x: x.to_string() if isinstance(x, EncodedArray) else x.tolist()
+        return [self.dataclass(*(converter(f[idx]) for f in shallow_tuple(self)))
+                for idx in range(len(self))]
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
