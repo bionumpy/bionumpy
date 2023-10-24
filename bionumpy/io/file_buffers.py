@@ -13,6 +13,16 @@ from ..encodings import BaseEncoding
 NEWLINE = "\n"
 
 
+def move_intervals_to_digit_array(data, starts, ends, fill_value):
+    max_chars = np.max(ends - starts)
+    view_starts = (ends - max_chars)
+    indices = view_starts[:, None] + np.arange(max_chars)
+    array = data[indices.ravel()]
+    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars, max_chars - (ends - starts)).get_flat_indices()
+    array[zeroed] = fill_value
+    return array.reshape((-1, max_chars))
+
+
 class FileBuffer:
     """ Base class for file buffer classes. Different FileBuffer classes
     should correspond to different file formats.
@@ -157,13 +167,7 @@ class FileBuffer:
         return NotImplemented
 
     def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
-        max_chars = np.max(ends-starts)
-        view_starts = (ends-max_chars)
-        indices = view_starts[:, None]+np.arange(max_chars)
-        array = self._data[indices.ravel()]
-        zeroed, _ = RaggedView(np.arange(starts.size)*max_chars, max_chars-(ends-starts)).get_flat_indices()
-        array[zeroed] = fill_value
-        return array.reshape((-1, max_chars))
+        return move_intervals_to_digit_array(self._data, starts, ends, fill_value)
 
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
@@ -228,6 +232,16 @@ class TextBufferExtractor:
     def get_fixed_length_field(self, field_nr: int, field_length: int):
         indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
         return self._data[indices]
+
+    def get_digit_array(self, field_nr: int):
+        starts = self._field_starts[:, field_nr]
+        possible_signs = self._data[starts]
+        is_negative = possible_signs == "-"
+        is_positive = possible_signs == "+"
+        if np.any(is_negative) or np.any(is_positive):
+            return self.get_field_by_number(field_nr), is_positive, is_negative
+        digit_array = move_intervals_to_digit_array(self._data, starts, starts+self._field_lens[:, field_nr], fill_value='0')
+        return digit_array, None, None
 
 
 class TextThroughputExtractor(TextBufferExtractor):

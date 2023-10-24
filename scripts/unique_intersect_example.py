@@ -23,7 +23,6 @@ def _test_profiling():
     assert bnp.count_entries('tmp.bed') == 65452
     print(bnp.open('tmp.bed', buffer_type=bnp.Bed6Buffer).read().strand)
 
-# test_profiling()
 
 if __name__ == '__main__':
     import sys

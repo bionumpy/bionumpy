@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
     requirements = ['numpy>=1.20',
-                    'npstructures>=0.2.9']
+                    'npstructures>=0.2.9',]
 # 'npstructures @ git+https://github.com/knutdrand/npstructures.git']
 
 test_requirements = ['pytest>=3', ]

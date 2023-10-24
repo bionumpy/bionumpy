@@ -42,7 +42,7 @@ def plot_averege_quality_scores_per_base(reads):
 def test(do_plot=False):
     examples = [plot_base_qualities, plot_gc_content, plot_averege_quality_scores_per_base]
     for example in examples:
-        reads = bnp.open("example_data/big.fq.gz").read_chunks(min_chunk_size=1000000)
+        reads = bnp.open("example_data/big.fq.gz").read_chunks(min_chunk_size=10000000)
         result = example(reads)
         if do_plot:
             import matplotlib.pyplot as plt

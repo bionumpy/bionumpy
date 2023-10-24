@@ -36,7 +36,10 @@ def sample_from_chunk(chunk, state):
 
 def test_count_entries():
     filename = 'length150_nreads5000000.fa'
-    bnp.count_entries(f'../benchmarks/results/dna_sequences/{filename}', buffer_type=TwoLineFastaBuffer)
+    out = 'tmp.fa'
+    input_filename = f'/home/knut/Sources/bionumpy/benchmarks/results/dna_sequences/{filename}'
+    #filename = 'length150_nreads5000000.fa'
+    bnp.count_entries(input_filename, buffer_type=TwoLineFastaBuffer)
 
 
 def _test():
