@@ -12,7 +12,7 @@ def unique_intersect(filename_a: str, filename_b: str, chrom_sizes_file: str, ou
             f.write(intervals[mask])
 
 
-def test_profiling():
+def _test_profiling():
     name_a = 'ENCFF143HTO_mapped_reads_1m'
     name_b = 'ENCFF491EEI'
     unique_intersect(
@@ -23,7 +23,6 @@ def test_profiling():
     assert bnp.count_entries('tmp.bed') == 65452
     print(bnp.open('tmp.bed', buffer_type=bnp.Bed6Buffer).read().strand)
 
-# test_profiling()
 
 if __name__ == '__main__':
     import sys
