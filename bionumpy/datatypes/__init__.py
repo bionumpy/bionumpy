@@ -1,9 +1,9 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
                          CigarEncoding, StrandEncoding)
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
 
 @bnpdataclass
@@ -101,7 +101,7 @@ class VCFEntry:
     alt_seq: str
     quality: str
     filter: str
-    info: str
+    info: Union[BNPDataClass, str]
 
     def is_snp(self):
         return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)

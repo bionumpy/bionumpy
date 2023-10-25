@@ -6,7 +6,8 @@ from npstructures import RaggedArray
 import bionumpy.encoded_array
 import bionumpy as bnp
 from bionumpy.util.testing import assert_encoded_array_equal, assert_encoded_raggedarray_equal
-from bionumpy import FastQBuffer, as_encoded_array
+from bionumpy import as_encoded_array
+from bionumpy.io import FastQBuffer
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.datatypes import SequenceEntryWithQuality
 from bionumpy.encodings import DigitEncoding, QualityEncoding, CigarEncoding, DigitEncodingFactory, DNAEncoding, ACGTnEncoding

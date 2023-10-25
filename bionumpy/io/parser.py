@@ -107,6 +107,10 @@ class NumpyFileReader:
         FIXME: Add docs.
 
         """
+        #if self._do_prepend:
+        #    # This means gzip file. Should be renamed
+        #    min_chunk_size = min_chunk_size//10
+        #    max_chunk_size = max_chunk_size//10 if max_chunk_size is not None else None
         complete_entry_found = False
         temp_chunks = []
         local_bytes_read = 0
@@ -247,8 +251,10 @@ class NpBufferedWriter:
         if hasattr(self._buffer_type, 'make_header') and \
                 (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
                 #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
-            header_array = self._buffer_type.make_header(data)
-            self._file_obj.write(header_array)
+            if not self._header_written:
+                header_array = self._buffer_type.make_header(data)
+                self._file_obj.write(header_array)
+                self._header_written = True
         if len(data) == 0:
             return
 
@@ -265,7 +271,7 @@ class NpBufferedWriter:
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
         self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
-        self._file_obj.flush()
+        # self._file_obj.flush()
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )

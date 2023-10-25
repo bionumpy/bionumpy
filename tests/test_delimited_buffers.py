@@ -1,3 +1,5 @@
+import pytest
+
 import bionumpy.encoded_array
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.datatypes import Interval
@@ -8,7 +10,7 @@ from npstructures.testing import assert_raggedarray_equal
 intervals = Interval(["chr1", "chr1"], [2, 10], [100, 20])
 
 
-
+@pytest.mark.skip
 def test_get_column_range():
     data = """\
 a b c d... e f

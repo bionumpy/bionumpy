@@ -59,8 +59,15 @@ For getting kmers from the variant alleles, we replace the allele bases with the
     sequences[:, k-1] = variants.get_data_field('alt_seq').ravel()
     sequences = bnp.as_encoded_array(sequences, bnp.DNAEncoding)
     alt_kmers = bnp.get_kmers(sequences, k)
+    print(alt_kmers[0:3])
 
 The `alt_kmers` now contains kmers for the alt alleles for each variant.
+
+.. testoutput::
+
+    [TTACG, TACGC, ACGCA, CGCAT, GCATA]
+    [ATAAA, TAAAG, AAAGC, AAGCC, AGCCC]
+    [TTTTA, TTTAA, TTAAT, TAATA, AATAT]
 
 Note that these kmers are encoded using a `KmerEncoding`. We can get the raw encoded kmers (int64) values:
 

@@ -1,8 +1,11 @@
 from pathlib import PurePath
+from typing import Union
+
 from .gzip_reading import gzip
 # import gzip
 import dataclasses
-from .file_buffers import FastQBuffer, FileBuffer
+from .file_buffers import FileBuffer
+from .fastq_buffer import FastQBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,
@@ -67,7 +70,7 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename: str, mode: str = None, buffer_type=None) -> NpDataclassReader:
+def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDataclassReader, NpBufferedWriter]:
     """Open a file according to its suffix
 
     Open a `NpDataclassReader` file object, that can be used to read the file,
@@ -199,7 +202,7 @@ def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type)
     if is_gzip:
         file_reader.set_prepend_mode()
-    chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks())
+    chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks(min_chunk_size=500000))
     return sum(chunk_counts)
 
 

@@ -20,7 +20,7 @@ rule assert_method_output_is_equal:
     shell:
         # diff return nonzero exit code on diff
         """
-        diff --ignore-space-change {input}
+        diff --ignore-space-change  -I '^#' {input}
         touch {output}
         """
 

@@ -1,21 +1,22 @@
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Set, Tuple, List, Mapping, Optional
 
 import re
 import warnings
+
 @dataclass
 class VCFHeader:
     """VCFHeader"""
-    fileformat: str
-    source: str
-    fileDate: str
-    reference: str
-    FILTER: Mapping[str, Any]
-    FORMAT: Mapping[str, Any]
-    INFO: Mapping[str, Any]
-    contig: Mapping[str, Any]
-    optional: Mapping[str, List[Any]]
+    fileformat: str = None
+    source: str = None
+    fileDate: str = None
+    reference: str = None
+    FILTER: Mapping[str, Any] = None
+    FORMAT: Mapping[str, Any] = None
+    INFO: Mapping[str, Any] = field(default_factory=dict)
+    contig: Mapping[str, Any] = None
+    optional: Mapping[str, List[Any]] = None
 
 def preprocess_number(x: str) -> Optional[int]:
     """Preprocess the number in field such as Number. Return None if x
@@ -52,7 +53,7 @@ def preprocess_type(x: str) -> type:
     type
         the corresponding class type.
     """
-    mapping = {'Float': float, 'Integer': int, 'Flag': bool, 'String': str}
+    mapping = {'Float': Optional[float], 'Integer': Optional[int], 'Flag': bool, 'String': str}
     return mapping[x]
 
 
@@ -162,6 +163,7 @@ class HeaderReflection:
     def is_mapping_identifier(cls, field: str) -> bool:
         return field in cls.mapping_identifiers
 
+
 def parse_header(lines: str) -> VCFHeader:
     """Parse the VCF header.
 
@@ -214,9 +216,9 @@ def parse_header(lines: str) -> VCFHeader:
             headers[optional_identifier][identifier].append(content)
     
     optional_identifier = 'optional'
-    for identifier, contents in headers[optional_identifier].items():
-        if len(contents) > 1:
-            message = f"Duplicated values for {identifier} ({len(contents)} values)"
-            warnings.warn(message, RuntimeWarning)    
+    # for identifier, contents in headers[optional_identifier].items():
+    #     if len(contents) > 1:
+    #         message = f"Duplicated values for {identifier} ({len(contents)} values)"
+    #         warnings.warn(message, RuntimeWarning)
 
     return VCFHeader(**headers)

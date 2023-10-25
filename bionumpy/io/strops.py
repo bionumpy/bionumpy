@@ -65,7 +65,21 @@ def replace_inplace(number_text: EncodedArray, replace_from: str, replace_to: st
     number_text[number_text == replace_from] = replace_to
 
 
-def str_to_int(number_text: EncodedArray) -> np.ndarray:
+def str_to_int_with_missing(number_text: EncodedArray, missing_value=0) -> np.ndarray:
+    return parse_with_missing(missing_value, number_text, str_to_int, int)
+
+def str_to_float_with_missing(number_text: EncodedArray, missing_value=np.nan) -> np.ndarray:
+    return parse_with_missing(missing_value, number_text, str_to_float, float)
+
+def parse_with_missing(missing_value, number_text, parser, dtype):
+    number_text = as_encoded_array(number_text)
+    mask = number_text.lengths > 0
+    values = np.full(len(number_text), missing_value, dtype=dtype)
+    values[mask] = parser(number_text[mask])
+    return values
+
+
+def str_to_int(number_text: EncodedArray, is_negative=None, is_positive=None) -> np.ndarray:
     """Convert strings in an EncodedRaggedArray to integers in numpy array
 
     Parameters
@@ -84,8 +98,15 @@ def str_to_int(number_text: EncodedArray) -> np.ndarray:
 
     """
     number_text = as_encoded_array(number_text)
-    is_negative = number_text[:, 0] == "-"
-    is_positive = number_text[:, 0] == "+"
+    if not isinstance(number_text, EncodedRaggedArray):
+        number_text = as_encoded_array(number_text, target_encoding=DigitEncoding)
+        powers = 10**np.arange(number_text.shape[-1])[::-1]
+        return number_text.raw().dot(powers)
+    if len(number_text) == 0:
+        return np.array([], dtype=int)
+    if is_negative is None:
+        is_negative = number_text[:, 0] == "-"
+        is_positive = number_text[:, 0] == "+"
     number_text[is_negative, 0] = "0"
     number_text[is_positive, 0] = "0"
     number_text = as_encoded_array(number_text, DigitEncoding)

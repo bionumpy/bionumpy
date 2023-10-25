@@ -1,9 +1,13 @@
 import dataclasses
-from typing import List, Type, Dict, Iterable
+import inspect
+from typing import List, Type, Dict, Iterable, Union, Optional
 from numpy.typing import ArrayLike
-from npstructures.npdataclasses import npdataclass, NpDataClass
+from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
 import numpy as np
+
+from .pandas_adaptor import pandas_adaptor
+
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
@@ -11,8 +15,55 @@ from ..encodings.alphabet_encoding import FlatAlphabetEncoding
 from ..util import is_subclass_or_instance
 
 
+def get_vanilla_generator(object):
+    if isinstance(object, np.ndarray):
+        convertor = (lambda x: x.item()) if (object.ndim == 1) else (lambda x: x.tolist())
+        return (convertor(o) for o in object)
+    if isinstance(object, (EncodedArray, EncodedRaggedArray)):
+        return (c.to_string() for c in object)
+    if isinstance(object, RaggedArray):
+        return (row.tolist() for row in object)
+    if isinstance(object, BNPDataClass):
+        return object.toiter()
+
+
 class BNPDataClass(NpDataClass):
-    _context = {}
+
+    def todict(self):
+        field_dict = {}
+        for field in dataclasses.fields(self):
+            pandas_obj = pandas_adaptor.pandas_converter(getattr(self, field.name))
+            if isinstance(pandas_obj, dict):
+                field_dict.update({f'{field.name}.{k}': v for k, v in pandas_obj.items()})
+            else:
+                field_dict[field.name] = pandas_obj
+
+        return field_dict
+
+    def topandas(self):
+        return pandas_adaptor.get_data_frame(self.todict())
+        # return pd.DataFrame(self.todict())
+
+    def tolist(self)-> List['dataclass']:
+        """
+        Convert the data into a list of entries from the
+        corrsponding dataclass with normal python types.
+        Similar to np.tolist and pd.tolist.
+        This is good for debugging, but for real applications
+        requires a lot of memory allocation. For iterating over
+        the data, use `toiter` instead.
+        Returns
+        -------
+            list[cls.dataclass]
+        """
+        return list(self.toiter())
+        lists = tuple(f.tolist() for f in shallow_tuple(self))
+        return list(self.dataclass(*row) for row in zip(*lists))
+
+    def toiter(self):
+        iters = tuple(get_vanilla_generator(f)
+                      for f in shallow_tuple(self))
+        return (self.dataclass(*row) for row in zip(*iters))
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
@@ -43,7 +94,8 @@ class BNPDataClass(NpDataClass):
         ['sequence_aa', 'sequence', 's1']
 
         """
-        cls_name = name if name is not None else f"Dynamic{cls.__name__}" if cls.__name__[:7] != 'Dynamic' else cls.__name__
+        cls_name = name if name is not None else f"Dynamic{cls.__name__}" if cls.__name__[
+                                                                             :7] != 'Dynamic' else cls.__name__
         return bnpdataclass(dataclasses.make_dataclass(cls_name, bases=(cls,), fields=fields))
 
     def add_fields(self, fields: Dict[str, ArrayLike], field_type_map: dict = None) -> 'BNPDataClass':
@@ -89,18 +141,22 @@ class BNPDataClass(NpDataClass):
     @classmethod
     def from_entry_tuples(cls, tuples):
         return cls(*(list(c) for c in zip(*tuples)))
-    
+
     def sort_by(self, field_name: str) -> 'BNPDataClass':
         return self[np.argsort(getattr(self, field_name))]
 
     def set_context(self, name, value):
+        if not hasattr(self, '_context'):
+            self._context = dict()
         self._context[name] = value
 
     def get_context(self, name):
+        if not hasattr(self, '_context'):
+            self._context = dict()
         return self._context[name]
 
     def has_context(self, name):
-        return name in self._context
+        return hasattr(self, '_context') and name in self._context
 
 
 def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
@@ -173,14 +229,30 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
             """
             for field in dataclasses.fields(obj):
                 pre_val = getattr(obj, field.name)
-                if field.type in (int, float, bool):
+                numeric_types = (int, float, bool)
+                optional_numeric_types = tuple(Optional[t] for t in numeric_types)
+                if field.type == Union[BNPDataClass, str]:
+                    if isinstance(pre_val,
+                                  (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or \
+                            hasattr(pre_val, 'to_numpy'):
+                        val = as_encoded_array(pre_val)
+                    elif True or isinstance(pre_val, BNPDataClass):
+                        val = pre_val
+                    else:
+                        assert False, (field.type, type(pre_val))
+
+                elif field.type in numeric_types + optional_numeric_types:
                     val = np.asanyarray(pre_val)
                 elif field.type == str:
-                    assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val))
+                    assert isinstance(pre_val, (
+                    str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)) or hasattr(pre_val,
+                                                                                                      'to_numpy'), (
+                    field, pre_val, type(pre_val))
                     val = as_encoded_array(pre_val)
                 elif is_subclass_or_instance(field.type, Encoding):
                     if is_subclass_or_instance(field.type, NumericEncoding):
-                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
+                        assert isinstance(pre_val,
+                                          (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
                             (field, pre_val, type(pre_val))
                     else:
                         assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
@@ -191,10 +263,13 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                         val = val.ravel()
                 elif field.type == List[int] or field.type == List[bool]:
                     if not isinstance(pre_val, RaggedArray):
-                        val = RaggedArray(pre_val)
+                        try:
+                            val = RaggedArray(pre_val)
+                        except TypeError as e:
+                            val = np.asanyarray(pre_val)
                     else:
                         val = pre_val
-                elif issubclass(field.type, BNPDataClass):
+                elif inspect.isclass(field.type) and issubclass(field.type, BNPDataClass):
                     assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
                     val = pre_val
                 else:

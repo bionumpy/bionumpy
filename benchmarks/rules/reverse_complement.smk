@@ -9,11 +9,13 @@ rule bionumpy_reverse_complement:
         "results/bionumpy/reverse_complement/{filename}.fa"
     benchmark:
         "benchmarks/reverse_complement/bionumpy/{filename}.txt"
-    run:
-        sequence_entries = bnp.open(input[0], buffer_type=bnp.TwoLineFastaBuffer).read_chunks()
-        reversed_entries = bnp.sequence.get_reverse_complement(sequence_entries)
-        with bnp.open(output[0], "w", buffer_type=bnp.TwoLineFastaBuffer) as outfile:
-            outfile.write(reversed_entries)
+    shell:
+        "python3 ../scripts/reverse_compliment_example.py {input} {output}"
+    # run:
+    #     sequence_entries = bnp.open(input[0], buffer_type=bnp.TwoLineFastaBuffer).read_chunks()
+    #     reversed_entries = bnp.sequence.get_reverse_complement(sequence_entries)
+    #     with bnp.open(output[0], "w", buffer_type=bnp.TwoLineFastaBuffer) as outfile:
+    #         outfile.write(reversed_entries)
 
 
 rule seqtk_reverse_complement:

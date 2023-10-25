@@ -19,6 +19,14 @@ class BamBuffer(FileBuffer):
         self._chromosome_names = as_encoded_array([header[0] for header in header_data])
         self._data = np.asarray(self._data)
 
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def n_lines(self):
+        return len(self._new_lines)
+
     @classmethod
     def _read_int(self, file_object):
         return int.from_bytes(file_object.read(4), byteorder="little")

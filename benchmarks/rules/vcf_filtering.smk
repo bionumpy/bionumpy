@@ -30,9 +30,8 @@ rule bionumpy_vcf_filtering:
         "benchmarks/vcf_filtering/bionumpy/{size}.txt"
     shell:
         """
-        python3 ../scripts/vcf_allele_frequency_filtering_example.py {input} {output} 10 
+        python3 -O ../scripts/vcf_allele_frequency_filtering_example.py {input} {output} 10
         """
-
 
 
 # not used, similar to pyvcf

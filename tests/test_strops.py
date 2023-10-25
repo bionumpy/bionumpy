@@ -4,7 +4,8 @@ import numpy as np
 import bionumpy as bnp
 from bionumpy import as_encoded_array
 from bionumpy.util.testing import assert_encoded_raggedarray_equal
-from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float, float_to_strings)
+from bionumpy.io.strops import (int_to_str, ints_to_strings, join, split, str_to_int, str_equal, str_to_float,
+                                float_to_strings, str_to_int_with_missing, str_to_float_with_missing)
 from bionumpy.io.strops import _str_equal_two_encoded_ragged_arrays
 
 
@@ -51,6 +52,15 @@ def test_multiple_int_to_string(ints, strings):
 def test_str_to_int(ints, strings):
     for i, s in zip(ints, str_to_int(strings)):
         assert i == s
+
+
+def test_str_to_int_with_missing():
+    text = as_encoded_array(['1', '', '', '10', ''])
+    np.testing.assert_array_equal(str_to_int_with_missing(text), [1, 0, 0, 10, 0])
+
+def test_str_to_float_with_missing():
+    text = as_encoded_array(['1', '', '', '10.1', ''])
+    np.testing.assert_array_equal(str_to_float_with_missing(text), [1, np.nan, np.nan, 10.1, np.nan])
 
 
 def test_str_to_float(floats):

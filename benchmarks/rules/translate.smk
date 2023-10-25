@@ -8,8 +8,8 @@ rule translate_bionumpy:
         "results/bionumpy/translate/{filename}.fa"
     benchmark:
         "benchmarks/translate/bionumpy/{filename}.txt"
-    script:
-        "../scripts/bionumpy_translate.py"
+    shell:
+        "python ../scripts/translate_example.py {input} {output}"
 
 
 rule translate_biopython:

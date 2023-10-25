@@ -1,16 +1,26 @@
-import sys
-from typing import List
+from functools import lru_cache
 
 import numpy as np
 from io import FileIO
-from npstructures import RaggedArray, RaggedView, RaggedShape
+from npstructures import RaggedView
+from npstructures.raggedshape import RaggedView2
+
 from .exceptions import FormatException
 from ..bnpdataclass import bnpdataclass
-from ..datatypes import SequenceEntry, SequenceEntryWithQuality
-from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
-from ..encodings import QualityEncoding, BaseEncoding
+from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encodings import BaseEncoding
 
 NEWLINE = "\n"
+
+
+def move_intervals_to_digit_array(data, starts, ends, fill_value):
+    max_chars = np.max(ends - starts)
+    view_starts = (ends - max_chars)
+    indices = view_starts[:, None] + np.arange(max_chars)
+    array = data[indices.ravel()]
+    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars, max_chars - (ends - starts)).get_flat_indices()
+    array[zeroed] = fill_value
+    return array.reshape((-1, max_chars))
 
 
 class FileBuffer:
@@ -37,12 +47,13 @@ class FileBuffer:
         self._is_validated = False
 
     @property
+    @lru_cache()
     def size(self):
         return self.data.size
 
     @property
     def data(self):
-        return self._data
+        return self._buffer_extractor.data
 
     def __getitem__(self, idx):
         return NotImplemented
@@ -59,6 +70,7 @@ class FileBuffer:
 
     @property
     def n_lines(self):
+        return NotImplemented
         return len(self._new_lines)
 
     @classmethod
@@ -155,13 +167,7 @@ class FileBuffer:
         return NotImplemented
 
     def _move_intervals_to_2d_array(self, starts, ends, fill_value=0):
-        max_chars = np.max(ends-starts)
-        view_starts = (ends-max_chars)
-        indices = view_starts[:, None]+np.arange(max_chars)
-        array = self._data[indices.ravel()]
-        zeroed, _ = RaggedView(np.arange(starts.size)*max_chars, max_chars-(ends-starts)).get_flat_indices()
-        array[zeroed] = fill_value
-        return array.reshape((-1, max_chars))
+        return move_intervals_to_digit_array(self._data, starts, ends, fill_value)
 
     def _move_intervals_to_ragged_array(self, starts, ends=None, lens=None, as_sequence=True):
         if lens is None:
@@ -181,24 +187,26 @@ class FileBuffer:
         n_new_lines = sum(np.count_nonzero(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
-    #def get_field_by_number(self, field_nr: int, field_type: type=object):
-    #    raise NotImplementedError
-
 
 class IncompleteEntryException(Exception):
     pass
 
 
 class TextBufferExtractor:
-    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray):
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens: np.ndarray=None):
         '''
         field_starts: n_entries x n_fields
         field_ends: n_entries x n_fields
         '''
         self._data = data
         self._field_starts = field_starts
-        self._field_ends = field_ends
-        self._field_lens = field_ends-field_starts
+
+        if field_lens is None:
+            assert field_ends is not None
+            self._field_lens = field_ends-field_starts
+        else:
+            assert field_ends is None
+            self._field_lens = field_lens
         self._n_fields = field_starts.shape[1]
 
     @property
@@ -209,270 +217,70 @@ class TextBufferExtractor:
         return len(self._field_starts)
 
     def __getitem__(self, idx):
-        return self.__class__(self._data, field_starts=self._field_starts[idx], field_ends=self._field_ends[idx])
+        return self.__class__(self._data,
+                              field_starts=self._field_starts[idx],
+                              field_lens=self._field_lens[idx])
 
-    def get_field_by_number(self, field_nr: int):
-        e = EncodedRaggedArray(self._data, RaggedView(self._field_starts.ravel(), self._field_lens.ravel()))
-        return e[field_nr::self._n_fields]
+    def get_field_by_number(self, field_nr: int, keep_sep=False):
+        assert field_nr < self._n_fields, (field_nr, self._n_fields)
+        lens = self._field_lens.ravel()[field_nr::self._n_fields]
+        if keep_sep:
+            lens = lens + 1
+        starts = self._field_starts.ravel()[field_nr::self._n_fields]
+        values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
+        # values = e[field_nr::self._n_fields]
+        assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
+        return values
+
+    def get_fixed_length_field(self, field_nr: int, field_length: int):
+        indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
+        return self._data[indices]
+
+    def get_digit_array(self, field_nr: int):
+        starts = self._field_starts[:, field_nr]
+        possible_signs = self._data[starts]
+        is_negative = possible_signs == "-"
+        is_positive = possible_signs == "+"
+        if np.any(is_negative) or np.any(is_positive):
+            return self.get_field_by_number(field_nr), is_positive, is_negative
+        digit_array = move_intervals_to_digit_array(self._data, starts, starts+self._field_lens[:, field_nr], fill_value='0')
+        return digit_array, None, None
 
 
-class OneLineBuffer(FileBuffer):
-    """ Base class for file formats where data fields are contained in lines."""
+class TextThroughputExtractor(TextBufferExtractor):
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens=None, entry_starts: np.ndarray=None, entry_ends:np.ndarray=None, is_contiguous=True):
+        if field_lens is None:
+            field_lens = field_ends-field_starts
+        super().__init__(data, field_starts, field_lens=field_lens)
+        self._entry_starts = entry_starts
+        self._entry_ends = entry_ends
+        self._is_contiguous = is_contiguous
 
-    n_lines_per_entry = 2
-    _buffer_divisor = 32
-    _line_offsets = (1, 0)
-    _empty_lines = []
+    def __getitem__(self, idx):
+        return self.__class__(self._data,
+                              field_starts=self._field_starts[idx],
+                              field_lens=self._field_lens[idx],
+                              entry_starts=self._entry_starts[idx],
+                              entry_ends=self._entry_ends[idx], is_contiguous=False)
 
-    def __init__(self, buffer_extractor: TextBufferExtractor):
-        # super().__init__(*args, **kwargs)
-        self._is_validated=False
-        self._buffer_extractor = buffer_extractor
-        self._is_validated = True
+    def _make_contigous(self):
+        assert not self._is_contiguous
+        lens = self._entry_ends - self._entry_starts
+        new_starts = np.insert(np.cumsum(lens), 0, 0)
+        offsets = self._entry_starts - new_starts[:-1]
+        self._data = EncodedRaggedArray(self._data, RaggedView2(self._entry_starts, lens)).ravel()
+        self._entry_starts = new_starts[:-1]
+        self._entry_ends = new_starts[1:]
+        self._field_starts = self._field_starts-offsets[:, None]
 
-    @property
-    def n_lines(self):
-        return len(self._buffer_extractor)*self.n_lines_per_entry
+        # self._field_ends = self._field_ends-offsets[:, None]
+        self._is_contiguous = True
 
     @property
     def data(self):
-        return self._buffer_extractor.data
+        if not self._is_contiguous:
+            self._make_contigous()
+        return self._data
+        # return EncodedRaggedArray(self._data,
+        #                           RaggedView2(self._entry_starts, self._entry_ends-self._entry_starts)).ravel()
 
-    @classmethod
-    def _get_buffer_extractor(cls, data, new_lines):
-        tmp = np.insert(new_lines, 0, -1)
-        ends = tmp[1:].reshape(-1, cls.n_lines_per_entry)
-        starts = tmp[:-1].reshape(-1, cls.n_lines_per_entry)+(np.array(cls._line_offsets)+1)
-        return TextBufferExtractor(data, starts, ends)
-
-    @classmethod
-    def contains_complete_entry(cls, chunks):
-        if len(chunks) == 1:
-            try:
-                return True, cls.from_raw_buffer(chunks[0])
-            except IncompleteEntryException:
-                return False
-        return super().contains_complete_entry(chunks)
-
-    @classmethod
-    def from_raw_buffer(cls, chunk, header_data=None) -> "OneLineBuffer":
-        """Create a buffer with full entries
-
-        Extract complete entries, i. e. a number of lines that is divisible by lines per entry
-
-        Parameters
-        ----------
-        chunk : np.ndarray
-            Raw buffer with data that might end with incomplete entry
-
-        Returns
-        -------
-        'OneLineBuffer'
-            Buffer with complete entries
-
-        Examples
-        --------
-        8
-
-        """
-        assert header_data is None
-        chunk = EncodedArray(chunk, BaseEncoding)
-        new_lines = np.flatnonzero(chunk == NEWLINE)
-        n_lines = new_lines.size
-        if n_lines < cls.n_lines_per_entry:
-            raise IncompleteEntryException("No complete entry in buffer. Try increasing chunk_size.")
-        new_lines = new_lines[: n_lines - (n_lines % cls.n_lines_per_entry)]
-        chunk = chunk[: new_lines[-1] + 1]
-        data = chunk[: new_lines[-1] + 1]
-        cls._validate(data, new_lines)
-        return cls(cls._get_buffer_extractor(data, new_lines))
-
-    @property
-    def lines(self):
-        if not hasattr(self, "__lines"):
-            starts = np.insert(self._new_lines, 0, -1)
-            lengths = np.diff(starts)
-            self.__lines = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        return self.__lines
-
-    @property
-    def entries(self):
-        if not hasattr(self, "__entries"):
-            lengths = np.diff(self._new_lines[self.n_lines_per_entry-1::self.n_lines_per_entry])
-            lengths = np.insert(lengths, 0, self._new_lines[self.n_lines_per_entry-1]+1)
-            self.__entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
-        return self.__entries
-
-    def get_data(self) -> bnpdataclass:
-        """Get and parse fields from each line"""
-        headers, sequences = [self._buffer_extractor.get_field_by_number(i) for i in (0, 1)]
-        return SequenceEntry(headers, sequences)
-
-    def get_field_by_number(self, i: int, t: type=object):
-        """ Get a field indexed by number"""
-        return self._buffer_extractor.get_field_by_number(i)
-
-    def __getitem__(self, idx):
-        return self.__class__(self._buffer_extractor[idx])
-
-    def count_entries(self) -> int:
-        """Count number of entries in file"""
-        return len(self._buffer_extractor)
-
-    def get_field_range_as_text(self, start, end):
-        """Get a range of fields as text"""
-        assert end == start+1
-        return self.get_text_field_by_number(start)
-
-    @classmethod
-    def from_data(cls, entries: bnpdataclass) -> "OneLineBuffer":
-        """Convert the data from the entries into a buffer that can be written to file
-        
-        Extract the name and the sequence and make a buffer with alternating lines
-
-        Parameters
-        ----------
-        entries : bnpdataclass
-            The entries to be written to the buffer
-        
-
-        Returns
-        -------
-        "OneLineBuffer"
-            A ASCII encoded buffer
-        """
-
-        names = entries.name
-        sequences = entries.sequence
-        name_lengths = names.lengths
-        sequence_lengths = sequences.lengths
-        line_lengths = np.hstack(
-            (name_lengths[:, None] + 2, sequence_lengths[:, None] + 1)
-        ).ravel()
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
-        lines = EncodedRaggedArray(buf, line_lengths)
-        step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = names
-        lines[1::step, :-1] = EncodedRaggedArray(
-            EncodedArray(sequences.encoding.decode(sequences.ravel()), sequences.encoding), sequences.shape)
-
-        lines[0::step, 0] = ">"
-
-        lines[:, -1] = "\n"
-        return buf
-
-    @classmethod
-    def join_fields(cls, fields: List[EncodedRaggedArray]):
-        field_lengths = np.hstack([field.shape[1][:, None] for field in fields])
-        line_lengths = field_lengths+1
-        for i in range(len(fields)):
-            line_lengths[:, i] += cls._line_offsets[i]
-        entry_lengths = line_lengths.sum(axis=-1)
-        buffer_size = entry_lengths.sum()
-        buf = EncodedArray(np.empty(buffer_size, dtype=np.uint8), BaseEncoding)
-        lines = EncodedRaggedArray(buf, line_lengths.ravel())
-        step = cls.n_lines_per_entry
-        for i, field in enumerate(fields):
-            lines[i::step, cls._line_offsets[i]:-1] = field
-        lines[0::step, 0] = cls.HEADER
-        lines[:, -1] = "\n"
-        return buf
-
-    @classmethod
-    def _validate(cls, data, new_lines):
-        header = cls.HEADER
-        if data.size == 0 and new_lines.size==0:
-            return
-        n_lines = new_lines.size
-        n_lines_per_entry = cls.n_lines_per_entry
-        assert n_lines % n_lines_per_entry == 0, "Wrong number of lines in buffer"
-        header_idxs = (
-                new_lines[n_lines_per_entry - 1: -1: n_lines_per_entry]
-                + 1
-        )
-
-        if np.any(data[header_idxs] != header) or data[0] != header:
-            if data[0] != header:
-                line_number = 0
-            else:
-                line_number = (np.flatnonzero(data[header_idxs] != header)[0] + 1) * n_lines_per_entry
-            raise FormatException(f"Expected header line to start with {header}" % data, line_number=line_number)
-
-    def get_text_field_by_number(self, i):
-        return self.get_field_by_number(i)
-
-
-class TwoLineFastaBuffer(OneLineBuffer):
-    HEADER = ">"# 62
-    n_lines_per_entry = 2
-    dataclass = SequenceEntry
-
-
-class FastQBuffer(OneLineBuffer):
-    HEADER = "@"
-    n_lines_per_entry = 4
-    dataclass = SequenceEntryWithQuality
-    _line_offsets = (1, 0, 0, 0)
-    _empty_lines = [2]
-
-    def get_text_field_by_number(self, i: int) -> EncodedRaggedArray:
-        if i == 2:
-            return self._buffer_extractor.get_field_by_number(3)
-        return super().get_text_field_by_number(i)
-
-    def get_field_by_number(self, i: int, t: type=object):
-        if i == 2:
-            return QualityEncoding.encode(self.get_text_field_by_number(i))
-        else:
-            return super().get_field_by_number(i, t)
-
-    def get_data(self):
-        seq_entry = super().get_data()
-        quality = self.get_field_by_number(2, QualityEncoding)
-        return SequenceEntryWithQuality(
-            seq_entry.name, seq_entry.sequence,quality)
-
-    @classmethod
-    def _get_line_lens(cls, entries):
-        name_lengths = entries.name.lengths[:, None]
-        sequence_lengths = entries.sequence.lengths[:, None]
-        return (
-            np.hstack(
-                (
-                    name_lengths + 1,
-                    sequence_lengths,
-                    np.ones_like(sequence_lengths),
-                    sequence_lengths,
-                )
-            ).ravel()
-            + 1
-        )
-
-    @classmethod
-    def _validate(cls, data, new_lines):
-        super()._validate(data, new_lines)
-        n_lines_per_entry = cls.n_lines_per_entry
-        if np.any(data[new_lines[1::n_lines_per_entry] + 1] != "+"):
-            entry_number = np.flatnonzero(data[new_lines[1::n_lines_per_entry] + 1] != "+")[0]
-            line_number = 2 + entry_number * n_lines_per_entry
-            raise FormatException(f"Expected '+' at third line of entry in {data}", line_number=line_number)
-
-    @classmethod
-    def join_fields(cls, fields: List[EncodedRaggedArray]):
-        plus_line = as_encoded_array(['+']*len(fields[0]))
-        return super().join_fields(fields[:2]+[plus_line]+fields[2:])
-
-    @classmethod
-    def from_data(cls, entries):
-        line_lengths = cls._get_line_lens(entries)
-        buf = EncodedArray(np.empty(line_lengths.sum(), dtype=np.uint8), BaseEncoding)
-        lines = EncodedRaggedArray(buf, line_lengths)
-        step = cls.n_lines_per_entry
-        lines[0::step, 1:-1] = entries.name
-        lines[1::step, :-1] = EncodedRaggedArray(EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()), BaseEncoding), entries.sequence.shape)
-        lines[2::step, 0] = "+"
-        lines[3::step, :-1] = EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding)
-        lines[0::step, 0] = cls.HEADER
-        lines[:, -1] = "\n"
-
-        return buf

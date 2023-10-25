@@ -1,0 +1,7 @@
+##fileformat=VCFv4.2
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00438	HG00621	HG00673
+chr1	5	var1	A	T	60	.	.	GT	0|0	0|1	0|0	0|0
+chr1	5	var1	A	G	60	.	.	GT	0|0	0|0	0|0	1|0
+chr1	8	var1	G	T	60	.	.	GT	0|0	0|1	1|0	1|0
+chr1	10	var1	GGG	G	60	.	.	GT	0|0	0|1	1|0	0|0
+chr1	10	var1	GGG	G	60	.	.	GT	0|0	0|0	0|0	0|1
