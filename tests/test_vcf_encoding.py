@@ -190,9 +190,28 @@ def test_concatenate_variants():
 
 # fails because comma in info field
 #@pytest.mark.xfail
-def test_vcf_with_messy_info_field():
+@pytest.fixture
+def data_with_info():
     file = "example_data/vcf_symbolic_sequences.vcf"
     data = bnp.open(file).read()
+    return data
 
-    for line in data:
+
+def test_vcf_with_messy_info_field(data_with_info):
+    for line in data_with_info:
         print(line)
+        print(line.info)
+
+def test_toiter_with_info(data_with_info):
+    for entry in data_with_info.toiter():
+        assert type(entry) == bnp.io.vcf_buffers.VCFEntry.dataclass
+        assert entry.info.__class__.__name__ == 'InfoDataclass'
+        assert isinstance(entry.chromosome, str)
+        assert isinstance(entry.position, int)
+        assert isinstance(entry.info.AC, list)
+        print(entry)
+
+def test_pandas_with_info(data_with_info):
+    print(data_with_info.topandas())
+
+

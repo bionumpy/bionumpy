@@ -5,6 +5,9 @@ from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
 import numpy as np
+
+from .pandas_adaptor import pandas_adaptor
+
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
@@ -26,7 +29,33 @@ def get_vanilla_generator(object):
 
 class BNPDataClass(NpDataClass):
 
-    def tolist(self):
+    def todict(self):
+        field_dict = {}
+        for field in dataclasses.fields(self):
+            pandas_obj = pandas_adaptor.pandas_converter(getattr(self, field.name))
+            if isinstance(pandas_obj, dict):
+                field_dict.update({f'{field.name}.{k}': v for k, v in pandas_obj.items()})
+            else:
+                field_dict[field.name] = pandas_obj
+
+        return field_dict
+
+    def topandas(self):
+        return pandas_adaptor.get_data_frame(self.todict())
+        # return pd.DataFrame(self.todict())
+
+    def tolist(self)-> List['dataclass']:
+        """
+        Convert the data into a list of entries from the
+        corrsponding dataclass with normal python types.
+        Similar to np.tolist and pd.tolist.
+        This is good for debugging, but for real applications
+        requires a lot of memory allocation. For iterating over
+        the data, use `toiter` instead.
+        Returns
+        -------
+            list[cls.dataclass]
+        """
         return list(self.toiter())
         lists = tuple(f.tolist() for f in shallow_tuple(self))
         return list(self.dataclass(*row) for row in zip(*lists))
