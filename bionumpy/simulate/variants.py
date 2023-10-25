@@ -7,7 +7,19 @@ from .sequences import simulate_sequences
 from bionumpy import EncodedRaggedArray, EncodedArray, DNAEncoding
 from bionumpy.encodings import ACGTnEncoding
 import bionumpy as bnp
+from ..bnpdataclass import bnpdataclass
 
+
+@bnpdataclass
+class VCFEntry:
+    chromosome: str
+    position: int
+    id: str
+    ref_seq: str
+    alt_seq: str
+    quality: str
+    filter: str
+    info: str
 
 def simulate_variants(genome: GenomicSequence, snp_prob=0.001, small_indel_prob=0.0001, sv_prob=0.00005,
                       ignore_variants_with_n=True, rng=np.random.default_rng()):
@@ -64,7 +76,7 @@ def simulate_variants(genome: GenomicSequence, snp_prob=0.001, small_indel_prob=
         alt_sequences[~not_snp, 0] = new_snp_bases
         assert np.all(new_snp_bases != ref_sequences[~not_snp, 0])
 
-        variants = bnp.datatypes.VCFEntry(
+        variants = VCFEntry(
             chromosome=bnp.as_encoded_array([chromosome] * n_variants),
             position=positions,
             id=bnp.as_encoded_array([f"simulated{i+variant_id_offset}" for i in range(n_variants)]),
