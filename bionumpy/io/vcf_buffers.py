@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from npstructures import RaggedView, RaggedArray
@@ -42,9 +42,9 @@ class NamedBufferExtractor(TextBufferExtractor):
     def __getitem__(self, idx):
         return self.__class__(self._data, field_starts=self._field_starts[idx], field_lens=self._field_lens[idx], names=self._names)
 
-    def get_field_by_number(self, number):
+    def get_field_by_number(self, number, keep_sep=False):
         name = self._names[number]
-        return self.get_field_by_name(name)
+        return self.get_field_by_name(name, keep_sep=keep_sep)
 
     def has_field_number(self, number):
         name = self._names[number]
@@ -59,12 +59,15 @@ class NamedBufferExtractor(TextBufferExtractor):
             mask[mask] = (array == name).all(axis=-1)
         return RaggedArray(mask, self._field_starts.shape).any(axis=1)
 
-    def get_field_by_name(self, name):
+    def get_field_by_name(self, name, keep_sep=False):
         assert name in self._names, (name, self._names)
         mask = self.has_field_mask(name)
+        n_entries = len(self._field_starts)
         if not np.any(mask):
             logger.warning(f"Field: {name} not found in buffer")
-            return EncodedRaggedArray(as_encoded_array(''), np.zeros(len(self._field_starts), dtype=int))
+            if keep_sep:
+                return EncodedRaggedArray(as_encoded_array(';'*n_entries), np.ones(n_entries, dtype=int))
+            return EncodedRaggedArray(as_encoded_array(''), np.zeros(n_entries, dtype=int))
         reshaped_mask = RaggedArray(mask, self._field_starts.shape)
         line_sums = reshaped_mask.sum(axis=-1)
         if np.any(line_sums > 1):
@@ -73,11 +76,13 @@ class NamedBufferExtractor(TextBufferExtractor):
 
         field_starts = self._field_starts.ravel()[mask] + len(name) + 1
         lens = self._field_lens.ravel()[mask]-len(name)-1# - field_starts
-        starts = np.zeros(len(self._field_starts), dtype=int)
+        if keep_sep:
+            lens += 1
+        starts = np.zeros(n_entries, dtype=int)
         starts[present_mask] = field_starts
         starts = np.maximum.accumulate(starts)
         #starts = np.maximum.accumulate(np.where(present_mask, field_starts, 0))
-        all_lens = np.zeros(len(self._field_starts), dtype=int)
+        all_lens = np.zeros(n_entries, dtype=int)
         all_lens[present_mask] = lens
         text = EncodedRaggedArray(self._data, RaggedView2(starts, all_lens))
         return text
@@ -182,7 +187,10 @@ class VCFBuffer(DelimitedBuffer):
             return info_cache[self.header_data][0]
 
         header = parse_header(self._header_data)
-        info_fields = [(key, val['Type']) for key, val in header.INFO.items()]
+        is_list= lambda val: (val['Number'] is None) or (val['Number'] > 1)
+        is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
+        convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
+        info_fields = [(key, convert_type(val)) for key, val in header.INFO.items()]
         dc = make_dataclass(info_fields, "InfoDataclass")
         info_cache[self.header_data] = (dc, create_lazy_class(dc))
         return info_cache[self.header_data][0]

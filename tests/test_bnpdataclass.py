@@ -20,13 +20,13 @@ class Person:
 @pytest.fixture
 def data():
     return Person(['knut', 'per', 'jon', 'erling'],
-                  [10, 20,  30, 40])
+                  [10, 20, 30, 40])
 
 
 @pytest.fixture
 def data_list():
     return [Person(['knut', 'per', 'jon', 'erling'],
-                   [10, 20,  30, 40])
+                   [10, 20, 30, 40])
             for _ in range(100)]
 
 
@@ -57,7 +57,6 @@ def test_extend():
 
 
 def test_make_dataclass():
-
     new_cls = make_dataclass([("sequence", DNAEncoding), ('signal1', int)])
 
     assert issubclass(new_cls, BNPDataClass)
@@ -66,7 +65,8 @@ def test_make_dataclass():
 
 
 def add(a, b):
-    return a+b
+    return a + b
+
 
 @pytest.mark.skip
 def test_from_pandas():
@@ -131,3 +131,12 @@ def test_hierachical(data):
     two_persons = TwoPerson(data, data, ['b', 'b', 'f', 'f'])
     assert_bnpdataclass_equal(two_persons.person_1, data)
     print(two_persons)
+
+
+def test_tolist(data):
+    entries = data.tolist()
+    for entry in entries:
+        assert isinstance(entry, Person.dataclass)
+        assert isinstance(entry.name, str)
+        assert isinstance(entry.age, int), type(entry.age)
+

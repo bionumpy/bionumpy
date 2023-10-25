@@ -246,7 +246,7 @@ class DelimitedBuffer(FileBuffer):
             subresult = self._buffer_extractor.get_digit_array(col_number)
             text = subresult[0]
         else:
-            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number)
+            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number, keep_sep=field_type == List[int])
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
         parsed = None
@@ -277,8 +277,15 @@ class DelimitedBuffer(FileBuffer):
 
     def _parse_split_ints(self, text, sep=','):
         if len(sep):
-            text[:, -1] = sep
+            try:
+                text[:, -1] = sep
+            except ValueError:
+                text = text.copy()
+                text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
+            if np.any(int_strings.lengths == 0):
+                mask = int_strings.lengths != 0
+                return RaggedArray(str_to_int(int_strings[mask]), (text == sep).sum(axis=-1))
             return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
         else:
             mask = as_encoded_array(text.ravel(), DigitEncoding).raw()

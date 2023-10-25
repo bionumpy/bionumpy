@@ -221,11 +221,14 @@ class TextBufferExtractor:
                               field_starts=self._field_starts[idx],
                               field_lens=self._field_lens[idx])
 
-    def get_field_by_number(self, field_nr: int):
+    def get_field_by_number(self, field_nr: int, keep_sep=False):
         assert field_nr < self._n_fields, (field_nr, self._n_fields)
-        e = EncodedRaggedArray(self._data,
-                               RaggedView2(self._field_starts.ravel(), self._field_lens.ravel()))
-        values = e[field_nr::self._n_fields]
+        lens = self._field_lens.ravel()[field_nr::self._n_fields]
+        if keep_sep:
+            lens = lens + 1
+        starts = self._field_starts.ravel()[field_nr::self._n_fields]
+        values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
+        # values = e[field_nr::self._n_fields]
         assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
         return values
 

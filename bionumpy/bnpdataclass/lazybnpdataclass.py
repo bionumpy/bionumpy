@@ -29,7 +29,7 @@ def buffer_backed_bnp(old_cls):
 
 class BufferBackedDescriptor:
     '''
-    This class is made to access and parse parts of a text buffer lazily.v
+    This class is made to access and parse parts of a text buffer lazily.
     '''
 
     def __init__(self, buffer, index, dtype):
@@ -101,6 +101,12 @@ def create_lazy_class(dataclass, header=None):
             self._header = header
             # if header is not None:
             # self.set_context('header', header)
+
+        def toiter(self):
+            return self.get_data_object().toiter()
+
+        def tolist(self):
+            return self.get_data_object().tolist()
 
         def __len__(self):
             return self._itemgetter.n_entries()
