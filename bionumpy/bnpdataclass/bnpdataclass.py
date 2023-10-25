@@ -212,7 +212,10 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                         val = val.ravel()
                 elif field.type == List[int] or field.type == List[bool]:
                     if not isinstance(pre_val, RaggedArray):
-                        val = RaggedArray(pre_val)
+                        try:
+                            val = RaggedArray(pre_val)
+                        except TypeError as e:
+                            val = np.asanyarray(pre_val)
                     else:
                         val = pre_val
                 elif inspect.isclass(field.type) and issubclass(field.type, BNPDataClass):

@@ -162,6 +162,10 @@ class EncodedRaggedArray(RaggedArray):
         super().__init__(data.raw(), shape)
         self._encoding = data.encoding
 
+    def copy(self):
+        return self.__class__(
+            EncodedArray(self.ravel().copy(), self._encoding), self.shape)
+
     @property
     def _cls(self):
         return lambda data, shape: self.__class__(EncodedArray(data, self._encoding), shape)

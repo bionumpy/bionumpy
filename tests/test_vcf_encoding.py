@@ -189,7 +189,7 @@ def test_concatenate_variants():
 
 
 # fails because comma in info field
-@pytest.mark.xfail
+#@pytest.mark.xfail
 def test_vcf_with_messy_info_field():
     file = "example_data/vcf_symbolic_sequences.vcf"
     data = bnp.open(file).read()
