@@ -102,6 +102,14 @@ def create_lazy_class(dataclass, header=None):
             # if header is not None:
             # self.set_context('header', header)
 
+        @classmethod
+        def from_data_frame(cls, df):
+            return dataclass.from_data_frame(df)
+
+        @classmethod
+        def from_dict(cls, d):
+            return dataclass.from_dict(d)
+
         def toiter(self):
             return self.get_data_object().toiter()
 
@@ -181,7 +189,7 @@ def create_lazy_class(dataclass, header=None):
                     buffer_class, 'SKIP_LAZY'):
                 return self._itemgetter.buffer.from_data(self.get_data_object())
             columns = []
-            if not self._set_values and self._itemgetter.buffer.__class__ == buffer_class:
+            if not self._set_values and issubclass(self._itemgetter.buffer.__class__, buffer_class):
                 return self._itemgetter.buffer.data.ravel()
             for i, field in enumerate(dataclasses.fields(dataclass)):
                 if field.name in self._set_values:
