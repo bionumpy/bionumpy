@@ -218,14 +218,14 @@ class DelimitedBuffer(FileBuffer):
         """
         self.validate_if_not()
         columns = {}
-        fields = dataclasses.fields(self.dataclass)
+        fields = dataclasses.fields(self.actual_dataclass)
         for col_number, field in enumerate(fields):
             col = self._get_field_by_number(col_number, field.type)
             columns[field.name] = col
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
                    for c, value in columns.items()}
-        data = self.dataclass(**columns)
+        data = self.actual_dataclass(**columns)
         data.set_context("header", self._header_data)
         return data
 
@@ -268,10 +268,15 @@ class DelimitedBuffer(FileBuffer):
             assert False, (self.__class__, field_type)
         return parsed
 
+    @property
+    def actual_dataclass(self):
+        return self.dataclass
+
+
     def get_field_by_number(self, field_nr: int, field_type: type=object):
         self.validate_if_not()
         if field_type is None:
-            field_type = dataclasses.fields(self.dataclass)[field_nr]
+            field_type = dataclasses.fields(self.actual_dataclass)[field_nr]
         return self._get_field_by_number(
             field_nr, field_type)
 
@@ -333,8 +338,7 @@ class GfaPathBuffer(DelimitedBuffer):
         directions = RaggedArray(directions, lengths)
         data =  GfaPath(name, node_ids, directions)
         return data
-
-
+    
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
                                  sub_delimiter=",") -> type:

@@ -9,6 +9,7 @@ from npstructures.raggedshape import RaggedView2
 from .exceptions import FormatException
 from .file_buffers import TextBufferExtractor, FileBuffer
 from .vcf_header import parse_header
+from ..bnpdataclass.bnpdataclass import narrow_type
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
@@ -127,10 +128,30 @@ class InfoBuffer(DelimitedBuffer):
         pass
 
 
+def create_info_dataclass(header_data):
+    if not header_data:
+        return str
+    header = parse_header(header_data)
+    is_list = lambda val: (val['Number'] is None) or (val['Number'] > 1)
+    is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
+    convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
+    info_fields = [(key, convert_type(val)) for key, val in header.INFO.items()]
+    dc = make_dataclass(info_fields, "InfoDataclass")
+    return dc
+
+
 class VCFBuffer(DelimitedBuffer):
     dataclass = VCFEntry
+    lazy_dataclass = create_lazy_class(dataclass)
     _info_dataclass = None
+    _vcf_data_class = None
     info_cache = {}
+    vcfentry_cache = {}
+
+
+    @property
+    def actual_dataclass(self):
+        return self.vcf_data_class
 
     def _get_field_by_number(self, field_nr: int, field_type: type = object):
         if field_nr == 7:
@@ -150,6 +171,12 @@ class VCFBuffer(DelimitedBuffer):
         if self._info_dataclass is None:
             self._info_dataclass = self._make_info_dataclass()
         return self._info_dataclass
+
+    @property
+    def vcf_data_class(self):
+        if self._vcf_data_class is None:
+            self._vcf_data_class = self._make_vcf_dataclass()
+        return self._vcf_data_class
 
     def _get_info_field(self):
         text = self._buffer_extractor.get_field_by_number(7)
@@ -181,19 +208,52 @@ class VCFBuffer(DelimitedBuffer):
     def _lazy_info_class(self):
         return self.__class__.info_cache[self.header_data][1]
 
+    @property
+    def _lazy_vcf_class(self):
+        if self.header_data not in self.__class__.vcfentry_cache:
+            self._make_vcf_dataclass()
+        return self.__class__.vcfentry_cache[self.header_data][1]
+
+    def _make_vcf_dataclass(self):
+        vcfentry_cache = self.__class__.vcfentry_cache
+        dataclass = self.dataclass
+        header_data = self.header_data
+        if header_data in vcfentry_cache:
+            return vcfentry_cache[header_data][0]
+        info_class = str if not header_data else self.info_dataclass
+        vcf_entry = narrow_type(dataclass, 'info', info_class)
+        lc = create_lazy_class(vcf_entry)
+        vcfentry_cache[header_data] = (vcf_entry, lc)
+        return vcfentry_cache[header_data][0]
+
+    @classmethod
+    def modify_class_with_header_data(cls, header_data):
+        if not header_data or '##INFO' not in header_data:
+            return cls
+        info_class = create_info_dataclass(header_data)
+        new_dataclass = narrow_type(cls.dataclass, 'info', info_class)
+        new_lazy_class = create_lazy_class(new_dataclass)
+
+        class ModifiedClass(cls):
+            _header_data = header_data
+            dataclass = new_dataclass
+            lazy_class = new_lazy_class
+
+        ModifiedClass.__name__ = cls.__name__+'H'
+        ModifiedClass.__qualname__ = cls.__qualname__+'H'
+
+        return ModifiedClass
+
     def _make_info_dataclass(self):
         info_cache = self.__class__.info_cache
         if self.header_data in info_cache:
             return info_cache[self.header_data][0]
 
-        header = parse_header(self._header_data)
-        is_list= lambda val: (val['Number'] is None) or (val['Number'] > 1)
-        is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
-        convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
-        info_fields = [(key, convert_type(val)) for key, val in header.INFO.items()]
-        dc = make_dataclass(info_fields, "InfoDataclass")
-        info_cache[self.header_data] = (dc, create_lazy_class(dc))
-        return info_cache[self.header_data][0]
+        header_data = self._header_data
+        dc = create_info_dataclass(header_data)
+        info_cache[header_data] = (dc, create_lazy_class(dc))
+        assert issubclass(info_cache[header_data][1], dc)
+        return info_cache[header_data][0]
         # return dc
 
     # @classmethod
@@ -249,10 +309,12 @@ class Genotypes:
 
 class PhasedVCFMatrixBuffer(VCFMatrixBuffer):
     dataclass = PhasedVCFGenotypeEntry
+    lazy_dataclass = create_lazy_class(dataclass)
     genotype_encoding = PhasedGenotypeRowEncoding
 
 
 class PhasedHaplotypeVCFMatrixBuffer(VCFMatrixBuffer):
     """Encodes genotype info using one column per haplotype (not genotype)"""
     dataclass = PhasedVCFHaplotypeEntry
+    lazy_dataclass = create_lazy_class(dataclass)
     genotype_encoding = PhasedHaplotypeRowEncoding

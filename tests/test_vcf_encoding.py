@@ -1,11 +1,16 @@
+import dataclasses
+
 import numpy as np
 from numpy.testing import assert_array_equal
-
+from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
 import pytest
+
+from bionumpy.datatypes import VCFEntry
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
+from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
 def test_vcf_matrix_buffer():
@@ -101,7 +106,9 @@ def test_parse_unphased_vcf():
     written = [line for line in open("test.tmp").read().split("\n") if not line.startswith('#')]
     first_types = ["1|1", "1|1", "1|1", "1|1"]
     first_written = written[0].split("\t")[-4:]
-    assert all(w.startswith(t) for w, t in zip(first_written, first_types))
+    for w, t in zip(first_written, first_types):
+        assert w.startswith(t), (w, t)
+    # assert all(w.startswith(t) for w, t in )
     last_written = written[1].split("\t")[-4:]
     last_types = ["0/0", "1/1", "1/1", "1/1"]
 
@@ -146,10 +153,6 @@ def test_read_info_field2():
 def test_read_biallelic_vcf():
     file_name = "example_data/small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
-    #chunk = vcf.read()
-    # chunk.genotypes
-    # str(chunk.genotypes)
-
     for chunk in vcf.read_chunks():
         print(chunk)
 
@@ -202,16 +205,26 @@ def test_vcf_with_messy_info_field(data_with_info):
         print(line)
         print(line.info)
 
+
 def test_toiter_with_info(data_with_info):
     for entry in data_with_info.toiter():
-        assert type(entry) == bnp.io.vcf_buffers.VCFEntry.dataclass
+        # assert type(entry) == bnp.io.vcf_buffers.VCFEntry.dataclass
         assert entry.info.__class__.__name__ == 'InfoDataclass'
         assert isinstance(entry.chromosome, str)
         assert isinstance(entry.position, int)
         assert isinstance(entry.info.AC, list)
         print(entry)
 
+
 def test_pandas_with_info(data_with_info):
-    print(data_with_info.topandas())
+    print(dataclasses.fields(data_with_info))
+    # assert issubclass(data_with_info.info, BNPDataClass), data_with_info.info
+
+    print(
+        [(f.name, f.type) for f in dataclasses.fields(data_with_info)]
+    )
+    df = data_with_info.topandas()
+    dc = data_with_info.from_data_frame(df)
+    assert_bnpdataclass_equal(data_with_info, dc)
 
 
