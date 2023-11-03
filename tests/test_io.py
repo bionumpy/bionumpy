@@ -240,7 +240,7 @@ def test_carriage_return_bed(bed_with_carriage_return_filename):
     assert len(data.stop) == 2
     assert_equal(data.stop, [2, 4])
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_carriage_return_fasta(fasta_with_carriage_return_filename):
     entries = bnp.open(fasta_with_carriage_return_filename).read()
     assert_encoded_raggedarray_equal(entries.sequence, ['GACTG', 'GACTCGAG'])

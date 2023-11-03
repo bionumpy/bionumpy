@@ -47,6 +47,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
         line_ends = np.append(self._new_lines, self._data.size-1)
+        line_ends = self._modify_ends_for_carriage_returns(line_ends, self._data)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
         data.ravel()
         new_entries = np.insert(self._new_entries+1, 0, 0)
@@ -98,6 +99,12 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         return cls(cut_chunk,
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
+
+    def _modify_ends_for_carriage_returns(self, line_ends, data):
+        if np.any((data[line_ends[:10]-1]) == '\r'):
+            return line_ends-(data[line_ends-1] == '\r')
+        return line_ends
+
 
 
 @bnpdataclass
