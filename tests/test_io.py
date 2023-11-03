@@ -244,3 +244,10 @@ def test_carriage_return_bed(bed_with_carriage_return_filename):
 def test_carriage_return_fasta(fasta_with_carriage_return_filename):
     entries = bnp.open(fasta_with_carriage_return_filename).read()
     assert_encoded_raggedarray_equal(entries.sequence, ['GACTG', 'GACTCGAG'])
+
+@pytest.mark.xfail
+def test_carriage_return_fai(fasta_with_carriage_return_filename):
+    # remove file
+    os.remove(fasta_with_carriage_return_filename + '.fai')
+    fai = bnp.open_indexed(fasta_with_carriage_return_filename)
+
