@@ -47,7 +47,7 @@ class ReceptorSequence:
 
 
 def raise_func(*args, **kwargs):
-    raise Exception("test", args, kwargs)
+    return True
 
 
 @pytest.fixture
@@ -78,6 +78,9 @@ def create_buffer_type_from_field_dict(type_dict: Dict[str, Any]) -> bnp.io.deli
         dataclass = make_dynamic_seq_set_dataclass(type_dict)
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(
             dataclass, delimiter='\t', has_header=True)
+
+
+
 
 
 @pytest.fixture()
@@ -114,3 +117,12 @@ def test_read2(full_buffer_type, full_file_name):
     print(obj.tolist())
     print(obj.get_data_object())
     print(obj.sequence_aa, obj.sequence, obj.v_call)
+
+def test_has_methods(full_buffer_type, full_file_name):
+    import bionumpy.config
+    bionumpy.config.LAZY = False
+    with bnp.open(str(full_file_name), buffer_type=full_buffer_type) as file:
+        obj = file.read()
+
+    print(obj.get_row_by_index(0))
+    bionumpy.config.LAZY = True

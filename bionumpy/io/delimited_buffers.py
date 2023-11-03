@@ -383,10 +383,13 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             new_dataclass = make_dataclass([], cls.dataclass.__name__+'Permuted', bases=(cls.dataclass, tmp))
             assert [f.name for f in dataclasses.fields(tmp)] == columns, (columns, [f.name for f in dataclasses.fields(tmp)])
             class NewClass(cls):
+                _actual_dataclass = cls.dataclass
                 dataclass = tmp
                 lazy_class = create_lazy_class(tmp)
-
             return NewClass
+
+        def get_data(self) -> BNPDataClass:
+            return super().get_data().astype(self._actual_dataclass)
 
         @classmethod
         def read_header(cls, file_object: io.FileIO) -> List[str]:
