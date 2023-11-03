@@ -1,5 +1,7 @@
 import dataclasses
 import inspect
+import logging
+from collections import defaultdict
 from typing import List, Type, Dict, Iterable, Union, Optional
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
@@ -13,6 +15,8 @@ from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
 from ..encodings.alphabet_encoding import FlatAlphabetEncoding
 from ..util import is_subclass_or_instance
+
+logger = logging.getLogger(__name__)
 
 
 def get_vanilla_generator(object):
@@ -43,6 +47,28 @@ class BNPDataClass(NpDataClass):
     def topandas(self):
         return pandas_adaptor.get_data_frame(self.todict())
         # return pd.DataFrame(self.todict())
+
+    @classmethod
+    def from_data_frame(cls, df):
+        return cls.from_dict(df.to_dict('series'))
+
+    @classmethod
+    def from_dict(cls, dict_object: Dict) -> 'BNPDataClass':
+        dict_names = [name.split('.')[0] for name in dict_object.keys()]
+        field_names = {field.name for field in dataclasses.fields(cls)}
+        logger.info(f'Dropping columns: {[n for n in dict_names if n not in field_names]}')
+        new_dict = defaultdict(dict)
+        for name, value in dict_object.items():
+            if '.' in name:
+                name, subname = name.split('.', maxsplit=1)
+                new_dict[name][subname] = value
+            else:
+                new_dict[name] = value
+        for field in dataclasses.fields(cls):
+            if isinstance(new_dict[field.name], dict):
+                assert is_subclass_or_instance(field.type, BNPDataClass), field
+                new_dict[field.name] = field.type.from_dict(new_dict[field.name])
+        return cls(**new_dict)
 
     def tolist(self)-> List['dataclass']:
         """
@@ -270,7 +296,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     else:
                         val = pre_val
                 elif inspect.isclass(field.type) and issubclass(field.type, BNPDataClass):
-                    assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
+                    # assert isinstance(pre_val, (field.type, field.type._single_entry)), (field.type, type(pre_val))
                     val = pre_val
                 else:
                     assert False, field.type
@@ -283,7 +309,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
     return NewClass
 
 
-def make_dataclass(fields: list, name: str = "DynamicDC") -> Type[BNPDataClass]:
+def make_dataclass(fields: list, name: str = "DynamicDC", bases=()) -> Type[BNPDataClass]:
     """
     Constructs a dynamic dataclass from a list of attributes
 
@@ -300,7 +326,11 @@ def make_dataclass(fields: list, name: str = "DynamicDC") -> Type[BNPDataClass]:
     new BNPDataClass
 
     """
-    return bnpdataclass(dataclasses.make_dataclass(name, fields=fields))
+    return bnpdataclass(dataclasses.make_dataclass(name, fields=fields, bases=bases))
+
+def narrow_type(bnp_dc, field_name, field_type):
+    new_fields = [(f.name, field_type) if f.name==field_name else (f.name, f.type, f) for f in dataclasses.fields(bnp_dc)]
+    return make_dataclass(new_fields, name=bnp_dc.__name__, bases=(bnp_dc,))
 
 
 def _extract_field_types(fields_with_values: dict, field_type_map: dict = None) -> dict:
@@ -314,7 +344,6 @@ def _extract_field_types(fields_with_values: dict, field_type_map: dict = None) 
             field_type = type(fields_with_values[field_name][0].encoding)
         else:
             field_type = type(fields_with_values[field_name][0])
-
         if fields_with_values[field_name] is not None:
             fields[field_name] = field_type
 

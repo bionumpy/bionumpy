@@ -74,6 +74,13 @@ class FileBuffer:
         return len(self._new_lines)
 
     @classmethod
+    def modify_class_with_header_data(cls, header_data):
+        return cls
+        # class NewClass(cls):
+        #     _header_data = header_data
+
+
+    @classmethod
     def read_header(cls, file_object: FileIO):
         """Read the header data from the file
 

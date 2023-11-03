@@ -58,6 +58,7 @@ class NumpyFileReader:
             else str(self._file_obj)
         )
         self._header_data = self._buffer_type.read_header(self._file_obj)
+        self._buffer_type = self._buffer_type.modify_class_with_header_data(self._header_data)
         self._total_bytes_read = 0
         self._do_prepend = False
         self._prepend = []

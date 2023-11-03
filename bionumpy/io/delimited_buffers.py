@@ -20,8 +20,8 @@ from .strops import (
 from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
-
-
+from ..bnpdataclass.bnpdataclass import make_dataclass
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 class DelimitedBuffer(FileBuffer):
     """Base class for file buffers for delimited files such as csv or tsv.
     Each line should correspond to an entry, and each column to a variable.
@@ -218,14 +218,14 @@ class DelimitedBuffer(FileBuffer):
         """
         self.validate_if_not()
         columns = {}
-        fields = dataclasses.fields(self.dataclass)
+        fields = dataclasses.fields(self.actual_dataclass)
         for col_number, field in enumerate(fields):
             col = self._get_field_by_number(col_number, field.type)
             columns[field.name] = col
         n_entries = len(next(col for col in columns if col is not None))
         columns = {c: value if c is not None else np.empty((n_entries, 0))
                    for c, value in columns.items()}
-        data = self.dataclass(**columns)
+        data = self.actual_dataclass(**columns)
         data.set_context("header", self._header_data)
         return data
 
@@ -268,10 +268,14 @@ class DelimitedBuffer(FileBuffer):
             assert False, (self.__class__, field_type)
         return parsed
 
+    @property
+    def actual_dataclass(self):
+        return self.dataclass
+
     def get_field_by_number(self, field_nr: int, field_type: type=object):
         self.validate_if_not()
         if field_type is None:
-            field_type = dataclasses.fields(self.dataclass)[field_nr]
+            field_type = dataclasses.fields(self.actual_dataclass)[field_nr]
         return self._get_field_by_number(
             field_nr, field_type)
 
@@ -333,8 +337,7 @@ class GfaPathBuffer(DelimitedBuffer):
         directions = RaggedArray(directions, lengths)
         data =  GfaPath(name, node_ids, directions)
         return data
-
-
+    
 
 def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
                                  sub_delimiter=",") -> type:
@@ -362,12 +365,31 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
         COMMENT = comment
         HAS_UNCOMMENTED_HEADER_LINE = has_header
         dataclass = _dataclass
-        fields = None
+        # fields = None
         # data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None,
-        def __init__(self, buffer_extractor, header_data: List[str] = None):
-            super().__init__(buffer_extractor, header_data)
-            # super().__init__(data, new_lines, delimiters, header_data)
-            self.set_fields_from_header(header_data)
+        # def __init__(self, buffer_extractor, header_data: List[str] = None):
+        #     super().__init__(buffer_extractor, header_data)
+        #     # super().__init__(data, new_lines, delimiters, header_data)
+        #   # self.set_fields_from_header(header_data)
+
+        @classmethod
+        def modify_class_with_header_data(cls, columns):
+            fields = dataclasses.fields(cls.dataclass)
+            type_dict = {field.name: field.type for field in fields}
+            new_fields = [(name, type_dict[name]) if name in type_dict else (name, str) for name in columns]
+            #ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
+            tmp = make_dataclass(
+                new_fields, cls.dataclass.__name__+'Permuted')
+            new_dataclass = make_dataclass([], cls.dataclass.__name__+'Permuted', bases=(cls.dataclass, tmp))
+            assert [f.name for f in dataclasses.fields(tmp)] == columns, (columns, [f.name for f in dataclasses.fields(tmp)])
+            class NewClass(cls):
+                _actual_dataclass = cls.dataclass
+                dataclass = tmp
+                lazy_class = create_lazy_class(tmp)
+            return NewClass
+
+        def get_data(self) -> BNPDataClass:
+            return super().get_data().astype(self._actual_dataclass)
 
         @classmethod
         def read_header(cls, file_object: io.FileIO) -> List[str]:
@@ -395,39 +417,41 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             """makes a header from field names separated by delimiter"""
             return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
-        def set_fields_from_header(self, columns: List[str]):
-            if not has_header:
-                return None
-            fields = dataclasses.fields(self.dataclass)
-            self.fields = [next(field for field in fields if field.name == col) for col in columns]
-            assert np.array_equal(columns, [field.name for field in self.fields])
-
-        def get_field_by_number(self, field_nr: int, field_type: type=object):
-            if self.fields is None:
-                return super().get_field_by_number(field_nr, field_type)
-            col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
-            return super().get_field_by_number(col_id, t)
-            # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
-
-        def get_data(self) -> _dataclass:
-            """Parse the data in the buffer according to the fields in _dataclass
-
-            Returns
-            -------
-            _dataclass
-                Dataclass with parsed data
-
-            """
-            self.validate_if_not()
-            columns = {}
-            fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
-            for col_number, field in enumerate(fields):
-                col = self._get_field_by_number(col_number, field.type)
-                columns[field.name] = col
-            n_entries = len(next(col for col in columns if col is not None))
-            columns = {c: value if c is not None else np.empty((n_entries, 0))
-                       for c, value in columns.items()}
-            return self.dataclass(**columns)
+#         def set_fields_from_header(self, columns: List[str]):
+#             if not has_header:
+#                 return None
+#             fields = dataclasses.fields(self.dataclass)
+#             ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
+# #            self._permuted_data_class = dataclasses.make_dataclass('TmpDataclass', ordered_fields)
+#             self.fields = ordered_fields
+#             assert np.array_equal(columns, [field.name for field in self.fields])
+#
+#         def get_field_by_number(self, field_nr: int, field_type: type=object):
+#             # if self.fields is None:
+#             return super().get_field_by_number(field_nr, field_type)
+#             # col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
+#             #return super().get_field_by_number(col_id, t)
+#             # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+#
+#         def get_data(self) -> _dataclass:
+#             """Parse the data in the buffer according to the fields in _dataclass
+#
+#             Returns
+#             -------
+#             _dataclass
+#                 Dataclass with parsed data
+#
+#             """
+#             self.validate_if_not()
+#             columns = {}
+#             fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+#             for col_number, field in enumerate(fields):
+#                 col = self._get_field_by_number(col_number, field.type)
+#                 columns[field.name] = col
+#             n_entries = len(next(col for col in columns if col is not None))
+#             columns = {c: value if c is not None else np.empty((n_entries, 0))
+#                        for c, value in columns.items()}
+#             return self.dataclass(**columns)
 
     DatatypeBuffer.__name__ = _dataclass.__name__ + "Buffer"
     DatatypeBuffer.__qualname__ = _dataclass.__qualname__ + "Buffer"
@@ -595,3 +619,18 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
 
 class GFFBuffer(DelimitedBufferWithInernalComments):
     dataclass = GFFEntry
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -103,7 +103,7 @@ class MutationTypeEncoding(Encoding):
 
 
 
-def count_mutation_types_genomic(variants: GenomicLocation, reference: GenomicSequence, flank=1, genotyped=False):
+def count_mutation_types_genomic(variants: GenomicLocation, reference: GenomicSequence, flank=1, genotyped=False, genotypes=None):
     snp_mask = (variants.get_data_field('alt_seq').shape[-1] == 1) & (variants.get_data_field('ref_seq').shape[-1]==1)
     snps = variants[snp_mask]
     ref_seq = snps.get_data_field('ref_seq')
@@ -111,6 +111,10 @@ def count_mutation_types_genomic(variants: GenomicLocation, reference: GenomicSe
     kmers = reference[windows].to_numpy_array()
     mask = ~np.any(kmers == 'N', axis=-1)
     hashes = encode_snps(kmers[mask], snps[mask].get_data_field('alt_seq'), ref_seq[mask])
-    if not genotyped:
+    if not genotyped and genotypes is None:
         return count_encoded(hashes)
-    return count_encoded(hashes, weights=(snps.get_data_field('genotypes').raw() > 0).T, axis=-1)
+    if genotypes is None:
+        genotypes = (snps[mask].get_data_field('genotypes').raw()>0).T
+    else:
+        genotypes = genotypes[snp_mask][mask].T
+    return count_encoded(hashes, genotypes, axis=-1)
