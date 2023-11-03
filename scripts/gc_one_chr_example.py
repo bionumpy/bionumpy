@@ -23,5 +23,7 @@ def get_gc_content(sequence, intervals):
     gc_count = sum([nn_counts[nn] for nn in "GC"])
     return gc_count / sum(nn_counts.values())
 
+if __name__ == '__main__':
+    analyze_within_chromosome("example_data/gc_test_onechr.fa", "example_data/gc_bedtest_onechr.bed")
 
-analyze_within_chromosome("example_data/gc_test_onechr.fa", "example_data/gc_bedtest_onechr.bed")
+

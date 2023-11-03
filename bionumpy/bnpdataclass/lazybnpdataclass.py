@@ -116,6 +116,12 @@ def create_lazy_class(dataclass, header=None):
         def tolist(self):
             return self.get_data_object().tolist()
 
+        def todict(self):
+            return self.get_data_object().todict()
+
+        def topandas(self):
+            return self.get_data_object().topandas()
+
         def __len__(self):
             return self._itemgetter.n_entries()
 
@@ -130,9 +136,11 @@ def create_lazy_class(dataclass, header=None):
                 return self._set_values[var_name]
             if var_name in field_names:
                 if var_name not in self._computed_values:
-                    self._computed_values[var_name] = self._itemgetter(var_name)
+                    value = self._itemgetter(var_name)
+                    self._computed_values[var_name] = value
                 return self._computed_values[var_name]
-            return super().__getattr__(var_name)
+            return getattr(super(), var_name)
+            # raise ValueError(f'No such field {var_name} in {self.__class__.__name__}')
 
         def __setattr__(self, key, value):
             if key in ['_itemgetter', '_set_values', '_computed', '_data', '_computed_values', '_header']:
