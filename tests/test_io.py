@@ -220,7 +220,6 @@ def test_carriage_return_fastq(fastq_with_carriage_return_filename):
     assert len(data.quality[0]) == 60
 
 
-@pytest.mark.xfail()
 def test_carriage_return_bed(bed_with_carriage_return_filename):
     data = bnp.open(bed_with_carriage_return_filename).read()
     assert len(data.start) == 2

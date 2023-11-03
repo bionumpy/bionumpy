@@ -22,6 +22,8 @@ from .exceptions import FormatException
 import numpy as np
 from ..bnpdataclass.bnpdataclass import make_dataclass
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
+
+
 class DelimitedBuffer(FileBuffer):
     """Base class for file buffers for delimited files such as csv or tsv.
     Each line should correspond to an entry, and each column to a variable.
@@ -40,7 +42,8 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
         self._is_validated = True
 
-    def __init___(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None, header_data=None, buffer_extractor=None):
+    def __init___(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None,
+                  header_data=None, buffer_extractor=None):
         super().__init__(data, new_lines)
         if delimiters is None:
             delimiters = np.concatenate(
@@ -74,17 +77,17 @@ class DelimitedBuffer(FileBuffer):
         mask = chunk == NEWLINE
         mask |= chunk == cls.DELIMITER
         delimiters = np.flatnonzero(mask)
-        n_fields = np.flatnonzero(chunk[delimiters]=='\n')
-        #n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
-        #if n_fields is None:
-        if n_fields.size ==0:
+        n_fields = np.flatnonzero(chunk[delimiters] == '\n')
+        # n_fields = next((i + 1 for i, v in enumerate(delimiters) if chunk[v] == "\n"), None)
+        # if n_fields is None:
+        if n_fields.size == 0:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise
-        n_fields = n_fields[0]+1
+        n_fields = n_fields[0] + 1
         new_lines = delimiters[(n_fields - 1)::n_fields]
         delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
         buffer_extractor = cls._get_buffer_extractor(
-            chunk[:new_lines[-1]+1], delimiters, n_fields)
+            chunk[:new_lines[-1] + 1], delimiters, n_fields)
         return cls(buffer_extractor, header_data)
         # return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data, buffer_extractor=buffer_extractor)
 
@@ -96,18 +99,28 @@ class DelimitedBuffer(FileBuffer):
 
     @classmethod
     def _get_buffer_extractor(cls, data, delimiters, n_cols) -> TextThroughputExtractor:
-        starts = delimiters[:-1].reshape(-1, n_cols)+1
+        starts = delimiters[:-1].reshape(-1, n_cols) + 1
         ends = delimiters[1:].reshape(-1, n_cols)
+        ends = cls._modify_for_carriage_return(ends, data)
         entry_starts = starts[:, 0]
-        entry_ends = ends[:, -1]+1
+        entry_ends = ends[:, -1] + 1
         return TextThroughputExtractor(data, starts, field_ends=ends, entry_starts=entry_starts, entry_ends=entry_ends)
+
+    @classmethod
+    def _modify_for_carriage_return(cls, ends, data):
+        if data.size==0 or ends[0, -1]==0:
+            return ends
+        if data[ends[0, -1]-1] == '\r':
+            ends = ends.copy()
+            ends[:, -1] -= data[ends[:, -1]-1] == '\r'
+        return ends
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)
         self.validate_if_not()
         cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
         entries = self.entries[idx].ravel()
-        delimiters = np.insert(np.cumsum(cell_lens)-1, 0, -1)
+        delimiters = np.insert(np.cumsum(cell_lens) - 1, 0, -1)
         new_lines = delimiters[self._n_cols:: self._n_cols]
         return self.__class__(entries, new_lines, delimiters)
 
@@ -115,7 +128,7 @@ class DelimitedBuffer(FileBuffer):
     def entries(self):
         if not hasattr(self, "_entries"):
             lengths = np.diff(self._new_lines)
-            lengths = np.insert(lengths, 0, self._new_lines[0]+1)
+            lengths = np.insert(lengths, 0, self._new_lines[0] + 1)
             self._entries = EncodedRaggedArray(self._data, RaggedShape(lengths))
         return self._entries
 
@@ -143,7 +156,6 @@ class DelimitedBuffer(FileBuffer):
 
         """
 
-
     @classmethod
     def join_fields(cls, fields_list: List[EncodedRaggedArray]):
         return join_columns(fields_list, cls.DELIMITER).ravel()
@@ -164,7 +176,7 @@ class DelimitedBuffer(FileBuffer):
             keep seperator at end
         """
         self.validate_if_not()
-        assert col_end == col_start+1
+        assert col_end == col_start + 1
         return self._buffer_extractor.get_field_by_number(col_start)
 
     @staticmethod
@@ -177,14 +189,16 @@ class DelimitedBuffer(FileBuffer):
         chunk = self._data
         delimiters = self._delimiters[1:]
         n_delimiters_per_line = (
-            next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
+                next(i for i, d in enumerate(delimiters) if chunk[d] == NEWLINE) + 1
         )
         self._n_cols = n_delimiters_per_line
-        should_be_new_lines = chunk[delimiters[n_delimiters_per_line-1::n_delimiters_per_line]]
+        should_be_new_lines = chunk[delimiters[n_delimiters_per_line - 1::n_delimiters_per_line]]
         if delimiters.size % n_delimiters_per_line != 0 or np.any(should_be_new_lines != "\n"):
             offending_line = np.flatnonzero(should_be_new_lines != "\n")[0]
             lines = split(self._data, '\n')
-            raise FormatException(f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line}): {lines}", line_number=offending_line)
+            raise FormatException(
+                f"Irregular number of delimiters per line ({delimiters.size}, {n_delimiters_per_line}): {lines}",
+                line_number=offending_line)
         self._validated = True
 
     @classmethod
@@ -246,7 +260,8 @@ class DelimitedBuffer(FileBuffer):
             subresult = self._buffer_extractor.get_digit_array(col_number)
             text = subresult[0]
         else:
-            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number, keep_sep=field_type == List[int])
+            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number,
+                                                                                       keep_sep=field_type == List[int])
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
         parsed = None
@@ -255,10 +270,10 @@ class DelimitedBuffer(FileBuffer):
                 try:
                     parsed = parser(subresult)
                     assert len(parsed) == len(text)
-                    #return parsed
+                    # return parsed
                 except EncodingError as e:
                     if isinstance(text, EncodedArray):
-                        row_number= e.offset//text.shape[1]
+                        row_number = e.offset // text.shape[1]
                     else:
                         row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
                     raise FormatException(e.args[0], line_number=row_number)
@@ -272,7 +287,7 @@ class DelimitedBuffer(FileBuffer):
     def actual_dataclass(self):
         return self.dataclass
 
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
+    def get_field_by_number(self, field_nr: int, field_type: type = object):
         self.validate_if_not()
         if field_type is None:
             field_type = dataclasses.fields(self.actual_dataclass)[field_nr]
@@ -306,6 +321,7 @@ class DelimitedBuffer(FileBuffer):
 
 class GfaSequenceBuffer(DelimitedBuffer):
     dataclass = SequenceEntry
+
     # SKIP_LAZY = True
 
     def get_data(self):
@@ -313,12 +329,12 @@ class GfaSequenceBuffer(DelimitedBuffer):
         sequences = self.get_text(col=2, fixed_length=False)
         return SequenceEntry(ids, sequences)
 
-    def get_field_by_number(self, field_nr: int, field_type: type=object):
-        return super().get_field_by_number(field_nr+1, field_type)
+    def get_field_by_number(self, field_nr: int, field_type: type = object):
+        return super().get_field_by_number(field_nr + 1, field_type)
 
     @classmethod
     def from_data(cls, data: SequenceEntry) -> EncodedArray:
-        return dump_csv([(str, as_encoded_array(["S"]*len(data))),
+        return dump_csv([(str, as_encoded_array(["S"] * len(data))),
                          (str, data.name),
                          (str, data.sequence)])
 
@@ -332,14 +348,15 @@ class GfaPathBuffer(DelimitedBuffer):
         all_node_texts = split(nodes_lists.ravel()[:-1], ",")
         int_text = all_node_texts[:, :-1]
         node_ids = str_to_int(int_text)
-        directions = np.where(all_node_texts[:, -1]=="+", 1, -1)
+        directions = np.where(all_node_texts[:, -1] == "+", 1, -1)
         node_ids = RaggedArray(node_ids, lengths)
         directions = RaggedArray(directions, lengths)
-        data =  GfaPath(name, node_ids, directions)
+        data = GfaPath(name, node_ids, directions)
         return data
-    
 
-def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False, comment: str = "#",
+
+def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t", has_header: bool = False,
+                                 comment: str = "#",
                                  sub_delimiter=",") -> type:
     """Create a FileBuffer class that can read a delimited file with the fields specified in `_dataclass`
 
@@ -365,6 +382,7 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
         COMMENT = comment
         HAS_UNCOMMENTED_HEADER_LINE = has_header
         dataclass = _dataclass
+
         # fields = None
         # data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None,
         # def __init__(self, buffer_extractor, header_data: List[str] = None):
@@ -377,15 +395,18 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             fields = dataclasses.fields(cls.dataclass)
             type_dict = {field.name: field.type for field in fields}
             new_fields = [(name, type_dict[name]) if name in type_dict else (name, str) for name in columns]
-            #ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
+            # ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
             tmp = make_dataclass(
-                new_fields, cls.dataclass.__name__+'Permuted')
-            new_dataclass = make_dataclass([], cls.dataclass.__name__+'Permuted', bases=(cls.dataclass, tmp))
-            assert [f.name for f in dataclasses.fields(tmp)] == columns, (columns, [f.name for f in dataclasses.fields(tmp)])
+                new_fields, cls.dataclass.__name__ + 'Permuted')
+            new_dataclass = make_dataclass([], cls.dataclass.__name__ + 'Permuted', bases=(cls.dataclass, tmp))
+            assert [f.name for f in dataclasses.fields(tmp)] == columns, (
+            columns, [f.name for f in dataclasses.fields(tmp)])
+
             class NewClass(cls):
                 _actual_dataclass = cls.dataclass
                 dataclass = tmp
                 lazy_class = create_lazy_class(tmp)
+
             return NewClass
 
         def get_data(self) -> BNPDataClass:
@@ -417,41 +438,41 @@ def get_bufferclass_for_datatype(_dataclass: bnpdataclass, delimiter: str = "\t"
             """makes a header from field names separated by delimiter"""
             return bytes(cls.DELIMITER.join([field.name for field in dataclasses.fields(data)]) + "\n", 'ascii')
 
-#         def set_fields_from_header(self, columns: List[str]):
-#             if not has_header:
-#                 return None
-#             fields = dataclasses.fields(self.dataclass)
-#             ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
-# #            self._permuted_data_class = dataclasses.make_dataclass('TmpDataclass', ordered_fields)
-#             self.fields = ordered_fields
-#             assert np.array_equal(columns, [field.name for field in self.fields])
-#
-#         def get_field_by_number(self, field_nr: int, field_type: type=object):
-#             # if self.fields is None:
-#             return super().get_field_by_number(field_nr, field_type)
-#             # col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
-#             #return super().get_field_by_number(col_id, t)
-#             # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
-#
-#         def get_data(self) -> _dataclass:
-#             """Parse the data in the buffer according to the fields in _dataclass
-#
-#             Returns
-#             -------
-#             _dataclass
-#                 Dataclass with parsed data
-#
-#             """
-#             self.validate_if_not()
-#             columns = {}
-#             fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
-#             for col_number, field in enumerate(fields):
-#                 col = self._get_field_by_number(col_number, field.type)
-#                 columns[field.name] = col
-#             n_entries = len(next(col for col in columns if col is not None))
-#             columns = {c: value if c is not None else np.empty((n_entries, 0))
-#                        for c, value in columns.items()}
-#             return self.dataclass(**columns)
+    #         def set_fields_from_header(self, columns: List[str]):
+    #             if not has_header:
+    #                 return None
+    #             fields = dataclasses.fields(self.dataclass)
+    #             ordered_fields = [next(field for field in fields if field.name == col) for col in columns]
+    # #            self._permuted_data_class = dataclasses.make_dataclass('TmpDataclass', ordered_fields)
+    #             self.fields = ordered_fields
+    #             assert np.array_equal(columns, [field.name for field in self.fields])
+    #
+    #         def get_field_by_number(self, field_nr: int, field_type: type=object):
+    #             # if self.fields is None:
+    #             return super().get_field_by_number(field_nr, field_type)
+    #             # col_id, t = next((i, field.type) for i, field in enumerate(dataclasses.fields(self.dataclass)) if field.name == self.fields[field_nr].name)
+    #             #return super().get_field_by_number(col_id, t)
+    #             # fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+    #
+    #         def get_data(self) -> _dataclass:
+    #             """Parse the data in the buffer according to the fields in _dataclass
+    #
+    #             Returns
+    #             -------
+    #             _dataclass
+    #                 Dataclass with parsed data
+    #
+    #             """
+    #             self.validate_if_not()
+    #             columns = {}
+    #             fields = self.fields if self.fields is not None else dataclasses.fields(self.dataclass)
+    #             for col_number, field in enumerate(fields):
+    #                 col = self._get_field_by_number(col_number, field.type)
+    #                 columns[field.name] = col
+    #             n_entries = len(next(col for col in columns if col is not None))
+    #             columns = {c: value if c is not None else np.empty((n_entries, 0))
+    #                        for c, value in columns.items()}
+    #             return self.dataclass(**columns)
 
     DatatypeBuffer.__name__ = _dataclass.__name__ + "Buffer"
     DatatypeBuffer.__qualname__ = _dataclass.__qualname__ + "Buffer"
@@ -475,16 +496,16 @@ class BedBuffer(DelimitedBuffer):
         """
         assert np.all(cols < self._n_cols), (str(self._data), cols, self._n_cols)
         cols = np.asanyarray(cols)
-        assert cols.size ==1
+        assert cols.size == 1
         integer_starts = self._col_starts(cols)
         integer_ends = self._col_ends(cols)
         array = self._move_intervals_to_2d_array(integer_starts, integer_ends, fill_value='0')
         try:
             digits = as_encoded_array(array, DigitEncoding).raw()
         except EncodingError as e:
-            row_number = e.offset//array.shape[-1]#  rows._shape.starts, e.offset, side="right")-1
+            row_number = e.offset // array.shape[-1]  # rows._shape.starts, e.offset, side="right")-1
             raise FormatException(e.args[0], line_number=row_number)
-        powers = 10**np.arange(digits.shape[-1])[::-1]
+        powers = 10 ** np.arange(digits.shape[-1])[::-1]
         return digits.dot(powers).reshape(-1, cols.size)
 
 
@@ -521,15 +542,15 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
 
     @classmethod
     def _calculate_col_starts_and_ends(cls, data, delimiters):
-        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1]+1] == cls.COMMENT)
+        comment_mask = (data[delimiters[:-1]] == '\n') & (data[delimiters[:-1] + 1] == cls.COMMENT)
         comment_mask = np.flatnonzero(comment_mask)
         start_delimiters = np.delete(delimiters, comment_mask)[:-1]
-        end_delimiters = np.delete(delimiters, comment_mask+1)
+        end_delimiters = np.delete(delimiters, comment_mask + 1)
         if data[0] != cls.COMMENT:
             start_delimiters = np.insert(start_delimiters, 0, -1)
         else:
-            end_delimiters=end_delimiters[1:]
-        return start_delimiters+1, end_delimiters
+            end_delimiters = end_delimiters[1:]
+        return start_delimiters + 1, end_delimiters
 
     def _col_ends(self, col):
         return self._wig_col_ends[:, col]
@@ -545,14 +566,14 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
         self._header_data = header_data
         self._is_validated = True
 
-        #data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
-        #delimiters_mask = data == self.DELIMITER
-        #delimiters_mask[new_lines] = True
-        #delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
+        # data: EncodedArray, new_lines: np.ndarray, delimiters: np.ndarray = None, header_data=None):
+        # delimiters_mask = data == self.DELIMITER
+        # delimiters_mask[new_lines] = True
+        # delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
         # super().__init__(data, new_lines, delimiters, header_data)
-        #starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
-        #n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
-        #self._n_cols = n_fields
+        # starts, ends = self._calculate_col_starts_and_ends(data, delimiters)
+        # n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
+        # self._n_cols = n_fields
         # self._wig_col_starts = starts.reshape(-1, n_fields)
         # self._wig_col_ends = ends.reshape(-1, n_fields)
 
@@ -560,7 +581,7 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
     def _get_buffer_extractor(cls, data, new_lines) -> TextBufferExtractor:
         delimiters_mask = (data == cls.DELIMITER)
         delimiters_mask[new_lines] = True
-        delimiters = np.append(np.flatnonzero(delimiters_mask), data.size-1)
+        delimiters = np.append(np.flatnonzero(delimiters_mask), data.size - 1)
         starts, ends = cls._calculate_col_starts_and_ends(data, delimiters)
         n_fields = next(i for i, d in enumerate(ends) if data[d] == '\n') + 1
         return TextBufferExtractor(data,
@@ -611,26 +632,11 @@ class DelimitedBufferWithInernalComments(DelimitedBuffer):
         try:
             digits = as_encoded_array(array, DigitEncoding).raw()
         except EncodingError as e:
-            row_number = e.offset//array.shape[-1]#  rows._shape.starts, e.offset, side="right")-1
+            row_number = e.offset // array.shape[-1]  # rows._shape.starts, e.offset, side="right")-1
             raise FormatException(e.args[0], line_number=row_number)
-        powers = 10**np.arange(digits.shape[-1])[::-1]
+        powers = 10 ** np.arange(digits.shape[-1])[::-1]
         return digits.dot(powers).reshape(-1, cols.size)
 
 
 class GFFBuffer(DelimitedBufferWithInernalComments):
     dataclass = GFFEntry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
