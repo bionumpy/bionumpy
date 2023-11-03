@@ -186,3 +186,25 @@ def test_read_write_bool():
     assert np.array_equal(obj.param, obj2.param)
 
     os.remove('tmp_bool.tsv')
+
+@pytest.fixture
+def fastq_with_carriage_return_filename():
+    text = '''\
+@test_sequence_id_here\r
+GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT\r
++\r
+!''*((((***+))%%%++)(%%%%).1***-+*''))**55CCF>>>>>>CCCCCCC65\r
+'''
+    filename =  'carriage_return.fq'
+    with open(filename, 'w') as file:
+        file.write(text)
+    return filename
+
+@pytest.mark.xfail()
+def test_carriage_return_fastq(fastq_with_carriage_return_filename):
+    data = bnp.open(fastq_with_carriage_return_filename).read()
+    assert len(data.sequence[0])==60
+
+
+
+
