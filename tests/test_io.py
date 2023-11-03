@@ -200,10 +200,13 @@ GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT\r
         file.write(text)
     return filename
 
-@pytest.mark.xfail()
+
 def test_carriage_return_fastq(fastq_with_carriage_return_filename):
     data = bnp.open(fastq_with_carriage_return_filename).read()
-    assert len(data.sequence[0])==60
+    assert len(data.sequence[0]) == 60
+    assert len(data.quality[0]) == 60
+
+
 
 
 

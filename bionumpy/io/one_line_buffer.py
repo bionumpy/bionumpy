@@ -33,9 +33,11 @@ class OneLineBuffer(FileBuffer):
     def _get_buffer_extractor(cls, data, new_lines):
         tmp = np.insert(new_lines, 0, -1)+1
         field_ends = new_lines.reshape(-1, cls.n_lines_per_entry)
+        field_ends = cls._modify_for_carriage_return(field_ends, data)
         field_starts = tmp[:-1].reshape(-1, cls.n_lines_per_entry)+(np.array(cls._line_offsets))
         entry_starts = tmp[:-1:cls.n_lines_per_entry]
         entry_ends = tmp[::cls.n_lines_per_entry][1:]
+
         return TextThroughputExtractor(data,
                                        field_starts,
                                        field_ends=field_ends,
@@ -168,6 +170,15 @@ class OneLineBuffer(FileBuffer):
 
     def get_text_field_by_number(self, i):
         return self.get_field_by_number(i)
+
+    @classmethod
+    def _modify_for_carriage_return(cls, field_ends, data):
+        if field_ends.size == 0 or field_ends[0, 0] < 1:
+            return field_ends
+        last_chars = data[field_ends[:cls.n_lines_per_entry, 0] - 1]
+        if not np.any(last_chars == "\r"):
+            return field_ends
+        return field_ends - (data[field_ends-1] == '\r')
 
 
 class TwoLineFastaBuffer(OneLineBuffer):
