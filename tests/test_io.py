@@ -213,6 +213,20 @@ chr2\t3\t4
         file.write(text)
     return filename
 
+@pytest.fixture
+def fasta_with_carriage_return_filename():
+    text = '''\
+>test_sequence_id_here\r
+GACTG\r
+>test_sequence_id_here2\r
+GACTC\r
+GAG\r
+'''
+    filename = 'carriage_return.fa'
+    with open(filename, 'w') as file:
+        file.write(text)
+    return filename
+
 
 def test_carriage_return_fastq(fastq_with_carriage_return_filename):
     data = bnp.open(fastq_with_carriage_return_filename).read()
@@ -225,3 +239,8 @@ def test_carriage_return_bed(bed_with_carriage_return_filename):
     assert len(data.start) == 2
     assert len(data.stop) == 2
     assert_equal(data.stop, [2, 4])
+
+@pytest.mark.xfail
+def test_carriage_return_fasta(fasta_with_carriage_return_filename):
+    entries = bnp.open(fasta_with_carriage_return_filename).read()
+    assert_encoded_raggedarray_equal(entries.sequence, ['GACTG', 'GACTCGAG'])
