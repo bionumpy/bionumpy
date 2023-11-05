@@ -186,3 +186,74 @@ def test_read_write_bool():
     assert np.array_equal(obj.param, obj2.param)
 
     os.remove('tmp_bool.tsv')
+
+
+@pytest.fixture
+def fastq_with_carriage_return_filename():
+    text = '''\
+@test_sequence_id_here\r
+GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT\r
++\r
+!''*((((***+))%%%++)(%%%%).1***-+*''))**55CCF>>>>>>CCCCCCC65\r
+'''
+    filename = 'carriage_return.fq'
+    with open(filename, 'w') as file:
+        file.write(text)
+    return filename
+
+
+@pytest.fixture
+def bed_with_carriage_return_filename():
+    text = '''\
+chr1\t1\t2\r
+chr2\t3\t4
+'''
+    filename = 'carriage_return.bed'
+    with open(filename, 'w') as file:
+        file.write(text)
+    return filename
+
+
+@pytest.fixture
+def fasta_with_carriage_return_filename():
+    text = '''\
+>test_sequence_id_here\r
+GACTG\r
+>test_sequence_id_here2\r
+GACTC\r
+GAG\r
+'''
+    filename = 'carriage_return.fa'
+    with open(filename, 'w') as file:
+        file.write(text)
+    return filename
+
+
+def test_carriage_return_fastq(fastq_with_carriage_return_filename):
+    data = bnp.open(fastq_with_carriage_return_filename).read()
+    assert len(data.sequence[0]) == 60
+    assert len(data.quality[0]) == 60
+
+
+def test_carriage_return_bed(bed_with_carriage_return_filename):
+    data = bnp.open(bed_with_carriage_return_filename).read()
+    assert len(data.start) == 2
+    assert len(data.stop) == 2
+    assert_equal(data.stop, [2, 4])
+
+
+# @pytest.mark.xfail
+def test_carriage_return_fasta(fasta_with_carriage_return_filename):
+    entries = bnp.open(fasta_with_carriage_return_filename).read()
+    assert_encoded_raggedarray_equal(entries.sequence, ['GACTG', 'GACTCGAG'])
+
+
+# @pytest.mark.xfail
+def test_carriage_return_fai(fasta_with_carriage_return_filename):
+    # remove file if it exists
+    if os.path.exists(fasta_with_carriage_return_filename + '.fai'):
+        os.remove(fasta_with_carriage_return_filename + '.fai')
+    fai = bnp.open_indexed(fasta_with_carriage_return_filename)
+    assert_encoded_array_equal(fai['test_sequence_id_here'].raw(), 'GACTG')
+    assert_encoded_array_equal(fai['test_sequence_id_here2'].raw(), 'GACTCGAG')
+

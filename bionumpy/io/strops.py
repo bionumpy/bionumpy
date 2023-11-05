@@ -97,11 +97,14 @@ def str_to_int(number_text: EncodedArray, is_negative=None, is_positive=None) ->
     FIXME: Add docs.
 
     """
-    number_text = as_encoded_array(number_text)
+    number_text = as_encoded_array(number_text).copy()
     if not isinstance(number_text, EncodedRaggedArray):
+
         number_text = as_encoded_array(number_text, target_encoding=DigitEncoding)
         powers = 10**np.arange(number_text.shape[-1])[::-1]
         return number_text.raw().dot(powers)
+    else:
+        number_text.ravel()
     if len(number_text) == 0:
         return np.array([], dtype=int)
     if is_negative is None:

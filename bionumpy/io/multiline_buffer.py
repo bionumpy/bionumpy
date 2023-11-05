@@ -47,6 +47,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
         line_ends = np.append(self._new_lines, self._data.size-1)
+        line_ends = self._modify_ends_for_carriage_returns(line_ends, self._data)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
         data.ravel()
         new_entries = np.insert(self._new_entries+1, 0, 0)
@@ -99,6 +100,12 @@ class MultiLineFastaBuffer(MultiLineBuffer):
                    new_lines[:new_entries[-1]],
                    new_entries[:-1])
 
+    def _modify_ends_for_carriage_returns(self, line_ends, data):
+        if np.any((data[line_ends[:10]-1]) == '\r'):
+            return line_ends-(data[line_ends-1] == '\r')
+        return line_ends
+
+
 
 @bnpdataclass
 class FastaIdx:
@@ -121,6 +128,8 @@ class FastaIdxBuffer(MultiLineFastaBuffer):
         self.validate_if_not()
         line_starts = np.insert(self._new_lines + 1, 0, 0)
         line_ends = np.append(self._new_lines, self._data.size-1)
+        entry_ends = line_ends
+        line_ends = self._modify_ends_for_carriage_returns(line_ends, self._data)
         data = self._move_intervals_to_ragged_array(line_starts, line_ends)
         new_entries = np.insert(self._new_entries+1, 0, 0)
         n_lines_per_entry = np.diff(np.append(new_entries, self._new_lines.size+1))-1
@@ -137,9 +146,10 @@ class FastaIdxBuffer(MultiLineFastaBuffer):
         seq_starts = line_starts[new_entries+1]
         seq_line_ends = line_ends[new_entries+1]
         chars_per_line = seq_line_ends-seq_starts
+        line_lens = entry_ends[new_entries+1]-seq_starts
         return FastaIdxBuilder(headers,
                                sequences.lengths,
                                seq_starts,
                                chars_per_line,
-                               chars_per_line+1,
+                               line_lens+1,
                                [self._data.size]*len(headers))

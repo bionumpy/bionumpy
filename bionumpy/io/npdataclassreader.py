@@ -2,6 +2,7 @@ from itertools import takewhile, repeat
 
 from .delimited_buffers import DelimitedBufferWithInernalComments
 from .parser import NumpyFileReader
+from .. import config
 from ..bnpdataclass import BNPDataClass
 from .exceptions import FormatException
 from ..datatypes import GTFEntry, VCFGenotypeEntry
@@ -57,6 +58,8 @@ class NpDataclassReader:
         return self.__lazy_class
 
     def _should_be_lazy(self, chunk):
+        if not config.LAZY:
+            return False
         should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
             if not issubclass(chunk.dataclass, (GTFEntry)):

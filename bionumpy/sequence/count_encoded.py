@@ -122,4 +122,7 @@ def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int
             counts = np.array([np.bincount(row, weights=weights, minlength=len(alphabet)) for row in values])
         else:
             counts = np.array([np.bincount(values, weights=row, minlength=len(alphabet)) for row in weights])
+            if not np.issubdtype(counts.dtype, np.integer) and not np.issubdtype(weights.dtype, np.floating):
+                counts = counts.astype(int)
+
     return EncodedCounts(alphabet, counts)
