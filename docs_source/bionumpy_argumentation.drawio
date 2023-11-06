@@ -1,71 +1,126 @@
-<mxfile host="app.diagrams.net" modified="2023-10-31T10:30:22.194Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="tFwf5eL7bKmEM7shrALW" version="22.0.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-11-06T12:25:46.766Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="wgeMRSQTKCuRdmGaGOn0" version="22.0.8" type="github">
   <diagram name="Page-1" id="cqgpyXr-cMNBFF1EY2c6">
     <mxGraphModel dx="1434" dy="758" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-1" value="Publish BioNumPy" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-1" value="Publish BioNumPy" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-3" value="Claim: Bionumpy is a valuable addition to the bioinformatics infrastructure" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="180" y="100" width="160" height="160" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-3" value="Claim: Bionumpy is a valuable addition to the bioinformatics infrastructure" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="140" y="10" width="160" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-4" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.413;entryY=1.038;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-3" target="I2-2xf_2cML_7aA4J0nP-1">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-4" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.413;entryY=1.038;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="I2-2xf_2cML_7aA4J0nP-3" target="I2-2xf_2cML_7aA4J0nP-1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="400" y="170" as="sourcePoint" />
             <mxPoint x="450" y="120" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-9" value="Claim: &lt;br&gt;BioNumpy Is Fast Enough to be used ro small conce&lt;br&gt;nence tasks" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="425" y="10" width="110" height="110" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-9" value="Claim: &lt;br&gt;BioNumpy Is Fast Enough to be used for small concrete&amp;nbsp;tasks" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="550" y="10" width="110" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-10" value="Claim: BioNumpy is good enogh to be used in production" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="425" y="290" width="110" height="110" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-10" value="Claim: BioNumpy is good enogh to be used in production" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="580" y="580" width="110" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-11" value="Evidence: KAGE2" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="610" y="290" width="110" height="110" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-11" value="Evidence: KAGE2" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="725" y="590" width="110" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-12" target="I2-2xf_2cML_7aA4J0nP-9">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" target="I2-2xf_2cML_7aA4J0nP-9" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="725" y="65" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-12" value="Evidence: Benchmarks" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="610" y="10" width="110" height="110" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-13" value="Claim: It is possible to make good abstractions for bioinformatics" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="600" y="440" width="110" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-13" value="Claim: It is possible to make good abstractions for bioinformatics" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="90" y="290" width="110" height="110" as="geometry" />
-        </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-16" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-11" target="I2-2xf_2cML_7aA4J0nP-10">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-16" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="I2-2xf_2cML_7aA4J0nP-11" target="I2-2xf_2cML_7aA4J0nP-10" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="600" y="270" as="sourcePoint" />
             <mxPoint x="450" y="340" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-18" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-9" target="I2-2xf_2cML_7aA4J0nP-3">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-18" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="I2-2xf_2cML_7aA4J0nP-9" target="oauaLSCg31V4cenp5z2G-5" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="380" y="100" as="sourcePoint" />
             <mxPoint x="430" y="50" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-19" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.825;entryY=0.988;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-10" target="I2-2xf_2cML_7aA4J0nP-3">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="400" y="390" as="sourcePoint" />
-            <mxPoint x="450" y="340" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-20" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-13" target="I2-2xf_2cML_7aA4J0nP-3">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-20" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="I2-2xf_2cML_7aA4J0nP-13" target="I2-2xf_2cML_7aA4J0nP-13" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="400" y="390" as="sourcePoint" />
             <mxPoint x="270" y="390" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-21" value="Evidence: Script examples" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="90" y="510" width="110" height="110" as="geometry" />
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-21" value="Evidence: Script examples" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="725" y="440" width="110" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="I2-2xf_2cML_7aA4J0nP-22" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="I2-2xf_2cML_7aA4J0nP-21" target="I2-2xf_2cML_7aA4J0nP-13">
+        <mxCell id="I2-2xf_2cML_7aA4J0nP-22" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="I2-2xf_2cML_7aA4J0nP-21" target="I2-2xf_2cML_7aA4J0nP-13" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="140" y="510" as="sourcePoint" />
             <mxPoint x="190" y="460" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="520" y="70" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="650" y="140" />
+              <mxPoint x="521" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-2" value="Warrant: It is in practice fast enough. Sometimes faster sometimes slower" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="160" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="275" as="sourcePoint" />
+            <mxPoint x="230" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-3" value="Claim: There is an obvious need to get bio-data conveniently into numpy arrays" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="170" y="250" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-5" target="I2-2xf_2cML_7aA4J0nP-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-5" value="Bionumpy conveniently gets bio-data into numpy arrays, in a way that let&#39;s you analyze it" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="380" y="10" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-7" target="oauaLSCg31V4cenp5z2G-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-7" value="Evidence: Example scripts(Example 1, Example2)" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="510" y="170" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-9" target="oauaLSCg31V4cenp5z2G-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-9" value="Claim: There doesn&#39;t exist a framework for efficiently handling sequence data with numpy&lt;br&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="90" y="480" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="190" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-10" value="There are libraries storing sequences in numpy, but not efficiently" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-12" target="oauaLSCg31V4cenp5z2G-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-12" value="Claim: Python and numpy is widely used in science" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="280" y="480" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-16" value="Evidence: Benchmarks" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="725" y="10" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="oauaLSCg31V4cenp5z2G-17" target="oauaLSCg31V4cenp5z2G-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oauaLSCg31V4cenp5z2G-17" value="Evidence: Benchmarks" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="90" y="650" width="110" height="110" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
