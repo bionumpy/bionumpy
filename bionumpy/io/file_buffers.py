@@ -249,7 +249,7 @@ class TextBufferExtractor:
         is_negative = possible_signs == "-"
         is_positive = possible_signs == "+"
         if np.any(is_negative) or np.any(is_positive):
-            return self.get_field_by_number(field_nr), is_positive, is_negative
+            return self.get_field_by_number(field_nr), is_negative, is_positive
         digit_array = move_intervals_to_digit_array(self._data, starts, starts+self._field_lens[:, field_nr], fill_value='0')
         return digit_array, None, None
 

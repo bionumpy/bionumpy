@@ -1,6 +1,7 @@
 import pytest
 
 import bionumpy.encoded_array
+from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.io.delimited_buffers import BedBuffer
 from bionumpy.datatypes import Interval
 import numpy as np
@@ -38,6 +39,20 @@ chr1\t2\t100
 chr1\t10\t20
 """
 
+@bnpdataclass
+class SimpleDC:
+    number: int
 
+class SimpleBuffer(bnp.io.delimited_buffers.DelimitedBuffer):
+    dataclass = SimpleDC
+
+
+def test_negative_int_io():
+    data = SimpleDC([-1, 1])
+    with bnp.open('tmp.csv', 'w', buffer_type=SimpleBuffer) as f:
+        f.write(data)
+    with bnp.open('tmp.csv', buffer_type=SimpleBuffer) as f:
+        result = f.read()
+    assert np.array_equal(result.number, data.number)
 
 
