@@ -17,7 +17,7 @@ method_names:
 analysis:
   reverse_complement:
     name: "Reverse-complement"
-    tools: [ "bionumpy", "biopython", "python", "biotite", "seqtk" ]
+    tools: [ "bionumpy", "biopython", "biotite", "seqtk" ]
     output_file_ending: ".fa"
     validate_equal: true
     runs:
@@ -26,7 +26,7 @@ analysis:
 
   translate:
     name: "Translating DNA to protein"
-    tools: [ "bionumpy", "biopython", "python", "biotite" ]
+    tools: [ "bionumpy", "biopython", "biotite" ]
     output_file_ending: ".fa"
     validate_equal: true
     runs:
@@ -35,7 +35,7 @@ analysis:
 
   subsample:
     name: "Subsampling a FASTA-file"
-    tools: [ "bionumpy", "python", "seqtk" ]
+    tools: [ "bionumpy", "biopython", "seqtk" ]
     validate_equal: false
     output_file_ending: ".fa"
     runs:
@@ -75,7 +75,7 @@ analysis:
 
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
-    tools: ["bionumpy", "jellyfish", "python"]
+    tools: ["bionumpy", "jellyfish", "biopython"]
     validate_equal: true
     runs:
       small: "length150_nreads10000"
@@ -96,7 +96,7 @@ analysis:
 
   sequence_length_distribution:
     name: "Getting histogram of sequence lengths in a FASTQ-file"
-    tools: ["bionumpy", "python", "awk"]
+    tools: ["bionumpy", "biopython", "awk"]
     validate_equal: true
     output_file_ending: ".csv"
     runs:
