@@ -14,10 +14,11 @@ from ..util import cached_property
 
 
 class BamBufferExtractor:
-    def __init__(self, data, new_entries, chromosome_names):
+    def __init__(self, data, new_entries, header_data):
         self._data = data
         self._new_lines = new_entries
-        self._chromosome_names = chromosome_names
+        self._chromosome_names = as_encoded_array([h[0] for h in header_data])
+        self._header_data = header_data
         self._functions = [self._get_chromosome,
                            self._get_read_name,
                            self._get_flag,
@@ -27,6 +28,16 @@ class BamBufferExtractor:
                            self._get_cigar_length,
                            self._get_sequences,
                            self._get_quality]
+
+    def __len__(self):
+        return len(self._new_lines)
+
+    @property
+    def data(self):
+        return self._data
+
+    def __getitem__(self, item):
+        return self.__class__(self._data, self._new_lines[item], self._header_data)
 
     def _get_ints(self, offsets, n_bytes, dtype):
         tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
@@ -113,27 +124,27 @@ class BamBufferExtractor:
         return self._functions[i]()
 
 
-
 class BamBuffer(FileBuffer):
     '''
     https://samtools.github.io/hts-specs/SAMv1.pdf
     '''
     dataclass = BamEntry
 
-    def __init__(self, data, delimiters, header_data):
-        delimiters = np.asanyarray(delimiters)
-        super().__init__(data, delimiters)
-        self._chromosome_names = as_encoded_array([header[0] for header in header_data])
-        self._buffer_extractor = BamBufferExtractor(data, delimiters, self._chromosome_names)
-        self._data = np.asarray(self._data)
+    def __init__(self, buffer_extractor, header_data=None):
+        self._buffer_extractor = buffer_extractor
+        self._header_data = header_data
+        self._is_validated = True
+
+    def __getitem__(self, idx):
+        return self.__class__(self._buffer_extractor[idx], self._header_data)
 
     @property
     def data(self):
-        return self._data
+        return self._buffer_extractor.data
 
     @property
     def n_lines(self):
-        return len(self._new_lines)
+        return len(self._buffer_extractor)
 
     @classmethod
     def _read_int(self, file_object):
@@ -170,9 +181,7 @@ class BamBuffer(FileBuffer):
     @staticmethod
     def _find_starts(chunk):
         chunk = bytes(chunk)
-        def new_start(start, _):
-            return start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
-        # new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
+        new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
         _starts = accumulate(repeat(0), new_start)# chain([0], accumulate(repeat(0), new_start))
         starts = list(takewhile(lambda start: start <= len(chunk), _starts))
         return starts
@@ -184,120 +193,47 @@ class BamBuffer(FileBuffer):
     @classmethod
     def from_raw_buffer(cls, chunk, header_data):
         chunk = np.asarray(chunk)
-        starts = cls._find_starts(chunk)
-        return cls(chunk[:starts[-1]], starts[:-1], header_data)
-
-    def _get_ints(self, offsets, n_bytes, dtype):
-        tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
-        ints = (tmp).view(dtype).ravel()
-        assert len(ints) == len(self._new_lines), (len(ints), offsets, len(self._new_lines), n_bytes, dtype)
-        return ints
+        starts = np.asanyarray(cls._find_starts(chunk))
+        buffer_extractor = BamBufferExtractor(chunk[:starts[-1]], starts[:-1], header_data)
+        return cls(buffer_extractor, header_data)
 
     def get_data(self):
-        l_read_name = self._get_read_name_length()
-        l_seq = self._get_sequence_length()
-        n_seq_bytes = (l_seq+1)//2
-        n_cigar_bytes = self._get_cigar_bytes()
-        read_name_start = self._new_lines + 36
-        cigar_start = read_name_start + l_read_name
-        read_name_end = cigar_start - 1
-        sequence_start = cigar_start + n_cigar_bytes
-        cigar_cymbol, cigar_length = self._get_cigar(cigar_start, sequence_start)
-        quality_start = sequence_start + n_seq_bytes
-        return BamEntry(self._buffer_extractor.get_field_by_number(0),
-                        self._buffer_extractor.get_field_by_number(1),
-                        self._buffer_extractor.get_field_by_number(2),
-                        self._buffer_extractor.get_field_by_number(3),
-                        self._buffer_extractor.get_field_by_number(4),
-                        self._buffer_extractor.get_field_by_number(5),
-                        self._buffer_extractor.get_field_by_number(6),
-                        self._buffer_extractor.get_field_by_number(7),
-                        self._buffer_extractor.get_field_by_number(8))
-                        # self._get_sequences(l_seq, n_seq_bytes, quality_start, sequence_start),
-                        # self._get_quality(l_seq, quality_start))
+        return BamEntry(*(self.get_field_by_number(i) for i in range(9)))
 
-    def _get_cigar_bytes(self):
-        n_cigar_op = self._get_ints(16, 2, np.uint16)
-        n_cigar_bytes = n_cigar_op * 4
-        return n_cigar_bytes
+    def get_field_by_number(self, i, dtype=None):
+        return self._buffer_extractor.get_field_by_number(i)
 
     def count_entries(self):
-        return len(self._new_lines)
-
-    def _get_quality(self, l_seq, quality_start):
-        return ragged_slice(self._data, quality_start, quality_start + l_seq)
-
-    def _get_sequences(self, l_seq, n_seq_bytes, quality_start, sequence_start):
-        sequences = ragged_slice(self._data, sequence_start, quality_start)
-        sequences = EncodedArray(
-            (((sequences.ravel()[:, None]) >> (4 * np.arange(2, dtype=np.uint8)[::-1])).ravel() & np.uint8(15)),
-            BamEncoding)
-        new_sequences = EncodedRaggedArray(sequences, n_seq_bytes * 2)
-        view = RaggedView(new_sequences._shape.starts, l_seq)
-        new_sequences = new_sequences[view]
-        return new_sequences
-
-    def _get_cigar(self, cigar_start, sequence_start):
-        cigars = ragged_slice(self._data, cigar_start, sequence_start)
-        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.lengths // 4)
-        cigar_symbol, cigar_length = split_cigar(cigars)
-        return cigar_symbol, cigar_length
-
-    def _get_read_name(self, read_name_end, read_name_start):
-        read_names = ragged_slice(self._data, read_name_start, read_name_end)
-        read_names = EncodedRaggedArray(
-            EncodedArray(read_names.ravel(), BaseEncoding), read_names.shape)
-        return read_names
-
-    def _get_flag(self):
-        return self._get_ints(18, 2, np.uint16)
-
-    def _get_sequence_length(self):
-        return self._get_ints(20, 4, np.int32)
-
-    def _get_read_name_length(self):
-        return self._data[self._new_lines + 12]
-
-    def _get_mapq(self):
-        return self._data[self._new_lines + 13]
-
-    def _get_position(self):
-        return self._get_ints(8, 4, np.int32)
-
-    def _get_chromosome(self):
-        ref_id = self._get_ints(4, 4, np.int32)
-        chromosome = self._chromosome_names[ref_id]
-        return chromosome
+        return len(self._buffer_extractor)
 
 
 class BamIntervalBuffer(BamBuffer):
     dataclass = Bed6
 
+    def get_field_by_number(self, i, dtype=None):
+        funcs = [
+            lambda: self._buffer_extractor.get_field_by_number(0),
+            lambda: self._buffer_extractor.get_field_by_number(3),
+            lambda: self._buffer_extractor.get_field_by_number(3)+count_reference_length(*(self._buffer_extractor.get_field_by_number(i) for i in (5, 6))),
+            lambda: self._buffer_extractor.get_field_by_number(1),
+            lambda: self._buffer_extractor.get_field_by_number(4),
+            lambda: EncodedArray(np.where(self._buffer_extractor.get_field_by_number(2) & np.uint16(16), ord("-"), ord("+"))[:, None], BaseEncoding)
+            ]
+        return funcs[i]()
+
     def get_data(self):
-        ref_id = self._get_ints(4, 4, np.int32)
-        pos = self._get_ints(8, 4, np.int32)
-        chromosome = self._chromosome_names[ref_id]
-        l_read_name = self._data[self._new_lines+12]
-        mapq = self._data[self._new_lines+13]
-        n_cigar_op = self._get_ints(16, 2, np.uint16)
-        flag = self._get_ints(18, 2, np.uint16)
-        n_cigar_bytes = n_cigar_op*4
-        read_names = ragged_slice(self._data, self._new_lines+36, self._new_lines+36+l_read_name-1)
-        read_names = EncodedRaggedArray(
-            EncodedArray(read_names.ravel(), BaseEncoding), read_names.shape)
-        cigars = ragged_slice(self._data, self._new_lines+36+l_read_name,
-                              self._new_lines+36+l_read_name+n_cigar_bytes)
+        return self.dataclass(*(self.get_field_by_number(i) for i in range(6)))
 
-        cigars = RaggedArray(cigars.ravel().view(np.uint32), cigars.lengths//4)
-        cigar_cymbol, cigar_length = split_cigar(cigars)
-
-        strand = flag & np.uint16(16)
-        strand = EncodedArray(np.where(strand, ord("-"), ord("+"))[:, None], BaseEncoding)
-        strand.encoding = BaseEncoding
-        length = count_reference_length(cigar_cymbol, cigar_length)
+        chromosome = self._buffer_extractor.get_field_by_number(0)
+        start = self._buffer_extractor.get_field_by_number(3)
+        cigar_symbol, cigar_length = (self._buffer_extractor.get_field_by_number(i) for i in (5, 6))
+        read_names = self._buffer_extractor.get_field_by_number(1)
+        mapq = self._buffer_extractor.get_field_by_number(4)
+        strand = self._buffer_extractor.get_field_by_number(2) & np.uint16(16)
+        length = count_reference_length(cigar_symbol, cigar_length)
         return Bed6(chromosome,
-                    pos,
-                    pos+length,
+                    start,
+                    start+length,
                     read_names,
                     mapq,
                     strand)
