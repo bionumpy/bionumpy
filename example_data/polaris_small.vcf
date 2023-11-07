@@ -1,0 +1,55 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##ALT=<ID=INS,Description="Insertion relative to the reference">
+##ALT=<ID=DEL,Description="Deletion relative to the reference">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##FILTER=<ID=CALL_RATE,Description="%Missing genotypes > 20% in population">
+##FILTER=<ID=TRIO_CALL_RATE,Description="%Missing genotypes > 20% in trio families">
+##FILTER=<ID=HWE,Description="Failed HWE test in population for depth validation">
+##FILTER=<ID=INFERIOR,Description="Quality is inferior to its overlapping variants">
+##FILTER=<ID=OVERLAP,Description="Has one or more overlapping variants nearby and only the left-aligned one is not filtered">
+##FILTER=<ID=MERGED,Description="Suboptimal representation. Merged with nearby superior records.">
+##FILTER=<ID=MULTI_ALLELIC,Description="Multi allelic CNV. Cannot get validated for now.">
+##FILTER=<ID=POPULATION_MINOR_AF,Description="Population frequency is too low to be validated">
+##FILTER=<ID=PASS_RATE,Description="More than half of the calls in population fail Paragraph internal filter">
+##FILTER=<ID=PEDIGREE,Description="More than one incorrect genotype in pedigree">
+##FILTER=<ID=TRIO_MED,Description="%inconsistent genotype in trio families > 10%">
+##FILTER=<ID=UNVALIDATED,Description="Not yet validated due to lack of information">
+##INFO=<ID=ALT_ID,Number=.,Type=String,Description="Alternative ID if exist duplicate calls">
+##INFO=<ID=ALT_AF,Number=1,Type=Float,Description="Alternative allele frequency in population">
+##INFO=<ID=END,Number=1,Type=Integer,Description="Last base in reference">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of SV">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference between REF and ALT alleles">
+##INFO=<ID=HWE,Number=1,Type=Float,Description="-10*log10 Hardy-Weinberg fisher exact p-value">
+##INFO=<ID=PEDIGREE,Number=1,Type=String,Description="Platinum Genome pedigree consistency check result">
+##INFO=<ID=HAMMING,Number=1,Type=Integer,Description="Platinum Genome pedigree hamming distance">
+##INFO=<ID=CALL_RATE,Number=1,Type=Float,Description="Call rate in population">
+##INFO=<ID=TRIO_CALL_RATE,Number=1,Type=Float,Description="Call rate in trio families">
+##INFO=<ID=PASS_RATE,Number=1,Type=Float,Description="Filter pass rate in population, only applies for breakpoint-accurate validation">
+##INFO=<ID=FRAC_INCONSI,Number=1,Type=Float,Description="#Mendellian errors in trio / #Kids with non-reference genotype">
+##INFO=<ID=NUM_ALT_KIDS,Number=1,Type=Integer,Description="Number of kids with alt genotypes in trio families">
+##INFO=<ID=NUM_INCONSI,Number=1,Type=Integer,Description="Number of inconsistent kid genotypes in trio analysis">
+##INFO=<ID=SOURCE,Number=.,Type=String,Description="Call sets where the variant was originally discovered">
+##INFO=<ID=MSOURCE,Number=.,Type=String,Description="Call sets where overlapping variants were originally discovered, if apply">
+##INFO=<ID=TR_OVERLAP,Number=1,Type=Float,Description="Overlapping fraction between variant and tandem repeat">
+##INFO=<ID=SEQ,Number=1,Type=String,Description="SV Insertion sequence">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Absolute copy number for CNVs">
+##FORMAT=<ID=RCN,Number=1,Type=Integer,Description="Copy number change. Can be different from CN for mosaic CNVs.">
+##fileDate=2019-2-20
+##reference=/Users/schen6/Documents/human_genomes/grc38/with_decoy/genome.fa
+##contig=<ID=1,length=248956422>
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##bcftools_viewVersion=1.10.2+htslib-1.10.2-3ubuntu0.1
+##bcftools_viewCommand=view --samples NA12877,NA12878,NA12889,NA12890 polaris_small.vcf.gz; Date=Tue Nov  7 13:19:35 2023
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA12877	NA12878	NA12889	NA12890
+1	10435	MantaDEL:4:0:3:0:1:0_77	C	<DEL>	.	CALL_RATE	END=180918;SVTYPE=DEL;SVLEN=-170483;SOURCE=mantaPG;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=1;NUM_ALT_KIDS=50;FRAC_INCONSI=0;CALL_RATE=0.56;AC=4;AN=8	GT	0/1	0/1	.	0/1
+1	50937	polaris_manta:1_50937_116_MantaDEL:161337:0:0:0:0:0	T	<DEL>	.	POPULATION_MINOR_AF	END=51053;SVTYPE=DEL;SVLEN=-116;SOURCE=polaris_manta;PEDIGREE=all_homozygous;HAMMING=0;TRIO_CALL_RATE=0.99;NUM_ALT_KIDS=0;AC=0;AN=8	GT	0/0	./1	0/0	0/0
+1	54715	polaris_manta:1_54715_1_52_MantaINS:145591:0:0:0:0:0	TC	TTTTTTCTTTCTTTCTTTCTTTCTTTCTTTCTTTCTTTCTTTCTTTCTTTCTT	.	TRIO_MED	SVTYPE=INS;SVLEN=51;SOURCE=polaris_manta;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.89;NUM_ALT_KIDS=14;FRAC_INCONSI=0.29;AC=4;AN=8	GT	0/1	0/1	0/0	1/1
+1	66218	polaris_manta:1_66218_59_5_MantaDEL:169037:0:0:0:0:0	AATATATATTATATAATATATATTATATTATATAATATATAATATAAATATAATATAAAT	ATAATA	.	TRIO_MED;INFERIOR	SVTYPE=DEL;SVLEN=-54;SOURCE=polaris_manta;MSOURCE=polaris_manta;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.97;NUM_ALT_KIDS=12;FRAC_INCONSI=0.58;AC=2;AN=8	GT	0/0	0/1	0/0	0/1
+1	66221	polaris_manta:1_66221_56_MantaDEL:158806:0:0:0:1:0	A	<DEL>	.	TRIO_MED;INFERIOR	END=66277;SVTYPE=DEL;SVLEN=-56;SOURCE=polaris_manta;MSOURCE=polaris_manta;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.97;NUM_ALT_KIDS=14;FRAC_INCONSI=0.5;AC=3;AN=8	GT	0/0	0/1	0/1	0/1
+1	66224	polaris_manta:1_66224_51_MantaDEL:163458:0:0:0:0:0	T	<DEL>	.	TRIO_MED	END=66275;SVTYPE=DEL;SVLEN=-51;SOURCE=polaris_manta;MSOURCE=polaris_manta;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.97;NUM_ALT_KIDS=19;FRAC_INCONSI=0.37;AC=3;AN=8	GT	0/0	0/1	0/1	0/1
+1	66258	polaris_manta:1_66258_57_MantaDEL:182436:0:0:0:0:0	A	<DEL>	.	PASS	END=66315;SVTYPE=DEL;SVLEN=-57;SOURCE=polaris_manta;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.99;NUM_ALT_KIDS=36;FRAC_INCONSI=0.06;AC=4;AN=8	GT	0/1	0/1	0/1	0/1
+1	136934	pbsv.INS.7	G	GCAAGGGGCTCGGGCTGACCTCTGTCCGCGTGGGAGGGGCCGGTGTGAGGCAAGGGGCTCGGGCTGACCTCTCTCAGTGTGGGAGGGGCCGGTGTGAGGCAAGGGGCTCACGCTGACCTCTGTCTGCGTGGGAGGGGCCGGTGTGAGACAAGGGGCTCGGGCTGACCTCTCTCAGCGTGGGAGGGGCCGGTGTGAGGCAAGGGGCTCGGGCTGACCTCTCTCAGCGTGGGAGGGGCCAGTGTGAGGCAAGGGCTCACACTGACCTCTCTCAGCATGGGAGGGGCCGGTGTGAGA	.	CALL_RATE;PASS_RATE;HWE	SVTYPE=INS;SVLEN=293;SOURCE=pbsv_ccs;PEDIGREE=no_vector;HAMMING=0;TRIO_CALL_RATE=0.83;NUM_ALT_KIDS=28;FRAC_INCONSI=0;CALL_RATE=0.79;PASS_RATE=0.2;HWE=0;ALT_AF=0.477;AC=4;AN=8	GT	0/1	0/1	0/1	0/1
+

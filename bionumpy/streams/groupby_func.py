@@ -105,7 +105,7 @@ def groupby(data: bnpdataclass, column: str=None, key: callable = key_func):
         keys = getattr(data, column)
     else:
         keys = data
-    if (isinstance(keys, EncodedArray) or (keys.lengths[-1] == keys.lengths[0])) and np.all(keys[-1] == keys[0]):
+    if (isinstance(keys, EncodedArray) or (hasattr(keys, "lengths") and keys.lengths[-1] == keys.lengths[0])) and np.all(keys[-1] == keys[0]):
         return grouped_stream(((key(keys[start]), data[start:]) for start in [0]), column)
                                        
 

@@ -65,7 +65,7 @@ class NamedBufferExtractor(TextBufferExtractor):
         mask = self.has_field_mask(name)
         n_entries = len(self._field_starts)
         if not np.any(mask):
-            logger.warning(f"Field: {name} not found in buffer")
+            #logger.warning(f"Field: {name} not found in buffer")
             if keep_sep:
                 return EncodedRaggedArray(as_encoded_array(';'*n_entries), np.ones(n_entries, dtype=int))
             return EncodedRaggedArray(as_encoded_array(''), np.zeros(n_entries, dtype=int))
