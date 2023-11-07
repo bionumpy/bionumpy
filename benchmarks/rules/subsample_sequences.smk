@@ -34,6 +34,18 @@ rule python_subsample:
     script:
         "../scripts/python_subsample.py"
 
+rule biopython_subsample:
+    input:
+        "results/dna_sequences/{filename}.fa"
+    output:
+        "results/biopython/subsample/{filename}.fa"
+    benchmark:
+        "benchmarks/subsample/biopython/{filename}.txt"
+    shell:
+        'python3 scripts/biopython_subsamle.py {input} {output}'
+
+#         "../scripts/biopython_subsample.py"
+
 
 rule seqtk_subsample:
     input:
