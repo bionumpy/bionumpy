@@ -1,14 +1,11 @@
-import numpy as np
 from numpy.testing import assert_array_equal
 
 import bionumpy as bnp
 import pytest
 from bionumpy.io.bam import BamIntervalBuffer
-from bionumpy.alignments import alignment_to_interval
 from bionumpy.util.testing import assert_encoded_raggedarray_equal
 
 
-#@pytest.mark.skip
 def test_read_acceptance():
     filename = "example_data/test.bam"
     f = bnp.open(filename)
@@ -47,9 +44,9 @@ def test_index_bam(bam_entries):
     assert_array_equal(filtered.position[:4], [523205, 3837782, 907877, 406696])
 
 
-@pytest.mark.xfail
 def test_write_bam(bam_entries):
+    subset = bam_entries[bam_entries.mapq== 60]
     with bnp.open('tmp.bam', mode='w') as f:
-        f.write(bam_entries[:10])
+        f.write(subset)
     new_entries = bnp.open('tmp.bam').read()
-    assert_array_equal(new_entries.position, bam_entries[:10].position)
+    assert_array_equal(new_entries.position, subset.position)
