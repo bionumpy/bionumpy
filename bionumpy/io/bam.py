@@ -12,6 +12,9 @@ from .file_buffers import FileBuffer
 
 
 class BamBuffer(FileBuffer):
+    '''
+    https://samtools.github.io/hts-specs/SAMv1.pdf
+    '''
     dataclass = BamEntry
 
     def __init__(self, data, delimiters, header_data):
