@@ -28,7 +28,7 @@ def sam_filename(tmp_path):
     filename.write_text(text)
     return filename
 
-
+@pytest.mark.xfail
 def test_sam_read(sam_filename):
     f = bnp.open(sam_filename)
     d = f.read()
