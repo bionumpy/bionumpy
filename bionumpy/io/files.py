@@ -9,8 +9,9 @@ from .fastq_buffer import FastQBuffer
 from .multiline_buffer import MultiLineFastaBuffer
 from .bam import BamBuffer, BamIntervalBuffer
 from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,
-                                GFFBuffer, SAMBuffer, ChromosomeSizeBuffer,
+                                GFFBuffer, ChromosomeSizeBuffer,
                                 NarrowPeakBuffer, BdgBuffer, GTFBuffer)
+from .buffers.sam import SAMBuffer
 from .vcf_buffers import VCFBuffer
 from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter

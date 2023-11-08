@@ -71,3 +71,22 @@ def test_groupby_many_chunks():
     for chromosome, variants in bnp.groupby(chunks, "chromosome"):
         print(chromosome)
         print(variants)
+
+
+
+@pytest.fixture
+def variants():
+    return bnp.datatypes.Variant.from_entry_tuples([
+        ("chr1", 10, "A", "T"),
+        ("chr1", 10, "A", "T"),
+        ("chr1", 15, "A", "T"),
+        ("chr1", 16, "A", "T"),
+    ])
+
+
+def test_group_variants_by_position(variants):
+    unique_positions = []
+    for position, variants in bnp.groupby(variants, "position"):
+        unique_positions.append(int(position))
+
+    assert unique_positions == [10, 15, 16]

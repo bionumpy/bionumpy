@@ -22,7 +22,6 @@ rule awk_sequence_length_distribution:
         "zcat {input} | awk 'NR%4 == 2 {{lengths[length($0)]++}} END {{for (l in lengths) {{print l, lengths[l]}}}}' > {output}"         
 
 
-
 rule python_sequence_length_distribution:
     input:
         "results/dna_sequences/{filename}.fq.gz"
@@ -51,4 +50,14 @@ rule python_sequence_length_distribution:
             ) + "\n")
 
 
-
+rule biopython_sequence_length_distribution:
+    input:
+        "results/dna_sequences/{filename}.fq.gz"
+    output:
+        "results/biopython/sequence_length_distribution/{filename}.csv"
+    benchmark:
+        "benchmarks/sequence_length_distribution/biopython/{filename}.txt"
+    conda:
+        "../envs/biopython.yml"
+    shell:
+        'python3 scripts/biopython_sequence_lengths.py {input} {output}'

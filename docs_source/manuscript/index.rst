@@ -4,11 +4,13 @@ BioNumPy manuscript
 
 Knut Rand [1]_, Ivar Grytten, Milena Pavlovic, Chakravarthi Kanduri and Geir Kjetil Sandve
 
-.. [1] Correspondence: knutdr@ifi.uio.no
+.. [1] Correspondence: knutdr@math.uio.no
 
 
 Abstract
 --------------------
+
+Maybe we don't need to sell python so much?
 
 Python is a popular and widespread programming language for scientific computing, in large part due to the powerful *array programming* library NumPy, which makes it easy to write clean, vectorized and efficient code for handling large datasets. A challenge with using array programming for biological data is that the data is often non-numeric and variable-length (such as DNA sequences), inhibiting out-of-the-box use of standard array programming techniques. Thus, a tradition in bioinformatics has been to use low-level languages like C and C++ to write efficient code. This makes the tools less transparent to the average computational biologist - making them harder to understand, modify and contribute to.
 
@@ -16,6 +18,8 @@ We here present a new Python package BioNumPy, which adds a layer on top of NumP
 
 Introduction
 --------------------------
+Less opiniopnated, more factual, Move discussion to discussion section
+
 Python is one of the most commonly used and fastest growing programming languages :cite:`tiobe`. Being a high-level language, Python is flexible and suits a wide variety of analyses. It is both easy to learn for biologists new to programming and a powerful language for experienced bioinformaticians. However, a common hurdle is that vanilla Python is too slow to be a viable option for large-scale analyses. Thus, bioinformaticians often end up using non-transparent and error-prone one-liners on the unix command line, or end up developing and using tools written in low-level languages such as C and C++.
 
 In other scientific fields (e.g. physics, engineering and machine learning), Python is being extensively and successfully used for high-performance computing and large-scale analysis :cite:`pytorch, pangeo, satpy, astropy`. This is in large part thanks to the very powerful *array programming* package NumPy :cite:`numpy`, which enables memory-efficient representation and fast analysis of numeric data (similar to R and MATLAB). For problems that lend themself to the array programming paradigm, solutions based on suited libraries in high-level languages are usually easier to write, read, use and adapt than corresponding programs written in low-level languages like C and C++. However, the discrete and variable-length nature of biological sequence data inhibits the out-of-the-box use of standard array programming languages and libraries. Due to a lack of suited high-performance libraries in Python, two distinct implementation strategies have come to dominate the processing and analysis of biosequence data: a) the use of high-level languages like Python with libraries like BioPython :cite:`biopython` and Biotite :cite:`biotite` for smaller-scale analytical exploration in individual life science investigations, and b) the use of low-level languages like C to create command-line executables for common compute-intensive tasks.

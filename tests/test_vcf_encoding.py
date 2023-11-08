@@ -1,6 +1,7 @@
 import dataclasses
 
 import numpy as np
+from npstructures.testing import assert_raggedarray_equal
 from numpy.testing import assert_array_equal
 from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
@@ -175,11 +176,11 @@ def test_concatenate_variants():
     print(len(chunk1))
     chunk2 = f.read_chunk(min_chunk_size=200)
     print(len(chunk2))
-    
+
     #merged = np.concatenate([chunk1, chunk2])
     #assert len(merged) == len(chunk1) + len(chunk2)
     #print(len(merged))
-    
+
     other_chunk = bnp.io.vcf_buffers.VCFEntry.from_entry_tuples(
         [
             ("chr1", 1, ".", "A", "T", ".", "PASS", "AF=0.8;AC=2;AN=2")
@@ -227,4 +228,42 @@ def test_pandas_with_info(data_with_info):
     dc = data_with_info.from_data_frame(df)
     assert_bnpdataclass_equal(data_with_info, dc)
 
+
+@pytest.mark.skip  # .genotype not implemented
+def test_read_genotype_data_from_messy_vcf():
+    file_name = "example_data/polaris_small.vcf"
+    data = bnp.open(file_name).read()
+    assert_array_equal(data.genotype[0], ["0/1", "0/1", ".", "0/1"])
+
+
+@pytest.mark.skip   # genotype fields not implemented
+def test_read_genotype_ad_field():
+    file_name = "example_data/syndip.vcf"
+    data = bnp.open(file_name).read()
+    assert_array_equal(data[0].genotype_data.AD == [1, 1])
+    # AD is variable length int, so should give ragged array?
+    # genotype_data or other name
+    assert_raggedarray_equal(data.genotype_data.AD[0, 1] == [[1, 1], [1, 1]])
+
+
+@pytest.mark.xfail
+def test_read_thousand_genomes_info_field():
+    data = bnp.open("example_data/thousand_genomes.vcf").read()
+
+    assert_raggedarray_equal(
+        data.info.SAS_AF[0:3],
+        [[0.15],
+            [0.3],
+            [0.16]]
+    )
+
+
+@pytest.mark.xfail
+def test_read_hprc_multiallelic():
+    data = bnp.open("example_data/hprc_multiallelic.vcf").read()
+
+    assert_raggedarray_equal(data.info.AF[0:2] == [
+        [0.5, 0.0277778],
+        [0.527778]
+    ])
 

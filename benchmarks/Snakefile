@@ -12,6 +12,7 @@ include: "rules/encode.smk"
 include: "rules/jaccard.smk"
 include: "rules/sequence_length_distribution.smk"
 include: "rules/vcf_filtering.smk"
+include: "rules/bam_filtering.smk"
 include: "rules/validation.smk"
 include: "rules/peak_calling.smk"
 
