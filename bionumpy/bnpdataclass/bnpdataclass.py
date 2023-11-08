@@ -287,7 +287,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                     val = as_encoded_array(pre_val, field.type)
                     if isinstance(field.type, FlatAlphabetEncoding):
                         val = val.ravel()
-                elif field.type == List[int] or field.type == List[bool]:
+                elif field.type == List[int] or field.type == List[bool] or field.type == List[float]:
                     if not isinstance(pre_val, RaggedArray):
                         try:
                             val = RaggedArray(pre_val)

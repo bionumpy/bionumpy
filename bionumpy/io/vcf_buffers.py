@@ -128,15 +128,15 @@ class InfoBuffer(DelimitedBuffer):
         pass
 
 
-def translatae_field_type(info_dict):
+def translate_field_type(info_dict):
     t = info_dict['Type']
     number = info_dict['Number']
     is_list = (number is None) or (number > 1)
     if t == Optional[int] and is_list:
         return List[int]
     elif t == Optional[float] and is_list:
-        return str
-        # return List[float]
+        # return str
+        return List[float]
     elif is_list:
         return str
     return t
@@ -149,7 +149,7 @@ def create_info_dataclass(header_data):
     is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
     is_float_list = lambda val: (val['Type'] == Optional[float]) and is_list(val)
     convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
-    info_fields = [(key, translatae_field_type(val)) for key, val in header.INFO.items()]
+    info_fields = [(key, translate_field_type(val)) for key, val in header.INFO.items()]
     dc = make_dataclass(info_fields, "InfoDataclass")
     return dc
 

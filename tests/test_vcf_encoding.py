@@ -246,7 +246,6 @@ def test_read_genotype_ad_field():
     assert_raggedarray_equal(data.genotype_data.AD[0, 1] == [[1, 1], [1, 1]])
 
 
-@pytest.mark.xfail
 def test_read_thousand_genomes_info_field():
     data = bnp.open("example_data/thousand_genomes.vcf").read()
 

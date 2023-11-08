@@ -254,6 +254,7 @@ class DelimitedBuffer(FileBuffer):
                    (float, str_to_float),
                    (Optional[float], str_to_float_with_missing),
                    (List[int], self._parse_split_ints),
+                   (List[float], self._parse_split_floats),
                    (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
         if field_type is None:
             return None
@@ -263,7 +264,7 @@ class DelimitedBuffer(FileBuffer):
             text = subresult[0]
         else:
             subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number,
-                                                                                       keep_sep=field_type == List[int])
+                                                                                       keep_sep=(field_type == List[int] or field_type==List[float]))
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
         parsed = None
@@ -296,7 +297,15 @@ class DelimitedBuffer(FileBuffer):
         return self._get_field_by_number(
             field_nr, field_type)
 
+    def _parse_split_floats(self, text, sep=','):
+        function = str_to_float
+        return self._parse_split_fields(text, function, sep)
+
     def _parse_split_ints(self, text, sep=','):
+        function = str_to_int
+        return self._parse_split_fields(text, function, sep)
+
+    def _parse_split_fields(self, text, function, sep):
         if len(sep):
             try:
                 text[:, -1] = sep
@@ -304,10 +313,11 @@ class DelimitedBuffer(FileBuffer):
                 text = text.copy()
                 text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
+
             if np.any(int_strings.lengths == 0):
                 mask = int_strings.lengths != 0
-                return RaggedArray(str_to_int(int_strings[mask]), (text == sep).sum(axis=-1))
-            return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
+                return RaggedArray(function(int_strings[mask]), (text == sep).sum(axis=-1))
+            return RaggedArray(function(int_strings), (text == sep).sum(axis=-1))
         else:
             mask = as_encoded_array(text.ravel(), DigitEncoding).raw()
             return RaggedArray(mask, text.shape)
