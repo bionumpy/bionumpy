@@ -75,7 +75,7 @@ analysis:
 
   kmer_counts:
     name: "Counting all kmers in a FASTA-file"
-    tools: ["bionumpy", "jellyfish", "biopython"]
+    tools: ["bionumpy", "jellyfish"]
     validate_equal: true
     runs:
       small: "length150_nreads10000"

@@ -54,8 +54,8 @@ rule biopython_sequence_length_distribution:
     input:
         "results/dna_sequences/{filename}.fq.gz"
     output:
-        "results/python/sequence_length_distribution/{filename}.csv"
+        "results/biopython/sequence_length_distribution/{filename}.csv"
     benchmark:
-        "benchmarks/sequence_length_distribution/python/{filename}.txt"
+        "benchmarks/sequence_length_distribution/biopython/{filename}.txt"
     shell:
-        'python3 scripts/biopython_sequence_length_distribution.py {input} {output}'
+        'python3 scripts/biopython_sequence_lengths.py {input} {output}'
