@@ -14,7 +14,7 @@ from ..util import cached_property
 
 
 class BamBufferExtractor:
-    def __init__(self, data, starts, ends, header_data):
+    def __init__(self, data, starts, ends, header_data, is_contigous=True):
         self._data = data
         self._new_lines = starts
         self._ends = ends
@@ -29,8 +29,7 @@ class BamBufferExtractor:
                            self._get_cigar_length,
                            self._get_sequences,
                            self._get_quality]
-        self._is_contigous = False
-
+        self._is_contigous = is_contigous
 
     def __len__(self):
         return len(self._new_lines)
@@ -52,7 +51,7 @@ class BamBufferExtractor:
         return self._data
 
     def __getitem__(self, item):
-        return self.__class__(self._data, self._new_lines[item], self._ends[item], self._header_data)
+        return self.__class__(self._data, self._new_lines[item], self._ends[item], self._header_data, is_contigous=False)
 
     def _get_ints(self, offsets, n_bytes, dtype):
         tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
@@ -138,6 +137,12 @@ class BamBufferExtractor:
     def get_field_by_number(self, i):
         return self._functions[i]()
 
+    @property
+    def size(self):
+        if self._is_contigous:
+            return self._data.size
+        else:
+            return (self._ends-self._new_lines).sum()
 
 class BamHeader:
     def __init__(self, file_object):
@@ -200,6 +205,9 @@ class BamBuffer(FileBuffer):
     def get_field_range_as_text(self):
         raise Exception('Cannot write BAM file with set values')
 
+    @property
+    def size(self):
+        return self._buffer_extractor.size
 
     @property
     def data(self):
