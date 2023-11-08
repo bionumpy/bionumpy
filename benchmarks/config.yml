@@ -12,6 +12,7 @@ method_names:
   vcfpy: "vcfpy"
   pyvcf: "pyvcf"
   pyranges: "pyranges"
+  pysam: 'pysam'
 
 
 analysis:
