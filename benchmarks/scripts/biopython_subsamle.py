@@ -1,8 +1,6 @@
-from more_itertools import grouper
 import numpy as np
 import sys
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 
 
 def subsample(input_filename, output_filename):
