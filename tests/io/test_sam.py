@@ -13,6 +13,7 @@ r004 0 ref 18 30 6M14N5M * 0 0 ATAGCTTCAGC *
 r003 2064 ref 31 30 6H5M * 0 0 TAGGC * NM:i:0
 r001 147 ref 39 30 9M = 7 -41 CAGCGGCAT * NM:i:1
 '''
+text = text.replace(' ', '\t')
 
 
 @pytest.fixture
