@@ -193,7 +193,6 @@ def test_read_gtf():
     assert True
 
 
-
 def test_read_bam():
     data = bnp.open("example_data/alignments.bam").read()
     data2 = bnp.open("example_data/alignments.sam").read()

@@ -234,9 +234,11 @@ class TextBufferExtractor:
         if keep_sep:
             lens = lens + 1
         starts = self._field_starts.ravel()[field_nr::self._n_fields]
+        return self._extract_data(lens, starts)
+
+    def _extract_data(self, lens, starts):
         values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
-        # values = e[field_nr::self._n_fields]
-        assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
+        assert len(values) == len(self), (self._field_starts, self._field_lens, self._n_fields, self._data)
         return values
 
     def get_fixed_length_field(self, field_nr: int, field_length: int):

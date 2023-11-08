@@ -1,5 +1,6 @@
 import pytest
 import bionumpy as bnp
+from bionumpy.util.testing import assert_encoded_array_equal
 
 text = '''\
 @HD VN:1.6 SO:coordinate
@@ -19,7 +20,7 @@ text = text.replace(' ', '\t')
 @pytest.fixture
 def tmp_path():
     from pathlib import Path
-    path = Path('tmp')
+    path = Path('tmp_folder')
     path.mkdir(exist_ok=True)
     return path
 
@@ -29,13 +30,13 @@ def sam_filename(tmp_path):
     filename.write_text(text)
     return filename
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_sam_read(sam_filename):
     f = bnp.open(sam_filename)
     d = f.read()
     print(d)
     print(d.flag.dtype)
-
+    assert_encoded_array_equal(d.extra[-1], 'NM:i:1')
 
 
 
