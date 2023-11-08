@@ -159,7 +159,7 @@ class SAMEntry:
     length: int
     sequence: str
     quality: str
-
+    extra: str
 
 @bnpdataclass
 class BamEntry:

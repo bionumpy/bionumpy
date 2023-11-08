@@ -81,16 +81,17 @@ class DelimitedBuffer(FileBuffer):
         if entry_ends.size == 0:
             logging.warning("Foud no new lines. Chunk size may be too low. Try increasing")
             raise
-        n_fields = entry_ends[0] + 1
-        # assert len(delimiters) == n_fields * len(entry_ends), (len(delimiters), n_fields, len(entry_ends))
-        new_lines = delimiters[(n_fields - 1)::n_fields]
+        n_fields = cls._get_n_fields(entry_ends)
         size = delimiters[entry_ends[-1]]+1
-        delimiters = np.concatenate(([-1], delimiters[:n_fields * len(new_lines)]))
-        # assert new_lines[-1] == delimitersentry_ends[-1], (new_lines, entry_ends)
+        delimiters = np.insert(delimiters[:entry_ends[-1]+1], 0, -1)
         buffer_extractor = cls._get_buffer_extractor(
             chunk[:size], delimiters, n_fields)
         return cls(buffer_extractor, header_data)
         # return cls(chunk[:new_lines[-1] + 1], new_lines, delimiters, header_data, buffer_extractor=buffer_extractor)
+
+    @classmethod
+    def _get_n_fields(cls, entry_ends):
+        return entry_ends[0] + 1
 
     @property
     def __buffer_extractor(self):

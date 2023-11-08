@@ -50,6 +50,8 @@ class NpDataclassReader:
         should_be_lazy = self._should_be_lazy(chunk)
         if should_be_lazy:
             return self._get_lazy_class(chunk.dataclass, chunk.header_data)(ItemGetter(chunk, chunk.dataclass))
+        if chunk is None:
+            return self._reader._buffer_type.dataclass.empty()
         return chunk.get_data()
 
     def _get_lazy_class(self, dataclass, header=None):

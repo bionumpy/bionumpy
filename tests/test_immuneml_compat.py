@@ -17,6 +17,7 @@ CCC\tACGT\tV2
 def header(type_dict):
     return '\t'.join(type_dict.keys()) + '\n'
 
+
 @pytest.fixture()
 def full_text(header):
     text = '''\
@@ -30,6 +31,13 @@ def file_name():
     name = 'tmp1234.tsv'
     with open(name, 'w') as f:
         f.write(text)
+    return name
+
+@pytest.fixture
+def empty_file_name(header):
+    name = 'empty.csv'
+    with open(name, 'w') as f:
+        f.write(header)
     return name
 
 @pytest.fixture
@@ -126,3 +134,7 @@ def test_has_methods(full_buffer_type, full_file_name):
 
     print(obj.get_row_by_index(0))
     bionumpy.config.LAZY = True
+
+def test_read_empty(empty_file_name, buffer_type):
+    data = bnp.open(str(empty_file_name), buffer_type=buffer_type).read()
+    assert len(data) == 0

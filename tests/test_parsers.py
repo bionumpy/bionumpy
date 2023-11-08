@@ -193,7 +193,6 @@ def test_read_gtf():
     assert True
 
 
-# @pytest.mark.skip("Failing")
 def test_read_bam():
     data = bnp.open("example_data/alignments.bam").read()
     data2 = bnp.open("example_data/alignments.sam").read()
