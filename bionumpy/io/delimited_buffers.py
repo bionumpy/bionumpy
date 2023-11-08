@@ -2,11 +2,11 @@ import io
 import logging
 import dataclasses
 from typing import List, Optional
-from npstructures import RaggedArray, ragged_slice, RaggedShape
+from npstructures import RaggedArray, RaggedShape
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..bnpdataclass.lazybnpdataclass import LazyBNPDataClass
 from ..datatypes import (Interval, SequenceEntry, Bed12, Bed6, BedGraph,
-                         GTFEntry, GFFEntry, SAMEntry, ChromosomeSize, NarrowPeak, GfaPath)
+                         GTFEntry, GFFEntry, ChromosomeSize, NarrowPeak, GfaPath)
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding
@@ -21,7 +21,7 @@ from .dump_csv import dump_csv, join_columns
 from .exceptions import FormatException
 import numpy as np
 from ..bnpdataclass.bnpdataclass import make_dataclass
-from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class
 
 
 class DelimitedBuffer(FileBuffer):
@@ -527,11 +527,6 @@ class NarrowPeakBuffer(DelimitedBuffer):
 
 class GTFBuffer(DelimitedBuffer):
     dataclass = GTFEntry
-
-
-class SAMBuffer(DelimitedBuffer):
-    dataclass = SAMEntry
-    COMMENT = "@"
 
 
 class ChromosomeSizeBuffer(DelimitedBuffer):
