@@ -57,5 +57,7 @@ rule biopython_sequence_length_distribution:
         "results/biopython/sequence_length_distribution/{filename}.csv"
     benchmark:
         "benchmarks/sequence_length_distribution/biopython/{filename}.txt"
+    conda:
+        "../envs/biopython.yml"
     shell:
         'python3 scripts/biopython_sequence_lengths.py {input} {output}'

@@ -60,6 +60,8 @@ rule biopython_count:
         "results/biopython/kmer_counts/{filename}.csv"
     benchmark:
         "benchmarks/kmer_counts/biopython/{filename}.txt"
+    conda:
+        "../envs/biopython.yml"
     shell:
         "python3 scripts/biopython_kmer_counting.py {input} {output}"
 

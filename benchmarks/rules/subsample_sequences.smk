@@ -41,6 +41,8 @@ rule biopython_subsample:
         "results/biopython/subsample/{filename}.fa"
     benchmark:
         "benchmarks/subsample/biopython/{filename}.txt"
+    conda:
+        "../envs/biopython.yml"
     shell:
         'python3 scripts/biopython_subsamle.py {input} {output}'
 
