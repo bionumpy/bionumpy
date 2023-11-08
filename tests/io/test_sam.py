@@ -53,7 +53,7 @@ def test_sam_write(sam_filename, sam_out_filename):
     d2 = bnp.open(sam_out_filename).read()
     assert_bnpdataclass_equal(d, d2)
 
-@pytest.mark.xfail
+
 def test_sam_write_do(sam_filename, sam_out_filename):
     d = bnp.open(sam_filename).read().get_data_object()
     print(d)
