@@ -13,6 +13,7 @@ method_names:
   pyvcf: "pyvcf"
   pyranges: "pyranges"
   pysam: 'pysam'
+  samtools: 'samtools'
 
 
 analysis:
@@ -95,14 +96,14 @@ analysis:
       small: "small"
       big: "big"
 
-  # bam_filtering:
-  #   name: "Filtering BAM on allele mapq"
-  #   tools: ["bionumpy", "pysam"]
-  #   validate_equal: false
-  #   output_file_ending: ".filtered.bam"
-  #   runs:
-  #     small: "small"
-  #     big: "big"
+  bam_filtering:
+    name: "Filtering BAM on allele mapq"
+    tools: ["bionumpy", "pysam", 'samtools']
+    validate_equal: false
+    output_file_ending: ".filtered.bam"
+    runs:
+      small: "small"
+      big: "big"
 
   sequence_length_distribution:
     name: "Getting histogram of sequence lengths in a FASTQ-file"
