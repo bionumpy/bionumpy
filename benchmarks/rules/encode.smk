@@ -33,3 +33,10 @@ rule download_mapped_reads_bed_file:
         "results/intervals/ENCFF{id}_mapped_reads_{size}.bed"
     shell:
         "wget -O {output} https://github.com/bionumpy/bionumpy-example-data/raw/master/ENCFF{wildcards.id}_mapped_reads_{wildcards.size}.bed"
+
+
+rule download_mapped_reads_bam_file:
+    output:
+        "results/bams/{size}.bam"
+    shell:
+        "wget -O {output} https://github.com/bionumpy/bionumpy-example-data/raw/master/{wildcards.size}.bam"
