@@ -135,7 +135,6 @@ def translate_field_type(info_dict):
     if t == Optional[int] and is_list:
         return List[int]
     elif t == Optional[float] and is_list:
-        # return str
         return List[float]
     elif is_list:
         return str
@@ -147,8 +146,6 @@ def create_info_dataclass(header_data):
     header = parse_header(header_data)
     is_list = lambda val: (val['Number'] is None) or (val['Number'] > 1)
     is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
-    is_float_list = lambda val: (val['Type'] == Optional[float]) and is_list(val)
-    convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
     info_fields = [(key, translate_field_type(val)) for key, val in header.INFO.items()]
     dc = make_dataclass(info_fields, "InfoDataclass")
     return dc

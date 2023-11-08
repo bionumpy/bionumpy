@@ -257,11 +257,12 @@ def test_read_thousand_genomes_info_field():
     )
 
 
-@pytest.mark.xfail
+#@pytest.mark.xfail
 def test_read_hprc_multiallelic():
     data = bnp.open("example_data/hprc_multiallelic.vcf").read()
 
-    assert_raggedarray_equal(data.info.AF[0:2] == [
+    result = data.info.AF[0:2]
+    assert_raggedarray_equal(result, [
         [0.5, 0.0277778],
         [0.527778]
     ])
