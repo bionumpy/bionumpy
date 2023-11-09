@@ -119,12 +119,6 @@ class DelimitedBuffer(FileBuffer):
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)
-        self.validate_if_not()
-        cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
-        entries = self.entries[idx].ravel()
-        delimiters = np.insert(np.cumsum(cell_lens) - 1, 0, -1)
-        new_lines = delimiters[self._n_cols:: self._n_cols]
-        return self.__class__(entries, new_lines, delimiters)
 
     @property
     def entries(self):

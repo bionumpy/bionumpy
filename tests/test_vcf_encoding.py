@@ -7,9 +7,10 @@ from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
+from bionumpy.io.vcf_buffers import VCFBuffer2
 import pytest
 
-from bionumpy.datatypes import VCFEntry
+from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
@@ -229,11 +230,12 @@ def test_pandas_with_info(data_with_info):
     assert_bnpdataclass_equal(data_with_info, dc)
 
 
-@pytest.mark.skip  # .genotype not implemented
+# @pytest.mark.skip  # .genotype not implemented
 def test_read_genotype_data_from_messy_vcf():
     file_name = "example_data/polaris_small.vcf"
-    data = bnp.open(file_name).read()
-    assert_array_equal(data.genotype[0], ["0/1", "0/1", ".", "0/1"])
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    genotype = data.genotype[0]
+    assert np.all(genotype == ["0/1", "0/1", ".", "0/1"])
 
 
 @pytest.mark.skip   # genotype fields not implemented

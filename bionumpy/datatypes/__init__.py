@@ -102,10 +102,14 @@ class VCFEntry:
     quality: str
     filter: str
     info: Union[BNPDataClass, str]
+    # genotypes: str
 
     def is_snp(self):
         return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)
 
+@bnpdataclass
+class VCFEntryWithGenotypes(VCFEntry):
+    genotype: str
 
 @bnpdataclass
 class VCFGenotypeEntry(VCFEntry):

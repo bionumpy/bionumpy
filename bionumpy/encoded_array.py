@@ -270,7 +270,6 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         if not self.encoding.is_one_to_one_encoding():
             return self.encoding.to_string(self.data)
         if hasattr(self.encoding, "_decode"):
-            # new system, can be used in all cases after refactoring
             data = self
 
             raw = self.encoding.decode(data).raw()
