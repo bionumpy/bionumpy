@@ -257,7 +257,6 @@ def test_read_thousand_genomes_info_field():
     )
 
 
-#@pytest.mark.xfail
 def test_read_hprc_multiallelic():
     data = bnp.open("example_data/hprc_multiallelic.vcf").read()
 

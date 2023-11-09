@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, Set, Tuple, List, Mapping, Optional
 import re
 import warnings
 
+
 @dataclass
 class VCFHeader:
     """VCFHeader"""
@@ -17,6 +18,7 @@ class VCFHeader:
     INFO: Mapping[str, Any] = field(default_factory=dict)
     contig: Mapping[str, Any] = None
     optional: Mapping[str, List[Any]] = None
+
 
 def preprocess_number(x: str) -> Optional[int]:
     """Preprocess the number in field such as Number. Return None if x
@@ -38,6 +40,7 @@ def preprocess_number(x: str) -> Optional[int]:
         return int(regex.group(1))
     else:
         return None
+
 
 def preprocess_type(x: str) -> type:
     """Preprocess the type in field such as Type. Reuturn the class 
