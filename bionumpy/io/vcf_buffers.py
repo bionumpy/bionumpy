@@ -274,6 +274,8 @@ class VCFBuffer(DelimitedBuffer):
         return info_cache[header_data][0]
 
     def _extract_genotypes(self):
+        if self._buffer_extractor.n_fields < 9:
+            return np.empty((len(self._buffer_extractor), 0), dtype='S')
         byte_array = self._buffer_extractor.get_padded_field(slice(9, None), stop_at=':').raw()
         n_bytes = byte_array.shape[-1]
         return StringArray(byte_array.view(f'>S{n_bytes}').reshape(byte_array.shape[:-1]))

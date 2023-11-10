@@ -237,6 +237,10 @@ class TextBufferExtractor:
     def data(self):
         return self._data
 
+    @property
+    def n_fields(self):
+        return self._n_fields
+
     def __len__(self):
         return len(self._field_starts)
 
