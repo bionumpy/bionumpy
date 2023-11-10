@@ -5,6 +5,12 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, data):
         self._data = np.asanyarray(data, dtype='S')
 
+    def __repr__(self):
+        if self._data.ndim>=1:
+            return repr(self._data[:10].astype('U'))
+        else:
+            return self._data.astype('U').__repr__()
+
     def raw(self):
         return self._data
 

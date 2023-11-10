@@ -23,11 +23,16 @@ def move_intervals_to_digit_array(data, starts, ends, fill_value):
     return array.reshape((-1, max_chars))
 
 
-def move_intervals_to_right_padded_array(data, starts, ends, fill_value):
+def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at=None):
     lens = ends - starts
     max_chars = np.max(lens)
     indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size-1)
-    array = data[indices.ravel()]
+    array = data[indices]
+    if stop_at is not None:
+        new_lens = np.argmax(array == stop_at, axis=-1)
+        lens = np.where(new_lens>0, np.minimum(lens, new_lens), lens)
+        max_chars = np.max(lens)
+        array = array[:, :max_chars].ravel()
     zeroed, _ = RaggedView(np.arange(starts.size) * max_chars + lens,
                            max_chars - lens).get_flat_indices()
     array[zeroed] = fill_value
@@ -257,10 +262,12 @@ class TextBufferExtractor:
         indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
         return self._data[indices]
 
-    def get_padded_field(self, field_nr):
+    def get_padded_field(self, field_nr, stop_at=None):
         starts = self._field_starts[:, field_nr]
-        ends = self._field_lens[:, field_nr]+starts
-        array = move_intervals_to_right_padded_array(self._data, starts.ravel(), ends.ravel(), fill_value='\x00')
+        lens = self._field_lens[:, field_nr]
+        ends = lens+starts
+
+        array = move_intervals_to_right_padded_array(self._data, starts.ravel(), ends.ravel(), fill_value='\x00', stop_at=stop_at)
         return array.reshape(starts.shape+(array.shape[-1],))
 
     def get_digit_array(self, field_nr: int):

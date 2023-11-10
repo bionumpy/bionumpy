@@ -67,7 +67,6 @@ class NamedBufferExtractor(TextBufferExtractor):
         mask = self.has_field_mask(name)
         n_entries = len(self._field_starts)
         if not np.any(mask):
-            #logger.warning(f"Field: {name} not found in buffer")
             if keep_sep:
                 return EncodedRaggedArray(as_encoded_array(';'*n_entries), np.ones(n_entries, dtype=int))
             return EncodedRaggedArray(as_encoded_array(''), np.zeros(n_entries, dtype=int))
@@ -173,6 +172,8 @@ class VCFBuffer(DelimitedBuffer):
             return self._get_info_field()
         elif field_nr == 8:
             return self._extract_genotypes()
+        elif field_nr == 9:
+            return self._extract_genotype_data()
         val = super()._get_field_by_number(field_nr, field_type)
         if field_nr == 1:
             val -= 1
@@ -273,9 +274,12 @@ class VCFBuffer(DelimitedBuffer):
         return info_cache[header_data][0]
 
     def _extract_genotypes(self):
-        byte_array = self._buffer_extractor.get_padded_field(slice(9, None)).raw()
+        byte_array = self._buffer_extractor.get_padded_field(slice(9, None), stop_at=':').raw()
         n_bytes = byte_array.shape[-1]
         return StringArray(byte_array.view(f'>S{n_bytes}').reshape(byte_array.shape[:-1]))
+
+    def _extract_genotype_data(self):
+        pass
 
 
 class VCFBuffer2(VCFBuffer):

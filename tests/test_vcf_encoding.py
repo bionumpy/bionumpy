@@ -238,10 +238,18 @@ def test_read_genotype_data_from_messy_vcf():
     assert np.all(genotype == ["0/1", "0/1", ".", "0/1"])
 
 
+def test_read_genotype_with_more_data():
+    file_name = "example_data/syndip.vcf"
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    genotypes = data.genotype[:4]
+    assert np.all(genotypes == [['1|0'], ['1|0'], ['0|1'], ['1|0']])
+
+
+
 @pytest.mark.skip   # genotype fields not implemented
 def test_read_genotype_ad_field():
     file_name = "example_data/syndip.vcf"
-    data = bnp.open(file_name).read()
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     assert_array_equal(data[0].genotype_data.AD == [1, 1])
     # AD is variable length int, so should give ragged array?
     # genotype_data or other name
