@@ -5,6 +5,8 @@ from .strops import ints_to_strings, int_lists_to_strings, float_to_strings
 from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding
 from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
+
+from ..typing import SequenceID
 from ..util import is_subclass_or_instance
 
 
@@ -15,11 +17,18 @@ def str_func(column):
         return column.encoding.decode(column)
     assert False
 
+def seq_id_func(column):
+    bytes = column.raw().view(np.uint8).reshape(len(column), -1)
+    mask = bytes != 0
+    data = bytes[mask]
+    return EncodedRaggedArray(EncodedArray(data, BaseEncoding), mask.sum(axis=-1))
+
 
 def get_column(values, field_type) -> EncodedRaggedArray:
     def get_func_for_datatype(datatype):
         funcs = {int: ints_to_strings,
                  str: str_func,  # lambda x: x,
+                 SequenceID: seq_id_func,
                  List[int]: int_lists_to_strings,
                  float: float_to_strings,
                  List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),

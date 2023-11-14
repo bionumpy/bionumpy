@@ -44,7 +44,7 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __getattr__(self, name):
         if name in self.wrapped_functions:
             return getattr(self._data, name)
-        return getattr(self, name)
+        raise AttributeError(f'{self.__class__.__name__} has no attribute {name}')
 
     def _convert_input(self, value):
         if isinstance(value, str):

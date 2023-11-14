@@ -6,6 +6,7 @@ from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.io.delimited_buffers import DelimitedBuffer
 from bionumpy.typing import SequenceID
 from bionumpy.string_array import StringArray, string_array
+from bionumpy.util.testing import assert_bnpdataclass_equal
 
 
 @bnpdataclass
@@ -41,6 +42,12 @@ deg\t3
 ''')
     return name
 
+
 def test_read(file_name):
     data = bnp.open(file_name, buffer_type=SimpleBuffer).read()
     assert np.all(data.name == ['hei', 'pa', 'deg'])
+    data = data.get_data_object()
+    with bnp.open(file_name, 'w', buffer_type=SimpleBuffer) as f:
+        f.write(data)
+    new_data = bnp.open(file_name, buffer_type=SimpleBuffer).read()
+    assert_bnpdataclass_equal(data, new_data)
