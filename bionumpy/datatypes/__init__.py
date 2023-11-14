@@ -1,3 +1,4 @@
+from ..typing import SequenceID
 import numpy as np
 from typing import List, Union
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
@@ -5,6 +6,7 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
+
 
 @bnpdataclass
 class LocationEntry:
@@ -15,7 +17,6 @@ class LocationEntry:
 @bnpdataclass
 class StrandedLocationEntry(LocationEntry):
     strand: StrandEncoding
-
 
 
 @bnpdataclass

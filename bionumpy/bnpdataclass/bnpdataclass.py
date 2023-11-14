@@ -7,13 +7,13 @@ from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
 import numpy as np
-
+from ..typing import SequenceID
 from .pandas_adaptor import pandas_adaptor
-
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
 from ..encodings.alphabet_encoding import FlatAlphabetEncoding
+from ..string_array import as_string_array
 from ..util import is_subclass_or_instance
 
 logger = logging.getLogger(__name__)
@@ -275,6 +275,8 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                                                                                                       'to_numpy'), (
                     field, pre_val, type(pre_val))
                     val = as_encoded_array(pre_val)
+                elif field.type == SequenceID:
+                    val = as_string_array(pre_val)
                 elif is_subclass_or_instance(field.type, Encoding):
                     if is_subclass_or_instance(field.type, NumericEncoding):
                         assert isinstance(pre_val,

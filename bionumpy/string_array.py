@@ -1,7 +1,8 @@
 import numpy as np
 
-
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
+    wrapped_functions = ['size', 'shape', 'ndim', '__len__']
+
     def __init__(self, data):
         self._data = np.asanyarray(data, dtype='S')
 
@@ -37,9 +38,33 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __setitem__(self, item, value):
         self._data[item] == self._convert_input(item, value)
 
+    def __getattr__(self, name):
+        if name in self.wrapped_functions:
+            return getattr(self._data, name)
+        return getattr(self, name)
+
     def _convert_input(self, value):
         if isinstance(value, str):
             return bytes(value)
         elif isinstance(value, self.__class__):
             return value.raw()
         return np.asanyarray(value, dtype='S')
+
+    def __len__(self):
+        return len(self._data)
+
+
+def string_array(input_data):
+    print(type(input_data))
+    if isinstance(input_data, (list, np.ndarray)):
+        return StringArray(input_data)
+    elif isinstance(input_data, StringArray):
+        return input_data.copy()
+    else:
+        raise TypeError(f'Cannot convert {input_data} to StringArray')
+
+
+def as_string_array(input_data):
+    if isinstance(input_data, StringArray):
+        return input_data
+    return string_array(input_data)
