@@ -1,5 +1,8 @@
 import numpy as np
 
+from .encoded_array import EncodedRaggedArray, BaseEncoding
+
+
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     wrapped_functions = ['size', 'shape', 'ndim', '__len__']
 
@@ -55,11 +58,15 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
 
 def string_array(input_data):
-    print(type(input_data))
     if isinstance(input_data, (list, np.ndarray)):
         return StringArray(input_data)
     elif isinstance(input_data, StringArray):
         return input_data.copy()
+    elif isinstance(input_data, EncodedRaggedArray):
+        assert input_data.encoding == BaseEncoding, input_data.encoding
+        array = input_data.raw().as_padded_matrix(side='right')
+        n_bytes = array.shape[-1]
+        return StringArray(array.ravel().view(f'|S{n_bytes}'))
     else:
         raise TypeError(f'Cannot convert {input_data} to StringArray')
 

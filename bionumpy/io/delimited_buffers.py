@@ -13,6 +13,8 @@ from ..encodings import Encoding
 from ..encodings.exceptions import EncodingError
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encoded_array import BaseEncoding
+from ..string_array import as_string_array
+from ..typing import SequenceID
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE, TextBufferExtractor, TextThroughputExtractor
 from .strops import (
@@ -242,6 +244,7 @@ class DelimitedBuffer(FileBuffer):
     def _get_field_by_number(self, col_number, field_type):
         parsers = [(str, lambda x: x),
                    (Encoding, lambda x: as_encoded_array(x, field_type)),
+                   (SequenceID, as_string_array),
                    (int, lambda x: str_to_int(*x)),
                    (Optional[int], str_to_int_with_missing),
                    (bool, lambda x: str_to_int(x).astype(bool)),
