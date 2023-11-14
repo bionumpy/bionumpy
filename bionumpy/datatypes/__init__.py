@@ -6,8 +6,10 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
-SequenceID = str
+from ..config import STRING_ARRAY
 
+if not STRING_ARRAY:
+    SequenceID = str
 
 @bnpdataclass
 class LocationEntry:
