@@ -40,9 +40,7 @@ class SequenceEntry:
 
 
 @bnpdataclass
-class SequenceEntryWithQuality:
-    name: str
-    sequence: str
+class SequenceEntryWithQuality(SequenceEntry):
     quality: QualityEncoding
 
 

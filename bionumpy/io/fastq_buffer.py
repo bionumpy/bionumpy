@@ -1,7 +1,9 @@
+import dataclasses
 from typing import List
 
 import numpy as np
 
+from .dump_csv import get_column
 from ..encoded_array import EncodedRaggedArray, as_encoded_array, EncodedArray, BaseEncoding, change_encoding
 from ..datatypes import SequenceEntryWithQuality
 from ..encodings import QualityEncoding
@@ -49,8 +51,11 @@ class FastQBuffer(OneLineBuffer):
 
     @classmethod
     def from_data(cls, entries):
+        name_field = get_column(entries.name, dataclasses.fields(entries)[0].type)
         quality_field = EncodedRaggedArray(EncodedArray(QualityEncoding.decode(entries.quality.ravel()), BaseEncoding),
                                            entries.quality.shape)
         sequence_field = change_encoding(entries.sequence, BaseEncoding) if entries.sequence.encoding != BaseEncoding else entries.sequence
-        return cls.join_fields([entries.name, sequence_field,
+
+
+        return cls.join_fields([name_field, sequence_field,
                                 quality_field])

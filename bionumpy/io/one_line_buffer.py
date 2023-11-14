@@ -131,10 +131,10 @@ class OneLineBuffer(FileBuffer):
             A ASCII encoded buffer
         """
 
-        names = entries.name
-        sequences = entries.sequence
-        if entries.sequence.encoding != BaseEncoding:
-            sequences = change_encoding(sequences, BaseEncoding)
+        # names = entries.name
+        # sequences = entries.sequence
+        # if entries.sequence.encoding != BaseEncoding:
+        # sequences = change_encoding(sequences, BaseEncoding)
         data_dict = [(field.type, getattr(entries, field.name)) for field in dataclasses.fields(entries)]
         columns= [get_column(value, key) for key, value in data_dict]
         return cls.join_fields(columns)
