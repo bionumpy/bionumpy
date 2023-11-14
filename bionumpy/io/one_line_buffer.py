@@ -1,7 +1,9 @@
+import dataclasses
 from typing import List
 
 import numpy as np
 
+from .dump_csv import get_column
 from ..encoded_array import EncodedArray, BaseEncoding, change_encoding, EncodedRaggedArray
 from ..bnpdataclass import bnpdataclass
 from ..datatypes import SequenceEntry
@@ -91,9 +93,13 @@ class OneLineBuffer(FileBuffer):
         headers, sequences = [self._buffer_extractor.get_field_by_number(i) for i in (0, 1)]
         return SequenceEntry(headers, sequences)
 
-    def get_field_by_number(self, i: int, t: type=object):
+    def get_field_by_number(self, i: int, t: type=None):
         """ Get a field indexed by number"""
-        return self._buffer_extractor.get_field_by_number(i)
+
+        text = self._buffer_extractor.get_field_by_number(i)
+        if t is not None:
+            return self._get_parser(t)(text)
+        return text
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx])
@@ -129,7 +135,10 @@ class OneLineBuffer(FileBuffer):
         sequences = entries.sequence
         if entries.sequence.encoding != BaseEncoding:
             sequences = change_encoding(sequences, BaseEncoding)
-        return cls.join_fields([names, sequences])
+        data_dict = [(field.type, getattr(entries, field.name)) for field in dataclasses.fields(entries)]
+        columns= [get_column(value, key) for key, value in data_dict]
+        return cls.join_fields(columns)
+        # return cls.join_fields([names, sequences])
 
     @classmethod
     def join_fields(cls, fields: List[EncodedRaggedArray]):

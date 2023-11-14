@@ -25,7 +25,9 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
         directly on the underlying data.
         """
 
-        if method == "__call__" and ufunc.__name__ in ("equal", "not_equal"):
+        if method != "__call__":
+            return NotImplemented
+        if ufunc.__name__ in ("equal", "not_equal"):
             inputs = [self._convert_input(input) for input in inputs]
             assert len(inputs) == 2, 'only binary operations are supported'
             if ufunc.__name__ == 'equal':
@@ -33,10 +35,21 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
             elif ufunc.__name__ == 'not_equal':
                 return inputs[0] != inputs[1]
             return ufunc(*inputs)
+
         return NotImplemented
+
+
 
     def __getitem__(self, item):
         return self.__class__(self._data[item])
+
+    def __array_function__(self, func, types, args, kwargs):
+        if not all(issubclass(t, StringArray) for t in types):
+            return NotImplemented
+        if func == np.concatenate:
+            return self.__class__(func([a._data for a in args[0]]))
+        return NotImplemented
+
 
     def __setitem__(self, item, value):
         self._data[item] == self._convert_input(item, value)
