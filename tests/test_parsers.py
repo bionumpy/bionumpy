@@ -2,6 +2,8 @@ import os
 from itertools import chain
 import pytest
 import numpy as np
+from npstructures.npdataclasses import shallow_tuple
+
 from bionumpy.datatypes import Interval, SNP, SequenceEntry, VCFEntry
 from bionumpy.io.delimited_buffers import BedBuffer, GfaSequenceBuffer, get_bufferclass_for_datatype
 from bionumpy.io import VCFBuffer, FastQBuffer, TwoLineFastaBuffer
@@ -35,7 +37,9 @@ def test_buffer_write(buffer_name):
     true_buf, data, buf_type = combos[buffer_name]
     if buffer_name == "multiline_fasta":
         buf_type.n_characters_per_line = 6
-    data = buf_type.dataclass.stack_with_ragged(data)
+    shallow_tuples = [shallow_tuple(d) for d in data]
+    data = buf_type.dataclass.from_entry_tuples(shallow_tuples)
+    # data = np.concatenate(data)
     print("DATA")
     print(repr(data))
     buf = buf_type.from_data(data)

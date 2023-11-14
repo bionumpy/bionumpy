@@ -4,6 +4,7 @@ For now, all these are depending on each other and needs to be in the same file 
 avoid circular imports.
 Should be refactored later.
 """
+from numbers import Number
 
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
@@ -562,8 +563,11 @@ def as_encoded_array(s: object, target_encoding: "Encoding" = None) -> EncodedAr
         target_encoding = BaseEncoding
 
     # if numeric encoding and already np-array, this is already encoded
-    if target_encoding.is_numeric() and type(s) in (np.ndarray, RaggedArray):
-        return s
+    if target_encoding.is_numeric():
+        if type(s) in (np.ndarray, RaggedArray):
+            return s
+        elif isinstance(s, list) and (len(s)== 0 or isinstance(s[0], (list,Number, np.ndarray))):
+            return RaggedArray(s)
     # is already encoded if list and elements are encoded
     elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return _list_of_encoded_arrays_as_encoded_ragged_array(s)

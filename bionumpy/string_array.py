@@ -38,8 +38,6 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
         return NotImplemented
 
-
-
     def __getitem__(self, item):
         return self.__class__(self._data[item])
 
