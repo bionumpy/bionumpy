@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional, List
 
 import numpy as np
 from io import FileIO
@@ -6,9 +7,13 @@ from npstructures import RaggedView
 from npstructures.raggedshape import RaggedView2
 
 from .exceptions import FormatException
+from .strops import str_to_int, str_to_int_with_missing, str_to_float, str_to_float_with_missing
 from ..bnpdataclass import bnpdataclass
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, Encoding, as_encoded_array
 from ..encodings import BaseEncoding
+from ..string_array import as_string_array
+from ..typing import SequenceID
+from ..util import is_subclass_or_instance
 
 NEWLINE = "\n"
 
@@ -205,6 +210,27 @@ class FileBuffer:
         max_chars = array.shape[-1]
         to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
         self._data[to_indices] = array[::-1]
+
+    def _get_parser(self, field_type):
+        parsers = [(str, lambda x: x),
+                   (Encoding, lambda x: as_encoded_array(x, field_type)),
+                   (SequenceID, as_string_array),
+                   (int, lambda x: str_to_int(*x)),
+                   (Optional[int], str_to_int_with_missing),
+                   (bool, lambda x: str_to_int(x).astype(bool)),
+                   (float, str_to_float),
+                   (Optional[float], str_to_float_with_missing),
+                   (List[int], lambda x: self._parse_split_ints(x)),
+                   (List[float], lambda x: self._parse_split_floats(x)),
+                   (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
+        parser = None
+        if is_subclass_or_instance(field_type, Encoding):
+            parser = lambda x: as_encoded_array(x, field_type)
+        for f, field_parser in parsers:
+            if field_type == f:
+                parser = field_parser
+        return parser
+
 
     @classmethod
     def contains_complete_entry(cls, chunks):

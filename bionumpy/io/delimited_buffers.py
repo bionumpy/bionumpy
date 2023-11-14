@@ -242,17 +242,7 @@ class DelimitedBuffer(FileBuffer):
         return data
 
     def _get_field_by_number(self, col_number, field_type):
-        parsers = [(str, lambda x: x),
-                   (Encoding, lambda x: as_encoded_array(x, field_type)),
-                   (SequenceID, as_string_array),
-                   (int, lambda x: str_to_int(*x)),
-                   (Optional[int], str_to_int_with_missing),
-                   (bool, lambda x: str_to_int(x).astype(bool)),
-                   (float, str_to_float),
-                   (Optional[float], str_to_float_with_missing),
-                   (List[int], self._parse_split_ints),
-                   (List[float], self._parse_split_floats),
-                   (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
+
         if field_type is None:
             return None
         self.validate_if_not()
@@ -264,24 +254,22 @@ class DelimitedBuffer(FileBuffer):
                                                                                        keep_sep=(field_type == List[int] or field_type==List[float]))
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
-        parsed = None
-        for f, parser in parsers:
-            if field_type == f:
-                try:
-                    parsed = parser(subresult)
-                    assert len(parsed) == len(text)
-                    # return parsed
-                except EncodingError as e:
-                    if isinstance(text, EncodedArray):
-                        row_number = e.offset // text.shape[1]
-                    else:
-                        row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
-                    raise FormatException(e.args[0], line_number=row_number)
-        if is_subclass_or_instance(field_type, Encoding):
-            parsed = as_encoded_array(subresult, field_type)
-        if parsed is None:
+        parser = self._get_parser(field_type)
+        if parser is None:
             assert False, (self.__class__, field_type)
+        try:
+            parsed = parser(subresult)
+            assert len(parsed) == len(text)
+        except EncodingError as e:
+            if isinstance(text, EncodedArray):
+                row_number = e.offset // text.shape[1]
+            else:
+                row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
+            raise FormatException(e.args[0], line_number=row_number)
+        # if is_subclass_or_instance(field_type, Encoding):
+        #    parsed = as_encoded_array(subresult, field_type)
         return parsed
+
 
     @property
     def actual_dataclass(self):

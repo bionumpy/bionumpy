@@ -8,7 +8,8 @@ import pytest
 
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
-from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal, assert_string_array_equal
+from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_raggedarray_equal, \
+    assert_string_array_equal, assert_encoded_raggedarray_like_equal
 from .buffers import combos
 
 
@@ -112,8 +113,8 @@ def test_lazy_with_fasta_buffer():
     lazy = create_lazy_class(bnp.datatypes.SequenceEntry)(ItemGetter(b, bnp.datatypes.SequenceEntry))
     lazy_name = lazy.name
     data_name = [data.name for data in data]
-    # assert_string_array_equal(lazy_name, data_name)
-    assert_encoded_raggedarray_equal(lazy.name, [data.name for data in data])
+    assert_encoded_raggedarray_like_equal(lazy_name, data_name)
+    # assert_encoded_raggedarray_equal(lazy.name, [data.name for data in data])
     lazy.name = bnp.as_encoded_array(['deg'])
     assert_encoded_raggedarray_equal(lazy.name, ['deg'])
 
@@ -131,7 +132,7 @@ def test_lazy_with_bed_buffer():
     text, data, bt = combos['bed']
     b = bt.from_raw_buffer(bnp.as_encoded_array(text))
     lazy = create_lazy_class(bnp.datatypes.Bed6)(ItemGetter(b, bnp.datatypes.Bed6))
-    assert_encoded_raggedarray_equal(lazy.chromosome, [data.chromosome for data in data])
+    assert_encoded_raggedarray_like_equal(lazy.chromosome, [data.chromosome for data in data])
     lazy.chromosome = bnp.as_encoded_array(['deg'])
     assert_encoded_raggedarray_equal(lazy.chromosome, ['deg'])
 

@@ -8,6 +8,7 @@ from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
 SequenceID = str
 
+
 @bnpdataclass
 class LocationEntry:
     chromosome: str

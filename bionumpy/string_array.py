@@ -53,6 +53,9 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
             return value.raw()
         return np.asanyarray(value, dtype='S')
 
+    def tolist(self):
+        return self._data.tolist()
+
     def __len__(self):
         return len(self._data)
 
