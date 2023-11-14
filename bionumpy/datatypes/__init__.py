@@ -6,7 +6,7 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
-
+SequenceID = str
 
 @bnpdataclass
 class LocationEntry:
@@ -34,7 +34,7 @@ class RawSeqeuence:
 
 @bnpdataclass
 class SequenceEntry:
-    name: str
+    name: SequenceID
     sequence: str
 
 
@@ -47,7 +47,7 @@ class SequenceEntryWithQuality:
 
 @bnpdataclass
 class Interval:
-    chromosome: str
+    chromosome: SequenceID
     start: int
     stop: int
 

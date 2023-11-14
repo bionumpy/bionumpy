@@ -11,9 +11,9 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __repr__(self):
         if self._data.ndim>=1:
-            return repr(self._data[:10].astype('U'))
+            return repr(self._data[:10])
         else:
-            return self._data.astype('U').__repr__()
+            return self._data.__repr__()
 
     def raw(self):
         return self._data
@@ -56,9 +56,21 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __len__(self):
         return len(self._data)
 
+def printio(func):
+    def new_func(*args, **kwargs):
+        print(args)
+        res = func(*args, **kwargs)
+        print('>', res)
+        return res
+    return new_func
 
+# @printio
 def string_array(input_data):
-    if isinstance(input_data, (list, np.ndarray)):
+    if isinstance(input_data, list) and len(input_data) > 0 and isinstance(input_data[0], StringArray):
+        return string_array([i.raw() for i in input_data])
+    if isinstance(input_data, (list, str)):
+        return StringArray(np.array(input_data, dtype='S'))
+    elif isinstance(input_data, np.ndarray):
         return StringArray(input_data)
     elif isinstance(input_data, StringArray):
         return input_data.copy()
@@ -68,7 +80,7 @@ def string_array(input_data):
         n_bytes = array.shape[-1]
         return StringArray(array.ravel().view(f'|S{n_bytes}'))
     else:
-        raise TypeError(f'Cannot convert {input_data} to StringArray')
+        raise TypeError(f'Cannot convert {input_data} to StringArray ({type(input_data)})')
 
 
 def as_string_array(input_data):

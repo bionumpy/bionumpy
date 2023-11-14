@@ -8,6 +8,9 @@ from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
 import numpy as np
 
+from ..string_array import StringArray
+
+
 def assert_encoded_array_equal(array1, array2):
     array1, array2 = (as_encoded_array(a) for a in (array1, array2))
     assert np.all(array1==array2), (array1.raw(), array2.raw(), array1.encoding, array2.encoding)
@@ -19,6 +22,11 @@ def assert_raggedshape_equal(shape1, shape2):
     assert len(shape1) == 2 and len(shape2) == 2
     assert shape1[0] == shape2[0], (shape1, shape2)
     assert_array_equal(shape1[1], shape2[1]), (shape1, shape2)
+
+
+def assert_string_array_equal(array1, array2):
+    array1, array2 = (a.tolist() if isinstance(a, StringArray) else a for a in (array1, array2))
+    assert array1 == array2
 
 
 def assert_encoded_raggedarray_equal(array1, array2):
