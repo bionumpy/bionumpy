@@ -61,13 +61,18 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def _convert_input(self, value):
         if isinstance(value, str):
-            return bytes(value)
+            return bytes(value, 'ascii')
         elif isinstance(value, self.__class__):
             return value.raw()
         return np.asanyarray(value, dtype='S')
 
     def tolist(self):
-        return self._data.tolist()
+        byte_list = self._data.tolist()
+        if isinstance(byte_list, bytes):
+            return byte_list.decode()
+        return [s.decode() for s in byte_list]
+
+    to_string=tolist
 
     def __len__(self):
         return len(self._data)

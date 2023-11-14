@@ -640,3 +640,12 @@ class EncodedLookup:
         else:
             key = as_encoded_array(key, self._encoding).raw()
         return key
+
+
+def encoded_array_from_nparray(column):
+    if hasattr(column, 'raw'):
+        column = column.raw()
+    bytes = column.view(np.uint8).reshape(len(column), -1)
+    mask = bytes != 0
+    data = bytes[mask]
+    return EncodedRaggedArray(EncodedArray(data, BaseEncoding), mask.sum(axis=-1))

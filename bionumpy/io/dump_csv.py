@@ -2,7 +2,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from typing import List, Dict, Tuple
 from .strops import ints_to_strings, int_lists_to_strings, float_to_strings
-from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding
+from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding, encoded_array_from_nparray
 from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
 
@@ -17,11 +17,9 @@ def str_func(column):
         return column.encoding.decode(column)
     assert False
 
+
 def seq_id_func(column):
-    bytes = column.raw().view(np.uint8).reshape(len(column), -1)
-    mask = bytes != 0
-    data = bytes[mask]
-    return EncodedRaggedArray(EncodedArray(data, BaseEncoding), mask.sum(axis=-1))
+    return encoded_array_from_nparray(column)
 
 
 def get_column(values, field_type) -> EncodedRaggedArray:
