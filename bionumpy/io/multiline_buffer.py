@@ -1,7 +1,7 @@
 from npstructures import RaggedArray
 from .file_buffers import FileBuffer
 from ..bnpdataclass import bnpdataclass
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, encoded_array_from_nparray
 from ..datatypes import SequenceEntry
 import numpy as np
 
@@ -76,7 +76,7 @@ class MultiLineFastaBuffer(MultiLineBuffer):
         line_lengths[entry_starts[1:]-1] = last_length + 1
         lines = EncodedRaggedArray(
             EncodedArray(np.zeros(line_lengths.sum(), dtype=np.uint8), BaseEncoding), line_lengths)
-        lines[entry_starts[:-1],1:-1] = entries.name
+        lines[entry_starts[:-1],1:-1] = encoded_array_from_nparray(entries.name)
         lines[entry_starts[:-1], 0] = cls._new_entry_marker
         idxs = np.delete(np.arange(len(lines)), entry_starts[:-1])
         decoded = EncodedArray(entries.sequence.encoding.decode(entries.sequence.ravel()),
