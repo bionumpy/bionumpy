@@ -14,4 +14,6 @@ def analyze_across_chromosome(seq_fn, genes_fn):
     gc_content = sum([nn_counts[nn] for nn in "GC"]) / sum(nn_counts.values())
     print(f"GC-content inside genes: {gc_content:.2f}", )
 
-analyze_across_chromosome("example_data/gc_test_multichr.fa", "example_data/gc_bedtest_multichr.bed")
+if __name__ == '__main__':
+    analyze_across_chromosome("example_data/gc_test_multichr.fa",
+                              "example_data/gc_bedtest_multichr.bed")
