@@ -14,7 +14,7 @@ from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
 from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry, \
-    VCFEntryWithGenotypes
+    VCFEntryWithGenotypes, VCFWithInfoAsStringEntry
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from .delimited_buffers import DelimitedBuffer
 from ..string_array import StringArray
@@ -199,8 +199,10 @@ class VCFBuffer(DelimitedBuffer):
     def _get_info_field(self):
         text = self._buffer_extractor.get_field_by_number(7)
         if (not self._header_data) or ('##INFO' not in self._header_data):
-            logger.warning('No header data found. Cannot parse INFO field. Returning as string')
+            logger.warning('No header data found or INFO tag missing in header. Cannot parse INFO field.'
+                           ' Returning as string. Please use VCFWithInfoAsAstringBuffer to ensure that info field is consistently parsed as string.')
             return text
+
         delimiters = np.flatnonzero(text.ravel() == ';') + 1
         offsets = np.insert(np.cumsum(text.lengths), 0, 0)
         all_delimiters = np.sort(np.concatenate([delimiters, offsets]), kind='mergesort')
@@ -288,6 +290,9 @@ class VCFBuffer2(VCFBuffer):
     dataclass = VCFEntryWithGenotypes
     lazy_dataclass = create_lazy_class(dataclass)
 
+
+class VCFWithInfoAsStringBuffer(VCFBuffer):
+    dataclass = VCFWithInfoAsStringEntry
 
 
 class VCFMatrixBuffer(VCFBuffer):

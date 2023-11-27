@@ -378,3 +378,4 @@ def dynamic_concatenate(dataclass_iter: Iterable[BNPDataClass]):
         fields[i] = np.concatenate(f)
     print('creating object')
     return first_class(*fields)
+
