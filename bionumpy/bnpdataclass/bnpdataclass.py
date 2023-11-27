@@ -51,7 +51,8 @@ class BNPDataClass(NpDataClass):
 
     @classmethod
     def from_data_frame(cls, df):
-        return cls.from_dict(df.to_dict('series'))
+        d = df.to_dict('series')
+        return cls.from_dict(d)
 
     @classmethod
     def from_dict(cls, dict_object: Dict) -> 'BNPDataClass':

@@ -2,6 +2,7 @@ import numpy as np
 from npstructures import RaggedArray
 
 from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..string_array import StringArray
 
 
 class PandasAdaptor:
@@ -22,9 +23,14 @@ class PandasAdaptor:
         if isinstance(object, np.ndarray):
             return object
         if isinstance(object, (EncodedArray, EncodedRaggedArray)):
-            return self.pd.Series(object.tolist(), dtype='string')
+            l = object.tolist()
+            if isinstance(l, str):
+                l = list(l)
+            return self.pd.Series(l, dtype='string')
         if isinstance(object, RaggedArray):
             return list(object)
+        if isinstance(object, StringArray):
+            return object.tolist()
         return object.todict()
 
 

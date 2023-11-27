@@ -267,6 +267,9 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     def raw(self) -> np.ndarray:
         return self.data.view(np.ndarray)
 
+    def tolist(self):
+        return self.to_string()
+
     def to_string(self) -> str:
         if not self.encoding.is_one_to_one_encoding():
             return self.encoding.to_string(self.data)
