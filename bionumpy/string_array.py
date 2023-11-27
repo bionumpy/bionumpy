@@ -9,11 +9,26 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, data):
         self._data = np.asanyarray(data, dtype='S')
 
+    @property
+    def encoding(self):
+        return None
+
+    def _as_bytes(self):
+        return self._data.view(np.uint8).reshape(self._data.shape + (-1,))
+
+    def ravel(self):
+        raveled = self._as_bytes().ravel()
+        return self.__class__(raveled[raveled!=0].view('S1'))
+
+    @property
+    def lengths(self):
+        return np.count_nonzero(self._as_bytes(), axis=-1)
+
     def __repr__(self):
         if self._data.ndim>=1:
-            return repr(self._data[:10])
+            return '\n'.join(b.decode() for b in self._data[:5].tolist())
         else:
-            return self._data.__repr__()
+            return self._data.tolist().decode()
 
     def raw(self):
         return self._data
