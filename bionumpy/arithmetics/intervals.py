@@ -245,7 +245,7 @@ def sort_intervals(intervals: Interval, chromosome_key_function: callable = lamb
         Sorted intervals
 
     """
-    if isinstance(intervals.chromosome.encoding, StringEncoding):
+    if hasattr(intervals.chromosome, 'encoding') and isinstance(intervals.chromosome.encoding, StringEncoding):
         args = np.lexsort((intervals.start, intervals.chromosome))
         return intervals[args]
 

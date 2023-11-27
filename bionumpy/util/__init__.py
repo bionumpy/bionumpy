@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import numpy as np
 import numpy.typing as npt
 import logging
@@ -7,6 +9,9 @@ import sys
 from . import testing
 from . import typing
 logger = logging.getLogger(__name__)
+
+def cached_property(func):
+    return property(lru_cache(None)(func))
 
 def as_strided(arr, shape=None, strides=None, **kwargs):
     sys.stdout.flush()

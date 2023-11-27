@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional, List
 
 import numpy as np
 from io import FileIO
@@ -6,9 +7,13 @@ from npstructures import RaggedView
 from npstructures.raggedshape import RaggedView2
 
 from .exceptions import FormatException
+from .strops import str_to_int, str_to_int_with_missing, str_to_float, str_to_float_with_missing
 from ..bnpdataclass import bnpdataclass
-from ..encoded_array import EncodedArray, EncodedRaggedArray
+from ..encoded_array import EncodedArray, EncodedRaggedArray, Encoding, as_encoded_array
 from ..encodings import BaseEncoding
+from ..string_array import as_string_array
+from ..typing import SequenceID
+from ..util import is_subclass_or_instance
 
 NEWLINE = "\n"
 
@@ -16,11 +21,28 @@ NEWLINE = "\n"
 def move_intervals_to_digit_array(data, starts, ends, fill_value):
     max_chars = np.max(ends - starts)
     view_starts = (ends - max_chars)
-    indices = view_starts[:, None] + np.arange(max_chars)
+    indices = view_starts[..., None] + np.arange(max_chars)
     array = data[indices.ravel()]
     zeroed, _ = RaggedView(np.arange(starts.size) * max_chars, max_chars - (ends - starts)).get_flat_indices()
     array[zeroed] = fill_value
     return array.reshape((-1, max_chars))
+
+
+def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at=None):
+    lens = ends - starts
+    max_chars = np.max(lens)
+    indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size-1)
+    array = data[indices]
+    if stop_at is not None:
+        new_lens = np.argmax(array == stop_at, axis=-1)
+        lens = np.where(new_lens>0, np.minimum(lens, new_lens), lens)
+        max_chars = np.max(lens)
+        array = array[:, :max_chars].ravel()
+    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars + lens,
+                           max_chars - lens).get_flat_indices()
+    array[zeroed] = fill_value
+    return array.reshape((-1, max_chars))
+
 
 
 class FileBuffer:
@@ -189,6 +211,27 @@ class FileBuffer:
         to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
         self._data[to_indices] = array[::-1]
 
+    def _get_parser(self, field_type):
+        parsers = [(str, lambda x: x),
+                   (Encoding, lambda x: as_encoded_array(x, field_type)),
+                   (SequenceID, as_string_array),
+                   (int, lambda x: str_to_int(*x)),
+                   (Optional[int], str_to_int_with_missing),
+                   (bool, lambda x: str_to_int(x).astype(bool)),
+                   (float, str_to_float),
+                   (Optional[float], str_to_float_with_missing),
+                   (List[int], lambda x: self._parse_split_ints(x)),
+                   (List[float], lambda x: self._parse_split_floats(x)),
+                   (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
+        parser = None
+        if is_subclass_or_instance(field_type, Encoding):
+            parser = lambda x: as_encoded_array(x, field_type)
+        for f, field_parser in parsers:
+            if field_type == f:
+                parser = field_parser
+        return parser
+
+
     @classmethod
     def contains_complete_entry(cls, chunks):
         n_new_lines = sum(np.count_nonzero(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
@@ -220,6 +263,10 @@ class TextBufferExtractor:
     def data(self):
         return self._data
 
+    @property
+    def n_fields(self):
+        return self._n_fields
+
     def __len__(self):
         return len(self._field_starts)
 
@@ -234,14 +281,24 @@ class TextBufferExtractor:
         if keep_sep:
             lens = lens + 1
         starts = self._field_starts.ravel()[field_nr::self._n_fields]
+        return self._extract_data(lens, starts)
+
+    def _extract_data(self, lens, starts):
         values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
-        # values = e[field_nr::self._n_fields]
-        assert len(values) == len(self), (self._field_starts, self._field_lens, field_nr, self._n_fields, self._data)
+        assert len(values) == len(self), (self._field_starts, self._field_lens, self._n_fields, self._data)
         return values
 
     def get_fixed_length_field(self, field_nr: int, field_length: int):
         indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
         return self._data[indices]
+
+    def get_padded_field(self, field_nr, stop_at=None):
+        starts = self._field_starts[:, field_nr]
+        lens = self._field_lens[:, field_nr]
+        ends = lens+starts
+
+        array = move_intervals_to_right_padded_array(self._data, starts.ravel(), ends.ravel(), fill_value='\x00', stop_at=stop_at)
+        return array.reshape(starts.shape+(array.shape[-1],))
 
     def get_digit_array(self, field_nr: int):
         starts = self._field_starts[:, field_nr]

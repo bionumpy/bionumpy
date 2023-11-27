@@ -1,1 +1,2 @@
 LAZY = True
+STRING_ARRAY = False

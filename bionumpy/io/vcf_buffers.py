@@ -13,9 +13,11 @@ from ..bnpdataclass.bnpdataclass import narrow_type
 from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
-from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry
+from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry, \
+    VCFEntryWithGenotypes
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from .delimited_buffers import DelimitedBuffer
+from ..string_array import StringArray
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,6 @@ class NamedBufferExtractor(TextBufferExtractor):
         mask = self.has_field_mask(name)
         n_entries = len(self._field_starts)
         if not np.any(mask):
-            #logger.warning(f"Field: {name} not found in buffer")
             if keep_sep:
                 return EncodedRaggedArray(as_encoded_array(';'*n_entries), np.ones(n_entries, dtype=int))
             return EncodedRaggedArray(as_encoded_array(''), np.zeros(n_entries, dtype=int))
@@ -128,26 +129,39 @@ class InfoBuffer(DelimitedBuffer):
         pass
 
 
+def translate_field_type(info_dict):
+    t = info_dict['Type']
+    number = info_dict['Number']
+    is_list = (number is None) or (number > 1)
+    if t == Optional[int] and is_list:
+        return List[int]
+    elif t == Optional[float] and is_list:
+        return List[float]
+    elif is_list:
+        return str
+    return t
+
 def create_info_dataclass(header_data):
     if not header_data:
         return str
     header = parse_header(header_data)
     is_list = lambda val: (val['Number'] is None) or (val['Number'] > 1)
     is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
-    convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
-    info_fields = [(key, convert_type(val)) for key, val in header.INFO.items()]
+    info_fields = [(key, translate_field_type(val)) for key, val in header.INFO.items()]
     dc = make_dataclass(info_fields, "InfoDataclass")
     return dc
 
 
 class VCFBuffer(DelimitedBuffer):
+    '''
+    https://samtools.github.io/hts-specs/VCFv4.2.pdf
+    '''
     dataclass = VCFEntry
     lazy_dataclass = create_lazy_class(dataclass)
     _info_dataclass = None
     _vcf_data_class = None
     info_cache = {}
     vcfentry_cache = {}
-
 
     @property
     def actual_dataclass(self):
@@ -156,6 +170,10 @@ class VCFBuffer(DelimitedBuffer):
     def _get_field_by_number(self, field_nr: int, field_type: type = object):
         if field_nr == 7:
             return self._get_info_field()
+        elif field_nr == 8:
+            return self._extract_genotypes()
+        elif field_nr == 9:
+            return self._extract_genotype_data()
         val = super()._get_field_by_number(field_nr, field_type)
         if field_nr == 1:
             val -= 1
@@ -254,15 +272,22 @@ class VCFBuffer(DelimitedBuffer):
         info_cache[header_data] = (dc, create_lazy_class(dc))
         assert issubclass(info_cache[header_data][1], dc)
         return info_cache[header_data][0]
-        # return dc
 
-    # @classmethod
-    # def adjust_dataclass(cls, dataclass, header):
-    #     if not header:
-    #         return None
-    #     fields = ((field.name, field.type) if field.name != 'info' else ('info', cls._make_info_dataclass(header))
-    #               for field in dataclasses.fields(dataclass))
-    #     return make_dataclass(fields, dataclass.__name__)
+    def _extract_genotypes(self):
+        if self._buffer_extractor.n_fields < 9:
+            return np.empty((len(self._buffer_extractor), 0), dtype='S')
+        byte_array = self._buffer_extractor.get_padded_field(slice(9, None), stop_at=':').raw()
+        n_bytes = byte_array.shape[-1]
+        return StringArray(byte_array.view(f'>S{n_bytes}').reshape(byte_array.shape[:-1]))
+
+    def _extract_genotype_data(self):
+        pass
+
+
+class VCFBuffer2(VCFBuffer):
+    dataclass = VCFEntryWithGenotypes
+    lazy_dataclass = create_lazy_class(dataclass)
+
 
 
 class VCFMatrixBuffer(VCFBuffer):

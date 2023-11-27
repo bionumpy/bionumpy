@@ -1,3 +1,4 @@
+from ..typing import SequenceID
 import numpy as np
 from typing import List, Union
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
@@ -5,6 +6,10 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
+from ..config import STRING_ARRAY
+
+if not STRING_ARRAY:
+    SequenceID = str
 
 @bnpdataclass
 class LocationEntry:
@@ -15,7 +20,6 @@ class LocationEntry:
 @bnpdataclass
 class StrandedLocationEntry(LocationEntry):
     strand: StrandEncoding
-
 
 
 @bnpdataclass
@@ -33,20 +37,18 @@ class RawSeqeuence:
 
 @bnpdataclass
 class SequenceEntry:
-    name: str
+    name: SequenceID
     sequence: str
 
 
 @bnpdataclass
-class SequenceEntryWithQuality:
-    name: str
-    sequence: str
+class SequenceEntryWithQuality(SequenceEntry):
     quality: QualityEncoding
 
 
 @bnpdataclass
 class Interval:
-    chromosome: str
+    chromosome: SequenceID
     start: int
     stop: int
 
@@ -102,10 +104,14 @@ class VCFEntry:
     quality: str
     filter: str
     info: Union[BNPDataClass, str]
+    # genotypes: str
 
     def is_snp(self):
         return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)
 
+@bnpdataclass
+class VCFEntryWithGenotypes(VCFEntry):
+    genotype: str
 
 @bnpdataclass
 class VCFGenotypeEntry(VCFEntry):
@@ -159,7 +165,7 @@ class SAMEntry:
     length: int
     sequence: str
     quality: str
-
+    extra: str
 
 @bnpdataclass
 class BamEntry:
