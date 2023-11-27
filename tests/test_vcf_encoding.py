@@ -1,5 +1,5 @@
 import dataclasses
-
+import bionumpy as bnp
 import numpy as np
 from npstructures.testing import assert_raggedarray_equal
 from numpy.testing import assert_array_equal
@@ -292,3 +292,32 @@ def test_read_hprc_multiallelic():
         [0.527778]
     ])
 
+
+def test_read_write_vcf_gives_identical_file():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    variants = bnp.open(file).read()
+
+    with bnp.open("tmp.vcf", "w") as f:
+        f.write(variants)
+
+    correct = open(file).read()
+    written = open("tmp.vcf").read()
+
+    assert written == correct
+
+
+@pytest.mark.xfail
+def test_read_vcf_replace_field():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    variants = bnp.open(file).read()
+    variants = bnp.replace(variants, position=np.ones_like(variants.position))
+
+    print(variants)
+
+    with bnp.open("tmp.vcf", "w") as f:
+        f.write(variants)
+
+    data = bnp.open("tmp.vcf").read()
+    assert_array_equal(data.position, variants.position)
+
+    print(data)
