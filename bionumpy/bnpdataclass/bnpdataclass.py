@@ -288,7 +288,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                                           (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
                             (field, pre_val, type(pre_val))
                     else:
-                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
+                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val)
                     # must do as_encoded and not explicit encode as pre_val might already
                     # be encoded
                     val = as_encoded_array(pre_val, field.type)

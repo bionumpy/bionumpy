@@ -114,7 +114,7 @@ def string_array(input_data):
         n_bytes = array.shape[-1]
         return StringArray(array.ravel().view(f'|S{n_bytes}'))
     if  hasattr(input_data, 'to_numpy'):
-        s = string_array(input_data.to_numpy().tolist())
+        return string_array(input_data.to_numpy().tolist())
     else:
         raise TypeError(f'Cannot convert {input_data} to StringArray ({type(input_data)})')
 

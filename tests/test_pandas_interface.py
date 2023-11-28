@@ -5,7 +5,7 @@ from bionumpy.bnpdataclass.bnpdataclass import dynamic_concatenate
 from bionumpy.util.testing import assert_bnpdataclass_equal
 from .fixtures import data
 
-@pytest.mark.xfail
+
 @pytest.mark.parametrize('name', data.keys())
 def test_pandas(name):
     d = data[name]
