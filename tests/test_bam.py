@@ -1,3 +1,4 @@
+import numpy as np
 from numpy.testing import assert_array_equal
 
 import bionumpy as bnp
@@ -51,3 +52,11 @@ def test_write_bam(bam_entries):
     assert open('tmp.bam', 'rb').read()[-28:] == b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     new_entries = bnp.open('tmp.bam').read()
     assert_array_equal(new_entries.position, subset.position)
+
+
+def test_write_bam_after_change(bam_entries):
+    bam_entries = bnp.replace(bam_entries, position=np.zeros_like(bam_entries.position))
+    print(bam_entries)
+
+    with bnp.open('tmp.bam', mode='w') as f:
+        f.write(bam_entries)
