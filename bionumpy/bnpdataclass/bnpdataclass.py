@@ -93,6 +93,8 @@ class BNPDataClass(NpDataClass):
                       for f in shallow_tuple(self))
         return (self.dataclass(*row) for row in zip(*iters))
 
+    to_iter = toiter
+
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
         """
