@@ -321,3 +321,9 @@ def test_read_vcf_replace_field():
     assert_array_equal(data.position, variants.position)
 
     print(data)
+
+
+@pytest.mark.xfail
+def test_parse_vcf_that_fails():
+    vcf = bnp.open("example_data/variants_with_af.vcf").read()
+    print(vcf)
