@@ -13,6 +13,7 @@ import pytest
 from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
+from tests.util import get_file_name
 
 
 def test_vcf_matrix_buffer():
@@ -323,7 +324,7 @@ def test_read_vcf_replace_field():
     print(data)
 
 
-@pytest.mark.xfail
+#@pytest.mark.xfail
 def test_parse_vcf_that_fails():
-    vcf = bnp.open("example_data/variants_with_af.vcf").read()
+    vcf = bnp.open(get_file_name("example_data/variants_with_af.vcf")).read()
     print(vcf)

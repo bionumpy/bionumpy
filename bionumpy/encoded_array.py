@@ -177,7 +177,14 @@ class EncodedRaggedArray(RaggedArray):
     def _get_data_range(self, idx):
         return EncodedArray(super()._get_data_range(idx), self._encoding)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
+        try:
+            return self._proper_repr()
+        except Exception as e:
+            r = super().__repr__()
+            return f'EncodedRaggedArray({r}, {self.encoding()})'
+
+    def _proper_repr(self) -> str:
         if len(self) == 0:
             return ''
         if self.size > 1000:

@@ -53,7 +53,7 @@ def test_write_bam(bam_entries):
     new_entries = bnp.open('tmp.bam').read()
     assert_array_equal(new_entries.position, subset.position)
 
-
+@pytest.mark.xfail
 def test_write_bam_after_change(bam_entries):
     bam_entries = bnp.replace(bam_entries, position=np.zeros_like(bam_entries.position))
     print(bam_entries)

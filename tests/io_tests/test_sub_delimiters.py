@@ -2,7 +2,7 @@ import numpy as np
 from npstructures.testing import assert_raggedarray_equal
 
 import bionumpy as bnp
-from tests.io.sub_delimiters import find_sub_delimiters
+from tests.io_tests.sub_delimiters import find_sub_delimiters
 
 
 def test_find_sub_delimiters():

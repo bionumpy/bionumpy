@@ -197,13 +197,14 @@ class VCFBuffer(DelimitedBuffer):
         return self._vcf_data_class
 
     def _get_info_field(self):
-        text = self._buffer_extractor.get_field_by_number(7)
+
         if (not self._header_data) or ('##INFO' not in self._header_data):
             logger.warning('No header data found or INFO tag missing in header. Cannot parse INFO field.'
                            ' Returning as string. Please use VCFWithInfoAsAstringBuffer to ensure that info field is consistently parsed as string.')
-            return text
-
-        delimiters = np.flatnonzero(text.ravel() == ';') + 1
+            return self._buffer_extractor.get_field_by_number(7)
+        text = self._buffer_extractor.get_field_by_number(7, keep_sep=True)
+        flat_text = text.ravel()
+        delimiters = np.flatnonzero(flat_text == ';') + 1
         offsets = np.insert(np.cumsum(text.lengths), 0, 0)
         all_delimiters = np.sort(np.concatenate([delimiters, offsets]), kind='mergesort')
         delimiter_offsets = np.searchsorted(all_delimiters, offsets)
@@ -211,11 +212,13 @@ class VCFBuffer(DelimitedBuffer):
         starts = RaggedArray(all_delimiters[:-1].copy(), dl_lens)
         ends = RaggedArray(all_delimiters[1:], dl_lens)
         # starts[:, :-1] = starts[:, :-1] + 1
-        ends[:, :-1] = ends[:, :-1] - 1
+        ends = ends-1
+        # [:, :-1] = ends[:, :-1] - 1
+        assert ends[-1, -1] < len(flat_text), (ends, flat_text)
         dataclass = self.info_dataclass
         lens = ends - starts
         extractor = NamedBufferExtractor(
-            text.ravel(),
+            flat_text,
             starts,
             lens,
             [f.name for f in dataclasses.fields(dataclass)])
