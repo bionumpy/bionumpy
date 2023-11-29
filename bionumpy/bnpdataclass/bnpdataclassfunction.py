@@ -28,13 +28,13 @@ def replace(obj, **kwargs):
 
     Examples
     --------
-    >>> from bionumpy.datatypes import SequenceEntry
-    >>> entry = SequenceEntry(['seq1'], ['acgt'])
+    >>> import bionumpy as bnp
+    >>> entry = bnp.SequenceEntry(['seq1'], ['acgt'])
     >>> entry
     SequenceEntry with 1 entries
                          name                 sequence
                          seq1                     acgt
-    >>> replace(entry, name=['seq2'])
+    >>> bnp.replace(entry, name=['seq2'])
     SequenceEntry with 1 entries
                          name                 sequence
                          seq2                     acgt
