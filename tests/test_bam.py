@@ -47,7 +47,7 @@ def test_index_bam(bam_entries):
 
 
 def test_write_bam(bam_entries):
-    subset = bam_entries[bam_entries.mapq== 60]
+    subset = bam_entries[bam_entries.mapq == 60]
     with bnp.open('tmp.bam', mode='w') as f:
         f.write(subset)
     assert open('tmp.bam', 'rb').read()[-28:] == b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
