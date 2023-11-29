@@ -3,7 +3,7 @@ from io import BytesIO
 from bionumpy.io import FastQBuffer, TwoLineFastaBuffer
 from bionumpy.io.parser import NumpyFileReader
 from bionumpy.io.delimited_buffers import BedBuffer
-from bionumpy.io.exceptions import FormatException
+from bionumpy.io.exceptions import FormatException, ParsingException
 from bionumpy.io.files import NpDataclassReader
 import bionumpy as bnp
 import pytest
