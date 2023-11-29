@@ -193,7 +193,7 @@ class BamBuffer(FileBuffer):
     https://samtools.github.io/hts-specs/SAMv1.pdf
     '''
     dataclass = BamEntry
-
+    supports_modified_write = False
     def __init__(self, buffer_extractor, header_data=None):
         self._buffer_extractor = buffer_extractor
         self._header_data = header_data

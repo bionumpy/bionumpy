@@ -5,6 +5,7 @@ import bionumpy as bnp
 import pytest
 from bionumpy.io.bam import BamIntervalBuffer
 from bionumpy.util.testing import assert_encoded_raggedarray_equal
+from tests.util import get_file_name
 
 
 def test_read_acceptance():
@@ -25,7 +26,7 @@ def test_read_intervals_acceptance():
 
 @pytest.fixture()
 def bam_entries():
-    filename = 'example_data/small_alignments.bam'
+    filename = get_file_name('example_data/small_alignments.bam')
     entries = bnp.open(filename).read()
     return entries
 
@@ -53,10 +54,10 @@ def test_write_bam(bam_entries):
     new_entries = bnp.open('tmp.bam').read()
     assert_array_equal(new_entries.position, subset.position)
 
-@pytest.mark.xfail
+
 def test_write_bam_after_change(bam_entries):
     bam_entries = bnp.replace(bam_entries, position=np.zeros_like(bam_entries.position))
     print(bam_entries)
-
     with bnp.open('tmp.bam', mode='w') as f:
-        f.write(bam_entries)
+        with pytest.raises(ValueError):
+            f.write(bam_entries)

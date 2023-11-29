@@ -199,6 +199,8 @@ def create_lazy_class(dataclass, header=None):
             columns = []
             if not self._set_values and issubclass(self._itemgetter.buffer.__class__, buffer_class):
                 return self._itemgetter.buffer.data.ravel()
+            if not buffer_class.supports_modified_write:
+                raise ValueError(f'Buffer class {buffer_class} does not support writing modified data')
             for i, field in enumerate(dataclasses.fields(dataclass)):
                 if field.name in self._set_values:
                     columns.append(get_column(self._set_values[field.name], field.type))

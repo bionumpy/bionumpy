@@ -61,6 +61,7 @@ class FileBuffer:
     """
 
     _buffer_divisor = 1
+    supports_modified_write = False
     COMMENT = 0
 
     def __init__(self, data: EncodedArray, new_lines: np.ndarray):

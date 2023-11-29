@@ -63,7 +63,8 @@ def _get_buffered_file(
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type) # , **kwargs2)
     if is_gzip:
         file_reader.set_prepend_mode()
-    return NpDataclassReader(file_reader)
+    lazy= kwargs.get('lazy', None)
+    return NpDataclassReader(file_reader, lazy=lazy)
 
 
 def _get_buffer_type(suffix):
@@ -75,7 +76,7 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDataclassReader, NpBufferedWriter]:
+def bnp_open(filename: str, mode: str = None, buffer_type=None, lazy=None) -> Union[NpDataclassReader, NpBufferedWriter]:
     """Open a file according to its suffix
 
     Open a `NpDataclassReader` file object, that can be used to read the file,
@@ -91,6 +92,11 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDatac
         Name of the file to open
     mode : str
         Either "w" or "r"
+    buffer_type : FileBuffer
+        A `FileBuffer` class to specify how the data in the file should be interpreted
+    lazy : bool
+        If True, the data will be read lazily, i. e. only when it is accessed. This is useful
+        to speed up reading of large files, but it is more memory demanding
 
     Returns
     -------
@@ -167,7 +173,7 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDatac
     is_gzip = suffix in (".gz", ".bam")
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type)
+    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type, lazy=lazy)
 
     
 def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
