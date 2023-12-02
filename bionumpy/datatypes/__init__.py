@@ -128,7 +128,7 @@ class VCFWithInfoAsStringEntry:
 
 @bnpdataclass
 class VCFEntryWithGenotypes(VCFEntry):
-    genotype: str
+    genotype: List[str]
 
 
 @bnpdataclass

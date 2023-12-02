@@ -249,9 +249,13 @@ class DelimitedBuffer(FileBuffer):
         if field_type == int:
             subresult = self._buffer_extractor.get_digit_array(col_number)
             text = subresult[0]
+        elif field_type == SequenceID:
+            subresult = self._buffer_extractor.get_padded_field(col_number)
+            text = subresult
         else:
-            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number,
-                                                                                       keep_sep=(field_type == List[int] or field_type==List[float]))
+            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(
+                col_number,
+                keep_sep=(field_type == List[int] or field_type==List[float]))
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
         parser = self._get_parser(field_type)

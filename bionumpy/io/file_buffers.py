@@ -23,7 +23,8 @@ def move_intervals_to_digit_array(data, starts, ends, fill_value):
     view_starts = (ends - max_chars)
     indices = view_starts[..., None] + np.arange(max_chars)
     array = data[indices.ravel()]
-    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars, max_chars - (ends - starts)).get_flat_indices()
+    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars,
+                           max_chars - (ends - starts)).get_flat_indices()
     array[zeroed] = fill_value
     return array.reshape((-1, max_chars))
 
@@ -33,16 +34,45 @@ def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at
     max_chars = np.max(lens)
     indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size-1)
     array = data[indices]
+    del indices
     if stop_at is not None:
         new_lens = np.argmax(array == stop_at, axis=-1)
         lens = np.where(new_lens>0, np.minimum(lens, new_lens), lens)
         max_chars = np.max(lens)
         array = array[:, :max_chars].ravel()
-    zeroed, _ = RaggedView(np.arange(starts.size) * max_chars + lens,
-                           max_chars - lens).get_flat_indices()
-    array[zeroed] = fill_value
+    z_lens = max_chars - lens
+    row_idxs = np.flatnonzero(z_lens)
+    if len(row_idxs) == 0:
+        return array.reshape((-1, max_chars))
+    first_row = row_idxs[0]
+    cm = np.cumsum(z_lens[row_idxs])
+    diffs = np.diff(row_idxs)*max_chars-z_lens[row_idxs[1:]]
+    del row_idxs
+    index_builder = np.ones(cm[-1], dtype=np.int32)
+    index_builder[cm[:-1]] = diffs + 1
+    del cm
+    index_builder[0] = first_row*max_chars+lens[first_row]
+    np.cumsum(index_builder, out=index_builder)
+    zeroed = index_builder
+    tmp = array.ravel()
+    tmp[zeroed] = fill_value
     return array.reshape((-1, max_chars))
 
+
+def wierd_padding(lens, max_chars):
+    z_len = max_chars - lens
+    mask = z_len != 0
+    z_len = z_len[mask]
+    cumsum = np.cumsum(z_len)
+    L = cumsum[-1]
+    zeroed = np.ones(L, dtype=int)
+    row_idxs = np.flatnonzero(mask)
+    diffs = np.diff(row_idxs) * max_chars
+    diffs -= np.diff(z_len)
+    zeroed[cumsum[:-1]] = diffs
+    zeroed[0] = (row_idxs[0] + 1) * max_chars - z_len[0]
+    zeroed = np.cumsum(zeroed)
+    return zeroed
 
 
 class FileBuffer:

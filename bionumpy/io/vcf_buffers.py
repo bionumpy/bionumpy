@@ -6,11 +6,12 @@ import numpy as np
 from npstructures import RaggedView, RaggedArray
 from npstructures.raggedshape import RaggedView2
 
+from .dump_csv import dump_csv
 from .exceptions import FormatException
 from .file_buffers import TextBufferExtractor, FileBuffer
 from .vcf_header import parse_header
 from ..bnpdataclass.bnpdataclass import narrow_type
-from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter, LazyBNPDataClass
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
 from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry, \
@@ -288,10 +289,33 @@ class VCFBuffer(DelimitedBuffer):
     def _extract_genotype_data(self):
         pass
 
+    @classmethod
+    def make_header(cls, data):
+        header = ""
+        if data.has_context("header"):
+            header = data.get_context("header")
+        else:
+            header='\n'.join([
+                '##fileformat=VCFv4.1',
+                '\t'.join('#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT'.split())])+ '\n'
+        return bytes(header, "ascii")
+
 
 class VCFBuffer2(VCFBuffer):
     dataclass = VCFEntryWithGenotypes
     lazy_dataclass = create_lazy_class(dataclass)
+
+
+
+    @classmethod
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
+        if isinstance(data, LazyBNPDataClass):
+            return cls.from_data(data.get_data_object())
+        data = dataclasses.replace(data, position=data.position + 1)
+        data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
+        data_dict = data_dict[:-1] + [(str, as_encoded_array(['GT']*len(data)))] + [data_dict[-1]]
+        return dump_csv(data_dict, cls.DELIMITER)
+
 
 
 class VCFWithInfoAsStringBuffer(VCFBuffer):

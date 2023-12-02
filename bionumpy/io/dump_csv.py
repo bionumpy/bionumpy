@@ -17,6 +17,14 @@ def str_func(column):
         return column.encoding.decode(column)
     assert False
 
+def str_matrix_func(column):
+    n_rows, n_cols = column.shape
+    a = column.as_bytes().reshape(n_rows*n_cols, -1)
+    tabs = np.full((n_rows*n_cols, 1), ord("\t"))
+    b = np.hstack([a, tabs])
+    b = b.reshape((n_rows, -1))[:, :-1]
+    return EncodedRaggedArray(EncodedArray(b.ravel(), BaseEncoding), np.full(b.shape[0], b.shape[-1]))
+
 
 def seq_id_func(column):
     return encoded_array_from_nparray(column)
@@ -30,7 +38,8 @@ def get_column(values, field_type) -> EncodedRaggedArray:
                  List[int]: int_lists_to_strings,
                  float: float_to_strings,
                  List[bool]: lambda x: int_lists_to_strings(x.astype(int), sep=""),
-                 bool: lambda x: ints_to_strings(x.astype(int))
+                 bool: lambda x: ints_to_strings(x.astype(int)),
+                 List[str]: str_matrix_func
                  }
         if is_subclass_or_instance(datatype, Encoding):
             encoding = datatype

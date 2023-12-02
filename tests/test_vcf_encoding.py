@@ -7,6 +7,7 @@ from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
+from bionumpy.bnpdataclass.bnpdataclass import narrow_type
 from bionumpy.io.vcf_buffers import VCFBuffer2
 import pytest
 
@@ -240,11 +241,27 @@ def test_read_genotype_data_from_messy_vcf():
 
 
 def test_read_genotype_with_more_data():
-    file_name = "example_data/syndip.vcf"
+    file_name = get_file_name("example_data/syndip.vcf")
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     genotypes = data.genotype[:4]
     assert np.all(genotypes == [['1|0'], ['1|0'], ['0|1'], ['1|0']])
 
+def test_write_genotype():
+    data = narrow_type(VCFEntryWithGenotypes, 'info', str)(
+        ['chr1', 'chr2'],
+        [1, 2],
+        ['.', 'rs123'],
+        ['A', 'C'],
+        ['T', 'G'],
+        ['.', '.'],
+        ['PASS', 'PASS'],
+        ['.', '.'],
+        [['0|0', '0|1'], ['0|0', '0|1']]
+    )
+    with bnp.open("tmp.vcf", "w", buffer_type=VCFBuffer2) as f:
+        f.write(data)
+    new_data = bnp.open("tmp.vcf", buffer_type=VCFBuffer2).read().get_data_object()
+    assert_bnpdataclass_equal(data, new_data)
 
 def test_read_genotype_with_no_data():
     file_name = "example_data/variants_without_genotypes.vcf"

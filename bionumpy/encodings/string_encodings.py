@@ -19,7 +19,7 @@ class StringEncoding(Encoding):
 
     def encode(self, encoded_ragged_array):
         if isinstance(encoded_ragged_array, StringArray):
-            encoded_ragged_array = encoded_array_from_nparray(encoded_ragged_array)
+            pass # encoded_ragged_array = encoded_array_from_nparray(encoded_ragged_array)
         else:
             encoded_ragged_array = as_encoded_array(encoded_ragged_array)
         is_flat = isinstance(encoded_ragged_array, EncodedArray)

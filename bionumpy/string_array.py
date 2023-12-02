@@ -1,6 +1,6 @@
 import numpy as np
 
-from .encoded_array import EncodedRaggedArray, BaseEncoding
+from .encoded_array import EncodedRaggedArray, BaseEncoding, EncodedArray
 
 
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
@@ -15,6 +15,9 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def _as_bytes(self):
         return self._data.view(np.uint8).reshape(self._data.shape + (-1,))
+
+    def as_bytes(self):
+        return self._as_bytes()
 
     def ravel(self):
         raveled = self._as_bytes().ravel()
@@ -35,7 +38,6 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """Handle numpy ufuncs called on EnocedArray objects
-
         Only support euqality checks for now. Numeric operations must be performed
         directly on the underlying data.
         """
@@ -108,11 +110,14 @@ def string_array(input_data):
         return StringArray(input_data)
     elif isinstance(input_data, StringArray):
         return input_data.copy()
-    elif isinstance(input_data, EncodedRaggedArray):
+    elif isinstance(input_data, (EncodedRaggedArray, EncodedArray)):
         assert input_data.encoding == BaseEncoding, input_data.encoding
-        array = input_data.raw().as_padded_matrix(side='right')
+        array = input_data.raw()
+        if isinstance(input_data,EncodedRaggedArray):
+            array = array.as_padded_matrix(side='right')
         n_bytes = array.shape[-1]
         return StringArray(array.ravel().view(f'|S{n_bytes}'))
+
     if  hasattr(input_data, 'to_numpy'):
         return string_array(input_data.to_numpy().tolist())
     else:

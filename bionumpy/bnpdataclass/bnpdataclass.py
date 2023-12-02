@@ -279,7 +279,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                                                                                                       'to_numpy'), (
                     field, pre_val, type(pre_val))
                     val = as_encoded_array(pre_val)
-                elif field.type == SequenceID:
+                elif field.type == SequenceID or field.type == List[str]:
                     if isinstance(pre_val, EncodedArray):
                         val = pre_val
                     else:
