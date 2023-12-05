@@ -23,7 +23,7 @@ def main(input_file, output_file):
                      in sorted(zip(kmers.alphabet, kmers.counts)))
 
 
-def test_profiling():
+def _test_profiling():
     main('../benchmarks/results/dna_sequences/length150_nreads10000000.fa', 'tmp.csv')
     assert open('tmp.csv').readline().strip() == 'AAAAA	1426301'
 

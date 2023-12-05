@@ -30,6 +30,7 @@ def move_intervals_to_digit_array(data, starts, ends, fill_value):
 
 
 def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at=None):
+
     lens = ends - starts
     max_chars = np.max(lens)
     indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size-1)
@@ -314,6 +315,9 @@ class TextBufferExtractor:
         starts = self._field_starts.ravel()[field_nr::self._n_fields]
         return self._extract_data(lens, starts)
 
+
+
+
     def _extract_data(self, lens, starts):
         values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
         assert len(values) == len(self), (self._field_starts, self._field_lens, self._n_fields, self._data)
@@ -325,6 +329,8 @@ class TextBufferExtractor:
 
     def get_padded_field(self, field_nr, stop_at=None):
         starts = self._field_starts[:, field_nr]
+        if starts.size == 0:
+            return np.zeros_like(self._data, shape = (len(starts), 0))
         lens = self._field_lens[:, field_nr]
         ends = lens+starts
 
@@ -376,6 +382,12 @@ class TextThroughputExtractor(TextBufferExtractor):
         if not self._is_contiguous:
             self._make_contigous()
         return self._data
-        # return EncodedRaggedArray(self._data,
-        #                           RaggedView2(self._entry_starts, self._entry_ends-self._entry_starts)).ravel()
 
+    def get_fields_by_range(self, from_nr: Optional[int] = None, to_nr: Optional[int] = None, keep_sep=False):
+        assert from_nr is not None
+        assert to_nr is None
+        starts = self._field_starts[:, from_nr]
+        lens = self._entry_ends-starts
+        if not keep_sep:
+            lens-=1
+        return self._extract_data(lens, starts)

@@ -31,6 +31,8 @@ def get_vanilla_generator(object):
     if isinstance(object, BNPDataClass):
         return object.toiter()
 
+    return (c.to_string() for c in object)
+
 
 class BNPDataClass(NpDataClass):
 

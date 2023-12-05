@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import numpy as np
 from bionumpy.datatypes import VCFEntry
@@ -8,6 +9,7 @@ from bionumpy import EncodedRaggedArray, EncodedArray, DNAEncoding
 from bionumpy.encodings import ACGTnEncoding
 import bionumpy as bnp
 from ..bnpdataclass import bnpdataclass
+from ..string_array import StringArray
 
 
 @bnpdataclass
@@ -31,10 +33,14 @@ class VCFEntryWithGenotypes:
     quality: str
     filter: str
     info: str
-    genotypes: str
+    genotypes: List[str]
+
 
 def simulate_variants(genome: GenomicSequence, snp_prob=0.001, small_indel_prob=0.0001, sv_prob=0.00005,
-                      ignore_variants_with_n=True, rng=np.random.default_rng()):
+                      ignore_variants_with_n=True, rng=np.random.default_rng(), genotype_probs={'0/0': 0.25,
+                                                                                                '0/1': 0.25,
+                                                                                                '1/0': 0.25,
+                                                                                                '1/1': 0.25}, n_samples=0):
     chromosomes = genome.genome_context.chrom_sizes
     variant_id_offset = 0
 
@@ -107,4 +113,23 @@ def simulate_variants(genome: GenomicSequence, snp_prob=0.001, small_indel_prob=
             logging.info("Not skipping variants with N")
 
         sorting = np.argsort(variants.position)
-        yield variants[sorting]
+        variants= variants[sorting]
+        if n_samples == 0:
+            yield variants
+        else:
+            n_genotypes= len(variants)*n_samples
+            genotypes = np.random.choice(list(genotype_probs), size=n_genotypes, p=list(genotype_probs.values()))
+            genotypes = genotypes.reshape(len(variants), n_samples)
+            genotypes = StringArray(genotypes)
+            yield VCFEntryWithGenotypes(
+                chromosome=variants.chromosome,
+                position=variants.position,
+                id=variants.id,
+                ref_seq=variants.ref_seq,
+                alt_seq=variants.alt_seq,
+                quality=variants.quality,
+                filter=variants.filter,
+                info=variants.info,
+                genotypes=genotypes
+            )
+

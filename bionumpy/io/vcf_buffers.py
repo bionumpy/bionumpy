@@ -289,6 +289,11 @@ class VCFBuffer(DelimitedBuffer):
     def _extract_genotype_data(self):
         pass
 
+    def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
+        if col_start != 8:
+            return super().get_column_range_as_text(col_start, col_end, keep_sep=keep_sep)
+        return self._buffer_extractor.get_fields_by_range(from_nr=8, to_nr=None, keep_sep=keep_sep)
+
     @classmethod
     def make_header(cls, data):
         header = ""
@@ -304,8 +309,6 @@ class VCFBuffer(DelimitedBuffer):
 class VCFBuffer2(VCFBuffer):
     dataclass = VCFEntryWithGenotypes
     lazy_dataclass = create_lazy_class(dataclass)
-
-
 
     @classmethod
     def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":

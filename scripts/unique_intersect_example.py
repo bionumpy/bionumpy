@@ -12,7 +12,7 @@ def unique_intersect(filename_a: str, filename_b: str, chrom_sizes_file: str, ou
             f.write(intervals[mask])
 
 
-def test_profiling():
+def _test_profiling():
     name_a = 'ENCFF143HTO_mapped_reads_1m'
     name_b = 'ENCFF491EEI'
     unique_intersect(

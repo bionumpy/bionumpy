@@ -265,6 +265,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         self.data = get_NPSArray(self.data)
         # assert isinstance(self.data, np.ndarray)
 
+    @property
+    def T(self):
+        return self.__class__(self.data.T, self.encoding)
+
     def copy(self):
         return self.__class__(self.data.copy(), self.encoding)
 

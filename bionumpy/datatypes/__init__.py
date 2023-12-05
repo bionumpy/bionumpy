@@ -11,9 +11,10 @@ from ..config import STRING_ARRAY
 if not STRING_ARRAY:
     SequenceID = str
 
+
 @bnpdataclass
 class LocationEntry:
-    chromosome: str
+    chromosome: SequenceID
     position: int
 
 
@@ -24,7 +25,7 @@ class StrandedLocationEntry(LocationEntry):
 
 @bnpdataclass
 class BedGraph:
-    chromosome: str
+    chromosome: SequenceID
     start: int
     stop: int
     value: float
@@ -59,8 +60,12 @@ class StrandedInterval(Interval):
 
 
 @bnpdataclass
-class Bed6(Interval):
-    name: str
+class NamedInterval(Interval):
+    name: SequenceID
+
+
+@bnpdataclass
+class Bed6(NamedInterval):
     score: int
     strand: StrandEncoding
 
@@ -85,7 +90,7 @@ class Bed12(Bed6):
 
 @bnpdataclass
 class Variant:
-    chromosome: str
+    chromosome: SequenceID
     position: int
     ref_seq: str
     alt_seq: str
@@ -96,7 +101,7 @@ class Variant:
 
 @bnpdataclass
 class VCFEntry:
-    chromosome: str
+    chromosome: SequenceID
     position: int
     id: str
     ref_seq: str

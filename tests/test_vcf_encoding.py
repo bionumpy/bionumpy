@@ -345,3 +345,13 @@ def test_read_vcf_replace_field():
 def test_parse_vcf_that_fails():
     vcf = bnp.open(get_file_name("example_data/variants_with_af.vcf")).read()
     print(vcf)
+
+
+def test_ioi():
+    out_filename = "tmp_ioi.vcf"
+    i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
+                 buffer_type=VCFBuffer2).read()
+    i = bnp.replace(i, position=i.position+1)
+    bnp.open(out_filename, "w").write(i)
+    i2 = bnp.open(out_filename, buffer_type=VCFBuffer2).read()
+    assert np.all(i2.genotype == i.genotype)
