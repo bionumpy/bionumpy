@@ -5,7 +5,7 @@ from .encoded_array import EncodedRaggedArray, BaseEncoding, EncodedArray
 
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     wrapped_functions = ['size', 'shape', 'ndim', '__len__']
-
+    wrapped_properies = ['T']
     def __init__(self, data):
         self._data = np.asanyarray(data, dtype='S')
 
@@ -72,6 +72,8 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
     def __getattr__(self, name):
         if name in self.wrapped_functions:
             return getattr(self._data, name)
+        if name in self.wrapped_properies:
+            return self.__class__(getattr(self._data, name))
         raise AttributeError(f'{self.__class__.__name__} has no attribute {name}')
 
     def _convert_input(self, value):

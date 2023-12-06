@@ -2,7 +2,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from typing import List, Dict, Tuple
 from .strops import ints_to_strings, int_lists_to_strings, float_to_strings
-from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding, encoded_array_from_nparray
+from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding, encoded_array_from_nparray, change_encoding
 from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
 
@@ -15,7 +15,9 @@ def str_func(column):
         return column
     elif isinstance(column.encoding, StringEncoding):
         return column.encoding.decode(column)
-    assert False
+    else:
+        return change_encoding(column, BaseEncoding)
+    assert False, column.encoding
 
 def str_matrix_func(column):
     n_rows, n_cols = column.shape

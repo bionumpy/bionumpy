@@ -663,6 +663,8 @@ class EncodedLookup:
 def encoded_array_from_nparray(column):
     if hasattr(column, 'raw'):
         column = column.raw()
+    if not column.flags['C_CONTIGUOUS']:
+        column = column.flatten()
     bytes = column.view(np.uint8).reshape(len(column), -1)
     mask = bytes != 0
     data = bytes[mask]
