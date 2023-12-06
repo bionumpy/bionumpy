@@ -18,9 +18,10 @@ class NpDataclassReader:
     for instance if the a file name is not available (stdin), or you want more control over
     the reading.
     """
-    def __init__(self, numpyfilereader: NumpyFileReader):
+    def __init__(self, numpyfilereader: NumpyFileReader, lazy=None):
         self._reader = numpyfilereader
         self.__lazy_class = None
+        self._lazy=lazy
 
     def __enter__(self):
         return self
@@ -60,7 +61,7 @@ class NpDataclassReader:
         return self.__lazy_class
 
     def _should_be_lazy(self, chunk):
-        if not config.LAZY:
+        if ((not config.LAZY) and self._lazy is None) or (self._lazy is False):
             return False
         should_be_lazy = False
         if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):

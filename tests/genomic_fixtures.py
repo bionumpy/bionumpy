@@ -114,3 +114,11 @@ def genomic_intervals_big(intervals_big, genome_context_big):
 @pytest.fixture
 def genomic_intervals(stranded_intervals, genome_context):
     return GenomicIntervals.from_intervals(stranded_intervals, genome_context, is_stranded=True)
+
+
+@pytest.fixture
+def genomic_intervals2(genome_context):
+    return GenomicIntervals.from_fields(genome_context,
+                                        ['chr1', 'chr1', 'chr2'],
+                                        [5, 10, 0],
+                                        [15, 95, 50])

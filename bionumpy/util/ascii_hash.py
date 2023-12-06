@@ -2,6 +2,9 @@ import numpy as np
 from ..encoded_array import EncodedRaggedArray
 from npstructures.mixin import NPSArray
 from npstructures import RaggedArray, HashTable
+
+from ..string_array import StringArray
+
 n_letters = 129
 
 
@@ -28,11 +31,29 @@ def _get_power_array(n, mod):
 def get_ascii_hash(encoded_array, mod):
     if len(encoded_array) == 0:
         return np.array([], dtype=int)
+    if isinstance(encoded_array, StringArray):
+        return get_ascii_hash_string_array(encoded_array, mod)
+    return get_ascii_hash_ragged(encoded_array, mod)
+
+
+def get_ascii_hash_ragged(encoded_array, mod):
     powers = _get_power_array(np.max(encoded_array.shape[-1]), mod)
     if isinstance(encoded_array, EncodedRaggedArray):
         col_indices = column_index_array(encoded_array.shape)
         powers = RaggedArray(powers[col_indices.ravel()], encoded_array.shape)
-    return np.sum((powers*encoded_array.raw()) % mod, axis=-1) % mod
+    elif isinstance(encoded_array, StringArray):
+
+        powers = RaggedArray(powers, encoded_array.shape)
+    return np.sum((powers * encoded_array.raw()) % mod, axis=-1) % mod
+
+
+def get_ascii_hash_string_array(encoded_array, mod):
+    array = encoded_array.as_bytes()
+    x = _get_power_array(array.shape[-1], mod)
+    A = (array * x % mod)
+    # A *= x
+    return np.sum(A, axis=-1) % mod
+    # return (A @ x).ravel() % mod
 
 
 class AsciiHashTable:

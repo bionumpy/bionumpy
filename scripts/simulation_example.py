@@ -1,3 +1,5 @@
+import numpy as np
+
 from bionumpy.io.motifs import read_motif
 from bionumpy.simulate.chipseq import simulate_chip_seq_reads, simulate_sequence, ChipSeqSimulationSettings
 import bionumpy as bnp

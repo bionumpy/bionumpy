@@ -13,6 +13,8 @@ from ..encodings import Encoding
 from ..encodings.exceptions import EncodingError
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encoded_array import BaseEncoding
+from ..string_array import as_string_array
+from ..typing import SequenceID
 from ..util import is_subclass_or_instance
 from .file_buffers import FileBuffer, NEWLINE, TextBufferExtractor, TextThroughputExtractor
 from .strops import (
@@ -119,12 +121,6 @@ class DelimitedBuffer(FileBuffer):
 
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)
-        self.validate_if_not()
-        cell_lens = np.diff(self._delimiters).reshape(-1, self._n_cols)[idx]
-        entries = self.entries[idx].ravel()
-        delimiters = np.insert(np.cumsum(cell_lens) - 1, 0, -1)
-        new_lines = delimiters[self._n_cols:: self._n_cols]
-        return self.__class__(entries, new_lines, delimiters)
 
     @property
     def entries(self):
@@ -246,44 +242,38 @@ class DelimitedBuffer(FileBuffer):
         return data
 
     def _get_field_by_number(self, col_number, field_type):
-        parsers = [(str, lambda x: x),
-                   (Encoding, lambda x: as_encoded_array(x, field_type)),
-                   (int, lambda x: str_to_int(*x)),
-                   (Optional[int], str_to_int_with_missing),
-                   (bool, lambda x: str_to_int(x).astype(bool)),
-                   (float, str_to_float),
-                   (Optional[float], str_to_float_with_missing),
-                   (List[int], self._parse_split_ints),
-                   (List[bool], lambda x: self._parse_split_ints(x, sep="").astype(bool))]
+
         if field_type is None:
             return None
         self.validate_if_not()
         if field_type == int:
             subresult = self._buffer_extractor.get_digit_array(col_number)
             text = subresult[0]
+        elif field_type == SequenceID:
+            subresult = self._buffer_extractor.get_padded_field(col_number)
+            text = subresult
         else:
-            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(col_number,
-                                                                                       keep_sep=field_type == List[int])
+            subresult: EncodedRaggedArray = self._buffer_extractor.get_field_by_number(
+                col_number,
+                keep_sep=(field_type == List[int] or field_type==List[float]))
             text = subresult
         assert isinstance(text, (EncodedRaggedArray, EncodedArray)), text
-        parsed = None
-        for f, parser in parsers:
-            if field_type == f:
-                try:
-                    parsed = parser(subresult)
-                    assert len(parsed) == len(text)
-                    # return parsed
-                except EncodingError as e:
-                    if isinstance(text, EncodedArray):
-                        row_number = e.offset // text.shape[1]
-                    else:
-                        row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
-                    raise FormatException(e.args[0], line_number=row_number)
-        if is_subclass_or_instance(field_type, Encoding):
-            parsed = as_encoded_array(subresult, field_type)
-        if parsed is None:
+        parser = self._get_parser(field_type)
+        if parser is None:
             assert False, (self.__class__, field_type)
+        try:
+            parsed = parser(subresult)
+            assert len(parsed) == len(text)
+        except EncodingError as e:
+            if isinstance(text, EncodedArray):
+                row_number = e.offset // text.shape[1]
+            else:
+                row_number = np.searchsorted(np.cumsum(text.lengths), e.offset, side="right")
+            raise FormatException(e.args[0], line_number=row_number)
+        # if is_subclass_or_instance(field_type, Encoding):
+        #    parsed = as_encoded_array(subresult, field_type)
         return parsed
+
 
     @property
     def actual_dataclass(self):
@@ -296,7 +286,15 @@ class DelimitedBuffer(FileBuffer):
         return self._get_field_by_number(
             field_nr, field_type)
 
+    def _parse_split_floats(self, text, sep=','):
+        function = str_to_float
+        return self._parse_split_fields(text, function, sep)
+
     def _parse_split_ints(self, text, sep=','):
+        function = str_to_int
+        return self._parse_split_fields(text, function, sep)
+
+    def _parse_split_fields(self, text, function, sep):
         if len(sep):
             try:
                 text[:, -1] = sep
@@ -304,10 +302,11 @@ class DelimitedBuffer(FileBuffer):
                 text = text.copy()
                 text[:, -1] = sep
             int_strings = split(text.ravel()[:-1], sep=sep)
+
             if np.any(int_strings.lengths == 0):
                 mask = int_strings.lengths != 0
-                return RaggedArray(str_to_int(int_strings[mask]), (text == sep).sum(axis=-1))
-            return RaggedArray(str_to_int(int_strings), (text == sep).sum(axis=-1))
+                return RaggedArray(function(int_strings[mask]), (text == sep).sum(axis=-1))
+            return RaggedArray(function(int_strings), (text == sep).sum(axis=-1))
         else:
             mask = as_encoded_array(text.ravel(), DigitEncoding).raw()
             return RaggedArray(mask, text.shape)

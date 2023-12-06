@@ -9,6 +9,7 @@ BioNumPy documentation
 
    index
    introduction
+   using_bionumpy_in_your_existing_project
 
 .. toctree::
     :maxdepth: 0

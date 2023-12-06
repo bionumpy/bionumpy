@@ -4,6 +4,7 @@ For now, all these are depending on each other and needs to be in the same file 
 avoid circular imports.
 Should be refactored later.
 """
+from numbers import Number
 
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
@@ -176,7 +177,14 @@ class EncodedRaggedArray(RaggedArray):
     def _get_data_range(self, idx):
         return EncodedArray(super()._get_data_range(idx), self._encoding)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
+        try:
+            return self._proper_repr()
+        except Exception as e:
+            r = super().__repr__()
+            return f'EncodedRaggedArray({r}, {self.encoding()})'
+
+    def _proper_repr(self) -> str:
         if len(self) == 0:
             return ''
         if self.size > 1000:
@@ -257,6 +265,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         self.data = get_NPSArray(self.data)
         # assert isinstance(self.data, np.ndarray)
 
+    @property
+    def T(self):
+        return self.__class__(self.data.T, self.encoding)
+
     def copy(self):
         return self.__class__(self.data.copy(), self.encoding)
 
@@ -266,11 +278,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     def raw(self) -> np.ndarray:
         return self.data.view(np.ndarray)
 
+    def tolist(self):
+        return self.to_string()
+
     def to_string(self) -> str:
         if not self.encoding.is_one_to_one_encoding():
             return self.encoding.to_string(self.data)
         if hasattr(self.encoding, "_decode"):
-            # new system, can be used in all cases after refactoring
             data = self
 
             raw = self.encoding.decode(data).raw()
@@ -563,8 +577,11 @@ def as_encoded_array(s: object, target_encoding: "Encoding" = None) -> EncodedAr
         target_encoding = BaseEncoding
 
     # if numeric encoding and already np-array, this is already encoded
-    if target_encoding.is_numeric() and type(s) in (np.ndarray, RaggedArray):
-        return s
+    if target_encoding.is_numeric():
+        if type(s) in (np.ndarray, RaggedArray):
+            return s
+        elif isinstance(s, list) and (len(s)== 0 or isinstance(s[0], (list,Number, np.ndarray))):
+            return RaggedArray(s)
     # is already encoded if list and elements are encoded
     elif isinstance(s, list) and len(s) > 0 and isinstance(s[0], EncodedArray):
         return _list_of_encoded_arrays_as_encoded_ragged_array(s)
@@ -641,3 +658,14 @@ class EncodedLookup:
         else:
             key = as_encoded_array(key, self._encoding).raw()
         return key
+
+
+def encoded_array_from_nparray(column):
+    if hasattr(column, 'raw'):
+        column = column.raw()
+    if not column.flags['C_CONTIGUOUS']:
+        column = column.flatten()
+    bytes = column.view(np.uint8).reshape(len(column), -1)
+    mask = bytes != 0
+    data = bytes[mask]
+    return EncodedRaggedArray(EncodedArray(data, BaseEncoding), mask.sum(axis=-1))

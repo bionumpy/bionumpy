@@ -6,16 +6,19 @@ import numpy as np
 from npstructures import RaggedView, RaggedArray
 from npstructures.raggedshape import RaggedView2
 
+from .dump_csv import dump_csv
 from .exceptions import FormatException
 from .file_buffers import TextBufferExtractor, FileBuffer
 from .vcf_header import parse_header
 from ..bnpdataclass.bnpdataclass import narrow_type
-from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter
+from ..bnpdataclass.lazybnpdataclass import create_lazy_class, ItemGetter, LazyBNPDataClass
 from ..encoded_array import EncodedArray, EncodedRaggedArray, as_encoded_array
 from ..bnpdataclass import BNPDataClass, make_dataclass
-from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry
+from ..datatypes import VCFEntry, VCFGenotypeEntry, PhasedVCFGenotypeEntry, PhasedVCFHaplotypeEntry, \
+    VCFEntryWithGenotypes, VCFWithInfoAsStringEntry
 from ..encodings.vcf_encoding import GenotypeRowEncoding, PhasedGenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from .delimited_buffers import DelimitedBuffer
+from ..string_array import StringArray
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +68,6 @@ class NamedBufferExtractor(TextBufferExtractor):
         mask = self.has_field_mask(name)
         n_entries = len(self._field_starts)
         if not np.any(mask):
-            #logger.warning(f"Field: {name} not found in buffer")
             if keep_sep:
                 return EncodedRaggedArray(as_encoded_array(';'*n_entries), np.ones(n_entries, dtype=int))
             return EncodedRaggedArray(as_encoded_array(''), np.zeros(n_entries, dtype=int))
@@ -128,26 +130,39 @@ class InfoBuffer(DelimitedBuffer):
         pass
 
 
+def translate_field_type(info_dict):
+    t = info_dict['Type']
+    number = info_dict['Number']
+    is_list = (number is None) or (number > 1)
+    if t == Optional[int] and is_list:
+        return List[int]
+    elif t == Optional[float] and is_list:
+        return List[float]
+    elif is_list:
+        return str
+    return t
+
 def create_info_dataclass(header_data):
     if not header_data:
         return str
     header = parse_header(header_data)
     is_list = lambda val: (val['Number'] is None) or (val['Number'] > 1)
     is_int_list = lambda val: (val['Type'] == Optional[int]) and is_list(val)
-    convert_type = lambda val: List[int] if is_int_list(val) else (str if is_list(val) else val['Type'])
-    info_fields = [(key, convert_type(val)) for key, val in header.INFO.items()]
+    info_fields = [(key, translate_field_type(val)) for key, val in header.INFO.items()]
     dc = make_dataclass(info_fields, "InfoDataclass")
     return dc
 
 
 class VCFBuffer(DelimitedBuffer):
+    '''
+    https://samtools.github.io/hts-specs/VCFv4.2.pdf
+    '''
     dataclass = VCFEntry
     lazy_dataclass = create_lazy_class(dataclass)
     _info_dataclass = None
     _vcf_data_class = None
     info_cache = {}
     vcfentry_cache = {}
-
 
     @property
     def actual_dataclass(self):
@@ -156,6 +171,10 @@ class VCFBuffer(DelimitedBuffer):
     def _get_field_by_number(self, field_nr: int, field_type: type = object):
         if field_nr == 7:
             return self._get_info_field()
+        elif field_nr == 8:
+            return self._extract_genotypes()
+        elif field_nr == 9:
+            return self._extract_genotype_data()
         val = super()._get_field_by_number(field_nr, field_type)
         if field_nr == 1:
             val -= 1
@@ -179,11 +198,14 @@ class VCFBuffer(DelimitedBuffer):
         return self._vcf_data_class
 
     def _get_info_field(self):
-        text = self._buffer_extractor.get_field_by_number(7)
+
         if (not self._header_data) or ('##INFO' not in self._header_data):
-            logger.warning('No header data found. Cannot parse INFO field. Returning as string')
-            return text
-        delimiters = np.flatnonzero(text.ravel() == ';') + 1
+            logger.warning('No header data found or INFO tag missing in header. Cannot parse INFO field.'
+                           ' Returning as string. Please use VCFWithInfoAsAstringBuffer to ensure that info field is consistently parsed as string.')
+            return self._buffer_extractor.get_field_by_number(7)
+        text = self._buffer_extractor.get_field_by_number(7, keep_sep=True)
+        flat_text = text.ravel()
+        delimiters = np.flatnonzero(flat_text == ';') + 1
         offsets = np.insert(np.cumsum(text.lengths), 0, 0)
         all_delimiters = np.sort(np.concatenate([delimiters, offsets]), kind='mergesort')
         delimiter_offsets = np.searchsorted(all_delimiters, offsets)
@@ -191,11 +213,13 @@ class VCFBuffer(DelimitedBuffer):
         starts = RaggedArray(all_delimiters[:-1].copy(), dl_lens)
         ends = RaggedArray(all_delimiters[1:], dl_lens)
         # starts[:, :-1] = starts[:, :-1] + 1
-        ends[:, :-1] = ends[:, :-1] - 1
+        ends = ends-1
+        # [:, :-1] = ends[:, :-1] - 1
+        assert ends[-1, -1] < len(flat_text), (ends, flat_text)
         dataclass = self.info_dataclass
         lens = ends - starts
         extractor = NamedBufferExtractor(
-            text.ravel(),
+            flat_text,
             starts,
             lens,
             [f.name for f in dataclasses.fields(dataclass)])
@@ -254,15 +278,51 @@ class VCFBuffer(DelimitedBuffer):
         info_cache[header_data] = (dc, create_lazy_class(dc))
         assert issubclass(info_cache[header_data][1], dc)
         return info_cache[header_data][0]
-        # return dc
 
-    # @classmethod
-    # def adjust_dataclass(cls, dataclass, header):
-    #     if not header:
-    #         return None
-    #     fields = ((field.name, field.type) if field.name != 'info' else ('info', cls._make_info_dataclass(header))
-    #               for field in dataclasses.fields(dataclass))
-    #     return make_dataclass(fields, dataclass.__name__)
+    def _extract_genotypes(self):
+        if self._buffer_extractor.n_fields < 9:
+            return np.empty((len(self._buffer_extractor), 0), dtype='S')
+        byte_array = self._buffer_extractor.get_padded_field(slice(9, None), stop_at=':').raw()
+        n_bytes = byte_array.shape[-1]
+        return StringArray(byte_array.view(f'>S{n_bytes}').reshape(byte_array.shape[:-1]))
+
+    def _extract_genotype_data(self):
+        pass
+
+    def get_column_range_as_text(self, col_start, col_end, keep_sep=False):
+        if col_start != 8:
+            return super().get_column_range_as_text(col_start, col_end, keep_sep=keep_sep)
+        return self._buffer_extractor.get_fields_by_range(from_nr=8, to_nr=None, keep_sep=keep_sep)
+
+    @classmethod
+    def make_header(cls, data):
+        header = ""
+        if data.has_context("header"):
+            header = data.get_context("header")
+        else:
+            header='\n'.join([
+                '##fileformat=VCFv4.1',
+                '\t'.join('#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT'.split())])+ '\n'
+        return bytes(header, "ascii")
+
+
+class VCFBuffer2(VCFBuffer):
+    dataclass = VCFEntryWithGenotypes
+    lazy_dataclass = create_lazy_class(dataclass)
+
+    @classmethod
+    def from_data(cls, data: BNPDataClass) -> "DelimitedBuffer":
+        if isinstance(data, LazyBNPDataClass):
+            return cls.from_data(data.get_data_object())
+        data = dataclasses.replace(data, position=data.position + 1)
+        data_dict = [(field.type, getattr(data, field.name)) for field in dataclasses.fields(data)]
+        data_dict = data_dict[:-1] + [(str, as_encoded_array(['GT']*len(data)))] + [data_dict[-1]]
+        return dump_csv(data_dict, cls.DELIMITER)
+
+
+
+class VCFWithInfoAsStringBuffer(VCFBuffer):
+    dataclass = VCFWithInfoAsStringEntry
 
 
 class VCFMatrixBuffer(VCFBuffer):

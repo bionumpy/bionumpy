@@ -10,8 +10,5 @@ API documentation
 .. currentmodule:: bionumpy.bnpdataclass
 
 .. autofunction:: bnpdataclass
-.. autoclass:: bnpdataclass
+.. autofunction:: replace
 .. autofunction:: make_dataclass
-
-
-

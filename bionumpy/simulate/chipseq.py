@@ -7,6 +7,7 @@ from ..sequence.position_weight_matrix import get_motif_scores
 from ..datatypes import Interval, Bed6
 from .. import streamable, EncodedArray, as_encoded_array
 from ..encodings import AlphabetEncoding, StrandEncoding
+from ..string_array import as_string_array
 
 rng = default_rng()
 
@@ -68,5 +69,5 @@ def simulate_chip_seq_reads(reference_sequence, settings, sequence_name=None):
     reads = simulate_read_fragments(fragments, settings.read_length)
     if sequence_name is not None:
         print(repr(sequence_name))
-        reads.chromosome = as_encoded_array([sequence_name]*len(reads))
+        reads.chromosome = as_string_array([sequence_name]*len(reads))
     return reads

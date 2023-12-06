@@ -1,6 +1,7 @@
 import numpy as np
-from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray
+from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray, encoded_array_from_nparray
 from .exceptions import EncodingError
+from ..string_array import StringArray
 from ..util.ascii_hash import AsciiHashTable
 
 
@@ -17,7 +18,10 @@ class StringEncoding(Encoding):
         return self._seqeunces[int(n)].to_string()
 
     def encode(self, encoded_ragged_array):
-        encoded_ragged_array = as_encoded_array(encoded_ragged_array)
+        if isinstance(encoded_ragged_array, StringArray):
+            pass # encoded_ragged_array = encoded_array_from_nparray(encoded_ragged_array)
+        else:
+            encoded_ragged_array = as_encoded_array(encoded_ragged_array)
         is_flat = isinstance(encoded_ragged_array, EncodedArray)
         if is_flat:
             encoded_ragged_array = EncodedRaggedArray(encoded_ragged_array, [len(encoded_ragged_array)])

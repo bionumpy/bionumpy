@@ -1,9 +1,11 @@
+import numpy as np
 from numpy.testing import assert_array_equal
 
 import bionumpy as bnp
 import pytest
 from bionumpy.io.bam import BamIntervalBuffer
 from bionumpy.util.testing import assert_encoded_raggedarray_equal
+from tests.util import get_file_name
 
 
 def test_read_acceptance():
@@ -24,7 +26,7 @@ def test_read_intervals_acceptance():
 
 @pytest.fixture()
 def bam_entries():
-    filename = 'example_data/small_alignments.bam'
+    filename = get_file_name('example_data/small_alignments.bam')
     entries = bnp.open(filename).read()
     return entries
 
@@ -45,8 +47,17 @@ def test_index_bam(bam_entries):
 
 
 def test_write_bam(bam_entries):
-    subset = bam_entries[bam_entries.mapq== 60]
+    subset = bam_entries[bam_entries.mapq == 60]
     with bnp.open('tmp.bam', mode='w') as f:
         f.write(subset)
+    assert open('tmp.bam', 'rb').read()[-28:] == b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     new_entries = bnp.open('tmp.bam').read()
     assert_array_equal(new_entries.position, subset.position)
+
+
+def test_write_bam_after_change(bam_entries):
+    bam_entries = bnp.replace(bam_entries, position=np.zeros_like(bam_entries.position))
+    print(bam_entries)
+    with bnp.open('tmp.bam', mode='w') as f:
+        with pytest.raises(ValueError):
+            f.write(bam_entries)

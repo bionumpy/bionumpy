@@ -13,7 +13,7 @@ class SAMBufferExctractor(TextThroughputExtractor):
 
     def _get_extra_field(self):
         starts = self._field_starts[:, -1]+self._field_lens[:, -1]+1
-        lens = self._entry_ends-starts-1
+        lens = np.maximum(self._entry_ends-starts-1, 0)
         return self._extract_data(lens, starts)
 
 class SAMBuffer(DelimitedBuffer):

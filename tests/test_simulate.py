@@ -14,6 +14,7 @@ from itertools import chain
 from bionumpy.simulate.sequences import simulate_reads_from_genome
 from bionumpy.simulate.variants import simulate_variants
 from numpy.random import default_rng
+from .util import get_file_name
 
 rng = default_rng()
 
@@ -106,7 +107,7 @@ def test_simualte_rnaseq(sequences, rnaseq_simulation_settings):
 
 
 def test_simulate_from_genome():
-    ref = "example_data/small_genome.fa"
+    ref = get_file_name("example_data/small_genome.fa")
     genome = bnp.Genome.from_file(ref)
     genome = genome.read_sequence(ref)
 

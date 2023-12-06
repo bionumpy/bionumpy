@@ -6,7 +6,7 @@ from numbers import Number
 import numpy as np
 
 from bionumpy.io.dump_csv import get_column, join_columns
-from bionumpy.io.exceptions import FormatException
+from bionumpy.io.exceptions import FormatException, ParsingException
 
 
 # from bionumpy import EncodedRaggedArray
@@ -136,11 +136,19 @@ def create_lazy_class(dataclass, header=None):
                 return self._set_values[var_name]
             if var_name in field_names:
                 if var_name not in self._computed_values:
-                    value = self._itemgetter(var_name)
+                    value = self._get_field(var_name)
                     self._computed_values[var_name] = value
                 return self._computed_values[var_name]
             return getattr(super(), var_name)
             # raise ValueError(f'No such field {var_name} in {self.__class__.__name__}')
+
+        def _get_field(self, var_name):
+            try:
+                return self._itemgetter(var_name)
+            except Exception as e:
+                if isinstance(e, FormatException):
+                    raise e
+                raise ParsingException(f'Error when parsing field {var_name} from {self.__class__.__name__}') from e
 
         def __setattr__(self, key, value):
             if key in ['_itemgetter', '_set_values', '_computed', '_data', '_computed_values', '_header']:
@@ -199,6 +207,8 @@ def create_lazy_class(dataclass, header=None):
             columns = []
             if not self._set_values and issubclass(self._itemgetter.buffer.__class__, buffer_class):
                 return self._itemgetter.buffer.data.ravel()
+            if not buffer_class.supports_modified_write:
+                raise ValueError(f'Buffer class {buffer_class} does not support writing modified data')
             for i, field in enumerate(dataclasses.fields(dataclass)):
                 if field.name in self._set_values:
                     columns.append(get_column(self._set_values[field.name], field.type))

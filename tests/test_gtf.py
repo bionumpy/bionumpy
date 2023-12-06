@@ -3,11 +3,12 @@ import bionumpy as bnp
 import numpy as np
 from bionumpy import as_encoded_array
 from bionumpy.sequence.genes import get_transcript_sequences
-
+from bionumpy.util.testing import assert_encoded_array_equal
+from .util import get_file_name
 
 @pytest.fixture
 def gtf_entries():
-    return bnp.open("example_data/small.gtf").read()
+    return bnp.open(get_file_name("example_data/small.gtf")).read()
 
 @pytest.fixture
 def reference_sequences():
@@ -23,6 +24,12 @@ def test_get_transcript_sequences(gtf_entries, reference_sequences):
     assert np.all(transcript_sequences.sequence==true)
 
 
+def test_get_gene_id(gtf_entries):
+    gene_id = gtf_entries.get_transcripts().gene_id[0]
+    print(gene_id)
+    assert_encoded_array_equal(gene_id, 'ENST00000619216.1')
+
+
 def test_get_exons(gtf_entries):
     assert len(gtf_entries.get_exons()) == 3
 
@@ -31,6 +38,7 @@ def test_get_exons(gtf_entries):
 def test_read_gff():
     annotation = bnp.open('example_data/small_gff.gff3').read()
     genes = annotation.get_genes()
+    assert_encoded_array_equal(genes[0].gene_id, 'ENSG00000290825.1')
     print(genes)
 
 

@@ -7,6 +7,7 @@ from npstructures.raggedarray.raggedslice import ragged_slice
 from bionumpy.encoded_array import EncodedArray, EncodedRaggedArray, change_encoding, as_encoded_array
 from ..encodings.alphabet_encoding import DigitEncoding
 from ..encodings import BaseEncoding
+from ..string_array import StringArray
 
 
 def int_to_str(number: int) -> str:
@@ -349,6 +350,9 @@ def str_equal(sequences: EncodedRaggedArray, match_string: Union[str, EncodedRag
         Boolean array of which sequences matches the `match_string`
 
     """
+    if isinstance(sequences, StringArray):
+        return sequences == match_string
+
     sequences = as_encoded_array(sequences)
 
     if isinstance(sequences, EncodedRaggedArray) and isinstance(match_string, EncodedRaggedArray):

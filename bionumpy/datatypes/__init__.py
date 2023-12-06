@@ -1,3 +1,4 @@
+from ..typing import SequenceID
 import numpy as np
 from typing import List, Union
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
@@ -5,10 +6,15 @@ from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from ..bnpdataclass import bnpdataclass, BNPDataClass
 from .gtf import GFFEntry, GFFExonEntry, GFFGeneEntry, GFFTranscriptEntry, GTFEntry
+from ..config import STRING_ARRAY
+
+if not STRING_ARRAY:
+    SequenceID = str
+
 
 @bnpdataclass
 class LocationEntry:
-    chromosome: str
+    chromosome: SequenceID
     position: int
 
 
@@ -17,10 +23,9 @@ class StrandedLocationEntry(LocationEntry):
     strand: StrandEncoding
 
 
-
 @bnpdataclass
 class BedGraph:
-    chromosome: str
+    chromosome: SequenceID
     start: int
     stop: int
     value: float
@@ -33,20 +38,18 @@ class RawSeqeuence:
 
 @bnpdataclass
 class SequenceEntry:
-    name: str
+    name: SequenceID
     sequence: str
 
 
 @bnpdataclass
-class SequenceEntryWithQuality:
-    name: str
-    sequence: str
+class SequenceEntryWithQuality(SequenceEntry):
     quality: QualityEncoding
 
 
 @bnpdataclass
 class Interval:
-    chromosome: str
+    chromosome: SequenceID
     start: int
     stop: int
 
@@ -57,8 +60,12 @@ class StrandedInterval(Interval):
 
 
 @bnpdataclass
-class Bed6(Interval):
-    name: str
+class NamedInterval(Interval):
+    name: SequenceID
+
+
+@bnpdataclass
+class Bed6(NamedInterval):
     score: int
     strand: StrandEncoding
 
@@ -83,7 +90,7 @@ class Bed12(Bed6):
 
 @bnpdataclass
 class Variant:
-    chromosome: str
+    chromosome: SequenceID
     position: int
     ref_seq: str
     alt_seq: str
@@ -94,7 +101,7 @@ class Variant:
 
 @bnpdataclass
 class VCFEntry:
-    chromosome: str
+    chromosome: SequenceID
     position: int
     id: str
     ref_seq: str
@@ -102,9 +109,31 @@ class VCFEntry:
     quality: str
     filter: str
     info: Union[BNPDataClass, str]
+    # genotypes: str
 
     def is_snp(self):
         return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)
+
+
+@bnpdataclass
+class VCFWithInfoAsStringEntry:
+    chromosome: str
+    position: int
+    id: str
+    ref_seq: str
+    alt_seq: str
+    quality: str
+    filter: str
+    info: str
+    # genotypes: str
+
+    def is_snp(self):
+        return (self.ref_seq.lengths == 1) & (self.alt_seq.lengths == 1)
+
+
+@bnpdataclass
+class VCFEntryWithGenotypes(VCFEntry):
+    genotype: List[str]
 
 
 @bnpdataclass

@@ -1,3 +1,4 @@
+import codecs
 import logging
 import numpy as np
 from typing.io import IO
@@ -278,6 +279,15 @@ class NpBufferedWriter:
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
+
+
+class NumpyBamWriter(NpBufferedWriter):
+    EOF_MARKER = b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._file_obj.close()
+        with open(self._file_obj.name, 'ab') as f:
+            f.write(self.EOF_MARKER)
 
 
 def chunk_lines(stream, n_lines):

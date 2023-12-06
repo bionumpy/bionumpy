@@ -3,6 +3,8 @@ from collections import namedtuple
 
 import numpy as np
 from typing import List, Iterable, Tuple, Dict
+
+from .coordinate_mapping import map_locations, find_indices
 from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
 from ..encodings import StrandEncoding
 from .genomic_track import GenomicArray, GenomicArrayNode
@@ -11,6 +13,8 @@ from ..datatypes import Interval, Bed6, StrandedInterval, LocationEntry, Strande
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask, RawInterval
 from ..computation_graph import StreamNode, Node, ComputationNode, compute
 import dataclasses
+
+from ..string_array import StringArray
 
 
 class GenomicPlace:
@@ -50,7 +54,7 @@ class GenomicLocation(GenomicPlace):
         return NotImplemented
 
     @classmethod
-    def from_fields(cls, genome_context: GenomeContextBase, chromosome: List[str], position: List[int] , strand: List[str] = None) -> 'GenomicLocation':
+    def from_fields(cls, genome_context: GenomeContextBase, chromosome: List[str], position: List[int], strand: List[str] = None) -> 'GenomicLocation':
         """Create genomic location from a genome context and the needed fields (chromosome and position)
 
         Parameters
@@ -492,6 +496,22 @@ class GenomicIntervalsFull(GenomicIntervals):
 
     def __len__(self) -> int:
         return len(self._intervals)
+
+    def map_locations(self, locations: LocationEntry):
+        go = self._genome_context.global_offset.from_local_interval(self._intervals)
+        global_positions = self._genome_context.global_offset.from_local_coordinates(locations.chromosome, locations.position)
+
+        location_indices, interval_indices = find_indices(global_positions, go)
+        new_entries = locations[location_indices]
+        names = self._intervals.name if hasattr(self._intervals, 'name') else StringArray(np.arange(len(self._intervals)).astype('S'))
+        return replace(new_entries, chromosome=names[interval_indices],
+                       position=new_entries.position - self.start[interval_indices])
+
+
+
+        return map_locations(replace(locations, position=global_positions), go)
+
+
 
     def sorted(self) -> 'GenomicIntervals':
         """Return the intervals sorted according to `genome_context`

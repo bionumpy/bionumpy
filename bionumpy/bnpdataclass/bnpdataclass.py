@@ -8,12 +8,13 @@ from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
 import numpy as np
 
+from ..typing import SequenceID
 from .pandas_adaptor import pandas_adaptor
-
 from ..encoded_array import EncodedArray, EncodedRaggedArray
 from ..encoded_array import as_encoded_array
 from ..encodings import Encoding, NumericEncoding
 from ..encodings.alphabet_encoding import FlatAlphabetEncoding
+from ..string_array import as_string_array
 from ..util import is_subclass_or_instance
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,8 @@ def get_vanilla_generator(object):
         return (row.tolist() for row in object)
     if isinstance(object, BNPDataClass):
         return object.toiter()
+
+    return (c.to_string() for c in object)
 
 
 class BNPDataClass(NpDataClass):
@@ -50,7 +53,8 @@ class BNPDataClass(NpDataClass):
 
     @classmethod
     def from_data_frame(cls, df):
-        return cls.from_dict(df.to_dict('series'))
+        d = df.to_dict('series')
+        return cls.from_dict(d)
 
     @classmethod
     def from_dict(cls, dict_object: Dict) -> 'BNPDataClass':
@@ -90,6 +94,8 @@ class BNPDataClass(NpDataClass):
         iters = tuple(get_vanilla_generator(f)
                       for f in shallow_tuple(self))
         return (self.dataclass(*row) for row in zip(*iters))
+
+    to_iter = toiter
 
     @classmethod
     def extend(cls, fields: tuple, name: str = None) -> Type['BNPDataClass']:
@@ -275,19 +281,24 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                                                                                                       'to_numpy'), (
                     field, pre_val, type(pre_val))
                     val = as_encoded_array(pre_val)
+                elif field.type == SequenceID or field.type == List[str]:
+                    if isinstance(pre_val, EncodedArray):
+                        val = pre_val
+                    else:
+                        val = as_string_array(pre_val)
                 elif is_subclass_or_instance(field.type, Encoding):
                     if is_subclass_or_instance(field.type, NumericEncoding):
                         assert isinstance(pre_val,
                                           (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
                             (field, pre_val, type(pre_val))
                     else:
-                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)), (field, pre_val)
+                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val)
                     # must do as_encoded and not explicit encode as pre_val might already
                     # be encoded
                     val = as_encoded_array(pre_val, field.type)
                     if isinstance(field.type, FlatAlphabetEncoding):
                         val = val.ravel()
-                elif field.type == List[int] or field.type == List[bool]:
+                elif field.type == List[int] or field.type == List[bool] or field.type == List[float]:
                     if not isinstance(pre_val, RaggedArray):
                         try:
                             val = RaggedArray(pre_val)
@@ -372,3 +383,4 @@ def dynamic_concatenate(dataclass_iter: Iterable[BNPDataClass]):
         fields[i] = np.concatenate(f)
     print('creating object')
     return first_class(*fields)
+

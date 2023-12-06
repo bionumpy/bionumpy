@@ -14,7 +14,7 @@ from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,
 from .buffers.sam import SAMBuffer
 from .vcf_buffers import VCFBuffer
 from .wig import WigBuffer
-from .parser import NumpyFileReader, NpBufferedWriter
+from .parser import NumpyFileReader, NpBufferedWriter, NumpyBamWriter
 from .exceptions import FormatException
 from ..streams import NpDataclassStream
 from ..bnpdataclass import BNPDataClass, bnpdataclass
@@ -48,18 +48,23 @@ def _get_buffered_file(
     filename, suffix, mode, is_gzip=False, buffer_type=None, **kwargs
 ):
     open_func = gzip.open if is_gzip else open
+
     if buffer_type is None:
         buffer_type = _get_buffer_type(suffix)
+    writer_class = NpBufferedWriter
+    if suffix == ".bam":
+        writer_class = NumpyBamWriter
     if mode in ("w", "write", "wb"):
-        return NpBufferedWriter(open_func(filename, "wb"), buffer_type)
+        return writer_class(open_func(filename, "wb"), buffer_type)
     elif mode in ('a', 'append', 'ab'):
-        return NpBufferedWriter(open_func(filename, 'ab'), buffer_type)
+        return writer_class(open_func(filename, 'ab'), buffer_type)
 
     # kwargs2 = {key: val for key, val in kwargs.items() if key in ["has_header"]}
     file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type) # , **kwargs2)
     if is_gzip:
         file_reader.set_prepend_mode()
-    return NpDataclassReader(file_reader)
+    lazy= kwargs.get('lazy', None)
+    return NpDataclassReader(file_reader, lazy=lazy)
 
 
 def _get_buffer_type(suffix):
@@ -71,7 +76,7 @@ def _get_buffer_type(suffix):
                            f"use one of {str(list(buffer_types.keys()))[1:-1]}")
 
 
-def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDataclassReader, NpBufferedWriter]:
+def bnp_open(filename: str, mode: str = None, buffer_type=None, lazy=None) -> Union[NpDataclassReader, NpBufferedWriter]:
     """Open a file according to its suffix
 
     Open a `NpDataclassReader` file object, that can be used to read the file,
@@ -87,6 +92,11 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDatac
         Name of the file to open
     mode : str
         Either "w" or "r"
+    buffer_type : FileBuffer
+        A `FileBuffer` class to specify how the data in the file should be interpreted
+    lazy : bool
+        If True, the data will be read lazily, i. e. only when it is accessed. This is useful
+        to speed up reading of large files, but it is more memory demanding
 
     Returns
     -------
@@ -163,7 +173,7 @@ def bnp_open(filename: str, mode: str = None, buffer_type=None) -> Union[NpDatac
     is_gzip = suffix in (".gz", ".bam")
     if suffix == ".gz":
         suffix = path.suffixes[-2]
-    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type)
+    return _get_buffered_file(filename, suffix, mode, is_gzip=is_gzip, buffer_type=buffer_type, lazy=lazy)
 
     
 def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
@@ -190,17 +200,21 @@ def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
     6
 
     """
+    reader = NumpyFileReader
     logger.info(f"Counting entries in {filename}")
     path = PurePath(filename)
     suffix = path.suffixes[-1]
     is_gzip = suffix in (".gz", ".bam")
+    if suffix == '.bam':
+        reader = NumpyBamReader
     if suffix == ".gz":
         suffix = path.suffixes[-2]
     open_func = gzip.open if is_gzip else open
     if buffer_type is None:
         buffer_type = _get_buffer_type(suffix)
 
-    file_reader = NumpyFileReader(open_func(filename, "rb"), buffer_type)
+
+    file_reader = reader(open_func(filename, "rb"), buffer_type)
     if is_gzip:
         file_reader.set_prepend_mode()
     chunk_counts = (chunk.count_entries() for chunk in file_reader.read_chunks(min_chunk_size=500000))

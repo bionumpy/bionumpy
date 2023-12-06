@@ -1,5 +1,5 @@
 import dataclasses
-
+import bionumpy as bnp
 import numpy as np
 from npstructures.testing import assert_raggedarray_equal
 from numpy.testing import assert_array_equal
@@ -7,11 +7,14 @@ from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
+from bionumpy.bnpdataclass.bnpdataclass import narrow_type
+from bionumpy.io.vcf_buffers import VCFBuffer2
 import pytest
 
-from bionumpy.datatypes import VCFEntry
+from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
+from tests.util import get_file_name
 
 
 def test_vcf_matrix_buffer():
@@ -229,24 +232,64 @@ def test_pandas_with_info(data_with_info):
     assert_bnpdataclass_equal(data_with_info, dc)
 
 
-@pytest.mark.skip  # .genotype not implemented
+# @pytest.mark.skip  # .genotype not implemented
 def test_read_genotype_data_from_messy_vcf():
     file_name = "example_data/polaris_small.vcf"
-    data = bnp.open(file_name).read()
-    assert_array_equal(data.genotype[0], ["0/1", "0/1", ".", "0/1"])
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    genotype = data.genotype[0]
+    assert np.all(genotype == ["0/1", "0/1", ".", "0/1"])
+
+
+def test_read_genotype_with_more_data():
+    file_name = get_file_name("example_data/syndip.vcf")
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    genotypes = data.genotype[:4]
+    assert np.all(genotypes == [['1|0'], ['1|0'], ['0|1'], ['1|0']])
+
+def test_write_genotype():
+    data = narrow_type(VCFEntryWithGenotypes, 'info', str)(
+        ['chr1', 'chr2'],
+        [1, 2],
+        ['.', 'rs123'],
+        ['A', 'C'],
+        ['T', 'G'],
+        ['.', '.'],
+        ['PASS', 'PASS'],
+        ['.', '.'],
+        [['0|0', '0|1'], ['0|0', '0|1']]
+    )
+    with bnp.open("tmp.vcf", "w", buffer_type=VCFBuffer2) as f:
+        f.write(data)
+    new_data = bnp.open("tmp.vcf", buffer_type=VCFBuffer2).read().get_data_object()
+    assert_bnpdataclass_equal(data, new_data)
+
+def test_read_genotype_with_no_data():
+    file_name = "example_data/variants_without_genotypes.vcf"
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    genotypes = data.genotype[:4]
+    assert genotypes.shape == (4, 0)
 
 
 @pytest.mark.skip   # genotype fields not implemented
 def test_read_genotype_ad_field():
     file_name = "example_data/syndip.vcf"
-    data = bnp.open(file_name).read()
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     assert_array_equal(data[0].genotype_data.AD == [1, 1])
     # AD is variable length int, so should give ragged array?
     # genotype_data or other name
     assert_raggedarray_equal(data.genotype_data.AD[0, 1] == [[1, 1], [1, 1]])
 
 
-@pytest.mark.xfail
+@pytest.mark.skip   # genotype fields not implemented
+def test_read_genotype_ad_field():
+    file_name = "example_data/syndip.vcf"
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    assert_array_equal(data[0].genotype_data.AD == [1, 1])
+    # AD is variable length int, so should give ragged array?
+    # genotype_data or other name
+    assert_raggedarray_equal(data.genotype_data.AD[0, 1] == [[1, 1], [1, 1]])
+
+
 def test_read_thousand_genomes_info_field():
     data = bnp.open("example_data/thousand_genomes.vcf").read()
 
@@ -258,12 +301,57 @@ def test_read_thousand_genomes_info_field():
     )
 
 
-@pytest.mark.xfail
 def test_read_hprc_multiallelic():
     data = bnp.open("example_data/hprc_multiallelic.vcf").read()
 
-    assert_raggedarray_equal(data.info.AF[0:2] == [
+    result = data.info.AF[0:2]
+    assert_raggedarray_equal(result, [
         [0.5, 0.0277778],
         [0.527778]
     ])
 
+
+def test_read_write_vcf_gives_identical_file():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    variants = bnp.open(file).read()
+
+    with bnp.open("tmp.vcf", "w") as f:
+        f.write(variants)
+
+    correct = open(file).read()
+    written = open("tmp.vcf").read()
+
+    assert written == correct
+
+
+@pytest.mark.xfail
+def test_read_vcf_replace_field():
+    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    variants = bnp.open(file).read()
+    variants = bnp.replace(variants, position=np.ones_like(variants.position))
+
+    print(variants)
+
+    with bnp.open("tmp.vcf", "w") as f:
+        f.write(variants)
+
+    data = bnp.open("tmp.vcf").read()
+    assert_array_equal(data.position, variants.position)
+
+    print(data)
+
+
+#@pytest.mark.xfail
+def test_parse_vcf_that_fails():
+    vcf = bnp.open(get_file_name("example_data/variants_with_af.vcf")).read()
+    print(vcf)
+
+
+def test_ioi():
+    out_filename = "tmp_ioi.vcf"
+    i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
+                 buffer_type=VCFBuffer2).read()
+    i = bnp.replace(i, position=i.position+1)
+    bnp.open(out_filename, "w").write(i)
+    i2 = bnp.open(out_filename, buffer_type=VCFBuffer2).read()
+    assert np.all(i2.genotype == i.genotype)

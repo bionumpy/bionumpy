@@ -18,6 +18,16 @@ def test_get_location(genomic_intervals, genomic_locations):
     assert_equal(result.position, genomic_locations.position)
 
 
+def test_map_locations(genomic_intervals2):
+    locations = LocationEntry(['chr1',
+                               'chr1',
+                               'chr2'], [5, 10, 0])
+    result = genomic_intervals2.map_locations(locations)
+    true_mapped = LocationEntry(['0', '0', '1', '2'],
+                                [0, 5, 0, 0])
+    assert_bnpdataclass_equal(result, true_mapped)
+
+
 def test_get_windows(genomic_locations, windows):
     result = genomic_locations.get_windows(flank=5)
     assert_equal(result.start, windows.start)

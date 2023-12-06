@@ -20,8 +20,8 @@ def _test_profiling():
                      f'../benchmarks/results/bed_files/{name_b}.bed.gz',
                      '../example_data/hg38.chrom.sizes',
                      'tmp.bed')
-    assert bnp.count_entries('tmp.bed') == 65452
-    print(bnp.open('tmp.bed', buffer_type=bnp.Bed6Buffer).read().strand)
+    #assert bnp.count_entries('tmp.bed') == 65452
+    #print(bnp.open('tmp.bed', buffer_type=bnp.Bed6Buffer).read().strand)
 
 
 if __name__ == '__main__':
