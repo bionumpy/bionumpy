@@ -15,10 +15,16 @@ rule bcftools_vcf_filtering:
         "benchmarks/vcf_filtering/bcftools/{size}.txt"
     log:
         "log/{size}.view.vcf.log"
-    params:
-        extra="--min-ac 10"
-    wrapper:
-        "v1.21.0/bio/bcftools/view"
+    #params:
+    #    extra="--min-ac 10"
+    #wrapper:
+    #    "v1.21.0/bio/bcftools/view"
+    conda:
+        "../envs/bcftools.yml"
+    shell:
+        """
+        bcftools view --min-ac 10 -o {output} {input}
+        """
 
 
 rule bionumpy_vcf_filtering:
