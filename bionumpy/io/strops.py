@@ -74,6 +74,9 @@ def str_to_float_with_missing(number_text: EncodedArray, missing_value=np.nan) -
 
 def parse_with_missing(missing_value, number_text, parser, dtype):
     number_text = as_encoded_array(number_text)
+    if np.all(number_text.lengths == 1):
+        if np.all(number_text=='.'):
+            return np.full(len(number_text), missing_value, dtype=dtype)
     mask = number_text.lengths > 0
     values = np.full(len(number_text), missing_value, dtype=dtype)
     values[mask] = parser(number_text[mask])

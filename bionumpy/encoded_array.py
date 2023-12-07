@@ -425,6 +425,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         Only support euqality checks for now. Numeric operations must be performed
         directly on the underlying data.
         """
+        if not all(isinstance(a, (
+                str, list, EncodedArray,
+                EncodedRaggedArray)) for a in inputs):
+            return NotImplemented
 
         if method == "__call__" and ufunc.__name__ in ("equal", "not_equal"):
             inputs = _parse_ufunc_inputs(inputs, self.encoding)

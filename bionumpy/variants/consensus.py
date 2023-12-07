@@ -5,6 +5,8 @@ from bionumpy import replace
 
 def apply_variants_to_sequence(sequence, variants):
     seq = sequence.copy()
+    assert np.all(seq[variants.position] == variants.ref_seq.ravel()), (seq[variants.position], seq[variants.position+1], seq[variants.position-1],
+                                                                        variants.ref_seq.ravel(), variants.position)
     seq[variants.position] = variants.alt_seq.ravel()
     return seq
 

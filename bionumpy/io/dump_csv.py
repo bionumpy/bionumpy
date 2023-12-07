@@ -1,8 +1,9 @@
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from .strops import ints_to_strings, int_lists_to_strings, float_to_strings
-from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding, encoded_array_from_nparray, change_encoding
+from ..encoded_array import EncodedArray, Encoding, EncodedRaggedArray, BaseEncoding, encoded_array_from_nparray, \
+    change_encoding, as_encoded_array
 from ..encodings.string_encodings import StringEncoding
 from npstructures import RaggedArray
 
@@ -29,12 +30,22 @@ def str_matrix_func(column):
 
 
 def seq_id_func(column):
+    if isinstance(column, EncodedArray):
+        if isinstance(column.encoding, StringEncoding):
+            return column.encoding.decode(column)
     return encoded_array_from_nparray(column)
+
+def optional_ints_to_strings(number: np.ndarray, missing_string='.')->EncodedRaggedArray:
+    if np.all(number)==np.nan:
+        return  as_encoded_array([missing_string]*len(number))
+    return ints_to_strings(number)
+
 
 
 def get_column(values, field_type) -> EncodedRaggedArray:
     def get_func_for_datatype(datatype):
         funcs = {int: ints_to_strings,
+                 Optional[int]: optional_ints_to_strings,
                  str: str_func,  # lambda x: x,
                  SequenceID: seq_id_func,
                  List[int]: int_lists_to_strings,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .encoded_array import EncodedRaggedArray, BaseEncoding, EncodedArray
+from .encoded_array import EncodedRaggedArray, BaseEncoding, EncodedArray, as_encoded_array, change_encoding
 
 
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
@@ -14,7 +14,10 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
         return None
 
     def _as_bytes(self):
-        return self._data.view(np.uint8).reshape(self._data.shape + (-1,))
+        data = self._data
+        if not data.flags['C_CONTIGUOUS']:
+            data = data.flatten()
+        return data.view(np.uint8).reshape(data.shape + (-1,))
 
     def as_bytes(self):
         return self._as_bytes()
@@ -81,6 +84,9 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
             return bytes(value, 'ascii')
         elif isinstance(value, self.__class__):
             return value.raw()
+        elif isinstance(value, EncodedArray):
+            print(value)
+            return string_array(value)
         return np.asanyarray(value, dtype='S')
 
     def tolist(self):
@@ -113,14 +119,15 @@ def string_array(input_data):
     elif isinstance(input_data, StringArray):
         return input_data.copy()
     elif isinstance(input_data, (EncodedRaggedArray, EncodedArray)):
-        assert input_data.encoding == BaseEncoding, input_data.encoding
+        if not input_data.encoding == BaseEncoding:
+            input_data = input_data.encoding.decode(input_data)
         array = input_data.raw()
-        if isinstance(input_data,EncodedRaggedArray):
+        if isinstance(input_data, EncodedRaggedArray):
             array = array.as_padded_matrix(side='right')
         n_bytes = array.shape[-1]
-        return StringArray(array.ravel().view(f'|S{n_bytes}'))
+        return StringArray(array.flatten().view(f'|S{n_bytes}'))
 
-    if  hasattr(input_data, 'to_numpy'):
+    if hasattr(input_data, 'to_numpy'):
         return string_array(input_data.to_numpy().tolist())
     else:
         raise TypeError(f'Cannot convert {input_data} to StringArray ({type(input_data)})')
