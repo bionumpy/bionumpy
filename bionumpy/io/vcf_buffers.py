@@ -305,6 +305,12 @@ class VCFBuffer(DelimitedBuffer):
                 '\t'.join('#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT'.split())])+ '\n'
         return bytes(header, "ascii")
 
+    @classmethod
+    def process_field_for_write(cls, field_name, value):
+        if field_name == 'position':
+            return value+1
+        return super().process_field_for_write(field_name, value)
+
 
 class VCFBuffer2(VCFBuffer):
     dataclass = VCFEntryWithGenotypes
