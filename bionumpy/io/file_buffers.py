@@ -19,6 +19,8 @@ NEWLINE = "\n"
 
 
 def move_intervals_to_digit_array(data, starts, ends, fill_value):
+    if len(starts)==0:
+        return np.zeros_like(data, shape=((0, 0)))
     max_chars = np.max(ends - starts)
     view_starts = (ends - max_chars)
     indices = view_starts[..., None] + np.arange(max_chars)

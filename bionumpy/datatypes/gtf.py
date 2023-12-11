@@ -2,13 +2,14 @@ from ..bnpdataclass import bnpdataclass
 from ..encodings import StrandEncoding
 from ..io.strops import str_equal, split, join
 from ..io.regexp import match_regexp
+from ..typing import SequenceID
 
 
 @bnpdataclass
 class GTFEntry:
     chromosome: str
     source: str
-    feature_type: str
+    feature_type: SequenceID
     start: int
     stop: int
     score: str
