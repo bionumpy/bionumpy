@@ -5,7 +5,7 @@ from ..sequence.position_weight_matrix import PWM
 def parse_jaspar_line(line):
     letter, rest = line.split(maxsplit=1)
     rest = rest.strip()[1:-1].split()
-    counts = [int(n) for n in rest]
+    counts = [float(n) for n in rest]
     return letter.strip(), counts
 
 
@@ -20,3 +20,14 @@ def read_jaspar_matrix(filename):
     # matrix = np.array(matrix, dtype="float")
     # return PWM.from_dict({char: row for
     # return alphabet, matrix
+
+
+def read_csv_motif(filename):
+    f = open(filename)
+    alphabet = f.readline().strip().split(",")
+    pwm = {letter: [] for letter in alphabet}
+    for line in f:
+        line = line.strip().split(",")
+        for i, letter in enumerate(alphabet):
+            pwm[letter].append(float(line[i]))
+    return PWM.from_dict(pwm)

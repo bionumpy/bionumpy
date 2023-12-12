@@ -351,7 +351,8 @@ def test_ioi():
     out_filename = "tmp_ioi.vcf"
     i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
                  buffer_type=VCFBuffer2).read()
-    i = bnp.replace(i, position=i.position+1)
+    i = bnp.replace(i, position=i.position + 1)
     bnp.open(out_filename, "w").write(i)
     i2 = bnp.open(out_filename, buffer_type=VCFBuffer2).read()
     assert np.all(i2.genotype == i.genotype)
+    assert np.all(i2.position[:10] == i.position[:10])

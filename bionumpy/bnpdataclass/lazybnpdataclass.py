@@ -211,7 +211,8 @@ def create_lazy_class(dataclass, header=None):
                 raise ValueError(f'Buffer class {buffer_class} does not support writing modified data')
             for i, field in enumerate(dataclasses.fields(dataclass)):
                 if field.name in self._set_values:
-                    columns.append(get_column(self._set_values[field.name], field.type))
+                    columns.append(get_column(
+                        buffer_class.process_field_for_write(field.name, self._set_values[field.name]), field.type))
                 else:
                     columns.append(self._itemgetter.buffer.get_field_range_as_text(i, i + 1))
             return buffer_class.join_fields(columns)

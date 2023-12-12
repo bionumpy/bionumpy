@@ -55,8 +55,8 @@ rule main_report:
 
         out = ""
         for i, image in enumerate(input):
-            if i % 3 == 0:
-                out += "<br>";
+            if i % 2 == 0:
+                out += "<br>"
             out += "<img src='" + image + "' style='width: 33%; height: auto'>"
 
         with open(output.html, "w") as f:
@@ -71,7 +71,9 @@ rule main_report_as_png:
         from plotly.subplots import  make_subplots
         import plotly.io as pio
 
-        n_rows = len(input) // 3
+        n_cols = 2
+        n_rows = len(input) // n_cols
+        print("N ROWS", n_rows)
 
         subfigures = []
         titles = []
@@ -84,20 +86,20 @@ rule main_report_as_png:
             print(type(subfig))
             subfigures.append(subfig.data[0])
 
-        fig = make_subplots(rows=n_rows, cols=3, subplot_titles=titles, y_title="Time in seconds")
+        fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=titles, y_title="Time in seconds")
 
         for i, subfig in enumerate(subfigures):
-            col = i % 3 + 1
-            row = i // 3 + 1
+            col = i % n_cols + 1
+            row = i // n_cols + 1
             print(col, row)
             fig.add_trace(subfig, row=row, col=col)
 
         fig.update_layout(
             font={
-                "size": 12
+                "size": 18
             }
         )
 
-        fig.update_layout(height=1200,width=1500)
+        fig.update_layout(height=2200,width=1500)
         fig.write_image(output[0])
         fig.show()
