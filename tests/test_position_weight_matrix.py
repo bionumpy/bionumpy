@@ -7,6 +7,7 @@ from bionumpy.io.jaspar import read_jaspar_matrix
 from bionumpy.sequence.position_weight_matrix import PositionWeightMatrix, _pwm_from_counts, PWM, get_motif_scores, get_motif_scores_old
 from bionumpy.encodings.alphabet_encoding import AlphabetEncoding
 from bionumpy import EncodedArray
+from bionumpy.io.motifs import read_motif
 
 @pytest.fixture
 def neutral_ppm_dict():
@@ -80,7 +81,13 @@ def test_integration():
     
     # Calculate the motif score for each valid window
     scores = motif_score.rolling_window(entries.sequence)
-    
+
+
+def test_read_csv_motif():
+    pwm = read_motif("example_data/pwm.csv")
+    pwm_jaspar = read_motif("example_data/pwm.jaspar")
+    assert str(pwm) == str(pwm_jaspar)
+
 
 def test_pwm(window, matrix):
     pwm = PWM(matrix, "ACGT")

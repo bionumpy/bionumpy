@@ -1,10 +1,10 @@
-from .jaspar import read_jaspar_matrix
+from .jaspar import read_jaspar_matrix, read_csv_motif
 import numpy as np
 from dataclasses import dataclass
 from pathlib import PurePath
 
 
-parsers = {".jaspar": read_jaspar_matrix}
+parsers = {".jaspar": read_jaspar_matrix, ".csv": read_csv_motif}
 
 
 @dataclass
