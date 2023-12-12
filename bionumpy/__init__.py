@@ -2,7 +2,7 @@
 
 __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import npstructures as nps
 
