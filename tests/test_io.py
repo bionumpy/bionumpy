@@ -6,12 +6,15 @@ import numpy as np
 from io import BytesIO
 import bionumpy as bnp
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encodings.string_encodings import StringEncoding
 from bionumpy.io.files import NumpyFileReader, NpDataclassReader, NpBufferedWriter
 from .buffers import buffer_texts, combos, big_fastq_text, SequenceEntryWithQuality, VCFEntry
 from bionumpy.io.matrix_dump import matrix_to_csv, parse_matrix
 from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_array_equal, \
     assert_encoded_raggedarray_equal
 from numpy.testing import assert_equal
+
+from .util import get_file_name
 
 
 @pytest.mark.parametrize("file_format", combos.keys())
@@ -257,3 +260,20 @@ def test_carriage_return_fai(fasta_with_carriage_return_filename):
     assert_encoded_array_equal(fai['test_sequence_id_here'].raw(), 'GACTG')
     assert_encoded_array_equal(fai['test_sequence_id_here2'].raw(), 'GACTCGAG')
 
+def test_rwr_bed_with_change():
+    tmp_path = 'tmp_rwr.bed'
+    filename = get_file_name('example_data/alignments.bed')
+    data = bnp.open(filename, buffer_type=bnp.io.Bed6Buffer).read()
+    data.start = data.start + 1
+    data.stop = data.stop + 1
+    data.chromosome = StringEncoding(['chr1', 'chr2']).encode(data.chromosome)
+    data == data[::2]
+    if os.path.exists(tmp_path):
+        os.remove(tmp_path)
+    bnp.open(tmp_path, 'w', buffer_type=bnp.io.Bed6Buffer).write(data)
+    text = open(tmp_path).read()
+    assert text.startswith('chr1'), text[:10]
+    print(text)
+    data2 = bnp.open(tmp_path).read()
+    assert_equal(data.start, data2.start)
+    assert np.all(data.chromosome == data2.chromosome)

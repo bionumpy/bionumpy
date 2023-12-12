@@ -1,6 +1,6 @@
 from ..typing import SequenceID
 import numpy as np
-from typing import List, Union
+from typing import List, Union, Optional
 from ..encodings import (CigarOpEncoding, BamEncoding, QualityEncoding,
                          CigarEncoding, StrandEncoding)
 from ..encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
@@ -66,7 +66,7 @@ class NamedInterval(Interval):
 
 @bnpdataclass
 class Bed6(NamedInterval):
-    score: int
+    score: Optional[int]
     strand: StrandEncoding
 
 
