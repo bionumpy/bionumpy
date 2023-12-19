@@ -51,3 +51,7 @@ def test_read(file_name):
         f.write(data)
     new_data = bnp.open(file_name, buffer_type=SimpleBuffer).read()
     assert_bnpdataclass_equal(data, new_data)
+
+def test_isin():
+    array = string_array(['hei', 'pa', 'deg'])
+    assert_array_equal(np.isin(array, ['hei', 'pa']), np.array([True, True, False]))

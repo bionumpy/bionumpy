@@ -62,6 +62,14 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
         return self.__class__(self._data[item])
 
     def __array_function__(self, func, types, args, kwargs):
+        if func == np.isin:
+            if type(args[1]) == list and all(type(a) == str for a in args[1]):
+                vals = as_string_array(args[1])
+            elif isinstance(args[1], StringArray):
+                vals = args[1]
+            else:
+                return NotImplemented
+            return np.isin(self._data, vals._data)
         if not all(issubclass(t, StringArray) for t in types):
             return NotImplemented
         if func == np.concatenate:
