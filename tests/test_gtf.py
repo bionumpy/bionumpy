@@ -27,7 +27,8 @@ def test_get_transcript_sequences(gtf_entries, reference_sequences):
 def test_get_gene_id(gtf_entries):
     gene_id = gtf_entries.get_transcripts().gene_id[0]
     print(gene_id)
-    assert_encoded_array_equal(gene_id, 'ENST00000619216.1')
+    assert gene_id == 'ENST00000619216.1'
+    # assert_encoded_array_equal(gene_id, )
 
 
 def test_get_exons(gtf_entries):
@@ -38,8 +39,9 @@ def test_get_exons(gtf_entries):
 def test_read_gff():
     annotation = bnp.open('example_data/small_gff.gff3').read()
     genes = annotation.get_genes()
-    assert_encoded_array_equal(genes[0].gene_id, 'ENSG00000290825.1')
-    print(genes)
+    assert genes[0].gene_id == 'ENSG00000290825.1'
+    # assert_encoded_array_equal(genes[0].gene_id, 'ENSG00000290825.1')
+    # print(genes)
 
 
 def test_read_sarcer_gtf():

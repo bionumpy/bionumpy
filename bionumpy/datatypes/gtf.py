@@ -1,7 +1,8 @@
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..encodings import StrandEncoding
 from ..io.strops import str_equal, split, join
-from ..io.regexp import match_regexp
+from ..io.regexp import match_regexp, match_regexp_string_array
+from ..string_array import as_string_array
 from ..typing import SequenceID
 
 
@@ -16,14 +17,15 @@ class GTFEntry:
     strand: StrandEncoding
     phase: str
     atributes: str
+    #attributes: BNPDataClass
 
-    def _get_attributes(gtf_entries, attribute_names):
+    def _get_attributes(self, attribute_names):
         group_thing = r''' \"(.*?)\"'''
-        return {name: match_regexp(gtf_entries.atributes.ravel(), name+group_thing)
+        return {name: match_regexp_string_array(self.atributes.ravel(), name + group_thing)
                 for name in attribute_names}
         # ends_in_sep = gtf_entries.atributes[:, -1] ==
-        gtf_entries.atributes[:, -1] = " "
-        all_features = split(gtf_entries.atributes.ravel(), " ")
+        self.atributes[:, -1] = " "
+        all_features = split(self.atributes.ravel(), " ")
         keys = all_features[:-1:2]
         values = all_features[1::2, 1:-2]
         return {name: values[str_equal(keys, name)] for name in attribute_names}
@@ -47,23 +49,24 @@ class GTFEntry:
 
 
 class GFFEntry(GTFEntry):
-    def _get_attributes(gtf_entries, attribute_names):
-        all_features = split(join(gtf_entries.atributes, ';'), [";", '='])
+    def _get_attributes(self, attribute_names):
+        joined = join(self.atributes, ';')
+        all_features = split(join(self.atributes, ';'), [";", '='])
         keys = all_features[:-1:2]
         values = all_features[1::2]
-        return {name: values[str_equal(keys, name)] for name in attribute_names}
+        return {name: as_string_array(values[str_equal(keys, name)]) for name in attribute_names}
 
 
 @bnpdataclass
 class GFFGeneEntry(GFFEntry):
-    gene_id: str
+    gene_id: SequenceID
 
 
 @bnpdataclass
 class GFFTranscriptEntry(GFFGeneEntry):
-    transcript_id: str
+    transcript_id: SequenceID
 
 
 @bnpdataclass
 class GFFExonEntry(GFFTranscriptEntry):
-    exon_id: str
+    exon_id: SequenceID
