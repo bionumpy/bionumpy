@@ -109,7 +109,7 @@ def summit_plot(bam_filename: str, chrom_sizes_filename: str, peak_filename: str
     reads = genome.read_intervals(bam_filename, stream=False, stranded=True)
 
     # Get mean pileup for reads with negative and positive strand
-    signals_dict = {strand: reads[reads.strand == strand].get_pileup()[windows].mean(axis=0)
+    signals_dict = {strand: reads[reads.strand.ravel() == strand].get_pileup()[windows].mean(axis=0)
                     for strand in '+-'}
     signals_dict = bnp.compute(signals_dict)
     if plot:
@@ -175,7 +175,7 @@ def write_images():
     fig.write_image('docs_source/figures/vcf_plot.png')
 
 
-write_images()
+# write_images()
 # main(*('/home/knut/Data/out.wig /home/knut/Data/hg38.chrom.sizes /home/knut/Data/ENCFF266FSE.bed.gz'.split()))
 #main(*'example_data/CTCF_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/chr21a22.gtf'.split())
 # main(*'example_data/CTCFpvalues_chr21-22.wig example_data/chr21-22.chrom.sizes example_data/ctcf_chr21-22.bed.gz'.split())

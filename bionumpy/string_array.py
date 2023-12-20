@@ -131,6 +131,8 @@ def string_array(input_data):
             input_data = input_data.encoding.decode(input_data)
         array = input_data.raw()
         if isinstance(input_data, EncodedRaggedArray):
+            if len(input_data) == 0:
+                return StringArray(np.array([], dtype='S'))
             array = array.as_padded_matrix(side='right')
         n_bytes = array.shape[-1]
         return StringArray(array.flatten().view(f'|S{n_bytes}'))

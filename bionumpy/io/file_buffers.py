@@ -111,6 +111,7 @@ class FileBuffer:
     def data(self):
         return self._buffer_extractor.data
 
+
     def __getitem__(self, idx):
         return NotImplemented
 
@@ -352,6 +353,15 @@ class TextBufferExtractor:
         digit_array = move_intervals_to_digit_array(self._data, starts, starts+self._field_lens[:, field_nr], fill_value='0')
         return digit_array, None, None
 
+    @classmethod
+    def concatenate(cls, buffers: List['TextBufferExtractor']):
+        sizes = np.array([b._data.size for b in buffers])
+        offsets = np.insert(np.cumsum(sizes), 0, 0)
+        data = np.concatenate([b._data for b in buffers])
+        starts = np.concatenate([b._field_starts + offset for b, offset in zip(buffers, offsets)])
+        lens = np.concatenate([b._field_lens for b in buffers])
+        return cls(data, starts, field_lens=lens)
+
 
 class TextThroughputExtractor(TextBufferExtractor):
     def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens=None, entry_starts: np.ndarray=None, entry_ends:np.ndarray=None, is_contiguous=True):
@@ -361,6 +371,17 @@ class TextThroughputExtractor(TextBufferExtractor):
         self._entry_starts = entry_starts
         self._entry_ends = entry_ends
         self._is_contiguous = is_contiguous
+
+    @classmethod
+    def concatenate(cls, buffers: List['TextThroughputExtractor']):
+        sizes = np.array([b._data.size for b in buffers])
+        offsets = np.insert(np.cumsum(sizes), 0, 0)
+        data = np.concatenate([b._data for b in buffers])
+        starts = np.concatenate([b._field_starts + offset for b, offset in zip(buffers, offsets)])
+        lens = np.concatenate([b._field_lens for b in buffers])
+        entry_starts = np.concatenate([b._entry_starts + offset for b, offset in zip(buffers, offsets)])
+        entry_ends = np.concatenate([b._entry_ends + offset for b, offset in zip(buffers, offsets)])
+        return cls(data, starts, field_lens=lens, entry_starts=entry_starts, entry_ends=entry_ends, is_contiguous=all(b._is_contiguous for b in buffers))
 
     def __getitem__(self, idx):
         return self.__class__(self._data,

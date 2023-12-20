@@ -141,7 +141,7 @@ class VCFBuffer(DelimitedBuffer):
         # starts[:, :-1] = starts[:, :-1] + 1
         ends = ends - 1
         # [:, :-1] = ends[:, :-1] - 1
-        assert ends[-1, -1] < len(flat_text), (ends, flat_text)
+        assert len(ends)==0 or ends[-1, -1] < len(flat_text), (ends, flat_text)
         lens = ends - starts
         extractor = NamedBufferExtractor(
             flat_text,

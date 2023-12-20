@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 import bionumpy as bnp
+from bionumpy import as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.io.delimited_buffers import DelimitedBuffer
 from bionumpy.typing import SequenceID
@@ -55,3 +56,8 @@ def test_read(file_name):
 def test_isin():
     array = string_array(['hei', 'pa', 'deg'])
     assert_array_equal(np.isin(array, ['hei', 'pa']), np.array([True, True, False]))
+
+def test_empty():
+    a = as_encoded_array([])
+    s = string_array(a)
+    assert len(s) == 0

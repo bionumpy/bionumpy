@@ -37,7 +37,9 @@ class AlphabetEncoding(OneToOneEncoding):
 
     def _decode(self, encoded):
         self._initialize()
-        return self._alphabet[np.asarray(encoded)]
+        array = np.asarray(encoded)
+        # assert np.issubdtype(array.dtype, int), (encoded, array)
+        return self._alphabet[array]
 
     @property
     def alphabet_size(self):

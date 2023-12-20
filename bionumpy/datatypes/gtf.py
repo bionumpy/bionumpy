@@ -8,7 +8,7 @@ from ..typing import SequenceID
 
 @bnpdataclass
 class GTFEntry:
-    chromosome: str
+    chromosome: SequenceID
     source: str
     feature_type: SequenceID
     start: int
