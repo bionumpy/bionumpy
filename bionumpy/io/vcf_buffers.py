@@ -312,3 +312,6 @@ class PhasedHaplotypeVCFMatrixBuffer(VCFMatrixBuffer):
     dataclass = PhasedVCFHaplotypeEntry
     lazy_dataclass = create_lazy_class(dataclass)
     genotype_encoding = PhasedHaplotypeRowEncoding
+
+class VCFHaplotypeBuffer(VCFBuffer2):
+    pass

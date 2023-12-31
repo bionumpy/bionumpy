@@ -8,7 +8,7 @@ import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
 from bionumpy.bnpdataclass.bnpdataclass import narrow_type
-from bionumpy.io.vcf_buffers import VCFBuffer2
+from bionumpy.io.vcf_buffers import VCFBuffer2, VCFHaplotypeBuffer
 import pytest
 
 from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
@@ -307,8 +307,7 @@ def test_read_thousand_genomes_info_field():
 
 
 def test_read_hprc_multiallelic():
-    data = bnp.open("example_data/hprc_multiallelic.vcf").read()
-
+    data = bnp.open(get_file_name("example_data/hprc_multiallelic.vcf")).read()
     result = data.info.AF[0:2]
     assert_raggedarray_equal(result, [
         [0.5, 0.0277778],
@@ -352,12 +351,27 @@ def test_parse_vcf_that_fails():
     print(vcf)
 
 
+def test_genotype_print():
+    i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
+                 buffer_type=VCFBuffer2).read()
+    print(i.genotype)
+
 def test_ioi():
     out_filename = "tmp_ioi.vcf"
     i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
                  buffer_type=VCFBuffer2).read()
+    print(i.genotype)
     i = bnp.replace(i, position=i.position + 1)
     bnp.open(out_filename, "w").write(i)
     i2 = bnp.open(out_filename, buffer_type=VCFBuffer2).read()
     assert np.all(i2.genotype == i.genotype)
     assert np.all(i2.position[:10] == i.position[:10])
+
+
+def test_vcf_haplotyped():
+    vcf = bnp.open(get_file_name("example_data/haplotypes.vcf"), buffer_type=VCFHaplotypeBuffer).read()
+    print(vcf.genotype)
+    genotype_ = vcf.genotype[1][:3]
+    print(genotype_)
+    assert np.all(genotype_ == ['0', '.', '0'])
+
