@@ -4,5 +4,6 @@ channels:
 
 dependencies:
   - tectonic
+  - make
   #- texlive-core
 
