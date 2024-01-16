@@ -22,6 +22,7 @@ from .computation_graph import compute
 # from . import simulate, VCFBuffer, VCFMatrixBuffer, PhasedVCFMatrixBuffer
 from . import arithmetics
 from . import alignments
+from . import variants
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
 from .plotting import plot
 

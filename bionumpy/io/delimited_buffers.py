@@ -44,6 +44,10 @@ class DelimitedBuffer(FileBuffer):
         self._header_data = header_data
         self._is_validated = True
 
+    def concatenate(self, buffers):
+        return self.__class__(self._buffer_extractor.concatenate([b._buffer_extractor for b in buffers]),
+                              header_data=self._header_data)
+
     def __init___(self, data: EncodedArray, new_lines: np.ndarray = None, delimiters: np.ndarray = None,
                   header_data=None, buffer_extractor=None):
         super().__init__(data, new_lines)

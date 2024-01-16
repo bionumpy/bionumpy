@@ -189,8 +189,13 @@ def create_lazy_class(dataclass, header=None):
             if func == np.concatenate:
                 values = args[0]
                 if hasattr(values[0]._itemgetter.buffer, 'concatenate'):
-                    if all(not a._set_values for a in values):
-                        return self.__class__(self._itemgetter.concatenate([a._itemgetter for a in values]))
+                    #if all(not a._set_values for a in values):
+                    set_values = {name: np.concatenate([a._set_values[name] for a in values])
+                                  for name in self._set_values}
+                    computed_values = {name: np.concatenate([a._computed_values[name] for a in values])
+                                       for name in self._computed_values}
+                    return self.__class__(self._itemgetter.concatenate([a._itemgetter for a in values]),
+                                          set_values=set_values, computed_values=computed_values)
 
                 objects = [a.get_data_object() for a in args[0]]
                 args = (objects,) + args[1:]
