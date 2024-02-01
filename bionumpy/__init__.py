@@ -22,6 +22,7 @@ from .computation_graph import compute
 # from . import simulate, VCFBuffer, VCFMatrixBuffer, PhasedVCFMatrixBuffer
 from . import arithmetics
 from . import alignments
+from . import variants
 from .genomic_data import Genome, GenomicArray, GenomicIntervals
 from .plotting import plot
 
@@ -70,6 +71,9 @@ def set_backend(lib):
     from .io import file_buffers
     file_buffers.np = lib
 
+    from .io import one_line_buffer
+    one_line_buffer.np = lib
+
     from .io import parser
     parser.np = lib
     parser.NumpyFileReader = CupyFileReader
@@ -84,6 +88,7 @@ def set_backend(lib):
     from . import encoded_array
     encoded_array.np = lib
     encoded_array.get_NPSArray = lambda x: x
+
 
     from . import util
     util.np = lib

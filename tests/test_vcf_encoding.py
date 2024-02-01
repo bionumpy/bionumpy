@@ -269,6 +269,11 @@ def test_read_genotype_with_no_data():
     genotypes = data.genotype[:4]
     assert genotypes.shape == (4, 0)
 
+def test_read_empty_vcf():
+    file_name = get_file_name("example_data/empty_variants.vcf")
+    data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
+    assert len(data) == 0
+    assert data.genotype.shape[0] == 0
 
 @pytest.mark.skip   # genotype fields not implemented
 def test_read_genotype_ad_field():

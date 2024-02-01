@@ -2,4 +2,5 @@ channels:
   - bioconda
 
 dependencies:
-  - bcftools
+  - bcftools=1.4.1
+  - openssl=1.0
