@@ -9,8 +9,8 @@ class AlphabetEncoding(OneToOneEncoding):
         self._is_initialized = False
         self._alphabet_size = len(self._raw_alphabet)
 
-    def _initialize(self):
-        if self._is_initialized:
+    def _initialize(self, force=True):
+        if self._is_initialized and not force:
             return
         alphabet = self._raw_alphabet
         self._alphabet = np.array([ord(c) for c in alphabet], dtype=np.uint8)

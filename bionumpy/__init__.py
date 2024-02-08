@@ -2,7 +2,7 @@
 
 __author__ = """Knut Rand"""
 __email__ = "knutdrand@gmail.com"
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 
 import npstructures as nps
 
@@ -71,6 +71,9 @@ def set_backend(lib):
     from .io import file_buffers
     file_buffers.np = lib
 
+    from .io import one_line_buffer
+    one_line_buffer.np = lib
+
     from .io import parser
     parser.np = lib
     parser.NumpyFileReader = CupyFileReader
@@ -85,6 +88,7 @@ def set_backend(lib):
     from . import encoded_array
     encoded_array.np = lib
     encoded_array.get_NPSArray = lambda x: x
+
 
     from . import util
     util.np = lib

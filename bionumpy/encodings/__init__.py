@@ -56,3 +56,10 @@ def set_backend(lib):
 
     from . import kmer_encodings
     kmer_encodings.np = lib
+
+    from . import alphabet_encoding
+    alphabet_encoding.np = lib
+
+    # Have to reinitalize the encodings since these where initialized with numpy
+    from .alphabet_encoding import DNAEncoding
+    DNAEncoding._initialize(force=True)

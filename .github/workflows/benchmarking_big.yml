@@ -35,6 +35,7 @@ jobs:
             python -m pip install --upgrade pip setuptools wheel
             pip install git+https://github.com/bionumpy/npstructures.git/@dev
             pip install -r requirements_dev.txt
+            pip install plotly
             pip install .
             cd benchmarks
 
