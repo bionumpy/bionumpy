@@ -1,18 +1,21 @@
 import bionumpy as bnp
 from bionumpy.sequence import translate_dna_to_protein
-import time
 
 
-def main(input_file, output_file):
-    chunks = bnp.open(input_file).read_chunks()
-    translated_chunks = (
-        bnp.replace(chunk, sequence=translate_dna_to_protein(chunk.sequence))
-        for chunk in chunks)
+def translate_dna(input_file: str, output_file: str):
     with bnp.open(output_file, "w") as f:
-        for chunk in translated_chunks:
-            f.write(chunk)
+        for chunk in bnp.open(input_file).read_chunks():
+            translated = bnp.replace(chunk, sequence=translate_dna_to_protein(chunk.sequence))
+            f.write(translated)
+
+
+def test_translate_dna():
+    input_file = "example_data/dna_translatable.fa"
+    output_file = "tmp.fa"
+    translate_dna(input_file, output_file)
+    assert bnp.count_entries(output_file) == bnp.count_entries(input_file)
 
 
 if __name__ == "__main__":
     import sys
-    main(*sys.argv[1:])
+    translate_dna(*sys.argv[1:])

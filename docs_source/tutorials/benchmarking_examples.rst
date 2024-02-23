@@ -37,3 +37,33 @@ Count the number of kmers in a fasta/fastq file:
 
 .. literalinclude:: /../scripts/kmer_counting_example.py
     :language: python
+
+Reverse Complement
+------------------
+Reverse complement a fasta/fastq file:
+
+.. literalinclude:: /../scripts/reverse_compliment_example.py
+    :language: python
+
+Sequence Length Distribution
+----------------------------
+Calculate the length distribution of sequences in a fasta/fastq file:
+
+.. literalinclude:: /../scripts/sequence_length_distribution_example.py
+    :language: python
+
+Subsampling
+-----------
+Subsample exactly half of the seqeuences in a fasta/fastq file. This example is complicated when working on big files as it
+one have to figure out how many sequences to subsample from each chunk to get exactly half of the sequences:
+
+.. literalinclude:: /../scripts/subsample_reads_example.py
+    :language: python
+
+Translation
+-----------
+Translate DNA sequences in a fasta file to protein sequences:
+
+.. literalinclude:: /../scripts/translate_example.py
+    :language: python
+

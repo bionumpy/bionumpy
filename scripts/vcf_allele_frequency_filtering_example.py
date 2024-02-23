@@ -2,8 +2,6 @@ import sys
 import numpy as np
 import bionumpy as bnp
 from itertools import islice
-import bionumpy.io.vcf_buffers
-
 
 # Filter a vcf file by min allele count
 

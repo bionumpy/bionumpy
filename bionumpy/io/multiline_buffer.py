@@ -105,6 +105,8 @@ class MultiLineFastaBuffer(MultiLineBuffer):
             return line_ends-(data[line_ends-1] == '\r')
         return line_ends
 
+    def count_entries(self):
+        return len(self._new_entries)
 
 
 @bnpdataclass
