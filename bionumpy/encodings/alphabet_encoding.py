@@ -29,8 +29,8 @@ class AlphabetEncoding(OneToOneEncoding):
         ret = self._lookup[byte_array]
         if np.any(ret >= self._alphabet_size):
             offset = np.flatnonzero(ret.ravel()==255)[0]
-            tmp = [chr(c) for c in byte_array.ravel()[ret.ravel()==255]][:10]
-            raise EncodingError(f"Error when encoding {''.join(chr(c) for c in byte_array.ravel()[0:100])} "
+            tmp = [chr(int(c)) for c in byte_array.ravel()[ret.ravel()==255]][:10]
+            raise EncodingError(f"Error when encoding {''.join(chr(int(c)) for c in byte_array.ravel()[0:100])} "
                                 f"to {self.__class__.__name__}. Invalid character(s): "
                                 f"{tmp}{[ord(c) for c in tmp]}", offset)
         return ret

@@ -117,7 +117,7 @@ class VCFEntry:
 
 @bnpdataclass
 class VCFWithInfoAsStringEntry:
-    chromosome: str
+    chromosome: SequenceID
     position: int
     id: str
     ref_seq: str
@@ -177,9 +177,9 @@ class SortedIntervals:
 
 @bnpdataclass
 class SAMEntry:
-    name: str
+    name: SequenceID
     flag: int
-    chromosome: str
+    chromosome: SequenceID
     position: int
     mapq: int
     cigar: str
@@ -192,8 +192,8 @@ class SAMEntry:
 
 @bnpdataclass
 class BamEntry:
-    chromosome: str
-    name: str
+    chromosome: SequenceID
+    name: SequenceID
     flag: int
     position: int
     mapq: int
