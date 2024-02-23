@@ -67,3 +67,9 @@ Translate DNA sequences in a fasta file to protein sequences:
 .. literalinclude:: /../scripts/translate_example.py
     :language: python
 
+VCF Filtering
+-------------
+Filter a VCF file on the allele count:
+
+.. literalinclude:: /../scripts/vcf_allele_frequency_filtering_example.py
+    :language: python
