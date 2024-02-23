@@ -10,7 +10,6 @@ $ pip install bionumpy
 If install fails for numpy, this can help:
 $ pip install --upgrade pip
 3.  Demo
-
 4.  Instructions for use
 See documentation: https://bionumpy.github.io/bionumpy/
 See https://github.com/bionumpy/bionumpy/tree/master/benchmarks for reproducing benchmarks

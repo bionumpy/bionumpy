@@ -1,4 +1,4 @@
-.. benchmarking_examples
+.. _benchmarking_examples:
 
 Benchmarking Examples
 ---------------------

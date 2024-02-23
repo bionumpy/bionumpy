@@ -1,3 +1,4 @@
+.. _best_practices:
 --------------
 Best Practices for memory management
 --------------

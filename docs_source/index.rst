@@ -104,5 +104,6 @@ Read next
 
  * :ref:`A 10 minute introduction to BioNumPy<introduction>`
  * :ref:`Learn how to efficiently read large data files with BioNumPy<reading_files>`
+ * :ref:`Check out examples of how to use BioNumPy efficiently <benchmarking_examples>`
  * :ref:`Check out the various tutorials<tutorials_menu>`
  * :ref:`Learn how to avoid memory issues<best_practices>`
