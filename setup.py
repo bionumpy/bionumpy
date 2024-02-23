@@ -46,7 +46,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/bionumpy/bionumpy',
-    version='1.0.3',
+    version='1.0.4',
     zip_safe=False,
     extras_require={'full': ['isal']}
 )
