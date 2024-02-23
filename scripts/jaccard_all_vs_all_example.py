@@ -4,16 +4,11 @@ Writes the results to stdout.
 """
 import itertools
 from typing import List, Tuple, Dict
-
 import bionumpy as bnp
-from bionumpy.arithmetics.similarity_measures import jaccard
-from bionumpy.arithmetics import intersect
-from bionumpy.genomic_data.global_offset import GlobalOffset
-import numpy as np
-import sys
 
 
-def jaccard_func(mask_a, mask_b):
+
+def jaccard_func(mask_a: bnp.genomic_data.GenomicArray, mask_b: bnp.genomic_data.GenomicArray):
     '''Jaccard = intersection / union'''
     return (mask_a & mask_b).sum() / (mask_a | mask_b).sum()
 
@@ -26,7 +21,14 @@ def jaccard(chrom_sizes_file: str, bed_files: List[str]) -> Dict[Tuple[str, str]
     return results
 
 
+def test():
+    chrom_sizes = 'example_data/hg38.chrom.sizes'
+    files = ['example_data/ctcf.bed.gz', 'example_data/znf263.bed.gz']
+    assert len(jaccard(chrom_sizes, files)) == 1
+
+
 if __name__ == "__main__":
+    import sys
     chrom_sizes = sys.argv[1]
     files = sys.argv[2:]
     result = jaccard(chrom_sizes, files)

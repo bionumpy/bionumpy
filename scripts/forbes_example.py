@@ -1,17 +1,26 @@
 import bionumpy as bnp
-from bionumpy.arithmetics import forbes, sort_intervals
 
-# Read the bed files
-a = bnp.open("example_data/ctcf.bed.gz").read()
-b = bnp.open("example_data/znf263.bed.gz").read()
 
-# We also need chromosomes to do sorting
-chromosome_sizes = bnp.open("example_data/hg38.chrom.sizes").read()
-print(chromosome_sizes)
+def calculate_forbes(chrom_sizes_file: str, filename_a: str, filename_b: str):
+    genome = bnp.Genome.from_file(chrom_sizes_file)
 
-# sort the bed files
-a_sorted = sort_intervals(a, sort_order=chromosome_sizes.name.tolist())
-b_sorted = sort_intervals(b, sort_order=chromosome_sizes.name.tolist())
+    # Read bed files as binary masks over the genome
+    a_mask = genome.read_intervals(filename_a).get_mask()
+    b_mask = genome.read_intervals(filename_b).get_mask()
+    observed_intersection = (b_mask & a_mask).sum()
+    expected_intersection = (a_mask.sum() * b_mask.sum()) / genome.size
 
-similarity = forbes(chromosome_sizes, a_sorted, b_sorted)
-print(similarity)
+    return observed_intersection / expected_intersection
+
+
+def test():
+    similarity = calculate_forbes("example_data/hg38.chrom.sizes",
+                                  "example_data/ctcf.bed.gz",
+                                  "example_data/znf263.bed.gz")
+
+    print(similarity)
+
+
+if __name__ == "__main__":
+    import sys
+    calculate_forbes(*sys.argv[1:])

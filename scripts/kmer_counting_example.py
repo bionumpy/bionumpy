@@ -1,7 +1,6 @@
 from bionumpy import TwoLineFastaBuffer
 from bionumpy.sequence import get_kmers, count_encoded
 import bionumpy as bnp
-from bionumpy.io.delimited_buffers import DelimitedBuffer
 
 
 def count_kmers(sequence_entries):
