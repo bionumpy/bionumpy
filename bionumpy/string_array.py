@@ -31,8 +31,12 @@ class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
         return np.count_nonzero(self._as_bytes(), axis=-1)
 
     def __repr__(self):
-        if self._data.ndim>=1:
+
+        ndim = self._data.ndim
+        if ndim == 1:
             return '\n'.join(b.decode() for b in self._data[:5].tolist())
+        elif ndim == 2:
+            return '\n'.join('\t'.join(b.decode() for b in line) for line in self._data[:5].tolist())
         else:
             return self._data.tolist().decode()
 

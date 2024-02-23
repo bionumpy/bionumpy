@@ -17,20 +17,19 @@ We start by importing all we need:
 
 We will be using the `big.fq.gz` file in the example_data folder, but feel free to use any fastq file you like.
 
-The first step is to read our data as chunks:
+The first step is to read a chunk of the file:
 
-    >>> reads = bnp.open("example_data/big.fq.gz").read_chunks()
+    >>> reads = bnp.open("example_data/big.fq.gz").read_chunk()
 
-Note that we now only have a generator object that will give us chunks when we start iterating over it. No data has been read yet.
-
+Note that this will not give us all the reads in the file, but only the first chunk. We can now inspect the reads:
 
 ===========
 GC-content
 ===========
 
-We want to get the GC-content (as a ratio between 0 and 1) within each sequence in a fastq file, and plot a histogram of these numbers.
+We want to get the GC-content (as a ratio between 0 and 1) within each sequence in the beginning of the fastq file, and plot a histogram of these numbers.
 
-For each chunk we read from the file, we get the sequences as a RaggedArray where each row is a sequence. Creating a boolean mask of where we have G or C is then as simple as:
+For the first chunk we read from the file, we get the sequences as a RaggedArray where each row is a sequence. Creating a boolean mask of where we have G or C is then as simple as:
 
     >>> mask = (chunk.sequence == "G") | (chunk.sequence == "C") # doctest: +SKIP
 
@@ -40,38 +39,21 @@ Getting the GC-content for each read can now be done by taking the mean across t
 
     >>> gc_contents = np.mean(mask, axis=-1) # doctest: +SKIP
 
-If we want to do this across all all sequence chunks, we can create a function that does what we want on one chunk and add the streamable decorator:
-
-
-    >>> @bnp.streamable()
-    ... def get_gc_content(reads):
-    ...     sequences = reads.sequence
-    ...     mask = (sequences == "G") | (sequences == "C")
-    ...     return np.mean(mask, axis=-1)
 
 We want to create a histogram of the gc-content values from all chunks. We could call get_gc_content on each chunk, add the results to a list and create a histogram from the final list, but BioNumPy also provides a utility function for creating a histogram from the results from multiple chunks:
 
-    >>> histogram, _ = bnp.histogram(get_gc_content(reads), bins=50, range=(0, 1))
-    >>> plt.plot(histogram) # doctest: +SKIP
+    >>> plt.hist(gc_contents) # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
-
-There is some "magic" happening here that might be useful to understand:
-
-* the @streamable decorator lets us call the get_gc_content on multiple chunks (the result from read_chunks). All it does is to provide an iterable over the results from calling get_gc_content on each chunk.
-* the `bnp.histogram` function can take such an iterable and combines the results
-* After this code has run, we have iterated over all the chunks in the file, and we need to open the file again and read chunks again if we want to anything else with the file
 
 
 ============================
 Histogram of base qualities
 ============================
-If we want to plot a histogram of all the base qualities in all reads, we can use the builtin `bnp.bincount` function. This function does a numpy bincount on each chunk and combines the results.
+If we want to plot a histogram of all the base qualities in a subset of reads, we can use the builtin `np.bincount` function.
 
-    >>> @bnp.streamable()
-    ... def get_base_qualities(reads):
-    ...     return reads.quality.ravel()
-    >>> reads = bnp.open("example_data/big.fq.gz").read_chunks()
-    >>> base_quality_bincount = bnp.bincount(get_base_qualities(reads), minlength=60)
+
+    >>> reads = bnp.open("example_data/big.fq.gz").read_chunk()
+    >>> base_quality_bincount = np.bincount(reads.quality.ravel())
     >>> plt.plot(base_quality_bincount) # doctest: +SKIP
     >>> plt.show() # doctest: +SKIP
 
@@ -82,16 +64,8 @@ In the GC content histogram example, we saw that we can take the mean the rows (
 
 .. code-block:: python
 
-    @bnp.streamable()
-    def get_quality_scores(reads):
-        return reads.quality
-
-    reads = bnp.open("example_data/big.fq.gz").read_chunks()
-    scores = bnp.mean(get_quality_scores(reads), axis=0)
+    reads = bnp.open("example_data/big.fq.gz").read_chunk()
+    scores = bnp.mean(reads.quality, axis=0)
     print(scores)
     plt.plot(scores)
     plt.show()
-
-
-Remember to change the limit_at_n_bases depending on your minimum read length (or how much of the reads you want to plot).
-

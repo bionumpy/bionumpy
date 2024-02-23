@@ -17,7 +17,6 @@ API documentation
 .. autoclass:: BedBuffer
 .. autoclass:: VCFBuffer
 .. autoclass:: FastQBuffer
-.. autoclass:: MultilineFastaBuffer
 .. autoclass:: TwoLineFastaBuffer
 .. autoclass:: IndexedFasta
    :members: 

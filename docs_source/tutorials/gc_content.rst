@@ -26,3 +26,7 @@ A second version still reads in the full data by the `read` function, but adds i
 A third version shows a more scalable version of the same code, which uses the `read_chunks` function (see :ref:`reading_files`) with the fasta file to get a generator that reads in a single chromosome sequence at a time, allowing it to handle full-genome data with limited memory footprint:
 
 .. literalinclude:: /../scripts/gc_by_chunks_example.py
+
+The fourth version shows how to use the `Genome` functionality to conveniently calculate the GC content:
+
+.. literalinclude:: /../scripts/genomic_gc_example.py

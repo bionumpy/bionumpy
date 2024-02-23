@@ -12,7 +12,7 @@ def test_bamquality():
     # Get aligments that start with soft-clip
     start_clipped_alignments = alignments[start_cigar == "s"]
     
-    # Get the number of softclipped
+    # Get the number of softclipped bases
     n_clipped_bases = start_clipped_alignments.cigar_length[..., 0]
     
     # Extract clipped bases
