@@ -23,7 +23,7 @@ class FastQBuffer(OneLineBuffer):
             return self._buffer_extractor.get_field_by_number(3)
         return super().get_text_field_by_number(i)
 
-    def get_field_by_number(self, i: int, t: type=object):
+    def get_field_by_number(self, i: int, t: type=None):
         if i == 2:
             return QualityEncoding.encode(self.get_text_field_by_number(i))
         else:

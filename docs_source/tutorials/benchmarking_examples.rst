@@ -30,3 +30,10 @@ Calculate the Jaccard index between two or more bed files:
 
 .. literalinclude:: /../scripts/jaccard_all_vs_all_example.py
     :language: python
+
+Count Kmers
+-----------
+Count the number of kmers in a fasta/fastq file:
+
+.. literalinclude:: /../scripts/kmer_counting_example.py
+    :language: python
