@@ -9,14 +9,17 @@ def test_read_fasta(fasta_file, genome_sequence):
 
 
 def test_read_bed(bed_file, intervals):
-    intervals = bnp.open(bed_file).read()
-    bnp.util.testing.assert_bnpdataclass_equal(intervals, intervals)
+    io_intervals = bnp.open(bed_file).read()
+    bnp.util.testing.assert_bnpdataclass_equal(intervals, io_intervals)
 
 
 def test_fastq(fastq_file, reads):
-    reads = bnp.open(fastq_file).read()
-    bnp.util.testing.assert_bnpdataclass_equal(reads, reads)
+    io_reads = bnp.open(fastq_file).read()
+    bnp.util.testing.assert_bnpdataclass_equal(reads, io_reads)
 
+def test_read_fastq_in_chunks(fastq_file, reads):
+    io_reads = np.concatenate(list(bnp.open(fastq_file).read_chunks(min_chunk_size=10)))
+    bnp.util.testing.assert_bnpdataclass_equal(reads, io_reads)
 
 def test_interval_intersection(bed_file, bed_file2, genome):
     mask = genome.read_intervals(bed_file).get_mask()
