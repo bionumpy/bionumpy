@@ -33,8 +33,8 @@ def test_bnpclass():
 
 
 @pytest.fixture
-def file_name():
-    name = 'string_array_test.txt'
+def file_name(tmp_path):
+    name = tmp_path / 'string_array_test.txt'
     open(name, 'w').write(
         '''\
 hei\t1

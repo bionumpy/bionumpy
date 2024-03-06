@@ -357,8 +357,8 @@ def test_genotype_print():
                  buffer_type=VCFBuffer2).read()
     print(i.genotype)
 
-def test_ioi():
-    out_filename = "tmp_ioi.vcf"
+def test_ioi(tmp_path):
+    out_filename = tmp_path / "tmp_ioi.vcf"
     i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
                  buffer_type=VCFBuffer2).read()
     print(i.genotype)

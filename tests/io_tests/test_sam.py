@@ -77,12 +77,6 @@ header_text = '''\
 def sam_text():
     return text.replace(' ', '\t')
 
-@pytest.fixture
-def _tmp_path():
-    from pathlib import Path
-    path = Path('tmp_folder')
-    path.mkdir(exist_ok=True)
-    return path
 
 @pytest.fixture
 def sam_filename(tmp_path, sam_text):

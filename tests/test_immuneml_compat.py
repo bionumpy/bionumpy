@@ -27,8 +27,8 @@ a\tb\tc\t1\t2\ta\ta\ta\tacgt\taaaa\tid\tv\n\
 
 
 @pytest.fixture
-def file_name():
-    name = 'tmp1234.tsv'
+def file_name(tmp_path):
+    name = tmp_path / 'tmp1234.tsv'
     with open(name, 'w') as f:
         f.write(text)
     return name
@@ -41,8 +41,8 @@ def empty_file_name(header, tmp_path):
     return name
 
 @pytest.fixture
-def full_file_name(full_text):
-    name = 'tmp1234full.tsv'
+def full_file_name(full_text, tmp_path):
+    name = tmp_path / 'tmp1234full.tsv'
     with open(name, 'w') as f:
         f.write(full_text)
     return name

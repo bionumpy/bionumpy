@@ -162,10 +162,11 @@ def test_write_dna_fastq():
     assert np.all(entry.sequence == result.sequence)
 
 
-def test_write_empty():
+def test_write_empty(tmp_path):
     entry = VCFEntry([], [], [], [],
                      [], [], [], [])
-    with bnp.open('tmp.vcf', 'w') as f:
+    filename = tmp_path / 'tmp.vcf'
+    with bnp.open(filename, 'w') as f:
         f.write(entry)
 
 
@@ -260,20 +261,20 @@ def test_carriage_return_fai(fasta_with_carriage_return_filename: Path):
     assert_encoded_array_equal(fai['test_sequence_id_here'].raw(), 'GACTG')
     assert_encoded_array_equal(fai['test_sequence_id_here2'].raw(), 'GACTCGAG')
 
-def test_rwr_bed_with_change():
-    tmp_path = 'tmp_rwr.bed'
+def test_rwr_bed_with_change(tmp_path):
+    file_path = tmp_path / 'tmp_rwr.bed'
     filename = get_file_name('example_data/alignments.bed')
     data = bnp.open(filename, buffer_type=bnp.io.Bed6Buffer).read()
     data.start = data.start + 1
     data.stop = data.stop + 1
     data.chromosome = StringEncoding(['chr1', 'chr2']).encode(data.chromosome)
     data == data[::2]
-    if os.path.exists(tmp_path):
-        os.remove(tmp_path)
-    bnp.open(tmp_path, 'w', buffer_type=bnp.io.Bed6Buffer).write(data)
-    text = open(tmp_path).read()
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    bnp.open(file_path, 'w', buffer_type=bnp.io.Bed6Buffer).write(data)
+    text = open(file_path).read()
     assert text.startswith('chr1'), text[:10]
     print(text)
-    data2 = bnp.open(tmp_path).read()
+    data2 = bnp.open(file_path).read()
     assert_equal(data.start, data2.start)
     assert np.all(data.chromosome == data2.chromosome)
