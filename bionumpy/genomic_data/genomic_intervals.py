@@ -6,13 +6,11 @@ from typing import List, Iterable, Tuple, Dict
 
 from .coordinate_mapping import map_locations, find_indices
 from ..bnpdataclass import BNPDataClass, replace, bnpdataclass
-from ..encodings import StrandEncoding
 from .genomic_track import GenomicArray, GenomicArrayNode
 from .genome_context_base import GenomeContextBase
 from ..datatypes import Interval, Bed6, StrandedInterval, LocationEntry, StrandedLocationEntry
 from ..arithmetics.intervals import get_pileup, merge_intervals, extend_to_size, clip, get_boolean_mask, RawInterval
 from ..computation_graph import StreamNode, Node, ComputationNode, compute
-import dataclasses
 
 from ..string_array import StringArray
 

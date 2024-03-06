@@ -55,7 +55,8 @@ def simulate_sequences(alphabet: str, lengths: Dict[str, int], rng=default_rng()
 def simulate_reads_from_genome(genome: GenomicSequence, length: int = 150, n_reads: int = 100,
                                chunk_size: int = 10000, sequence_name_prefix="", rng=default_rng(),
                                ignore_reads_with_n=False):
-    """ Simulates reads on a genome. Yields chunks of SequenceEntryWithQuality objects
+    """
+    Simulates reads on a genome. Yields chunks of SequenceEntryWithQuality objects
     """
     if isinstance(rng, int):
         rng = default_rng(rng)
