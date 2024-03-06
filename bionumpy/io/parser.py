@@ -1,7 +1,10 @@
 import codecs
 import logging
 import numpy as np
-from typing.io import IO
+try:
+    from typing import IO
+except ImportError:
+    from typing.io import IO
 from npstructures import npdataclass
 
 from .exceptions import FormatException
