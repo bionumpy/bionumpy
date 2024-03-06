@@ -27,7 +27,7 @@ def test_vcf_matrix_buffer(tmp_path):
         assert header
         out.write(chunk)
 
-    filestart = open('test1.vcf').read(100)
+    filestart = open(out_path).read(100)
     assert filestart.startswith('#'), filestart
     # check that header was written
     chunk = bnp.open(out_path).read_chunk()
