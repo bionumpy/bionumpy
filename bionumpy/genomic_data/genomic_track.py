@@ -160,6 +160,9 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         args = [(i._global_track if isinstance(i, GenomicArrayGlobal) else i) for i in args]
         if func == np.histogram:
             return np.histogram(*args, **kwargs)
+        if func == np.sum:
+            return self.sum(*args[1:], **kwargs)
+        return NotImplemented
 
     def get_data(self) -> Union[Interval, BedGraph]:
         """The data of the array represented in BNPDataClass
