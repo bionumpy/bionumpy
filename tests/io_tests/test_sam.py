@@ -78,7 +78,7 @@ def sam_text():
     return text.replace(' ', '\t')
 
 @pytest.fixture
-def tmp_path():
+def _tmp_path():
     from pathlib import Path
     path = Path('tmp_folder')
     path.mkdir(exist_ok=True)
@@ -99,8 +99,6 @@ def sam_out_filename(tmp_path):
 def test_sam_read(sam_filename):
     f = bnp.open(sam_filename)
     d = f.read()
-    print(d)
-    print(d.flag.dtype)
     assert_encoded_array_equal(d.extra[-1], 'NM:i:1')
 
 

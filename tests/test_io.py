@@ -119,16 +119,13 @@ def test_read_big_fastq():
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
-def test_ctx_manager_read(buffer_name):
-    file_path = Path(f"./{buffer_name}_example.{buffer_name}")
-
+def test_ctx_manager_read(buffer_name, tmp_path):
+    file_path = tmp_path / f"./{buffer_name}_example.{buffer_name}"
     with open(file_path, "w") as file:
         file.write(buffer_texts[buffer_name])
 
     with bnp.open(file_path) as file:
         file.read()
-
-    os.remove(file_path)
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])

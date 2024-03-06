@@ -1,9 +1,7 @@
 import dataclasses
-import bionumpy as bnp
 import numpy as np
 from npstructures.testing import assert_raggedarray_equal
 from numpy.testing import assert_array_equal
-from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
@@ -11,7 +9,7 @@ from bionumpy.bnpdataclass.bnpdataclass import narrow_type
 from bionumpy.io.vcf_buffers import VCFBuffer2, VCFHaplotypeBuffer
 import pytest
 
-from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
+from bionumpy.datatypes import VCFEntryWithGenotypes
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
 from tests.util import get_file_name
@@ -36,14 +34,15 @@ def test_vcf_matrix_buffer(tmp_path):
     assert chunk.get_context("header") != "" and chunk.get_context("header") == header
 
 
-def test_vcf_matrix_buffer_stream():
+def test_vcf_matrix_buffer_stream(tmp_path):
     f = bnp.open("example_data/variants_with_header.vcf",
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
-    out = bnp.open("test1.vcf", mode="w")
+    outpath = tmp_path / "test1.vcf"
+    out = bnp.open(outpath, mode="w")
     out.write(f.read_chunks())
     # check that header was written
-    chunk = bnp.open("test1.vcf").read_chunk()
+    chunk = bnp.open(outpath).read_chunk()
     assert chunk.get_context("header") != ""
 
 def test_context_state():
