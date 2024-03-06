@@ -17,11 +17,12 @@ from bionumpy.util.testing import assert_bnpdataclass_equal
 from tests.util import get_file_name
 
 
-def test_vcf_matrix_buffer():
+def test_vcf_matrix_buffer(tmp_path):
     f = bnp.open("example_data/variants_with_header.vcf",
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
-    out = bnp.open("test1.vcf", mode="w")
+    out_path = tmp_path / "test1.vcf"
+    out = bnp.open(out_path, mode="w")
 
     for chunk in f:
         header = chunk.get_context("header")
@@ -31,7 +32,7 @@ def test_vcf_matrix_buffer():
     filestart = open('test1.vcf').read(100)
     assert filestart.startswith('#'), filestart
     # check that header was written
-    chunk = bnp.open("test1.vcf").read_chunk()
+    chunk = bnp.open(out_path).read_chunk()
     assert chunk.get_context("header") != "" and chunk.get_context("header") == header
 
 
@@ -246,7 +247,7 @@ def test_read_genotype_with_more_data():
     genotypes = data.genotype[:4]
     assert np.all(genotypes == [['1|0'], ['1|0'], ['0|1'], ['1|0']])
 
-def test_write_genotype():
+def test_write_genotype(tmp_path):
     data = narrow_type(VCFEntryWithGenotypes, 'info', str)(
         ['chr1', 'chr2'],
         [1, 2],
@@ -258,9 +259,10 @@ def test_write_genotype():
         ['.', '.'],
         [['0|0', '0|1'], ['0|0', '0|1']]
     )
-    with bnp.open("tmp.vcf", "w", buffer_type=VCFBuffer2) as f:
+    file_path = tmp_path / "tmp.vcf"
+    with bnp.open(file_path, "w", buffer_type=VCFBuffer2) as f:
         f.write(data)
-    new_data = bnp.open("tmp.vcf", buffer_type=VCFBuffer2).read().get_data_object()
+    new_data = bnp.open(file_path, buffer_type=VCFBuffer2).read().get_data_object()
     assert_bnpdataclass_equal(data, new_data)
 
 def test_read_genotype_with_no_data():

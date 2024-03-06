@@ -57,9 +57,9 @@ def test_buffer_write(buffer_name):
 
 @pytest.mark.parametrize("file", ["example_data/reads.fq", "example_data/big.fq.gz"])
 @pytest.mark.parametrize("chunk_size", [100, 5000000])
-def test_buffered_writer_ctx_manager(file, chunk_size):
+def test_buffered_writer_ctx_manager(file, chunk_size, tmp_path):
 
-    file_path = "./tmp.fq"
+    file_path = tmp_path / "./tmp.fq"
     true_stream = bnp_open('example_data/reads.fq').read_chunks()
 
     with bnp_open(file_path, mode='w') as f:
@@ -70,7 +70,7 @@ def test_buffered_writer_ctx_manager(file, chunk_size):
     for fq_item, true_item in zip(fq_stream, true_stream):
         assert_bnpdataclass_equal(fq_item, true_item)
 
-    os.remove(file_path)
+    # os.remove(file_path)
 
 
 def test_custom_read():
