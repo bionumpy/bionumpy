@@ -34,8 +34,8 @@ def file_name():
     return name
 
 @pytest.fixture
-def empty_file_name(header):
-    name = 'empty.csv'
+def empty_file_name(header, tmp_path):
+    name = tmp_path / 'empty.csv'
     with open(name, 'w') as f:
         f.write(header)
     return name
