@@ -95,7 +95,7 @@ class _GenotypeRowEncoding(Encoding):
 
 class GenotypeBuffer:
     _lookup = np.zeros(256, dtype=np.uint8)
-    _lookup[[ord(c) for c in ('0', '1', '.')]] = np.array([0, 1, np.nan])
+    _lookup[[ord(c) for c in ('0', '1', '.')]] = np.array([0, 1, 0]) # Changed nan to 0 here since that's the uint8 version of nan
 
     def __init__(self, data, field_starts):
         self._data = data
