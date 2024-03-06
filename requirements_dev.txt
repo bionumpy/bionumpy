@@ -16,5 +16,4 @@ plotly
 kaleido
 nbsphinx
 more_itertools
-sphinxcontrib.bibtex
 pandas
