@@ -28,6 +28,3 @@ API documentation
 
 .. autoclass:: GenomicSequence
     :members:	       
-
-.. autoclass:: GenomicContext
-    :members:	       
