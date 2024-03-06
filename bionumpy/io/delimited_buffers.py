@@ -309,7 +309,7 @@ class DelimitedBuffer(FileBuffer):
 
             if np.any(int_strings.lengths == 0):
                 mask = int_strings.lengths != 0
-                return RaggedArray(function(int_strings[mask]), (text == sep).sum(axis=-1))
+                return RaggedArray(function(int_strings[mask]), (text == sep).sum(axis=-1), safe_mode=False) # TODO: is it necessary with unsafe mode here
             return RaggedArray(function(int_strings), (text == sep).sum(axis=-1))
         else:
             mask = as_encoded_array(text.ravel(), DigitEncoding).raw()

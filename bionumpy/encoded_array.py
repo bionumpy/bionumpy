@@ -158,9 +158,9 @@ class IncompatibleEncodingsException(Exception):
 class EncodedRaggedArray(RaggedArray):
     """ Class to represnt EnocedArray with different row lengths """
 
-    def __init__(self, data: 'EncodedArray', shape):
+    def __init__(self, data: 'EncodedArray', shape, *args, **kwargs):
         assert isinstance(data, EncodedArray), data
-        super().__init__(data.raw(), shape)
+        super().__init__(data.raw(), shape, *args, **kwargs)
         self._encoding = data.encoding
 
     def copy(self):

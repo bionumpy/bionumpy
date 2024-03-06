@@ -55,9 +55,9 @@ class RollableFunction:
         convoluted = self(windows)
         if isinstance(_sequence, RaggedArray):
             if isinstance(convoluted, EncodedArray):
-                out = EncodedRaggedArray(convoluted, shape)
+                out = EncodedRaggedArray(convoluted, shape, safe_mode=False) #FIXME: Should avoid use of unsafe
             else:
-                out = RaggedArray(convoluted, shape)
+                out = RaggedArray(convoluted, shape, safe_mode=False)
         elif isinstance(_sequence, (np.ndarray, EncodedArray)):
             out = as_strided(convoluted, shape)
         if mode == "valid":
