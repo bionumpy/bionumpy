@@ -3,7 +3,7 @@ import os
 from bionumpy.io.vcf_header import parse_header
 import bionumpy as bnp
 import pytest
-from .fixtures import data_path
+from .conftest import data_path
 from bionumpy.util.testing import assert_encoded_array_equal
 
 lines = """\

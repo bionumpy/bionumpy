@@ -15,13 +15,13 @@ import numpy as np
 """
 
 
-def test_fasta_index():
-    index = create_index("example_data/small_genome.fa")
+def test_fasta_index(data_path):
+    index = create_index(data_path / "small_genome.fa")
     assert_equal(index.length, [300, 600, 900, 1200])
 
 
-def test_dictlike():
-    idx_fasta = bnp.open_indexed("example_data/small_genome.fa")
+def test_dictlike(data_path):
+    idx_fasta = bnp.open_indexed(data_path / "small_genome.fa")
     assert list(idx_fasta.keys()) == ["0", "1", "2", "3"]
     assert "Indexed Fasta" in repr(idx_fasta)
     for key, val in idx_fasta.items():
@@ -32,8 +32,8 @@ def test_dictlike():
         assert isinstance(val, bnp.EncodedArray)
 
 
-def test_get_sequences():
-    idx_fasta = bnp.open_indexed("example_data/small_genome.fa")
+def test_get_sequences(data_path):
+    idx_fasta = bnp.open_indexed(data_path / "small_genome.fa")
     _intervals = Interval.from_entry_tuples([("1", 10, 20),
                                             ("2", 11, 50),
                                             ("1", 5, 10),

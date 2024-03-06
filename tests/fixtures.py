@@ -1,7 +1,3 @@
-from pathlib import Path
-
-import pytest
-
 from bionumpy import Bed6
 from bionumpy.datatypes import VCFEntry, SequenceEntryWithQuality
 
@@ -44,8 +40,4 @@ data = {
         ('chr1',	9871,	9872,	0.17042)])
 }'''
 
-
-@pytest.fixture()
-def data_path():
-    return Path(__file__).parent.parent / 'example_data'
 

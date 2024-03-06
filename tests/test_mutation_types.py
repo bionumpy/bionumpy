@@ -32,8 +32,8 @@ def snp_locations(snps, reference):
     return Genome({'chr1': len(reference)}).get_locations(snps)
 
 
-def test_cosmic_read():
-    matrix = bnp.io.read_matrix('example_data/COSMIC_v3.3.1_SBS_GRCh38.txt')
+def test_cosmic_read(data_path):
+    matrix = bnp.io.read_matrix(data_path / 'COSMIC_v3.3.1_SBS_GRCh38.txt')
     encoded = bnp.as_encoded_array(matrix.row_names.to_numpy_array(),
                                    MutationTypeEncoding(1))
     matrix.data[np.argsort(encoded)]

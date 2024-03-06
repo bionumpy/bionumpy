@@ -8,16 +8,17 @@ from bionumpy.util.testing import assert_encoded_raggedarray_equal
 from tests.util import get_file_name
 
 
-def test_read_acceptance():
-    filename = "example_data/test.bam"
+
+def test_read_acceptance(data_path):
+    filename = data_path / "test.bam"
     f = bnp.open(filename)
     d = f.read()
     print(d)
     print(d.flag.dtype)
 
 
-def test_read_intervals_acceptance():
-    filename = "example_data/test.bam"
+def test_read_intervals_acceptance(data_path):
+    filename = data_path / "test.bam"
     f = bnp.open(filename, buffer_type=BamIntervalBuffer)
     d = f.read()
     print(d.start)
@@ -25,8 +26,8 @@ def test_read_intervals_acceptance():
     print(d)
 
 @pytest.fixture()
-def bam_entries():
-    filename = get_file_name('example_data/small_alignments.bam')
+def bam_entries(data_path):
+    filename = data_path / 'small_alignments.bam'
     entries = bnp.open(filename).read()
     return entries
 

@@ -261,9 +261,9 @@ def test_carriage_return_fai(fasta_with_carriage_return_filename: Path):
     assert_encoded_array_equal(fai['test_sequence_id_here'].raw(), 'GACTG')
     assert_encoded_array_equal(fai['test_sequence_id_here2'].raw(), 'GACTCGAG')
 
-def test_rwr_bed_with_change(tmp_path):
+def test_rwr_bed_with_change(tmp_path, data_path):
     file_path = tmp_path / 'tmp_rwr.bed'
-    filename = get_file_name('example_data/alignments.bed')
+    filename = data_path  / 'alignments.bed'
     data = bnp.open(filename, buffer_type=bnp.io.Bed6Buffer).read()
     data.start = data.start + 1
     data.stop = data.stop + 1

@@ -27,12 +27,12 @@ def test_lex_sort_2(array_1, array_2):
 
 
 @pytest.fixture
-def intervals():
-    return bnp.open("example_data/ctcf.bed.gz").read()
+def intervals(data_path):
+    return bnp.open(data_path / "ctcf.bed.gz").read()
 
 @pytest.fixture
-def chrom_sizes():
-    return bnp.open("example_data/hg38.chrom.sizes").read()
+def chrom_sizes(data_path):
+    return bnp.open(data_path / "hg38.chrom.sizes").read()
 
 
 def test_interval_sort(intervals, chrom_sizes):
