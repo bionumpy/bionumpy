@@ -93,7 +93,7 @@ def convolution(func):
         if not isinstance(shape[-1], np.ndarray):
             out = as_strided(convoluted, shape)
         else:
-            out = EncodedRaggedArray(convoluted, shape)
+            out = EncodedRaggedArray(convoluted, shape, safe_mode=False) # FIXME: Should not use unsafe here
 
         return out[..., : (-window_size + 1)]
 
