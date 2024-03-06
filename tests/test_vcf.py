@@ -1,7 +1,9 @@
+import os
+
 from bionumpy.io.vcf_header import parse_header
 import bionumpy as bnp
 import pytest
-
+from .conftest import data_path
 from bionumpy.util.testing import assert_encoded_array_equal
 
 lines = """\
@@ -92,8 +94,8 @@ def test_parse_header():
             assert header_ans[field][key] == target[key]
 
 
-def test_vcf_lof():
-    variants = bnp.open("example_data/lof_file.vcf").read()
+def test_vcf_lof(data_path):
+    variants = bnp.open(data_path / "lof_file.vcf").read()
     lof = variants.info.LoF
     n_variants = len(variants)
     assert len(lof) == n_variants
@@ -103,24 +105,28 @@ def test_vcf_lof():
     assert variants.info.ONCOGENE.sum() == 12
 
 
-def test_vcf_info_data_object():
-    variants = bnp.open("example_data/lof_file.vcf").read()
+def test_vcf_info_data_object(data_path):
+    variants = bnp.open(data_path / "lof_file.vcf").read()
     info = variants.info.get_data_object()
     print(str(info))
     print(variants)
 
-def test_vcf_filtering_chunk():
-    with bnp.open('tmp.vcf', 'w') as f:
-        for chunk in bnp.open("example_data/lof_file.vcf").read_chunks():
+
+def test_vcf_filtering_chunk(tmp_path, data_path):
+    in_filepath = data_path / "lof_file.vcf"
+    out_filepath = tmp_path / 'tmp.vcf'
+    with bnp.open(out_filepath, 'w') as f:
+        for chunk in bnp.open(in_filepath).read_chunks():
             f.write(chunk[(chunk.info.LoF.lengths > 0) & chunk.info.ONCOGENE])
-    assert bnp.count_entries('tmp.vcf') == 2
+    assert bnp.count_entries(out_filepath) == 2
 
 
-def test_locations():
+def test_locations(data_path):
     k = 5
     # Read genome and variants
-    genome = bnp.Genome.from_file("example_data/sacCer3.fa", filter_function=None)
-    variants_file = "example_data/sacCer3_sample_variants.vcf.gz"
+    genome_file_name = data_path / "sacCer3.fa"
+    genome = bnp.Genome.from_file(genome_file_name, filter_function=None)
+    variants_file = data_path / "sacCer3_sample_variants.vcf.gz"
     print(bnp.open(variants_file).read())
 
     variants = genome.read_locations(variants_file, has_numeric_chromosomes=False)
@@ -131,7 +137,7 @@ def test_locations():
     variants = variants[snp_mask]
     # Get windows around these snps
     print(variants)
-    windows = variants.get_windows(flank=k-1)
+    windows = variants.get_windows(flank=k - 1)
     print(windows)
     # Use the windows to extract sequences (kmers)
     sequences = genome.read_sequence()[windows]
@@ -139,9 +145,13 @@ def test_locations():
     sequences = bnp.as_encoded_array(sequences, bnp.DNAEncoding)
     reference_kmers = bnp.get_kmers(sequences, k)
     assert_encoded_array_equal(sequences[:, k - 1], variants.get_data_field('ref_seq').ravel())
-    sequences[:, k-1] = variants.get_data_field('alt_seq').ravel()
+    sequences[:, k - 1] = variants.get_data_field('alt_seq').ravel()
     assert_encoded_array_equal(sequences[:, k - 1], variants.get_data_field('alt_seq').ravel())
     print(sequences)
     sequences = bnp.as_encoded_array(sequences, bnp.DNAEncoding)
     alt_kmers = bnp.get_kmers(sequences, k)
     print(alt_kmers[0:3])
+    fai_filename = genome_file_name.with_suffix(genome_file_name.suffix + '.fai')
+    # remove file
+    if os.path.exists(fai_filename):
+        os.remove(fai_filename)

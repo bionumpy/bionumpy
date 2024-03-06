@@ -1,9 +1,7 @@
 import dataclasses
-import bionumpy as bnp
 import numpy as np
 from npstructures.testing import assert_raggedarray_equal
 from numpy.testing import assert_array_equal
-from bionumpy.bnpdataclass import BNPDataClass
 import bionumpy as bnp
 import bionumpy.encoded_array
 import bionumpy.io.vcf_buffers
@@ -11,44 +9,45 @@ from bionumpy.bnpdataclass.bnpdataclass import narrow_type
 from bionumpy.io.vcf_buffers import VCFBuffer2, VCFHaplotypeBuffer
 import pytest
 
-from bionumpy.datatypes import VCFEntry, VCFEntryWithGenotypes
+from bionumpy.datatypes import VCFEntryWithGenotypes
 from bionumpy.encodings.vcf_encoding import PhasedGenotypeRowEncoding, GenotypeRowEncoding, PhasedHaplotypeRowEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
-from tests.util import get_file_name
 
 
-def test_vcf_matrix_buffer():
-    f = bnp.open("example_data/variants_with_header.vcf",
+def test_vcf_matrix_buffer(tmp_path, data_path):
+    f = bnp.open(data_path / "variants_with_header.vcf",
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
-    out = bnp.open("test1.vcf", mode="w")
+    out_path = tmp_path / "test1.vcf"
+    out = bnp.open(out_path, mode="w")
 
     for chunk in f:
         header = chunk.get_context("header")
         assert header
         out.write(chunk)
 
-    filestart = open('test1.vcf').read(100)
+    filestart = open(out_path).read(100)
     assert filestart.startswith('#'), filestart
     # check that header was written
-    chunk = bnp.open("test1.vcf").read_chunk()
+    chunk = bnp.open(out_path).read_chunk()
     assert chunk.get_context("header") != "" and chunk.get_context("header") == header
 
 
-def test_vcf_matrix_buffer_stream():
-    f = bnp.open("example_data/variants_with_header.vcf",
+def test_vcf_matrix_buffer_stream(tmp_path, data_path):
+    f = bnp.open(data_path / "variants_with_header.vcf",
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
 
-    out = bnp.open("test1.vcf", mode="w")
+    outpath = tmp_path / "test1.vcf"
+    out = bnp.open(outpath, mode="w")
     out.write(f.read_chunks())
     # check that header was written
-    chunk = bnp.open("test1.vcf").read_chunk()
+    chunk = bnp.open(outpath).read_chunk()
     assert chunk.get_context("header") != ""
 
-def test_context_state():
-    f = bnp.open("example_data/variants_with_header.vcf").read()
+def test_context_state(data_path):
+    f = bnp.open(data_path / "variants_with_header.vcf").read()
     assert f.get_context("header")
-    f2 = bnp.open("example_data/variants.vcf").read()
+    f2 = bnp.open(data_path / "variants.vcf").read()
     assert not f2.get_context("header")
 
 
@@ -96,9 +95,9 @@ def test_genotype_encoding():
     assert decoded_string == raw_data
 
 
-def test_parse_unphased_vcf():
-    # example_data/variants.vcf has messy unphased and missing genotypes
-    filename = "example_data/variants.vcf"
+def test_parse_unphased_vcf(data_path):
+    # variants.vcf has messy unphased and missing genotypes
+    filename = data_path / "variants.vcf"
     print(open(filename).read())
     f = bnp.open(filename, buffer_type=bionumpy.io.vcf_buffers.VCFMatrixBuffer)
     data = f.read()
@@ -119,8 +118,8 @@ def test_parse_unphased_vcf():
     assert all(w.startswith(t) for w, t in zip(last_written, last_types))
 
 
-def test_parse_phased_vcf():
-    f = bnp.open("example_data/variants_phased.vcf", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
+def test_parse_phased_vcf(data_path):
+    f = bnp.open(data_path / "variants_phased.vcf", buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
     data = f.read()
     data = data.genotypes.raw()
     print(data)
@@ -132,8 +131,8 @@ def test_parse_phased_vcf():
                   ])
 
 
-def test_read_info_field():
-    vcf_filename = "example_data/variants_with_header.vcf"
+def test_read_info_field(data_path):
+    vcf_filename = data_path / "variants_with_header.vcf"
     f = bnp.open(vcf_filename,
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
     chunk = f.read_chunk()
@@ -144,8 +143,8 @@ def test_read_info_field():
     assert chunk.info.EX_TARGET[0] == False
 
 @pytest.mark.skip('missing data')
-def test_read_info_field2():
-    vcf_filename = "example_data/info_flag.vcf"
+def test_read_info_field2(data_path):
+    vcf_filename = data_path / "info_flag.vcf"
     f = bnp.open(vcf_filename,
                  buffer_type=bionumpy.io.vcf_buffers.PhasedVCFMatrixBuffer)
     chunk = f.read_chunk()
@@ -154,16 +153,16 @@ def test_read_info_field2():
 
 
 # @pytest.mark.xfail
-def test_read_biallelic_vcf():
-    file_name = "example_data/small_phased_biallelic.vcf"
+def test_read_biallelic_vcf(data_path):
+    file_name = data_path / "small_phased_biallelic.vcf"
     vcf = bnp.open(file_name, buffer_type=bnp.io.vcf_buffers.PhasedHaplotypeVCFMatrixBuffer)
     for chunk in vcf.read_chunks():
         print(chunk)
 
 
 @pytest.mark.xfail
-def test_read_info_from_vcf():
-    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+def test_read_info_from_vcf(data_path):
+    file = data_path / "variants_with_single_individual_genotypes_and_info.vcf"
     variants = bnp.open(file).read()
 
     print(variants.info)
@@ -172,8 +171,8 @@ def test_read_info_from_vcf():
 
 
 @pytest.mark.skip
-def test_concatenate_variants():
-    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+def test_concatenate_variants(data_path):
+    file = data_path / "variants_with_single_individual_genotypes_and_info.vcf"
     f = bnp.open(file)
     chunk1 = f.read_chunk(min_chunk_size=200)
     print(len(chunk1))
@@ -198,8 +197,8 @@ def test_concatenate_variants():
 # fails because comma in info field
 #@pytest.mark.xfail
 @pytest.fixture
-def data_with_info():
-    file = "example_data/vcf_symbolic_sequences.vcf"
+def data_with_info(data_path):
+    file = data_path / "vcf_symbolic_sequences.vcf"
     data = bnp.open(file).read()
     return data
 
@@ -233,20 +232,20 @@ def test_pandas_with_info(data_with_info):
 
 
 # @pytest.mark.skip  # .genotype not implemented
-def test_read_genotype_data_from_messy_vcf():
-    file_name = "example_data/polaris_small.vcf"
+def test_read_genotype_data_from_messy_vcf(data_path):
+    file_name = data_path / "polaris_small.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     genotype = data.genotype[0]
     assert np.all(genotype == ["0/1", "0/1", ".", "0/1"])
 
 
-def test_read_genotype_with_more_data():
-    file_name = get_file_name("example_data/syndip.vcf")
+def test_read_genotype_with_more_data(data_path):
+    file_name = data_path / "syndip.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     genotypes = data.genotype[:4]
     assert np.all(genotypes == [['1|0'], ['1|0'], ['0|1'], ['1|0']])
 
-def test_write_genotype():
+def test_write_genotype(tmp_path):
     data = narrow_type(VCFEntryWithGenotypes, 'info', str)(
         ['chr1', 'chr2'],
         [1, 2],
@@ -258,26 +257,27 @@ def test_write_genotype():
         ['.', '.'],
         [['0|0', '0|1'], ['0|0', '0|1']]
     )
-    with bnp.open("tmp.vcf", "w", buffer_type=VCFBuffer2) as f:
+    file_path = tmp_path / "tmp.vcf"
+    with bnp.open(file_path, "w", buffer_type=VCFBuffer2) as f:
         f.write(data)
-    new_data = bnp.open("tmp.vcf", buffer_type=VCFBuffer2).read().get_data_object()
+    new_data = bnp.open(file_path, buffer_type=VCFBuffer2).read().get_data_object()
     assert_bnpdataclass_equal(data, new_data)
 
-def test_read_genotype_with_no_data():
-    file_name = "example_data/variants_without_genotypes.vcf"
+def test_read_genotype_with_no_data(data_path):
+    file_name = data_path / "variants_without_genotypes.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     genotypes = data.genotype[:4]
     assert genotypes.shape == (4, 0)
 
-def test_read_empty_vcf():
-    file_name = get_file_name("example_data/empty_variants.vcf")
+def test_read_empty_vcf(data_path):
+    file_name = data_path / "empty_variants.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     assert len(data) == 0
     assert data.genotype.shape[0] == 0
 
 @pytest.mark.skip   # genotype fields not implemented
-def test_read_genotype_ad_field():
-    file_name = "example_data/syndip.vcf"
+def test_read_genotype_ad_field(data_path):
+    file_name = data_path / "syndip.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     assert_array_equal(data[0].genotype_data.AD == [1, 1])
     # AD is variable length int, so should give ragged array?
@@ -286,8 +286,8 @@ def test_read_genotype_ad_field():
 
 
 @pytest.mark.skip   # genotype fields not implemented
-def test_read_genotype_ad_field():
-    file_name = "example_data/syndip.vcf"
+def test_read_genotype_ad_field(data_path):
+    file_name = data_path / "syndip.vcf"
     data = bnp.open(file_name, buffer_type=VCFBuffer2).read()
     assert_array_equal(data[0].genotype_data.AD == [1, 1])
     # AD is variable length int, so should give ragged array?
@@ -295,8 +295,8 @@ def test_read_genotype_ad_field():
     assert_raggedarray_equal(data.genotype_data.AD[0, 1] == [[1, 1], [1, 1]])
 
 
-def test_read_thousand_genomes_info_field():
-    data = bnp.open("example_data/thousand_genomes.vcf").read()
+def test_read_thousand_genomes_info_field(data_path):
+    data = bnp.open(data_path / "thousand_genomes.vcf").read()
 
     assert_raggedarray_equal(
         data.info.SAS_AF[0:3],
@@ -306,8 +306,8 @@ def test_read_thousand_genomes_info_field():
     )
 
 
-def test_read_hprc_multiallelic():
-    data = bnp.open(get_file_name("example_data/hprc_multiallelic.vcf")).read()
+def test_read_hprc_multiallelic(data_path):
+    data = bnp.open(data_path / "hprc_multiallelic.vcf").read()
     result = data.info.AF[0:2]
     assert_raggedarray_equal(result, [
         [0.5, 0.0277778],
@@ -315,8 +315,8 @@ def test_read_hprc_multiallelic():
     ])
 
 
-def test_read_write_vcf_gives_identical_file():
-    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+def test_read_write_vcf_gives_identical_file(data_path):
+    file = data_path /"variants_with_single_individual_genotypes_and_info.vcf"
     variants = bnp.open(file).read()
 
     with bnp.open("tmp.vcf", "w") as f:
@@ -330,7 +330,7 @@ def test_read_write_vcf_gives_identical_file():
 
 @pytest.mark.xfail
 def test_read_vcf_replace_field():
-    file = "example_data/variants_with_single_individual_genotypes_and_info.vcf"
+    file = data_path / "variants_with_single_individual_genotypes_and_info.vcf"
     variants = bnp.open(file).read()
     variants = bnp.replace(variants, position=np.ones_like(variants.position))
 
@@ -346,19 +346,19 @@ def test_read_vcf_replace_field():
 
 
 #@pytest.mark.xfail
-def test_parse_vcf_that_fails():
-    vcf = bnp.open(get_file_name("example_data/variants_with_af.vcf")).read()
+def test_parse_vcf_that_fails(data_path):
+    vcf = bnp.open(data_path /"variants_with_af.vcf").read()
     print(vcf)
 
 
-def test_genotype_print():
-    i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
+def test_genotype_print(data_path):
+    i = bnp.open(data_path / "thousand_genomes.vcf",
                  buffer_type=VCFBuffer2).read()
     print(i.genotype)
 
-def test_ioi():
-    out_filename = "tmp_ioi.vcf"
-    i = bnp.open(get_file_name("example_data/thousand_genomes.vcf"),
+def test_ioi(tmp_path, data_path):
+    out_filename = tmp_path / "tmp_ioi.vcf"
+    i = bnp.open(data_path / "thousand_genomes.vcf",
                  buffer_type=VCFBuffer2).read()
     print(i.genotype)
     i = bnp.replace(i, position=i.position + 1)
@@ -368,8 +368,8 @@ def test_ioi():
     assert np.all(i2.position[:10] == i.position[:10])
 
 
-def test_vcf_haplotyped():
-    vcf = bnp.open(get_file_name("example_data/haplotypes.vcf"), buffer_type=VCFHaplotypeBuffer).read()
+def test_vcf_haplotyped(data_path ):
+    vcf = bnp.open(data_path / "haplotypes.vcf", buffer_type=VCFHaplotypeBuffer).read()
     print(vcf.genotype)
     genotype_ = vcf.genotype[1][:3]
     print(genotype_)

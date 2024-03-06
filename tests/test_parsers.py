@@ -55,22 +55,22 @@ def test_buffer_write(buffer_name):
     assert np.all(true_buf == buf)
 
 
-@pytest.mark.parametrize("file", ["example_data/reads.fq", "example_data/big.fq.gz"])
+@pytest.mark.parametrize("file", ["reads.fq", "big.fq.gz"])
 @pytest.mark.parametrize("chunk_size", [100, 5000000])
-def test_buffered_writer_ctx_manager(file, chunk_size):
-
-    file_path = "./tmp.fq"
-    true_stream = bnp_open('example_data/reads.fq').read_chunks()
+def test_buffered_writer_ctx_manager(file, chunk_size, tmp_path, data_path):
+    file = data_path / file
+    file_path = tmp_path / "tmp.fq"
+    true_stream = bnp_open(data_path /'reads.fq').read_chunks()
 
     with bnp_open(file_path, mode='w') as f:
         f.write(true_stream)
 
-    true_stream = bnp_open('example_data/reads.fq').read_chunks()
+    true_stream = bnp_open(data_path / 'reads.fq').read_chunks()
     fq_stream = bnp_open(file_path)
     for fq_item, true_item in zip(fq_stream, true_stream):
         assert_bnpdataclass_equal(fq_item, true_item)
 
-    os.remove(file_path)
+    # os.remove(file_path)
 
 
 def test_custom_read():
@@ -113,7 +113,6 @@ def test_fastq_buffer(fastq_buffer):
 
 
 @pytest.mark.skip("makingtrouble")
-@pytest.mark.parametrize("file_name", glob.glob("example_data/*"))
 def test_read_example_data(file_name):
     if "broken" in file_name:
         # broken data should not pass tests
@@ -183,23 +182,23 @@ def test_line_chunker(vcf_buffer2):
         assert_bnpdataclass_equal(line, t)
 
 
-def test_read_chunk_after_read_chunks_returns_empty_dataclass():
-    file = bnp.open("example_data/reads.fq")
+def test_read_chunk_after_read_chunks_returns_empty_dataclass(data_path):
+    file = bnp.open(data_path / 'reads.fq')
     chunks = list(file.read_chunks())
     new_chunk = file.read_chunk()
     assert isinstance(chunks[0],
                       type(new_chunk))
 
 
-def test_read_gtf():
-    file = bnp.open("example_data/small.gtf")
+def test_read_gtf(data_path):
+    file = bnp.open(data_path / 'small.gtf')
     chunk = file.read_chunk()
     assert True
 
 
-def test_read_bam():
-    data = bnp.open("example_data/alignments.bam").read()
-    data2 = bnp.open("example_data/alignments.sam").read()
+def test_read_bam(data_path):
+    data = bnp.open(data_path / 'alignments.bam').read()
+    data2 = bnp.open(data_path / 'alignments.sam').read()
     print(data)
     print(data2)
     print(data.sequence.raw(), data.sequence.shape)
@@ -207,6 +206,6 @@ def test_read_bam():
     print(data2.sequence.shape)
     assert_encoded_raggedarray_equal(data.sequence, data2.sequence)
     print(data)
-    n_lines = len([line for line in open("example_data/alignments.sam") if not line.startswith("@")])
+    n_lines = len([line for line in open(data_path / 'alignments.sam') if not line.startswith("@")])
     assert n_lines == len(data)
 

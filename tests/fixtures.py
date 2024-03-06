@@ -3,16 +3,16 @@ from bionumpy.datatypes import VCFEntry, SequenceEntryWithQuality
 
 data = {
     "bed": Bed6.from_entry_tuples([
-            ("chr1", 1, 3, ".", 0, "-"),
-            ("chr1", 40, 60, ".", 1, "+"),
-            ("chr20",  400, 600, ".", 2, "+")]),
+        ("chr1", 1, 3, ".", 0, "-"),
+        ("chr1", 40, 60, ".", 1, "+"),
+        ("chr20", 400, 600, ".", 2, "+")]),
     "vcf2": VCFEntry.from_entry_tuples([
-        ("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
-        ("chr1",	887559, "rs3748595",	"A",	"CAA", ".", ".", "."),
-        ("chr2",	8877, "rs3828047",	"AGG",	"C", ".", ".", ".")]),
+        ("chr1", 88361, "rs4970378", "A", "G", ".", ".", "."),
+        ("chr1", 887559, "rs3748595", "A", "CAA", ".", ".", "."),
+        ("chr2", 8877, "rs3828047", "AGG", "C", ".", ".", ".")]),
     "fastq": SequenceEntryWithQuality.from_entry_tuples([
         ("headerishere", "CTTGTTGA", "".join("!" for _ in "CTTGTTGA")),
-        ("anotherheader", "CGG", "".join("~" for _ in "CGG"))]),}
+        ("anotherheader", "CGG", "".join("~" for _ in "CGG"))]), }
 '''
     "vcf": [
         VCFEntry.single_entry("chr1",	88361, "rs4970378",	"A",	"G", ".", ".", "."),
@@ -39,3 +39,5 @@ data = {
         ('chr1',	9800,	9871,	0.36612),
         ('chr1',	9871,	9872,	0.17042)])
 }'''
+
+

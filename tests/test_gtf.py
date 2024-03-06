@@ -4,11 +4,10 @@ import numpy as np
 from bionumpy import as_encoded_array
 from bionumpy.sequence.genes import get_transcript_sequences
 from bionumpy.util.testing import assert_encoded_array_equal
-from .util import get_file_name
 
 @pytest.fixture
-def gtf_entries():
-    return bnp.open(get_file_name("example_data/small.gtf")).read()
+def gtf_entries(data_path ):
+    return bnp.open(data_path / "small.gtf").read()
 
 @pytest.fixture
 def reference_sequences():
@@ -36,15 +35,15 @@ def test_get_exons(gtf_entries):
 
 
 # @pytest.mark.skip('waiting')
-def test_read_gff():
-    annotation = bnp.open('example_data/small_gff.gff3').read()
+def test_read_gff(data_path):
+    annotation = bnp.open(data_path / 'small_gff.gff3').read()
     genes = annotation.get_genes()
     assert genes[0].gene_id == 'ENSG00000290825.1'
     # assert_encoded_array_equal(genes[0].gene_id, 'ENSG00000290825.1')
     # print(genes)
 
 
-def test_read_sarcer_gtf():
-    annotation = bnp.open('example_data/sacCer3.ensGene.gtf.gz').read()
+def test_read_sarcer_gtf(data_path):
+    annotation = bnp.open(data_path / 'sacCer3.ensGene.gtf.gz').read()
     transcripts = annotation.get_transcripts()
     assert len(transcripts) > 0

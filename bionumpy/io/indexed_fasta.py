@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Union
+
 import numpy as np
 from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
 from .multiline_buffer import FastaIdxBuffer, FastaIdx
@@ -61,9 +64,11 @@ class IndexedFasta:
     Behaves like dict of chrom names to sequences
     """
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: Union[str, Path]):
+        if isinstance(filename, str):
+            filename = Path(filename)
         self._filename = filename
-        self._index = read_index(filename+".fai")
+        self._index = read_index(filename.with_suffix(filename.suffix + ".fai"))
         self._f_obj = open(filename, "rb")
         self._index_table = FastaIdx.from_entry_tuples(
             [(name, var['rlen'], var['offset'], var['lenc'], var['lenb'])

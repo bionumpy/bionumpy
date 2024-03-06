@@ -6,6 +6,6 @@ def filter_bam(input_file, output_file):
         for chunk in bnp.open(input_file).read_chunks(min_chunk_size=100000):
             f.write(chunk[chunk.mapq == 60])
 
-def test_profile():
+def _test_profile():
     filter_bam('../benchmarks/results/bams/big.bam', 'tmp.bam')
 

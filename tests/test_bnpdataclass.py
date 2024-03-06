@@ -103,10 +103,11 @@ def test_set_get_context():
 
 
 @pytest.mark.parametrize("file", [
-    "example_data/variants.vcf",
-    "example_data/variants_with_header.vcf"
+    "variants.vcf",
+    "variants_with_header.vcf"
 ])
-def test_read_header(file):
+def test_read_header(file,data_path):
+    file = data_path/file
     chunks = list(bnp.open(file).read_chunks())
     true_header = "".join(line for line in open(file) if line.startswith("#"))
     for chunk in chunks:

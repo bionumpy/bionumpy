@@ -38,13 +38,13 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.doctest',
               'sphinx.ext.coverage',
-              'sphinx_design',
-              'sphinxcontrib.bibtex']
+              'sphinx_design',]
+
 
 # for manuscript references
-bibtex_bibfiles = ['manuscript/refs.bib']
-bibtex_reference_style = 'label'
-bibtex_encoding = 'latin'
+#bibtex_bibfiles = ['manuscript/refs.bib']
+#bibtex_reference_style = 'label'
+#bibtex_encoding = 'latin'
 
 doctest_global_setup = """
 import bionumpy as bnp

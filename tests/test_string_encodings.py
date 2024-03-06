@@ -24,8 +24,8 @@ def string_encoding(encoded_ragged_array):
     return StringEncoding(encoded_ragged_array, modulo=103)
 
 @pytest.fixture
-def chrom_names():
-    return bnp.open("example_data/hg38.chrom.sizes").read().name
+def chrom_names(data_path):
+    return bnp.open(data_path / "hg38.chrom.sizes").read().name
 
 
 def test_problems(problems):

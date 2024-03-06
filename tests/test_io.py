@@ -119,16 +119,13 @@ def test_read_big_fastq():
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
-def test_ctx_manager_read(buffer_name):
-    file_path = Path(f"./{buffer_name}_example.{buffer_name}")
-
+def test_ctx_manager_read(buffer_name, tmp_path):
+    file_path = tmp_path / f"./{buffer_name}_example.{buffer_name}"
     with open(file_path, "w") as file:
         file.write(buffer_texts[buffer_name])
 
     with bnp.open(file_path) as file:
         file.read()
-
-    os.remove(file_path)
 
 
 @pytest.mark.parametrize("buffer_name", ["bed", "vcf", "fastq", "fasta"])
@@ -165,10 +162,11 @@ def test_write_dna_fastq():
     assert np.all(entry.sequence == result.sequence)
 
 
-def test_write_empty():
+def test_write_empty(tmp_path):
     entry = VCFEntry([], [], [], [],
                      [], [], [], [])
-    with bnp.open('tmp.vcf', 'w') as f:
+    filename = tmp_path / 'tmp.vcf'
+    with bnp.open(filename, 'w') as f:
         f.write(entry)
 
 
@@ -192,33 +190,33 @@ def test_read_write_bool():
 
 
 @pytest.fixture
-def fastq_with_carriage_return_filename():
+def fastq_with_carriage_return_filename(tmp_path):
     text = '''\
 @test_sequence_id_here\r
 GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT\r
 +\r
 !''*((((***+))%%%++)(%%%%).1***-+*''))**55CCF>>>>>>CCCCCCC65\r
 '''
-    filename = 'carriage_return.fq'
+    filename = tmp_path/'carriage_return.fq'
     with open(filename, 'w') as file:
         file.write(text)
     return filename
 
 
 @pytest.fixture
-def bed_with_carriage_return_filename():
+def bed_with_carriage_return_filename(tmp_path):
     text = '''\
 chr1\t1\t2\r
 chr2\t3\t4
 '''
-    filename = 'carriage_return.bed'
+    filename = tmp_path / 'carriage_return.bed'
     with open(filename, 'w') as file:
         file.write(text)
     return filename
 
 
 @pytest.fixture
-def fasta_with_carriage_return_filename():
+def fasta_with_carriage_return_filename(tmp_path):
     text = '''\
 >test_sequence_id_here\r
 GACTG\r
@@ -226,7 +224,7 @@ GACTG\r
 GACTC\r
 GAG\r
 '''
-    filename = 'carriage_return.fa'
+    filename = tmp_path/'carriage_return.fa'
     with open(filename, 'w') as file:
         file.write(text)
     return filename
@@ -252,28 +250,31 @@ def test_carriage_return_fasta(fasta_with_carriage_return_filename):
 
 
 # @pytest.mark.xfail
-def test_carriage_return_fai(fasta_with_carriage_return_filename):
+def test_carriage_return_fai(fasta_with_carriage_return_filename: Path):
     # remove file if it exists
-    if os.path.exists(fasta_with_carriage_return_filename + '.fai'):
-        os.remove(fasta_with_carriage_return_filename + '.fai')
-    fai = bnp.open_indexed(fasta_with_carriage_return_filename)
+    # add .fai to the end of the file
+    filename = fasta_with_carriage_return_filename
+    fai_filename = filename.with_suffix(filename.suffix + '.fai')
+    if os.path.exists(fai_filename):
+        os.remove(fai_filename)
+    fai = bnp.open_indexed(filename)
     assert_encoded_array_equal(fai['test_sequence_id_here'].raw(), 'GACTG')
     assert_encoded_array_equal(fai['test_sequence_id_here2'].raw(), 'GACTCGAG')
 
-def test_rwr_bed_with_change():
-    tmp_path = 'tmp_rwr.bed'
-    filename = get_file_name('example_data/alignments.bed')
+def test_rwr_bed_with_change(tmp_path, data_path):
+    file_path = tmp_path / 'tmp_rwr.bed'
+    filename = data_path  / 'alignments.bed'
     data = bnp.open(filename, buffer_type=bnp.io.Bed6Buffer).read()
     data.start = data.start + 1
     data.stop = data.stop + 1
     data.chromosome = StringEncoding(['chr1', 'chr2']).encode(data.chromosome)
     data == data[::2]
-    if os.path.exists(tmp_path):
-        os.remove(tmp_path)
-    bnp.open(tmp_path, 'w', buffer_type=bnp.io.Bed6Buffer).write(data)
-    text = open(tmp_path).read()
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    bnp.open(file_path, 'w', buffer_type=bnp.io.Bed6Buffer).write(data)
+    text = open(file_path).read()
     assert text.startswith('chr1'), text[:10]
     print(text)
-    data2 = bnp.open(tmp_path).read()
+    data2 = bnp.open(file_path).read()
     assert_equal(data.start, data2.start)
     assert np.all(data.chromosome == data2.chromosome)
