@@ -9,7 +9,7 @@ This is a list of  currently supported file formats in BioNumPy. Reading files w
 * bed
 * fasta / fa
 * bed
-* fasta / fa
+* fastq / fq
 * gfa (limited support only)
 * gff
 * gtf
