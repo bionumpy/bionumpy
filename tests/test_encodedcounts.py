@@ -14,3 +14,5 @@ def test_most_common(encoded_counts):
     most_common = encoded_counts.most_common(2)
     assert most_common == EncodedCounts(
         ['T', 'A'], np.array([5, 4]))
+
+
