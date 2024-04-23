@@ -15,6 +15,34 @@ Fouth paragraph
 General
 
 - array API: https://data-apis.org/array-api/2022.12/API_specification/index.html
+  - from importlib.metadata import entry_points
+  - return hasattr(x, '__array_namespace__')
+  - https://data-apis.org/array-api/2022.12/verification_test_suite.html
+  - doesn't support list inputs
+  - mutation is not allowed
+  - access device in raggedarrays
+  - dlpack
+  - .devce, device=None, to_device
+  - in-place operations?
+  - we can't do T, mT
+  - __array_namespace__
+  - __index__
+  - __int__
+  - broadcasting - we only support 2 dims
+  - array creation algorithms
+  - positional only?
+  - must return zero-dim array on indexing (this differs from numpy)
+  - boolean indexing is voluntary
+  - take
+  - manipulation functions
+  - argmin, argmax, nonzero, where
+  - set functions
+  - argsort, sort
+  - max, mean, min, prod, std, sum, var, all, any
+  - check type promotion, should be delegated entirely to numpy
+  - __array_api_version__
+  - extension name
+  
 - interplay with torch jax, numpy
 - Autodiff
 - Data types. string/unicode numeric SI?- Supporting Info
