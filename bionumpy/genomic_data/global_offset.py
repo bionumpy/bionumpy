@@ -1,4 +1,6 @@
 import dataclasses
+from typing import Tuple
+
 import numpy as np
 from ..encodings.string_encodings import StringEncoding
 from ..encoded_array import EncodedArray, as_encoded_array
@@ -51,6 +53,11 @@ class GlobalOffset:
                        chromosome=chromosome,
                        start=start,
                        stop=stop)
+
+    def to_local_coordinates(self, global_offset) -> Tuple[EncodedArray, np.ndarray]:
+        chromosome_idxs = np.searchsorted(self._offset, global_offset, side="right") - 1
+        local_offset = global_offset - self._offset[chromosome_idxs]
+        return EncodedArray(chromosome_idxs, self._old_encoding), local_offset
 
     def from_local_interval(self, interval, do_clip=False):
         start_offsets, stop_offsets = self.start_ends_from_intervals(interval, do_clip)

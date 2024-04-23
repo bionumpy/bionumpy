@@ -202,7 +202,7 @@ class BamBuffer(FileBuffer):
     def __getitem__(self, idx):
         return self.__class__(self._buffer_extractor[idx], self._header_data)
 
-    def get_field_range_as_text(self):
+    def get_field_range_as_text(self, *args):
         raise Exception('Cannot write BAM file with set values')
 
     @property
