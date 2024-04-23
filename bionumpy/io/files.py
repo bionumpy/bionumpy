@@ -1,6 +1,7 @@
 from pathlib import PurePath
 from typing import Union
 
+
 from .gzip_reading import gzip
 # import gzip
 import dataclasses
@@ -13,6 +14,7 @@ from .delimited_buffers import (BedBuffer, GfaSequenceBuffer,
                                 NarrowPeakBuffer, BdgBuffer, GTFBuffer)
 from .buffers.sam import SAMBuffer
 from .vcf_buffers import VCFBuffer
+from .pairs import PairsBuffer
 from .wig import WigBuffer
 from .parser import NumpyFileReader, NpBufferedWriter, NumpyBamWriter
 from .exceptions import FormatException
@@ -40,7 +42,8 @@ buffer_types = {
     ".sam": SAMBuffer, #, comment="@"),
     ".bam": BamBuffer,
     ".sizes": ChromosomeSizeBuffer,
-    '.wig': WigBuffer
+    '.wig': WigBuffer,
+    '.pairs': PairsBuffer,
 }
 
 

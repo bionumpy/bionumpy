@@ -1,0 +1,10 @@
+#chromsize: scaffold_1494 13653
+#chromsize: scaffold_1496 13619
+#chromsize: scaffold_1497 13524
+#chromsize: scaffold_1499 13000
+#chromsize: scaffold_1500 13000
+#chromsize: scaffold_1508 11662
+#columns: readID chrom1 pos1 chrom2 pos2 strand1 strand2 pair_type
+name1	scaffold_1	61	scaffold_1	23	+	-	UU
+name1	scaffold_1	61	scaffold_1	23	+	-	UU
+name1	scaffold_1	61	scaffold_1	23	+	-	UU
