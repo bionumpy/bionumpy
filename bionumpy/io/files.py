@@ -44,6 +44,7 @@ buffer_types = {
     ".sizes": ChromosomeSizeBuffer,
     '.wig': WigBuffer,
     '.pairs': PairsBuffer,
+    '.pa5': PairsBuffer,
 }
 
 

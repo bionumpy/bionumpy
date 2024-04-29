@@ -220,9 +220,9 @@ class GfaPath:
 class PairsEntry:
     """https://pairtools.readthedocs.io/en/latest/formats.html"""
     read_id: str
-    chrom1: str
+    chrom1: SequenceID
     pos1: int
-    chrom2: str
+    chrom2: SequenceID
     pos2: int
     strand1: StrandEncoding
     strand2: StrandEncoding
