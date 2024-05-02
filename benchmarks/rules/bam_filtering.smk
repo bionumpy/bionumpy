@@ -4,7 +4,7 @@ rule pysam_filter_bam:
     output:
         'results/pysam/filtered_bams/{size}.filtered.bam'
     benchmark:
-        "benchmarks/bam_filtering/pysam/{size}.txt"
+        repeat("benchmarks/bam_filtering/pysam/{size}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/pysam.yml"
     script:
@@ -16,7 +16,7 @@ rule samtools_filter_bam:
     output:
         'results/samtools/filtered_bams/{size}.filtered.bam'
     benchmark:
-        "benchmarks/bam_filtering/samtools/{size}.txt"
+        repeat("benchmarks/bam_filtering/samtools/{size}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/samtools.yml"
     shell:
@@ -29,7 +29,7 @@ rule bionumpy_filter_bam:
     output:
         'results/bionumpy/filtered_bams/{size}.filtered.bam'
     benchmark:
-        "benchmarks/bam_filtering/bionumpy/{size}.txt"
+        repeat("benchmarks/bam_filtering/bionumpy/{size}.txt", config["n_benchmark_repeats"])
     run:
         import bionumpy as bnp
         with bnp.open(output[0], 'w') as f:

@@ -18,7 +18,7 @@ rule bionumpy_subsample:
     output:
         "results/bionumpy/subsample/{filename}.fa"
     benchmark:
-        "benchmarks/subsample/bionumpy/{filename}.txt"
+        repeat("benchmarks/subsample/bionumpy/{filename}.txt", config["n_benchmark_repeats"])
     shell:
         'python3 ../scripts/subsample_reads.py {input} {output}'
         #"../scripts/bionumpy_subsample.py"
@@ -30,7 +30,7 @@ rule python_subsample:
     output:
         "results/python/subsample/{filename}.fa"
     benchmark:
-        "benchmarks/subsample/python/{filename}.txt"
+        repeat("benchmarks/subsample/python/{filename}.txt", config["n_benchmark_repeats"])
     script:
         "../scripts/python_subsample.py"
 
@@ -40,7 +40,7 @@ rule biopython_subsample:
     output:
         "results/biopython/subsample/{filename}.fa"
     benchmark:
-        "benchmarks/subsample/biopython/{filename}.txt"
+        repeat("benchmarks/subsample/biopython/{filename}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biopython.yml"
     shell:
@@ -60,7 +60,7 @@ rule seqtk_subsample:
     conda:
         "../envs/seqtk.yml"
     benchmark:
-        "benchmarks/subsample/seqtk/{filename}.txt"
+        repeat("benchmarks/subsample/seqtk/{filename}.txt", config["n_benchmark_repeats"])
     #wrapper:
     # wrapper uses pigz to compress
     #    "v1.20.0/bio/seqtk/subsample/se"
