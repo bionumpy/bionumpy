@@ -8,7 +8,7 @@ sorted(tf_experiments)
 
 def bedtools_commands(wildcards):
     n_tfs = int(wildcards.n_tfs)
-    tf_pairs = set(itertools.combinations(tf_experiments[0:n_tfs],2))
+    tf_pairs = sorted(list(set(itertools.combinations(tf_experiments[0:n_tfs],2))))
     path = "results/bed_files/"
     file_ending = ".sorted.bed"
     # A bit hacky, in order to run all bedtools commands in one rule so benchmark is valid
