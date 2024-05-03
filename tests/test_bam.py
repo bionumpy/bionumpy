@@ -64,3 +64,4 @@ def test_write_bam_after_change(bam_entries):
     with bnp.open('tmp.bam', mode='w') as f:
         with pytest.raises(ValueError):
             f.write(bam_entries)
+

@@ -11,7 +11,7 @@ rule jellyfish_count:
         #extra="--canonical",
     threads: 1
     benchmark:
-        "benchmarks/kmer_counts/jellyfish/count-{filename}.txt"
+        repeat("benchmarks/kmer_counts/jellyfish/count-{filename}.txt", config["n_benchmark_repeats"])
     wrapper:
         "v1.19.2-20-g6055e791/bio/jellyfish/count"
 
@@ -26,7 +26,7 @@ rule jellyfish_dump:
     params:
         extra="-c -t",
     benchmark:
-        "benchmarks/kmer_counts/jellyfish/dump-{prefix}.txt"
+        repeat("benchmarks/kmer_counts/jellyfish/dump-{prefix}.txt", config["n_benchmark_repeats"])
     wrapper:
         "v1.19.2-20-g6055e791/bio/jellyfish/dump"
 
@@ -37,7 +37,7 @@ rule bionumpy_count:
     output:
         "results/bionumpy/kmer_counts/{filename}.csv"
     benchmark:
-        "benchmarks/kmer_counts/bionumpy/{filename}.txt"
+        repeat("benchmarks/kmer_counts/bionumpy/{filename}.txt", config["n_benchmark_repeats"])
     shell:
         'python ../scripts/kmer_counting_example.py {input} {output}'
         #         "../scripts/bionumpy_count_kmers.py"
@@ -49,7 +49,7 @@ rule python_count:
     output:
         "results/python/kmer_counts/{filename}.csv"
     benchmark:
-        "benchmarks/kmer_counts/python/{filename}.txt"
+        repeat("benchmarks/kmer_counts/python/{filename}.txt", config["n_benchmark_repeats"])
     script:
         "../scripts/python_kmer_counting.py"
 
@@ -59,7 +59,7 @@ rule biopython_count:
     output:
         "results/biopython/kmer_counts/{filename}.csv"
     benchmark:
-        "benchmarks/kmer_counts/biopython/{filename}.txt"
+        repeat("benchmarks/kmer_counts/biopython/{filename}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biopython.yml"
     shell:

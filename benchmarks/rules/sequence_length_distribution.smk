@@ -5,9 +5,10 @@ rule bionumpy_sequence_length_distribution:
     output:
         "results/bionumpy/sequence_length_distribution/{filename}.csv"
     benchmark:
-        "benchmarks/sequence_length_distribution/bionumpy/{filename}.txt"
+        repeat("benchmarks/sequence_length_distribution/bionumpy/{filename}.txt", config["n_benchmark_repeats"])
     shell:
         "python ../scripts/sequence_length_distribution_example.py {input} {output}"
+
     
 rule awk_sequence_length_distribution:
     input:
@@ -15,7 +16,7 @@ rule awk_sequence_length_distribution:
     output:
         "results/awk/sequence_length_distribution/{filename}.csv"
     benchmark:
-        "benchmarks/sequence_length_distribution/awk/{filename}.txt"
+        repeat("benchmarks/sequence_length_distribution/awk/{filename}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/awk.yml"
     shell:
@@ -28,7 +29,7 @@ rule python_sequence_length_distribution:
     output:
         "results/python/sequence_length_distribution/{filename}.csv"
     benchmark:
-        "benchmarks/sequence_length_distribution/python/{filename}.txt"
+        repeat("benchmarks/sequence_length_distribution/python/{filename}.txt", config["n_benchmark_repeats"])
     run:
         import gzip
         from collections import defaultdict
@@ -56,7 +57,7 @@ rule biopython_sequence_length_distribution:
     output:
         "results/biopython/sequence_length_distribution/{filename}.csv"
     benchmark:
-        "benchmarks/sequence_length_distribution/biopython/{filename}.txt"
+        repeat("benchmarks/sequence_length_distribution/biopython/{filename}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biopython.yml"
     shell:
