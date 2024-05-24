@@ -1,3 +1,5 @@
+from typing import Optional, List, Union
+
 import numpy as np
 from ..encoded_array import Encoding, as_encoded_array, EncodedArray, EncodedRaggedArray, encoded_array_from_nparray
 from .exceptions import EncodingError
@@ -6,18 +8,48 @@ from ..util.ascii_hash import AsciiHashTable
 
 
 class StringEncoding(Encoding):
-    def __init__(self, sequences, modulo=None):
+    """
+    Encodes strings into a numeric value corresponding to the index of the string in the input list.
+    """
+    def __init__(self, sequences: List[str], modulo: Optional[int] = None):
         self._seqeunces = as_encoded_array(sequences)
         self._modulo = modulo
         self._hash_table = AsciiHashTable.from_sequences(self._seqeunces)
 
-    def get_labels(self):
+    def get_labels(self) -> List[str]:
         return self._seqeunces.tolist()
 
-    def to_string(self, n):
+    def to_string(self, n: int) -> str:
+        """
+        Get the string corresponding to the index n.
+
+        Parameters
+        ----------
+        n: int
+
+        Returns
+        -------
+        str
+            The string corresponding to the index n.
+
+        """
         return self._seqeunces[int(n)].to_string()
 
-    def encode(self, encoded_ragged_array):
+    def encode(self, encoded_ragged_array: Union[EncodedRaggedArray, StringArray, List[str]]) -> Union[EncodedArray, EncodedRaggedArray]:
+        """
+        Encode a string, list of strings or EncodedRaggedArray into an EncodedArray or EncodedRaggedArray of hashed strings.
+
+        Parameters
+        ----------
+        encoded_ragged_array: Union[EncodedRaggedArray, StringArray, list[str]]
+            The input data to encode.
+
+        Returns
+        -------
+        Union[EncodedArray, EncodedRaggedArray]
+            The encoded data.
+
+        """
         if isinstance(encoded_ragged_array, StringArray):
             pass # encoded_ragged_array = encoded_array_from_nparray(encoded_ragged_array)
         else:
@@ -33,7 +65,19 @@ class StringEncoding(Encoding):
             hashes = np.squeeze(hashes)
         return EncodedArray(hashes, self)
 
-    def decode(self, encoded_array):
+    def decode(self, encoded_array: Union[EncodedArray, np.ndarray]) -> Union[str, List[str]]:
+        """
+        Decode an EncodedArray or np.ndarray into a string or list of strings.
+
+        Parameters
+        ----------
+        encoded_array
+
+        Returns
+        -------
+
+        """
+
         if isinstance(encoded_array, EncodedArray):
             data = encoded_array.raw()
         else:
