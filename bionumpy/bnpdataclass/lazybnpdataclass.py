@@ -1,58 +1,61 @@
 import dataclasses
 import types
-from functools import lru_cache
+from functools import lru_cache, wraps
 from numbers import Number
+from typing import Type, Optional, Any
 
 import numpy as np
 
-from bionumpy.io.dump_csv import get_column, join_columns
-from bionumpy.io.exceptions import FormatException, ParsingException
+from .bnpdataclass import BNPDataClass
+from ..encoded_array import EncodedRaggedArray
+from ..io.dump_csv import get_column
+from ..io.exceptions import FormatException, ParsingException
 
 
 # from bionumpy import EncodedRaggedArray
 
 
-def translate_types(input_type):
-    if input_type == str:
-        return EncodedRaggedArray
-    elif input_type == int:
-        return np.ndarray
+# def translate_types(input_type):
+#     if input_type == str:
+#         return EncodedRaggedArray
+#     elif input_type == int:
+#         return np.ndarray
+#
+#
+# def buffer_backed_bnp(old_cls):
+#     cls = types.new_class(old_cls.__name__, old_cls.__bases__, {})
+#     for i, (var_name, var_type) in enumerate(old_cls.__annotations__.items()):
+#         setattr(cls, var_name, BufferBackedDescriptor(i, var_type))
+#         setattr(cls, '__init__', lambda self, buffer: setattr(self, '_buffer', buffer))
+#     return cls
 
 
-def buffer_backed_bnp(old_cls):
-    cls = types.new_class(old_cls.__name__, old_cls.__bases__, {})
-    for i, (var_name, var_type) in enumerate(old_cls.__annotations__.items()):
-        setattr(cls, var_name, BufferBackedDescriptor(i, var_type))
-        setattr(cls, '__init__', lambda self, buffer: setattr(self, '_buffer', buffer))
-    return cls
-
-
-class BufferBackedDescriptor:
-    '''
-    This class is made to access and parse parts of a text buffer lazily.
-    '''
-
-    def __init__(self, buffer, index, dtype):
-        self._buffer = buffer
-        self._index = index
-        self._dtype = dtype
-
-    def __get__(self, obj, objtype):
-        return self._dtype(obj._buffer.get_field_by_number(self._index, self._dtype))
+# class BufferBackedDescriptor:
+#     '''
+#     This class is made to access and parse parts of a text buffer lazily.
+#     '''
+#
+#     def __init__(self, buffer, index, dtype):
+#         self._buffer = buffer
+#         self._index = index
+#         self._dtype = dtype
+#
+#     def __get__(self, obj, objtype):
+#         return self._dtype(obj._buffer.get_field_by_number(self._index, self._dtype))
 
 
 class LazyBNPDataClass:
     pass
 
 
-class BaseClass:
-    def __init__(self, buffer):
-        self._buffer = buffer
-
-    def __getattr__(self, var_name):
-        if var_name in self._buffer:
-            return self._buffer[var_name]
-        return super().__getattr__(var_name)
+# class BaseClass:
+#     def __init__(self, buffer):
+#         self._buffer = buffer
+#
+#     def __getattr__(self, var_name):
+#         if var_name in self._buffer:
+#             return self._buffer[var_name]
+#         return super().__getattr__(var_name)
 
 
 class ItemGetter:
@@ -88,10 +91,26 @@ class ItemGetter:
         return self._buffer
 
 
-def create_lazy_class(dataclass, header=None):
+def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any]=None) -> Type[BNPDataClass]:
+    '''
+    Creates a dataclass that emulates the given BNPDataClass  but with lazy loading of fields
+    Parameters
+    ----------
+    dataclass
+    header
+
+    Returns
+    -------
+
+    '''
+
     field_names = [field.name for field in dataclasses.fields(dataclass)]
 
     class NewClass(dataclass, LazyBNPDataClass):
+        """
+        A class that lazily loads fields from a buffer
+        """
+
         def __init__(self, item_getter, set_values=None, computed_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
@@ -103,22 +122,28 @@ def create_lazy_class(dataclass, header=None):
             # self.set_context('header', header)
 
         @classmethod
-        def from_data_frame(cls, df):
+        @wraps(dataclass.from_data_frame)
+        def from_data_frame(cls, df: 'pd.DataFrame') -> 'NewClass':
             return dataclass.from_data_frame(df)
 
         @classmethod
+        @wraps(dataclass.from_dict)
         def from_dict(cls, d):
             return dataclass.from_dict(d)
 
+        @wraps(dataclass.toiter)
         def toiter(self):
             return self.get_data_object().toiter()
 
+        @wraps(dataclass.tolist)
         def tolist(self):
             return self.get_data_object().tolist()
 
+        @wraps(dataclass.todict)
         def todict(self):
             return self.get_data_object().todict()
 
+        @wraps(dataclass.topandas)
         def topandas(self):
             return self.get_data_object().topandas()
 
@@ -173,7 +198,15 @@ def create_lazy_class(dataclass, header=None):
         def __iter__(self):
             return iter(self.get_data_object())
 
-        def get_data_object(self):
+        def get_data_object(self)->BNPDataClass:
+            """
+            Returns the BNPDataClass with all fields loaded
+
+            Returns
+            -------
+            BNPDataClass
+
+            """
             if not self._computed:
                 fields = [getattr(self, field.name) for field in dataclasses.fields(dataclass)]
                 self._data = dataclass(*fields)
@@ -202,7 +235,7 @@ def create_lazy_class(dataclass, header=None):
                 return func(*args, **kwargs)
             return NotImplemented
 
-        def get_buffer(self, buffer_class=None):
+        def get_buffer(self, buffer_class=None)->EncodedRaggedArray:
             if buffer_class is None:
                 buffer_class = self._itemgetter.buffer.__class__
             if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer,
