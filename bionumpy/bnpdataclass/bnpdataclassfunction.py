@@ -11,7 +11,7 @@ class bnpdataclassfunction:
             pass
 
 
-def replace(obj, **kwargs):
+def replace(obj: BNPDataClass, **kwargs) -> BNPDataClass:
     '''Replace the values of a dataclass with new values
 
     Parameters

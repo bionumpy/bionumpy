@@ -396,7 +396,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
 
     NewClass.__name__ = base_class.__name__
     NewClass.__qualname__ = base_class.__qualname__
-
+    NewClass.__doc__ = dataclasses.dataclass(base_class).__doc__
     return NewClass
 
 
