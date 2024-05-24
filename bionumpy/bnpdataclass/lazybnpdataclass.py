@@ -1,5 +1,5 @@
 import dataclasses
-import types
+
 from functools import lru_cache, wraps
 from numbers import Number
 from typing import Type, Optional, Any
@@ -12,50 +12,8 @@ from ..io.dump_csv import get_column
 from ..io.exceptions import FormatException, ParsingException
 
 
-# from bionumpy import EncodedRaggedArray
-
-
-# def translate_types(input_type):
-#     if input_type == str:
-#         return EncodedRaggedArray
-#     elif input_type == int:
-#         return np.ndarray
-#
-#
-# def buffer_backed_bnp(old_cls):
-#     cls = types.new_class(old_cls.__name__, old_cls.__bases__, {})
-#     for i, (var_name, var_type) in enumerate(old_cls.__annotations__.items()):
-#         setattr(cls, var_name, BufferBackedDescriptor(i, var_type))
-#         setattr(cls, '__init__', lambda self, buffer: setattr(self, '_buffer', buffer))
-#     return cls
-
-
-# class BufferBackedDescriptor:
-#     '''
-#     This class is made to access and parse parts of a text buffer lazily.
-#     '''
-#
-#     def __init__(self, buffer, index, dtype):
-#         self._buffer = buffer
-#         self._index = index
-#         self._dtype = dtype
-#
-#     def __get__(self, obj, objtype):
-#         return self._dtype(obj._buffer.get_field_by_number(self._index, self._dtype))
-
-
 class LazyBNPDataClass:
     pass
-
-
-# class BaseClass:
-#     def __init__(self, buffer):
-#         self._buffer = buffer
-#
-#     def __getattr__(self, var_name):
-#         if var_name in self._buffer:
-#             return self._buffer[var_name]
-#         return super().__getattr__(var_name)
 
 
 class ItemGetter:
@@ -91,7 +49,7 @@ class ItemGetter:
         return self._buffer
 
 
-def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any]=None) -> Type[BNPDataClass]:
+def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any] = None) -> Type[BNPDataClass]:
     '''
     Creates a dataclass that emulates the given BNPDataClass  but with lazy loading of fields
     Parameters
@@ -198,7 +156,7 @@ def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any]=None)
         def __iter__(self):
             return iter(self.get_data_object())
 
-        def get_data_object(self)->BNPDataClass:
+        def get_data_object(self) -> BNPDataClass:
             """
             Returns the BNPDataClass with all fields loaded
 
@@ -222,7 +180,7 @@ def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any]=None)
             if func == np.concatenate:
                 values = args[0]
                 if hasattr(values[0]._itemgetter.buffer, 'concatenate'):
-                    #if all(not a._set_values for a in values):
+                    # if all(not a._set_values for a in values):
                     set_values = {name: np.concatenate([a._set_values[name] for a in values])
                                   for name in self._set_values}
                     computed_values = {name: np.concatenate([a._computed_values[name] for a in values])
@@ -235,12 +193,12 @@ def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any]=None)
                 return func(*args, **kwargs)
             return NotImplemented
 
-        def get_buffer(self, buffer_class=None)->EncodedRaggedArray:
+        def get_buffer(self, buffer_class=None) -> EncodedRaggedArray:
             if buffer_class is None:
                 buffer_class = self._itemgetter.buffer.__class__
             if not hasattr(self._itemgetter.buffer, 'get_field_range_as_text') or hasattr(self._itemgetter.buffer,
                                                                                           'SKIP_LAZY') or hasattr(
-                    buffer_class, 'SKIP_LAZY'):
+                buffer_class, 'SKIP_LAZY'):
                 return self._itemgetter.buffer.from_data(self.get_data_object())
             columns = []
             if not self._set_values and issubclass(self._itemgetter.buffer.__class__, buffer_class):
