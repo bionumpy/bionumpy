@@ -45,7 +45,7 @@ However, if we give this function an array of 10 sequences, it will just count t
     def count_gs(sequence):
         return np.sum(sequence == "G", axis=-1)
 
-This, trick of doing reductions along the last axis will often be enough to make seuqnece->scalar functions broadcast as sequences. (reductions are for instance `np.sum, np.max, np.argmax, np.mean` or other functions that map arrays to scalars).
+This trick of doing reductions along the last axis will often be enough to make sequence->scalar functions broadcast as sequences (reductions are for instance `np.sum, np.max, np.argmax, np.mean` or other functions that map arrays to scalars).
 
 Another general rule is to add axis to the very end, when adding axes to an array. This is not so common with sequences, but one example is one-hot encoding. One hot encoding maps letters in an alphabet of size `N` to `n`-dimensional binary vectors. For a single letter, this function could be written::
 

@@ -55,5 +55,4 @@ This is the preferred way you should use for all large files (typically fasta fi
 
 Remember that when one chunk has been processed, that chunk is "lost" and the generator continues to the next chunk. A typical implementation will thus be to write a function that does all you want to do one one chunk, run that function on each chunk and summarize the results in some way.
 
-Continue to the guide on :ref:`working_with_big_data` to see the recommended way of working with chunks in BioNumPy.
 
