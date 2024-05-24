@@ -17,13 +17,11 @@ class GTFEntry:
     strand: StrandEncoding
     phase: str
     atributes: str
-    #attributes: BNPDataClass
 
     def _get_attributes(self, attribute_names):
         group_thing = r''' \"(.*?)\"'''
         return {name: match_regexp_string_array(self.atributes.ravel(), name + group_thing)
                 for name in attribute_names}
-        # ends_in_sep = gtf_entries.atributes[:, -1] ==
         self.atributes[:, -1] = " "
         all_features = split(self.atributes.ravel(), " ")
         keys = all_features[:-1:2]
