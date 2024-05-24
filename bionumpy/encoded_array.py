@@ -8,7 +8,7 @@ from numbers import Number
 
 from npstructures import RaggedArray
 from npstructures.mixin import NPSArray
-from typing import Tuple, List
+from typing import Tuple, List, Union
 import numpy as np
 from abc import abstractmethod
 
@@ -279,10 +279,10 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         # assert isinstance(self.data, np.ndarray)
 
     @property
-    def T(self):
+    def T(self) -> "EncodedArray":
         return self.__class__(self.data.T, self.encoding)
 
-    def copy(self):
+    def copy(self) -> 'EncodedArray':
         return self.__class__(self.data.copy(), self.encoding)
 
     def __len__(self) -> int:
@@ -291,10 +291,13 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
     def raw(self) -> np.ndarray:
         return self.data.view(np.ndarray)
 
-    def tolist(self):
+    def tolist(self) -> str:
+        """Converts the data to a string by decoding the data.
+        This behaviour is compatible with NumPy's scalar behaviour (only a single element)"""
         return self.to_string()
 
     def to_string(self) -> str:
+        """Converts the data to a string by decoding the data"""
         if not self.encoding.is_one_to_one_encoding():
             return self.encoding.to_string(self.data)
         if hasattr(self.encoding, "_decode"):
@@ -384,7 +387,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
                          ).reshape(self.data.shape[:-1])[:20]
             return str(a)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         if len(self.shape) <= 1:
             return hash(self.to_string())
 
@@ -482,7 +485,7 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         return NotImplemented
         return super().__array_function__(func, types, args, kwargs)
 
-    def ravel(self):
+    def ravel(self) -> "EncodedArray":
         return self.__class__(self.data.ravel(), self.encoding)
 
     def as_strided(self, *args, **kwargs):
@@ -634,8 +637,14 @@ def from_encoded_array(encoded_array: EncodedArray) -> str:
 
     Examples
     --------
-    5
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.DNAEncoding.encode("ACGT")
+    >>> print(from_encoded_array(encoded_array))
+    ACGT
 
+    >>> encoded_array = bnp.DNAEncoding.encode(["ACGT", "ACGT"])
+    >>> print(from_encoded_array(encoded_array))
+    ['ACGT', 'ACGT']
     """
     if isinstance(encoded_array, EncodedRaggedArray):
         return [from_encoded_array(row) for row in encoded_array]
@@ -643,7 +652,36 @@ def from_encoded_array(encoded_array: EncodedArray) -> str:
         return "".join(chr(c) for c in encoded_array.encoding.decode(encoded_array).raw())
 
 
-def change_encoding(encoded_array, new_encoding):
+def change_encoding(encoded_array: Union[EncodedArray, EncodedRaggedArray], new_encoding: Encoding) \
+        -> Union[EncodedArray, EncodedRaggedArray]:
+    """
+    Changes the encoding of an `EncodedArray` or `EncodedRaggedArray` by decoding the data and
+    encoding it again with the new encoding.
+
+    Parameters:
+    -----------
+    encoded_array : EncodedArray/EncodedRaggedArray
+        The data to change encoding on
+    new_encoding : Encoding
+        The new encoding to use
+
+    Returns:
+    --------
+    EncodedArray/EncodedRaggedArray
+        The data with the new encoding
+
+    Examples
+    --------
+    >>> import bionumpy as bnp
+    >>> encoded_array = bnp.as_encoded_array("ACGT", bnp.DNAEncoding)
+    >>> encoded_array.raw()
+    array([0, 1, 2, 3], dtype=uint8)
+    >>> new_encoding = bnp.BaseEncoding
+    >>> new_encoded_array = change_encoding(encoded_array, new_encoding)
+    >>> new_encoded_array.raw()
+    array([65, 67, 71, 84], dtype=uint8)
+
+    """
     assert isinstance(encoded_array, (EncodedArray, EncodedRaggedArray)), \
         "Can only change encoding of EncodedArray or EncodedRaggedArray"
 

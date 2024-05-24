@@ -1,4 +1,6 @@
 import numpy as np
+
+from ..bnpdataclass import BNPDataClass
 from ..streams import streamable
 from ..encodings import BaseEncoding, AlphabetEncoding
 from ..sequence.kmers import KmerEncoder
@@ -38,7 +40,7 @@ class Translate(WindowFunction):
     def window_size(self):
         return 3# np.log(self._table._lookup.size, self._table.from_encoding.alphabet_size)
 
-    def __call__(self, sequence: EncodedArrayLike):
+    def __call__(self, sequence: EncodedArrayLike)-> EncodedArrayLike:
         e = sequence.encoding
         sequence = sequence[..., ::-1]
         sequence.encoding = e
@@ -48,6 +50,29 @@ class Translate(WindowFunction):
 
 @streamable()
 @apply_to_npdataclass("sequence")
-def translate_dna_to_protein(sequence):
+def translate_dna_to_protein(sequence: BNPDataClass) -> BNPDataClass:
+    """
+    Translate a DNA sequence to a protein sequence.
+
+    Parameters
+    ----------
+    sequence : BNPDataClass
+        The data that should be translated, should have a sequence attribute
+
+    Returns
+    -------
+    BNPDataClass
+        The translated data
+
+    Examples
+    --------
+    >>> import bionumpy as bnp
+    >>> dna = bnp.SequenceEntry.from_entry_tuples([("seq1", "ACGTAT")])
+    >>> protein = bnp.sequence.translate_dna_to_protein(dna)
+    >>> protein
+    SequenceEntry with 1 entries
+                     name                 sequence
+                     seq1                       TY
+    """
     return Translate().windowed(sequence)
 
