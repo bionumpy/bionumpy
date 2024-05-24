@@ -4,7 +4,7 @@
 Working with Multiple Files/Data Sources
 ========================================
 
-A lot of analyses requires working on multiple data sources that are annotated on the same reference sequences. Especially when workin with reference genomes. A common example is analysing soms variants from a vcf file, but only those variants that fall within some intervals specified in a bed file. One way to do this in BioNumPy is to use the `MultiStream` class. This is designed to take in multiple data streams or indexed data and deliver synchronized streams that return data corresponding to the same reference sequence/chromosome in each chunk. It is best shown in an example.
+A lot of analyses requires working on multiple data sources that are annotated on the same reference sequences. Especially when working with reference genomes. A common example is analysing some variants from a vcf file, but only those variants that fall within some intervals specified in a bed file. One way to do this in BioNumPy is to use the `MultiStream` class. This is designed to take in multiple data streams or indexed data and deliver synchronized streams that return data corresponding to the same reference sequence/chromosome in each chunk. It is best shown in an example.
 
     >>> import bionumpy as bnp
     >>> variants = bnp.open("example_data/few_variants.vcf").read_chunks()
@@ -19,7 +19,7 @@ These variants and intervals come in chunks, and stream of chunks are not really
     ...                               intervals=intervals)
 
 
-The attributes we specify for the multistream are now synched streams that give data corresponding to the seqeunces listed int `reference.get_sequence_lengths()` one at a time. This means we can give these streams to any function with the `streamable` decorator. For example:
+The attributes we specify for the multistream are now synched streams that give data corresponding to the sequences listed in `reference.get_sequence_lengths()` one at a time. This means we can give these streams to any function with the `streamable` decorator. For example:
 
     >>> from bionumpy.arithmetics import get_boolean_mask
     >>> @bnp.streamable(sum)
@@ -38,7 +38,7 @@ The attributes we specify for the multistream are now synched streams that give 
 Sort Order
 ------------
 
-Unindexed files (.bed, .vcf) are read from start to finish. This means that the data for each chromosome comes one at a time in the order they appear in the file. Multistream expects that this order is the same as that specified in the `seqeuence_lengths` parameter, which is unfortunately not always the case. This is usually due to the fact that different programs sorts the files in different ways: `["chr1", "chr2",,, "chr10", "chr11"]` or `["chr1", "chr10", "chr11",,, "chr2"]`. If you're only have one unindexed file, the easiest solution to a sort order discrepancy is to change the sort order of the `sequence_lengths` parameter. This can be done with the `sort_dict_by_key` function, with `human_key_func` or `None` as key.
+Unindexed files (.bed, .vcf) are read from start to finish. This means that the data for each chromosome comes one at a time in the order they appear in the file. Multistream expects that this order is the same as that specified in the `seqeuence_lengths` parameter, which is unfortunately not always the case. This is usually due to the fact that different programs sorts the files in different ways: `["chr1", "chr2",,, "chr10", "chr11"]` or `["chr1", "chr10", "chr11",,, "chr2"]`. If you only have one unindexed file, the easiest solution to a sort order discrepancy is to change the sort order of the `sequence_lengths` parameter. This can be done with the `sort_dict_by_key` function, with `human_key_func` or `None` as key.
 
     >>> sequence_lengths = {"chr1": 10, "chr11": 20, "chr2": 40, "chr10": 50}
     >>> bnp.MultiStream.sort_dict_by_key(sequence_lengths)

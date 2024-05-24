@@ -49,6 +49,51 @@ This shows us that we have a a chunk of 71 intervals, and we get to see the firs
                            17                  7512559                  7512635
 
 
-Implementing a new file format
+Reading a new file format
 ------------------------------
-This guide is not written.
+
+BioNumpy works well with popular file formats in biological data.
+However, if you have a custom file format that you would like to read into BioNumpy,
+you can implement a new buffer class that inherits from `DelimitedBuffer` and
+specify the dataclass that you would like to use to store the data.
+Here is an example of how you can implement a new buffer class for a custom file format:
+
+We define a custom dataclass (e.g. MyCustomFormat here) that corresponds to the columns in our file format.
+We then define a new buffer class (e.g. MyCustomBuffer here) that inherits from `DelimitedBuffer` and specify
+the dataclass (e.g. MyCustomFormat here) that we would like to use.
+We can then use the `bnp.open` function to read all the files that have similar format.
+
+.. testcode::
+
+    from bionumpy.io.delimited_buffers import DelimitedBuffer
+    from bionumpy.bnpdataclass import bnpdataclass
+    import bionumpy as bnp
+
+    @bnpdataclass
+    class MyCustomFormat:
+      dna: bnp.DNAEncoding
+      amino_acid: bnp.AminoAcidEncoding
+      v_gene: str
+      j_gene: str
+
+    class MyCustomBuffer(DelimitedBuffer):
+       dataclass = MyCustomFormat
+
+    my_sequence_data = bnp.open(filename="example_data/airr.tsv", buffer_type=MyCustomBuffer).read()
+    print(my_sequence_data)
+
+.. testoutput::
+
+ MyCustomFormat with 100 entries
+                          dna               amino_acid                   v_gene                   j_gene
+      TGCGCCACCTGGGGGGACGAGCA               CATWGDEQYF                 TRBV10-2                  TRBJ2-7
+      TGTGCCAGCTCACCTACGAATTC         CASSPTNSGSNYGYTF                   TRBV18                  TRBJ1-2
+      TGCGGGCCCGTAATGAACACTGA              CGPVMNTEAFF                 TRBV10-2                  TRBJ1-1
+      TGTGCCAGCAGTGAAGCGCGTCC         CASSEARPARMYGYTF                  TRBV6-1                  TRBJ1-2
+      TGTGCCAGCAGTAGTGGGACAGG          CASSSGTGPDQPQHF                  TRBV6-3                  TRBJ1-5
+      TGTGCCAGCAACCTAGCGGGGAA          CASNLAGKNTGELFF                  TRBV6-2                  TRBJ2-2
+      TGTGCCAGCAGCCAACCGGGGGG         CASSQPGGSGNYGYTF                  TRBV4-2                  TRBJ1-2
+      TGCGCCAGCAGCCGCGGCCTCAG           CASSRGLREETQYF                  TRBV5-1                  TRBJ2-5
+      TGTGCCAGCAGCCAAGTCTCACG        CASSQVSRQDSSYEQYF                  TRBV4-2                  TRBJ2-7
+      TGTGCCAGCAGGCCGGGACAGGG     CASRPGQGAPGWEDNYGYTF                   TRBV28                  TRBJ1-2
+

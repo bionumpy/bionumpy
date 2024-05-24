@@ -164,7 +164,7 @@ class IndexedFasta:
         return EncodedRaggedArray(a, lengths)
 
     def get_interval_sequences(self, intervals: Interval) -> EncodedRaggedArray:
-        """Get the seqeunces for a set of genomic intervals
+        """Get the sequences for a set of genomic intervals
 
         Parameters
         ----------

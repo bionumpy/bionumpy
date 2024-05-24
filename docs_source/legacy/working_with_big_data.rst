@@ -9,7 +9,7 @@ The recommended way of working with big datasets (bigger than what you can fit i
     >>> import bionumpy as bnp
     >>> data = bnp.open("filename").read_chunks() # doctest: +SKIP
 
-`data` is now an iterable, and when iterating over data, BioNumPy will for every iteration read a new chunk from the file, meaning that at most one chunk is kept in memory. It is possible to specify the chunk size (in bytes) to read_chunks, e.g. `read_chunks(chunk_size=10000000)`
+`data` is now an iterable, and when iterating over data, BioNumPy will for every iteration read a new chunk from the file, meaning that at most one chunk is kept in memory. It is possible to specify the chunk size (in bytes) to read_chunks, e.g. `read_chunks(min_chunk_size=10000000)`.
 
 One way of working with chunks is thus to create a for-loop iterating over the chunks. However, BioNumPy makes it possible to write code as if you only had a single chunk, and can handle the tecnhicalities of making your code work on multiple chunks.
 

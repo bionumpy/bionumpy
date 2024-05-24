@@ -7,7 +7,7 @@ Sequences
 `EncodedArray`
 ==============
 
-Sequence data in BioNumPy are are represented by `EncodedArray` objects. These are basically `numpy` arrays of integers, that have an encoding that specifies which character each integer represent. This representataion allows us to do fast `numpy` operation on the seqeunces, while still allowing for human readable representation of them. The easiest way to create an `EncodedArray` is to use the `as_encoded_array` function.
+Sequence data in BioNumPy are are represented by `EncodedArray` objects. These are basically `numpy` arrays of integers, that have an encoding that specifies which character each integer represent. This representataion allows us to do fast `numpy` operation on the sequences, while still allowing for human readable representation of them. The easiest way to create an `EncodedArray` is to use the `as_encoded_array` function.
 
     >>> import bionumpy as bnp
     >>> encoded_array = bnp.as_encoded_array("actggtcc")
@@ -26,7 +26,7 @@ And get numpy-fast performance for the query. We can also use numpy-like indexin
     
 `EncodedRaggedArray`
 ====================
-When working with multiple seqeunces we usually have to use `EncodedRaggedArray` objects. These are much like `EncodedArray` objects, but instead uses `npstructures.RaggedArray` to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an `EncodedRaggedArray` is to use the `as_encoded_array` function on a list of strings:
+When working with multiple sequences we usually have to use `EncodedRaggedArray` objects. These are much like `EncodedArray` objects, but instead uses `npstructures.RaggedArray` to store the integers. This allows us to store seqeunces of differing lengths. The easiest way to create an `EncodedRaggedArray` is to use the `as_encoded_array` function on a list of strings:
 
     >>> encoded_ragged_array = bnp.as_encoded_array(["ctt", "actg", "ag"])
     >>> encoded_ragged_array

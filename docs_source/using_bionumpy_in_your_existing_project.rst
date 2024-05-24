@@ -64,3 +64,28 @@ It is straightforward to convert a chunk of a file or a whole file to a Pandas D
 
 Continue to see an overview of :ref:`what you can do with bionumpy<what_can_you_do>`.
 
+Using BioNumPy RaggedArray functionalities
+==========================================
+
+Alternatively, if one is working with biological sequences and are already loaded into a list of strings,
+one can use the `as_encoded_array` function to convert the list of strings into a RaggedArray.
+This is useful if you want to make use of all the efficient ways of BioNumpy's functionalities on
+handling non-uniform length sequences and computations on them. Below is an example. See all the available encodings in :ref:`encodings`.
+
+.. testcode::
+
+    import bionumpy as bnp
+    my_sequences = ["TGTGCCAGCAGCGGGGATCGTAATCAGCCCCAGCATTTT",
+                    "TGCAGCGTCAAGGTCCAAGCTTTCTTT",
+                    "TGTGCCACCAGTGATTATTATTGGTACGAGCAGTACTTC"]
+    my_ragged_array = bnp.as_encoded_array(my_sequences, bnp.encodings.alphabet_encoding.DNAEncoding)
+    print(my_ragged_array)
+    print(my_ragged_array.shape)
+
+.. testoutput::
+
+    TGTGCCAGCAGCGGGGATCGTAATCAGCCCCAGCATTTT
+    TGCAGCGTCAAGGTCCAAGCTTTCTTT
+    TGTGCCACCAGTGATTATTATTGGTACGAGCAGTACTTC
+    (3, array([39, 27, 39]))
+

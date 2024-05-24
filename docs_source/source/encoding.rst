@@ -1,9 +1,10 @@
+.. _encodings:
 
 Encodings
 ~~~~~~~~~
 A central concept in BioNumPy is the *encoding* of data, such as DNA sequence, base qualities, kmers, etc, to memory-efficient data types that are used internally by BioNumPy.
 
-For instance, when asking BioNumPy to store the DNA-sequence `s = bnp.as_encoded_array("ACGT", bnp.DNAEncoding`, BioNumPy does not store the letters A, C, T and G, but instead uses an efficient numeric representation of them. However, the user does not need to know how this works internally, and will only need to think about the stored sequence as letters. This is why things like `sequence == "A"` works, even though sequence internally is a numeric array.
+For instance, when asking BioNumPy to store the DNA-sequence `s = bnp.as_encoded_array("ACGT", bnp.DNAEncoding)`, BioNumPy does not store the letters A, C, T and G, but instead uses an efficient numeric representation of them. However, the user does not need to know how this works internally, and will only need to think about the stored sequence as letters. This is why things like `sequence == "A"` works, even though sequence internally is a numeric array.
 
 
 Encoding data using a specific encoding
