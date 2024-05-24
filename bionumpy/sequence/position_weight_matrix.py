@@ -26,8 +26,8 @@ class PositionWeightMatrix(RollableFunction):
 
 
 def _pwm_from_counts(count_matrix):
-    with_pseudo = count_matrix+1
-    return np.log(with_pseudo/with_pseudo.sum(axis=0, keepdims=True))
+    with_pseudo = count_matrix + 1
+    return np.log(with_pseudo / with_pseudo.sum(axis=0, keepdims=True))
 
 
 class PWM:
@@ -35,6 +35,7 @@ class PWM:
     Class representing a Position Weight Matrix. Calculates scores based on
     the log likelihood ratio between the motif and a background probability
     """
+
     def __init__(self, matrix, alphabet):
         self._matrix = matrix
         self._alphabet = alphabet
@@ -43,7 +44,7 @@ class PWM:
 
     def as_valid_encoded_array(self, sequence):
         if isinstance(sequence, (EncodedArray, EncodedRaggedArray)):
-            
+
             if isinstance(sequence.encoding, AlphabetEncoding):
                 alphabet = list((sequence.encoding.get_alphabet()))
                 s_alphabet = list(self._alphabet)
@@ -53,17 +54,15 @@ class PWM:
                     return sequence
         return as_encoded_array(sequence, self._encoding)
 
-        
-
     @property
-    def alphabet(self):
+    def alphabet(self) -> str:
         return self._alphabet
 
     def __str__(self):
         return "\n".join(["\t".join(self._alphabet), str(self._matrix)])
 
     @property
-    def window_size(self):
+    def window_size(self) -> int:
         return self._matrix.shape[-1]
 
     def calculate_score(self, sequence: EncodedArrayLike) -> float:
@@ -94,16 +93,14 @@ class PWM:
             Motif scores for all valid and invalid windows
         """
         sequence = self.as_valid_encoded_array(sequence)
-        # sequence = as_encoded_array(sequence, self._encoding)
-        # assert sequence.encoding == self._encoding
         scores = np.zeros(sequence.size, dtype=float)
         m = self._matrix.T.copy()
         for offset, row in enumerate(m):
-            scores[:scores.size-offset] += row[sequence[offset:].raw()]
+            scores[:scores.size - offset] += row[sequence[offset:].raw()]
         return scores
 
     @classmethod
-    def from_dict(cls, dictionary: Dict[str, ArrayLike], background: Dict[str, float]=None) -> "PWM":
+    def from_dict(cls, dictionary: Dict[str, ArrayLike], background: Dict[str, float] = None) -> "PWM":
         """Create a PWM object from a dict of letters to position probabilities
 
         This takes raw probabilities as input. Not log
@@ -124,29 +121,23 @@ class PWM:
             Position Weight Matrix object with log-likelihood ratios
         """
         if background is None:
-            background = {key: 1/len(dictionary) for key in dictionary}
+            background = {key: 1 / len(dictionary) for key in dictionary}
         alphabet = "".join(dictionary.keys())
         with np.errstate(divide="ignore"):
-            matrix = np.log(np.array(list(dictionary.values())))-np.log([background[key] for key in dictionary])[:, np.newaxis]
+            matrix = np.log(np.array(list(dictionary.values()))) - np.log([background[key] for key in dictionary])[:,
+                                                                   np.newaxis]
         return cls(matrix, alphabet)
 
-    # @classmethod
-    # def from_motif(cls, motif: Motif):
-    #     return cls(motif.matrix, motif.alphabet)
-
     @classmethod
-    def from_counts(cls, counts: typing.Union[dict]):
-        # if isinstance(counts, Motif):
-        #     return cls(_pwm_from_counts(counts.matrix), counts.alphabet)
-        # else:
-        return cls(_pwm_from_counts(np.array(list(counts.values()))), 
+    def from_counts(cls, counts: Dict[str, typing.List[int]]) -> "PWM":
+        """Create a PWM object from a dict of letters to position counts"""
+        return cls(_pwm_from_counts(np.array(list(counts.values()))),
                    "".join(counts.keys()))
 
     def __str__(self):
         matrix = self._matrix.transpose()
         return "PWM with alphabet " + self._alphabet + "\n" + \
-            '\n'.join([' '.join([str(round(c, 2)) for c in row]) for row in matrix])
-
+               '\n'.join([' '.join([str(round(c, 2)) for c in row]) for row in matrix])
 
 
 def get_motif_scores_old(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
@@ -202,4 +193,4 @@ def get_motif_scores(sequence: EncodedRaggedArray, pwm: PWM) -> RaggedArray:
     scores = pwm.calculate_scores(flat_sequence)
     if isinstance(sequence, EncodedRaggedArray):
         scores = RaggedArray(scores, shape[-1])
-    return scores[..., :(-pwm.window_size+1)]
+    return scores[..., :(-pwm.window_size + 1)]
