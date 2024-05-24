@@ -50,3 +50,4 @@ class Translate(WindowFunction):
 @apply_to_npdataclass("sequence")
 def translate_dna_to_protein(sequence):
     return Translate().windowed(sequence)
+

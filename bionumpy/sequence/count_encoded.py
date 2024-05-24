@@ -50,6 +50,17 @@ class EncodedCounts:
 
     # return dataclasses.replace(self, counts=self.counts+o_counts)
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method == "__call__":
+            assert all(i.alphabet == self.alphabet for i in inputs if isinstance(i, EncodedCounts))
+            assert all(i.alphabet == self.alphabet for i in kwargs.values() if isinstance(i, EncodedCounts))
+            arrays = [i.counts if isinstance(i, EncodedCounts) else i for i in inputs]
+            kwargs = {k: i.counts if isinstance(i, EncodedCounts) else i for k, i in kwargs.items()}
+            return self.__class__(self.alphabet, getattr(ufunc, method)(*arrays, **kwargs))
+        else:
+            return NotImplemented
+
+
     @property
     def proportions(self):
         s = self.counts.sum(axis=-1, keepdims=True)
