@@ -1,4 +1,4 @@
-Using BioNumPy with BioPython
+Using BioNumPy with Biopython
 ==============================
 
 Biopython is a powerful library for bioinformatics, and can in many typical workflows easily be used together with BioNumPy.
