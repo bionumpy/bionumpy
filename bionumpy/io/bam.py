@@ -1,6 +1,6 @@
 from functools import lru_cache
 from itertools import accumulate, repeat, takewhile, chain
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Any
 
 import numpy as np
 from npstructures.raggedshape import RaggedView, RaggedView2
