@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Dict, Iterable
+from typing import Union, Dict, Iterable, Tuple
 
 import numpy as np
 from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
@@ -90,7 +90,7 @@ class IndexedFasta:
     def values(self) -> Iterable[EncodedArray]:
         return (self[key] for key in self.keys())
 
-    def items(self) -> Iterable[tuple[str, EncodedArray]]:
+    def items(self) -> Iterable[Tuple[str, EncodedArray]]:
         return ((key, self[key]) for key in self.keys())
 
     def __repr__(self):
