@@ -40,3 +40,4 @@ jobs:
     - name: Run pytest and doctest
       run: |
         ./run_tests
+
