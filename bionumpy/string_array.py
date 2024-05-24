@@ -4,8 +4,10 @@ from .encoded_array import EncodedRaggedArray, BaseEncoding, EncodedArray, as_en
 
 
 class StringArray(np.lib.mixins.NDArrayOperatorsMixin):
+    """Wrapper around NumPy arrays of strings. Can be used as datatype in BNPDataClass fields."""
     wrapped_functions = ['size', 'shape', 'ndim', '__len__']
     wrapped_properies = ['T']
+
     def __init__(self, data):
         self._data = np.asanyarray(data, dtype='S')
 

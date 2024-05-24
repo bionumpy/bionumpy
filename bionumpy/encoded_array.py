@@ -36,6 +36,9 @@ class Encoding:
 
 
 class OneToOneEncoding(Encoding):
+    """Represents encodings that are one-to-one, i.e. where each element is
+    encoded to one element and vice versa. This class is meant to be subclassed
+    when implementing specific encodings."""
 
     def encode(self, data):
         assert hasattr(self, "_encode"), "Missing implementation of _encode for %s" % self
@@ -228,6 +231,7 @@ class EncodedRaggedArray(RaggedArray):
     def ravel(self):
         return EncodedArray(super().ravel(), self._encoding)
 
+
 def get_NPSArray(array):
     return array.view(NPSArray)
 
@@ -247,6 +251,8 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
 
         Use `as_encoded_array` to create encoded arrays from `str` objects
 
+
+
         Parameters
         ----------
         data : np.ndarray
@@ -254,7 +260,14 @@ class EncodedArray(np.lib.mixins.NDArrayOperatorsMixin):
         encoding : Encoding
             The encoding that the data already has
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> import numpy as np
+        >>> print(EncodedArray(np.array([0, 1, 2, 3]), bnp.DNAEncoding))
+        ACGT
         """
+
         if isinstance(data, EncodedArray):
             assert data.encoding == encoding
             data = data.data
