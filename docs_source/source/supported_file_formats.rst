@@ -24,6 +24,7 @@ We open a bed file, read one chunk and print a description of that chunk:
 .. testcode::
 
     import bionumpy as bnp
+    from bionumpy.io.delimited_buffers import DelimitedBuffer
     data = bnp.open("example_data/test.bed")
     chunk = data.read_chunk()
     print(chunk)

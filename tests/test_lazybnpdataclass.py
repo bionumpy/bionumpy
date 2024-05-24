@@ -13,7 +13,7 @@ from bionumpy.util.testing import assert_bnpdataclass_equal, assert_encoded_ragg
 from .buffers import combos
 
 
-@dataclasses.dataclass
+@bnpdataclass
 class DummyClass:
     a: int
     b: str

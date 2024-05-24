@@ -159,7 +159,7 @@ class DelimitedBuffer(FileBuffer):
         """
 
     @classmethod
-    def join_fields(cls, fields_list: List[EncodedRaggedArray]):
+    def join_fields(cls, fields_list: List[EncodedRaggedArray])->EncodedRaggedArray:
         return join_columns(fields_list, cls.DELIMITER).ravel()
 
     def get_field_range_as_text(self, *args, **kwargs):

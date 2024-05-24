@@ -8,18 +8,6 @@ __all__ = ["BaseEncoding", "Encoding",
            "AlphabetEncoding",  "AminoAcidEncoding"]
 
 
-# class StrandEncoding(Encoding):
-#     MIN_CODE = ord("+")
-# 
-#     @classmethod
-#     def encode(cls, bytes_array):
-#         return (bytes_array & np.uint8(2)) >> np.uint8(1)
-# 
-#     @classmethod
-#     def decode(cls, strands):
-#         return 2 * strands + cls.MIN_CODE
-
-
 class DigitEncodingFactory(NumericEncoding):
     def __init__(self, min_code):
         self._min_code = ord(min_code)
@@ -40,13 +28,6 @@ CigarEncoding = DigitEncodingFactory(chr(0))
 
 
 def set_backend(lib):
-    #from ..cupy_compatible.encodings.alphabet_encoding import CPAlphabetEncoding
-    #from ..cupy_compatible.encodings.alphabet_encoding import CPACTGEncoding
-    #from ..cupy_compatible.encodings.alphabet_encoding import CPAminoAcidEncoding
-    
-    #sys.modules[__name__].AlphabetEncoding = CPAlphabetEncoding
-    #sys.modules[__name__].ACTGEncoding = CPACTGEncoding
-    #sys.modules[__name__].AminoAcidEncoding = CPAminoAcidEncoding
 
     from . import base_encoding
     base_encoding.np = lib
