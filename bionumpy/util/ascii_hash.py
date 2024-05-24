@@ -67,7 +67,6 @@ class AsciiHashTable:
     def from_sequences(cls, encoded_ragged_array, modulo=103):
         from collections import Counter
         ascii_hashes = get_ascii_hash(encoded_ragged_array, cls.big_mod)
-        idx = Counter(ascii_hashes).most_common(1)[0][0]
         assert len(set(ascii_hashes)) == len(ascii_hashes), (len(set(ascii_hashes)), len(ascii_hashes))
         hash_table = HashTable(ascii_hashes, np.arange(len(encoded_ragged_array)), mod=modulo)
         return cls(hash_table, encoded_ragged_array)

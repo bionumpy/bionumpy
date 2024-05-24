@@ -27,6 +27,7 @@ BioNumPy documentation
     tutorials/set_of_sequences.rst
     tutorials/similarity_measures.rst
     tutorials/extracting_kmers_around_snps.rst
+    tutorials/working_with_biopython.rst
 
 
 .. toctree::
