@@ -66,7 +66,21 @@ def get_reverse_complement(sequence: EncodedArrayLike) -> EncodedArrayLike:
 
 
 @streamable()
-def get_strand_specific_sequences(encoded_array: EncodedArray, stranded_intervals: Interval):
+def get_strand_specific_sequences(encoded_array: EncodedArray, stranded_intervals: Interval) -> EncodedRaggedArray:
+    """Extract the sequences within the intervals, and reverse complement if the strand is negative
+
+    Parameters
+    ----------
+    encoded_array : EncodedArray
+        The encoded sequences
+    stranded_intervals : Interval
+        The intervals with strands
+
+    Returns
+    -------
+    EncodedArray
+        The (possibly reverse complemented) sequences
+    """
     relevant_sequences = encoded_array[stranded_intervals.start:stranded_intervals.stop]
     rev_complimnet_seqs = get_reverse_complement(relevant_sequences)
     return np.where((stranded_intervals.strand.ravel() == "-")[:, np.newaxis],
@@ -74,5 +88,19 @@ def get_strand_specific_sequences(encoded_array: EncodedArray, stranded_interval
 
 
 @streamable()
-def get_sequences(sequence: EncodedArray, intervals: Interval):
+def get_sequences(sequence: EncodedArray, intervals: Interval) -> EncodedRaggedArray:
+    """
+    Get the sequences within the intervals, without caring about strands.
+    For stranded intervals use get_strand_specific_sequences
+
+    Parameters
+    ----------
+    sequence: EncodedArray
+    intervals: Interval
+
+    Returns
+    -------
+    EncodedRaggedArray
+
+    """
     return sequence[intervals.start:intervals.stop]
