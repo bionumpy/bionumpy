@@ -16,3 +16,9 @@ def test_most_common(encoded_counts):
         ['T', 'A'], np.array([5, 4]))
 
 
+def test_ufuncs(encoded_counts):
+    sqrt = np.sqrt(encoded_counts)
+    assert sqrt == EncodedCounts(list('ACGT'), np.sqrt([4, 3, 1, 5]))
+    assert encoded_counts + 1 == EncodedCounts(list('ACGT'), np.array([5, 4, 2, 6]))
+    assert encoded_counts + encoded_counts == EncodedCounts(list('ACGT'), np.array([8, 6, 2, 10]))
+

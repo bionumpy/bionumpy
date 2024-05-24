@@ -17,6 +17,5 @@ class MultipleSequenceAlignment:
         matrix = sequences.ravel().reshape(len(sequences), L)
         return cls(matrix, entries.name)
 
-
-
-
+    def mask(self):
+        return self.matrix != '-'
