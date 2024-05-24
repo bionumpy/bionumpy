@@ -20,10 +20,11 @@ def str_func(column):
         return change_encoding(column, BaseEncoding)
     assert False, column.encoding
 
+
 def str_matrix_func(column):
     n_rows, n_cols = column.shape
-    a = column.as_bytes().reshape(n_rows*n_cols, -1)
-    tabs = np.full((n_rows*n_cols, 1), ord("\t"))
+    a = column.as_bytes().reshape(n_rows * n_cols, -1)
+    tabs = np.full((n_rows * n_cols, 1), ord("\t"))
     b = np.hstack([a, tabs])
     b = b.reshape((n_rows, -1))[:, :-1]
     return EncodedRaggedArray(EncodedArray(b.ravel(), BaseEncoding), np.full(b.shape[0], b.shape[-1]))
@@ -35,11 +36,11 @@ def seq_id_func(column):
             return column.encoding.decode(column)
     return encoded_array_from_nparray(column)
 
-def optional_ints_to_strings(number: np.ndarray, missing_string='.')->EncodedRaggedArray:
-    if np.all(number)==np.nan:
-        return  as_encoded_array([missing_string]*len(number))
-    return ints_to_strings(number)
 
+def optional_ints_to_strings(number: np.ndarray, missing_string='.') -> EncodedRaggedArray:
+    if np.all(number) == np.nan:
+        return as_encoded_array([missing_string] * len(number))
+    return ints_to_strings(number)
 
 
 def get_column(values, field_type) -> EncodedRaggedArray:
@@ -73,8 +74,16 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
     """Put each field of the dataclass into a column in a buffer.
 
     Parameters
-    data : bnpdataclass
-        Data
+    data_dict: List[Tuple]
+        A list of tuples where each tuple contains the field name and the field value.
+    sep: str
+        The separator to use between fields.
+
+    Returns
+    -------
+    EncodedArray
+        A buffer containing the data in CSV format.
+
     """
 
     columns = [get_column(value, key) for key, value in data_dict]
@@ -83,6 +92,20 @@ def dump_csv(data_dict: List[Tuple], sep: str = "\t") -> EncodedArray:
 
 
 def join_columns(columns: List[EncodedRaggedArray], sep: str) -> EncodedRaggedArray:
+    """
+    Join columns into a single buffer.
+
+    Parameters
+    ----------
+    columns: List[EncodedRaggedArray]
+    sep: str
+
+    Returns
+    -------
+    EncodedRaggedArray
+        The lines of the buffer
+
+    """
     lengths = np.concatenate([((column.lengths if
                                 isinstance(column, RaggedArray)
                                 else np.array([

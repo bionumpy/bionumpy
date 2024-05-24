@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, Iterable, Tuple
 
 import numpy as np
 from ..encoded_array import EncodedArray, as_encoded_array, EncodedRaggedArray
@@ -74,7 +74,7 @@ class IndexedFasta:
             [(name, var['rlen'], var['offset'], var['lenc'], var['lenb'])
              for name, var in self._index.items()])#  if '_' not in name])
 
-    def get_contig_lengths(self) -> dict:
+    def get_contig_lengths(self) -> Dict[str, int]:
         """Return a dict of chromosome names to seqeunce lengths
 
         Returns
@@ -84,13 +84,13 @@ class IndexedFasta:
         """
         return {name: values["lenc"] for name, values in self._index.items()}
 
-    def keys(self):
+    def keys(self) -> Iterable[str]:
         return self._index.keys()
 
-    def values(self):
+    def values(self) -> Iterable[EncodedArray]:
         return (self[key] for key in self.keys())
 
-    def items(self):
+    def items(self) -> Iterable[Tuple[str, EncodedArray]]:
         return ((key, self[key]) for key in self.keys())
 
     def __repr__(self):
@@ -102,12 +102,12 @@ class IndexedFasta:
         Parameters
         ----------
         chromosome : str
-            chromsome name
+            chromosome name
 
         Returns
         -------
         EncodedArray
-            The sequence for that chromoeme
+            The sequence for that chromosome
         """
         idx = self._index[chromosome]
         lenb, rlen, lenc = (idx["lenb"], idx["rlen"], idx["lenc"])
@@ -157,8 +157,6 @@ class IndexedFasta:
             sequence = np.delete(r_sequence,
                                  [lenb*(j+1)-1-start_mod
                                   for j in range(n_row)])
-            # assert not np.any(sequence == 10), (np.flatnonzero(r_sequence==10), [lenb*(j+1)-1-start_mod
-            #                                                                      for j in range(n_row)], read_start, read_length, n_row, start_mod, lenb, a_offset, intervals[i:i+1], indices[i:i+1])
             pre_alloc[a_offset:a_offset+sequence.size] = sequence
         a = EncodedArray(pre_alloc, BaseEncoding)
         return EncodedRaggedArray(a, lengths)
@@ -204,7 +202,5 @@ class IndexedFasta:
             cur_offset += stop_offset-start_offset
         assert alloc_offset == pre_alloc.size, (alloc_offset, pre_alloc.size)
         assert np.all(pre_alloc> 0), np.sum(pre_alloc==0)
-        # s = np.delete(np.array(sequences, dtype=np.uint8), delete_indices)
-        #s = np.delete(pre_alloc[:alloc_offset], delete_indices)
         a = EncodedArray(pre_alloc, BaseEncoding)
         return EncodedRaggedArray(a, lengths)

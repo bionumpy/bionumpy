@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional, List
+from typing import Optional, List, Union, Any, Type, Tuple
 
 import numpy as np
 from io import FileIO
@@ -8,7 +8,7 @@ from npstructures.raggedshape import RaggedView2
 
 from .exceptions import FormatException
 from .strops import str_to_int, str_to_int_with_missing, str_to_float, str_to_float_with_missing
-from ..bnpdataclass import bnpdataclass
+from ..bnpdataclass import bnpdataclass, BNPDataClass
 from ..encoded_array import EncodedArray, EncodedRaggedArray, Encoding, as_encoded_array
 from ..encodings import BaseEncoding
 from ..string_array import as_string_array
@@ -19,7 +19,7 @@ NEWLINE = "\n"
 
 
 def move_intervals_to_digit_array(data, starts, ends, fill_value):
-    if len(starts)==0:
+    if len(starts) == 0:
         return np.zeros_like(data, shape=((0, 0)))
     max_chars = np.max(ends - starts)
     view_starts = (ends - max_chars)
@@ -32,15 +32,14 @@ def move_intervals_to_digit_array(data, starts, ends, fill_value):
 
 
 def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at=None):
-
     lens = ends - starts
     max_chars = np.max(lens)
-    indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size-1)
+    indices = np.minimum(starts[..., None] + np.arange(max_chars), data.size - 1)
     array = data[indices]
     del indices
     if stop_at is not None:
         new_lens = np.argmax(array == stop_at, axis=-1)
-        lens = np.where(new_lens>0, np.minimum(lens, new_lens), lens)
+        lens = np.where(new_lens > 0, np.minimum(lens, new_lens), lens)
         max_chars = np.max(lens)
         array = array[:, :max_chars].ravel()
     z_lens = max_chars - lens
@@ -49,12 +48,12 @@ def move_intervals_to_right_padded_array(data, starts, ends, fill_value, stop_at
         return array.reshape((-1, max_chars))
     first_row = row_idxs[0]
     cm = np.cumsum(z_lens[row_idxs])
-    diffs = np.diff(row_idxs)*max_chars-z_lens[row_idxs[1:]]
+    diffs = np.diff(row_idxs) * max_chars - z_lens[row_idxs[1:]]
     del row_idxs
     index_builder = np.ones(cm[-1], dtype=np.int32)
     index_builder[cm[:-1]] = diffs + 1
     del cm
-    index_builder[0] = first_row*max_chars+lens[first_row]
+    index_builder[0] = first_row * max_chars + lens[first_row]
     np.cumsum(index_builder, out=index_builder)
     zeroed = index_builder
     tmp = array.ravel()
@@ -104,15 +103,14 @@ class FileBuffer:
 
     @property
     @lru_cache()
-    def size(self):
+    def size(self) -> int:
         return self.data.size
 
     @property
-    def data(self):
+    def data(self) -> EncodedArray:
         return self._buffer_extractor.data
 
-
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: Union[int, slice, List[int]]):
         return NotImplemented
 
     def raise_if(condition, *args, **kwargs):
@@ -120,25 +118,21 @@ class FileBuffer:
             raise FormatException(*args, **kwargs)
 
     @property
-    def header_data(self):
+    def header_data(self) -> Any:
         if hasattr(self, "_header_data"):
             return self._header_data
         return None
 
     @property
-    def n_lines(self):
+    def n_lines(self) -> int:
         return NotImplemented
-        return len(self._new_lines)
 
     @classmethod
-    def modify_class_with_header_data(cls, header_data):
+    def modify_class_with_header_data(cls, header_data: Any) -> Type["FileBuffer"]:
         return cls
-        # class NewClass(cls):
-        #     _header_data = header_data
-
 
     @classmethod
-    def read_header(cls, file_object: FileIO):
+    def read_header(cls, file_object: FileIO) -> str:
         """Read the header data from the file
 
         The data returned here is passed to each buffer through the
@@ -214,18 +208,19 @@ class FileBuffer:
         return NotImplemented
 
     def validate_if_not(self):
+        """Validate the buffer if it has not been validated yet"""
         if not self._is_validated:
             self._validate()
             self._is_validated = True
 
-    def get_data(self) -> bnpdataclass:
+    def get_data(self) -> BNPDataClass:
         """Extract the data from the buffer
 
         The default way to extract data from the the buffer
 
         Returns
         -------
-        npdataclass
+        BNPDataClass
             dataset containing the data from the buffer
         """
         return NotImplemented
@@ -243,7 +238,7 @@ class FileBuffer:
 
     def _move_2d_array_to_intervals(self, array, starts, ends):
         max_chars = array.shape[-1]
-        to_indices = ends[::-1, None]-max_chars+np.arange(max_chars)
+        to_indices = ends[::-1, None] - max_chars + np.arange(max_chars)
         self._data[to_indices] = array[::-1]
 
     def _get_parser(self, field_type):
@@ -266,9 +261,8 @@ class FileBuffer:
                 parser = field_parser
         return parser
 
-
     @classmethod
-    def contains_complete_entry(cls, chunks):
+    def contains_complete_entry(cls, chunks: List[np.ndarray]) -> bool:
         n_new_lines = sum(np.count_nonzero(EncodedArray(chunk, BaseEncoding) == NEWLINE) for chunk in chunks)
         return n_new_lines >= cls.n_lines_per_entry
 
@@ -276,12 +270,17 @@ class FileBuffer:
     def process_field_for_write(cls, field_name, value):
         return value
 
+
 class IncompleteEntryException(Exception):
     pass
 
 
 class TextBufferExtractor:
-    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens: np.ndarray=None):
+    """
+    Base class for extracting data from a text buffer.
+    """
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray = None,
+                 field_lens: np.ndarray = None):
         '''
         field_starts: n_entries x n_fields
         field_ends: n_entries x n_fields
@@ -291,29 +290,41 @@ class TextBufferExtractor:
 
         if field_lens is None:
             assert field_ends is not None
-            self._field_lens = field_ends-field_starts
+            self._field_lens = field_ends - field_starts
         else:
             assert field_ends is None
             self._field_lens = field_lens
         self._n_fields = field_starts.shape[1]
 
     @property
-    def data(self):
+    def data(self) -> EncodedArray:
         return self._data
 
     @property
-    def n_fields(self):
+    def n_fields(self) -> int:
         return self._n_fields
 
     def __len__(self):
         return len(self._field_starts)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: Union[int, slice, List[int]]) -> 'TextBufferExtractor':
         return self.__class__(self._data,
                               field_starts=self._field_starts[idx],
                               field_lens=self._field_lens[idx])
 
-    def get_field_by_number(self, field_nr: int, keep_sep=False):
+    def get_field_by_number(self, field_nr: int, keep_sep: bool=False) -> EncodedRaggedArray:
+        """
+        Extract the data for a single field.
+        Parameters
+        ----------
+        field_nr: int
+        keep_sep: bool
+
+        Returns
+        -------
+        EncodedRaggedArray
+
+        """
         assert field_nr < self._n_fields, (field_nr, self._n_fields)
         lens = self._field_lens.ravel()[field_nr::self._n_fields]
         if keep_sep:
@@ -321,40 +332,63 @@ class TextBufferExtractor:
         starts = self._field_starts.ravel()[field_nr::self._n_fields]
         return self._extract_data(lens, starts)
 
-
-
-
     def _extract_data(self, lens, starts):
         values = EncodedRaggedArray(self._data, RaggedView2(starts, lens))
         assert len(values) == len(self), (self._field_starts, self._field_lens, self._n_fields, self._data)
         return values
 
-    def get_fixed_length_field(self, field_nr: int, field_length: int):
+    def get_fixed_length_field(self, field_nr: int, field_length: int)-> EncodedArray:
         indices = self._field_starts[:, field_nr, None] + np.arange(field_length)
         return self._data[indices]
 
-    def get_padded_field(self, field_nr, stop_at=None):
+    def get_padded_field(self, field_nr, stop_at=None) -> EncodedArray:
         starts = self._field_starts[:, field_nr]
         if starts.size == 0:
-            return np.zeros_like(self._data, shape = (len(starts), 0))
+            return np.zeros_like(self._data, shape=(len(starts), 0))
         lens = self._field_lens[:, field_nr]
-        ends = lens+starts
+        ends = lens + starts
 
-        array = move_intervals_to_right_padded_array(self._data, starts.ravel(), ends.ravel(), fill_value='\x00', stop_at=stop_at)
-        return array.reshape(starts.shape+(array.shape[-1],))
+        array = move_intervals_to_right_padded_array(self._data, starts.ravel(), ends.ravel(), fill_value='\x00',
+                                                     stop_at=stop_at)
+        return array.reshape(starts.shape + (array.shape[-1],))
 
-    def get_digit_array(self, field_nr: int):
+    def get_digit_array(self, field_nr: int) -> Tuple[EncodedArray, Optional[np.ndarray], Optional[np.ndarray]]:
+        """
+        Extract the digits of the field as a 2D array of encoded integres.
+
+        Parameters
+        ----------
+        field_nr: int
+
+        Returns
+        -------
+        EncodedArray
+        """
+
         starts = self._field_starts[:, field_nr]
         possible_signs = self._data[starts]
         is_negative = possible_signs == "-"
         is_positive = possible_signs == "+"
         if np.any(is_negative) or np.any(is_positive):
             return self.get_field_by_number(field_nr), is_negative, is_positive
-        digit_array = move_intervals_to_digit_array(self._data, starts, starts+self._field_lens[:, field_nr], fill_value='0')
+        digit_array = move_intervals_to_digit_array(self._data, starts, starts + self._field_lens[:, field_nr],
+                                                    fill_value='0')
         return digit_array, None, None
 
     @classmethod
     def concatenate(cls, buffers: List['TextBufferExtractor']):
+        """
+        Concatenate multiple buffers into a single buffer.
+
+        Parameters
+        ----------
+        buffers: List[TextBufferExtractor]
+
+        Returns
+        -------
+        TextBufferExtractor
+
+        """
         sizes = np.array([b._data.size for b in buffers])
         offsets = np.insert(np.cumsum(sizes), 0, 0)
         data = np.concatenate([b._data for b in buffers])
@@ -364,9 +398,14 @@ class TextBufferExtractor:
 
 
 class TextThroughputExtractor(TextBufferExtractor):
-    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray=None, field_lens=None, entry_starts: np.ndarray=None, entry_ends:np.ndarray=None, is_contiguous=True):
+    """
+    TextBufferExtractor made especially for making it fast to write a modified or filtered buffer to file again.
+    """
+
+    def __init__(self, data: EncodedArray, field_starts: np.ndarray, field_ends: np.ndarray = None, field_lens=None,
+                 entry_starts: np.ndarray = None, entry_ends: np.ndarray = None, is_contiguous=True):
         if field_lens is None:
-            field_lens = field_ends-field_starts
+            field_lens = field_ends - field_starts
         super().__init__(data, field_starts, field_lens=field_lens)
         self._entry_starts = entry_starts
         self._entry_ends = entry_ends
@@ -381,7 +420,8 @@ class TextThroughputExtractor(TextBufferExtractor):
         lens = np.concatenate([b._field_lens for b in buffers])
         entry_starts = np.concatenate([b._entry_starts + offset for b, offset in zip(buffers, offsets)])
         entry_ends = np.concatenate([b._entry_ends + offset for b, offset in zip(buffers, offsets)])
-        return cls(data, starts, field_lens=lens, entry_starts=entry_starts, entry_ends=entry_ends, is_contiguous=all(b._is_contiguous for b in buffers))
+        return cls(data, starts, field_lens=lens, entry_starts=entry_starts, entry_ends=entry_ends,
+                   is_contiguous=all(b._is_contiguous for b in buffers))
 
     def __getitem__(self, idx):
         return self.__class__(self._data,
@@ -398,13 +438,11 @@ class TextThroughputExtractor(TextBufferExtractor):
         self._data = EncodedRaggedArray(self._data, RaggedView2(self._entry_starts, lens)).ravel()
         self._entry_starts = new_starts[:-1]
         self._entry_ends = new_starts[1:]
-        self._field_starts = self._field_starts-offsets[:, None]
-
-        # self._field_ends = self._field_ends-offsets[:, None]
+        self._field_starts = self._field_starts - offsets[:, None]
         self._is_contiguous = True
 
     @property
-    def data(self):
+    def data(self) -> EncodedArray:
         if not self._is_contiguous:
             self._make_contigous()
         return self._data
@@ -413,7 +451,7 @@ class TextThroughputExtractor(TextBufferExtractor):
         assert from_nr is not None
         assert to_nr is None
         starts = self._field_starts[:, from_nr]
-        lens = self._entry_ends-starts
+        lens = self._entry_ends - starts
         if not keep_sep:
-            lens-=1
+            lens -= 1
         return self._extract_data(lens, starts)
