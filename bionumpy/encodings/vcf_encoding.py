@@ -59,15 +59,12 @@ class _GenotypeRowEncoding(Encoding):
         if isinstance(genotype_rows, list):
             assert len(genotype_rows) ==0
             genotype_rows = EncodedArray(np.zeros((0, 3)), BaseEncoding)
-        # genotype_rows = as_encoded_array(genotype_rows)
         data = genotype_rows.ravel()
         # hack because the row sometime ends with \n and sometimes with \t
         replace_inplace(data, "\n", "\t")
         indices = np.flatnonzero(data == "\t")
         indices = np.insert(indices, 0, -1)
         return data[indices[:-1, np.newaxis] + np.array([1, 2, 3])]
-        #data = split(data.ravel(), "\t")[:-1, 0:3]  # don't include last element which is empty
-        #return data
 
     def decode(self, genotype):
         if len(genotype.shape) == 0:
@@ -76,7 +73,7 @@ class _GenotypeRowEncoding(Encoding):
         new_shape = genotype.shape[:-1] + (4*genotype.shape[-1],)
         if not isinstance(genotype, np.ndarray):
             genotype = genotype.raw()
-        decoded = self.decode_lookup()[genotype].reshape(new_shape)# genotype.shape[0], genotype.shape[1]*4)
+        decoded = self.decode_lookup()[genotype].reshape(new_shape)
         # remove last tab
         return decoded[..., :-1]
 
