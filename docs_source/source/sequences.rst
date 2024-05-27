@@ -39,6 +39,114 @@ These objects also behave very much like numpy arrays, in indexing and broadcast
     >>> encoded_ragged_array[[0, 2], 1]
     encoded_array('tg')
 
+Absolute basics of `EncodedRaggedArray`
+=======================================
+
+As shown above, sequences are represented as `EncodedRaggedArray` objects. Below are some absolute basics of `EncodedRaggedArray` objects:
+
+For this example, instead of creating a `EncodedRaggedArray` object directly, we will simulate some sequences using the
+BioNumpy's `simulate_sequences` function:
+
+    >>> import bionumpy as bnp
+    >>> import numpy as np
+    >>> from bionumpy.simulate import simulate_sequences
+    >>> rng = np.random.default_rng(seed=1)
+    >>> aa_alphabet = bnp.encodings.alphabet_encoding.AminoAcidEncoding.get_labels()
+    >>> named_seqs = simulate_sequences(aa_alphabet, {f's{i}': np.random.randint(5,20) for i in range(10)})
+    >>> my_seqs = named_seqs.sequence
+    >>> named_seqs # print the sequences
+    SequenceEntry with 10 entries
+                     name                 sequence
+                       s0       LMSYAEVYGHWKGVGKQN
+                       s1               CAWSVNVHLT
+                       s2       DHDL*DKKWFMGASCGMM
+                       s3               D*S*CSHNYG
+                       s4      SEH*KMHDKQLTIPTYKAS
+                       s5                  NWLICLQ
+                       s6                    TVFPT
+                       s7              GIVPMRM*SCE
+                       s8           NVCRSTWFNTIFMC
+                       s9                  FVRWVWH
+
+Indexing and slicing of `EncodedRaggedArray` objects
+-----------------------------------------------------
+
+We can index and slice `EncodedRaggedArray` objects in a similar way to numpy arrays. Below are some examples:
+
+    >>> my_seqs[0:2] # first 2 sequences
+    encoded_ragged_array(['LMSYAEVYGHWKGVGKQN',
+                      'CAWSVNVHLT'], AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'))
+
+    >>> my_seqs[-4:] # last 4 sequences
+    encoded_ragged_array(['TVFPT',
+                      'GIVPMRM*SCE',
+                      'NVCRSTWFNTIFMC',
+                      'FVRWVWH'], AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'))
+
+Some basic properties of `EncodedRaggedArray` objects
+------------------------------------------------------
+
+    >>> my_seqs.shape # number of sequences and length of each sequence
+    (10, array([18, 10, 18, 10, 19,  7,  5, 11, 14,  7]))
+
+    >>> my_seqs.lengths # lengths of each sequence
+    array([18, 10, 18, 10, 19,  7,  5, 11, 14,  7])
+
+    >>> my_seqs.size # total number of elements (amino acid residues across all sequences in the encoded ragged array)
+    119
+
+    >>> my_seqs.encoding # the encoding used for the sequences
+    AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*')
+
+Concatenation of `EncodedRaggedArray` objects
+------------------------------------------------
+
+    >>> np.concatenate([my_seqs, my_seqs[-2:]]).shape # concatenate two encoded ragged arrays and get the shape
+    (12, array([18, 10, 18, 10, 19,  7,  5, 11, 14,  7, 14,  7]))
+
+Getting unique elements and counting occurrences
+-------------------------------------------------
+
+    >>> bnp.count_encoded(my_seqs.get_column_values(0)) # count the number of occurrences of each amino acid at the first position (similar to numpy.unique)
+    EncodedCounts(alphabet=['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', '*'], counts=array([0, 1, 2, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 0, 0, 0]), row_names=None)
+
+Counting the number of occurrences of a specific element in each sequence
+--------------------------------------------------------------------------
+
+    >>> np.sum(my_seqs == "F", axis=-1) # count the number of occurrences of the amino acid "F" in each sequence
+    array([0, 0, 1, 0, 0, 0, 1, 0, 2, 1])
+
+Filtering `EncodedRaggedArray` objects based on a mask
+------------------------------------------------------
+
+    >>> mask = my_seqs.lengths < 8
+    >>> short_seqs = my_seqs[mask]
+    >>> short_seqs
+    encoded_ragged_array(['NWLICLQ',
+                      'TVFPT',
+                      'FVRWVWH'], AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'))
+
+
+Broadcasting and one-hot encoding
+----------------------------------
+
+    >>> short_seqs[1][..., np.newaxis] == "ACDEFGHIKLMNPQRSTVWY" # one-hot encoding of the second sequence
+    array([[False, False, False, False, False, False, False, False, False,
+        False, False, False, False, False, False, False,  True, False,
+        False, False],
+       [False, False, False, False, False, False, False, False, False,
+        False, False, False, False, False, False, False, False,  True,
+        False, False],
+       [False, False, False, False,  True, False, False, False, False,
+        False, False, False, False, False, False, False, False, False,
+        False, False],
+       [False, False, False, False, False, False, False, False, False,
+        False, False, False,  True, False, False, False, False, False,
+        False, False],
+       [False, False, False, False, False, False, False, False, False,
+        False, False, False, False, False, False, False,  True, False,
+        False, False]])
+
 Reading sequences from file
 ===========================
 Usually we get sequences directly from file. BioNumPy supports a range of file formats containing sequence data including fasta, fastq, indexed fasta and bam files.
