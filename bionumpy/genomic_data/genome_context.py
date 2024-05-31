@@ -37,7 +37,20 @@ class GenomeContext(GenomeContextBase):
         self._chrom_size_dict = {key: value for key, value in chrom_size_dict.items() if key in self._included}
         self._global_offset = GlobalOffset(self._chrom_size_dict, string_encoding=self._string_endcoding)
 
-    def with_ignored_added(self, ignored):
+    def with_ignored_added(self, ignored: Iterable[str]) -> 'GenomeContext':
+        '''
+        Make a new GenomeContext with additional ignored chromosomes. This is useful for allowing but ignoring
+        chromosome names that are not in the origin genome
+
+        Parameters
+        ----------
+        ignored: Iterable[str]
+
+        Returns
+        -------
+        GenomeContext
+
+        '''
         c = self._original_chrom_sizes.copy()
         c.update({name: 0 for name in ignored})
         return self.__class__(c, set(ignored) | set(self._ignored))

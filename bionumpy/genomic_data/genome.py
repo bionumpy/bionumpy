@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from typing import Dict
+from typing import Dict, List
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
@@ -36,11 +36,37 @@ class Genome:
             self._genome_context = GenomeContext.from_dict(chrom_sizes, filter_function)
         self._fasta_filename = fasta_filename
 
-    def with_ignored_added(self, ignored):
+    def with_ignored_added(self, ignored: List[str]) -> 'Genome':
+        '''
+        Make a new GenomeContext with additional ignored chromosomes. This is useful for allowing but ignoring
+        chromosome names that are not in the origin genome.
+        Parameters
+        ----------
+        ignored: Iterable[str]
+
+        Returns
+        -------
+        Genome
+
+        '''
         return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
-    def from_dict(cls, chrom_sizes: Dict[str, int], *args, **kwargs):
+    def from_dict(cls, chrom_sizes: Dict[str, int], *args, **kwargs) -> 'Genome':
+        '''
+        Create a Genome object from a dictionary of chromosome sizes
+
+        Parameters
+        ----------
+        chrom_sizes: Dict[str, int]
+        args: Additional args to be passed to the Genome constructor
+        kwargs: Additional kwargs to be passed to the Genome constructor
+
+        Returns
+        -------
+        Genome
+
+        '''
         return cls(chrom_sizes, *args, **kwargs)
 
     @classmethod
@@ -191,6 +217,7 @@ class Genome:
 
         """
         assert not (stream and has_numeric_chromosomes)
+        assert not stranded, "Stranded locations are not supported yet"
         f = bnp_open(filename, buffer_type=buffer_type)
         data = f.read_chunks()
         if not stream:
@@ -278,10 +305,17 @@ class Genome:
             ((key, value) for key, value in self._genome_context.chrom_sizes.items() if '_' not in key),
             headers=["Chromosome", "Size"])
 
-    def get_genome_context(self):
+    def get_genome_context(self) -> GenomeContext:
+        '''
+        Get the genome context of the Genome
+        Returns
+        -------
+        GenomeContext
+        '''
+
         return self._genome_context
 
     @property
-    def size(self):
+    def size(self) -> int:
         '''The size of the genome'''
         return self._genome_context.size
