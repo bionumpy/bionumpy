@@ -1,6 +1,6 @@
 .. _introduction:
 
-A 10-minute introduction to BioNumPy
+Getting started with BioNumPy in 10 minutes
 --------------------------------------
 
 By following this quick guide, you should be able to get started using BioNumPy to analyse your own biological data.
@@ -9,11 +9,6 @@ Prerequisites
 ==============
 
 To follow this guide, you will need to know some Python and should also ideally know the basics of NumPy or array programming. If you have experience from R, you may already be used to concepts of array programming, such as indexing, slicing and vectorized operations, and the concepts here should be possible to understand. If you need to freshen up on NumPy/array programming, check out the `NumPy introduction <https://numpy.org/doc/stable/user/quickstart.html>`_.
-
-The core concepts of BioNumPy
-==============================
-
-The main philosophy behind BioNumPy is that you should be able to efficiently read biological datasets into NumPy-like data structure, and then analyse the data using NumPy-like methods, such as indexing, slicing, broadcasting and other vectorized operations (sum, mean, etc). Since NumPy arrays are used to store the data, BioNumPy has a very low memory footprint and operations are very efficient, meaning that BioNumPy is suitable for working with large datasets and can be an alternative to using libraries and tools written in more low-level languages such as C and C++.
 
 
 Install BioNumPy
@@ -37,7 +32,7 @@ We start by downloading a fastq file:
 
 .. code-block:: bash
 
-    wget https://github.com/bionumpy/bionumpy/raw/master/example_data/big.fq.gz
+    wget https://github.com/bionumpy/bionumpy/raw/main/example_data/big.fq.gz
 
 In the following, we assume you have the big.fq.gz in a directory called `example_data`.
 

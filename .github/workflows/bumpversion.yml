@@ -2,7 +2,7 @@ name: Bump version
 on:
   workflow_run:
     workflows: [ "Build and test" ]
-    branches: [ master ]
+    branches: [ main ]
     types:
       - completed
 jobs:

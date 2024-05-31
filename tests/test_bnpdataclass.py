@@ -94,7 +94,7 @@ def test_bnpdataclassfunction():
     bnp_add = bnpdataclassfunction("a", "b", (add))
     assert_equal(bnp_add(MyClass([10], [20])), [30])
 
-
+# @pytest.mark.skip("Deprecated")
 def test_set_get_context():
     data = MyClass(a=[10, 20], b=[100, 200])
     context = "Test test"

@@ -1,9 +1,16 @@
+from typing import List
+
 import numpy as np
 from ..encoded_array import OneToOneEncoding
 from .exceptions import EncodingError
 
 
 class AlphabetEncoding(OneToOneEncoding):
+    """
+    Encoding for an alphabet. The encoding is one-to-one and the alphabet is
+    defined by the input string. The encoding is case-insensitive.
+    """
+
     def __init__(self, alphabet: str):
         self._raw_alphabet = [c.upper() for c in alphabet]
         self._is_initialized = False
@@ -41,19 +48,36 @@ class AlphabetEncoding(OneToOneEncoding):
     def _decode(self, encoded):
         self._initialize()
         array = np.asarray(encoded)
-        # assert np.issubdtype(array.dtype, int), (encoded, array)
         return self._alphabet[array]
 
     @property
-    def alphabet_size(self):
+    def alphabet_size(self)->int:
+        """
+        Get the size of the alphabet
+
+        Returns
+        -------
+        int
+            The size of the alphabet
+
+        """
         self._initialize()
         return self._alphabet.size
 
-    def get_alphabet(self):
+    def get_alphabet(self)-> List[str]:
+        """
+        Get the alphabet
+
+        Returns
+        -------
+        list[str]
+            The alphabet
+
+        """
         self._initialize()
         return [chr(c) for c in self._alphabet]
 
-    def get_labels(self):
+    def get_labels(self) -> List[str]:
         return self.get_alphabet()
 
     def __str__(self):

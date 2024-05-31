@@ -1,3 +1,4 @@
+n_benchmark_repeats: 10  # number of times each benchmark is repeated
 
 method_names:
   bionumpy: "BioNumPy"

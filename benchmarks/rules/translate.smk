@@ -7,7 +7,7 @@ rule translate_bionumpy:
     output:
         "results/bionumpy/translate/{filename}.fa"
     benchmark:
-        "benchmarks/translate/bionumpy/{filename}.txt"
+        repeat("benchmarks/translate/bionumpy/{filename}.txt", config["n_benchmark_repeats"])
     shell:
         "python ../scripts/translate_example.py {input} {output}"
 
@@ -18,7 +18,7 @@ rule translate_biopython:
     output:
         "results/biopython/translate/{name}.fa"
     benchmark:
-        "benchmarks/translate/biopython/{name}.txt"
+        repeat("benchmarks/translate/biopython/{name}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biopython.yml"
     script:
@@ -31,7 +31,7 @@ rule translate_biostrings:
     output:
         "results/biostrings/translate/{name}.fa"
     benchmark:
-        "benchmarks/translate/biostrings/{name}.txt"
+        repeat("benchmarks/translate/biostrings/{name}.txt", config["n_benchmark_repeats"])
     script:
         "scripts/reverse_complement_biostrings.R"
 
@@ -42,7 +42,7 @@ rule translate_python:
     output:
         "results/python/translate/{name}.fa"
     benchmark:
-        "benchmarks/translate/python/{name}.txt"
+        repeat("benchmarks/translate/python/{name}.txt", config["n_benchmark_repeats"])
     script:
         "../scripts/python_translate.py"
 
@@ -53,7 +53,7 @@ rule translate_biotite:
     output:
         "results/biotite/translate/{name}.fa"
     benchmark:
-        "benchmarks/translate/biotite/{name}.txt"
+        repeat("benchmarks/translate/biotite/{name}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biotite.yml"
     script:

@@ -25,6 +25,7 @@ Simulating sequences is very straightforward in BioNumPy. Since a sequence array
 
 
 One can now easily do a variety of analyses on these simulated sequences, e.g. compute the GC content per simulated sequence:
+
     >>> seqs = named_seqs.sequence
     >>> gc_content_per_seq = np.mean((seqs=='C')|(seqs=='G'), axis=1)
     >>> gc_content_per_seq
@@ -36,6 +37,7 @@ One can now easily do a variety of analyses on these simulated sequences, e.g. c
 
 
 If desired, such computed values per sequence can easily be added back as an additional column of the bionumpy data structure:
+
     >>> named_seqs = named_seqs.add_fields({'gc':gc_content_per_seq}, {'gc':float})
     >>> named_seqs
     DynamicSequenceEntry with 20 entries

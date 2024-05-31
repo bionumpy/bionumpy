@@ -8,7 +8,7 @@ sorted(tf_experiments)
 
 def bedtools_commands(wildcards):
     n_tfs = int(wildcards.n_tfs)
-    tf_pairs = set(itertools.combinations(tf_experiments[0:n_tfs],2))
+    tf_pairs = sorted(list(set(itertools.combinations(tf_experiments[0:n_tfs],2))))
     path = "results/bed_files/"
     file_ending = ".sorted.bed"
     # A bit hacky, in order to run all bedtools commands in one rule so benchmark is valid
@@ -39,7 +39,7 @@ rule pyranges_jaccard_all_vs_all:
     output:
         "results/pyranges/jaccard_all_vs_all/ntfs{n_tfs}.txt"
     benchmark:
-        "benchmarks/jaccard_all_vs_all/pyranges/ntfs{n_tfs}.txt"
+        repeat("benchmarks/jaccard_all_vs_all/pyranges/ntfs{n_tfs}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/pyranges.yml"
     script:
@@ -56,7 +56,7 @@ rule bedtools_jaccard_all_vs_all:
     conda:
         "../envs/bedtools.yml"
     benchmark:
-        "benchmarks/jaccard_all_vs_all/bedtools/ntfs{n_tfs}.txt"
+        repeat("benchmarks/jaccard_all_vs_all/bedtools/ntfs{n_tfs}.txt", config["n_benchmark_repeats"])
     shell:
         """
         touch {output}
@@ -70,7 +70,7 @@ rule bionumpy_jaccard_all_vs_all:
     output:
         "results/bionumpy/jaccard_all_vs_all/ntfs{n_tfs}.txt"
     benchmark:
-        "benchmarks/jaccard_all_vs_all/bionumpy/ntfs{n_tfs}.txt"
+        repeat("benchmarks/jaccard_all_vs_all/bionumpy/ntfs{n_tfs}.txt", config["n_benchmark_repeats"])
     shell:
         """
         python ../scripts/jaccard_all_vs_all_example.py ../example_data/hg38_unix_sorted.chrom.sizes {input} > {output}
@@ -84,11 +84,12 @@ rule bionumpy_jaccard_two_bed_files:
     output:
         "results/bionumpy/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
-        "benchmarks/jaccard_two_bed_files/bionumpy/{a}-vs-{b}.txt"
+        repeat("benchmarks/jaccard_two_bed_files/bionumpy/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     shell:
         """
         python ../scripts/jaccard_all_vs_all_example.py ../example_data/hg38_unix_sorted.chrom.sizes {input} > {output}
         """
+
 
 # also does sorting in this rule so that's included in the benchmark
 rule bedtools_jaccard_two_bed_files:
@@ -98,7 +99,7 @@ rule bedtools_jaccard_two_bed_files:
     output:
         "results/bedtools/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
-        "benchmarks/jaccard_two_bed_files/bedtools/{a}-vs-{b}.txt"
+        repeat("benchmarks/jaccard_two_bed_files/bedtools/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/bedtools.yml"
     shell:
@@ -109,7 +110,6 @@ rule bedtools_jaccard_two_bed_files:
         """
 
 
-
 rule pyranges_jaccard_two_bed_files:
     input:
         a="results/intervals/{a}.bed",
@@ -117,7 +117,7 @@ rule pyranges_jaccard_two_bed_files:
     output:
         "results/pyranges/jaccard_two_bed_files/{a}-vs-{b}.txt"
     benchmark:
-        "benchmarks/jaccard_two_bed_files/pyranges/{a}-vs-{b}.txt"
+        repeat("benchmarks/jaccard_two_bed_files/pyranges/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/pyranges.yml"
     script:

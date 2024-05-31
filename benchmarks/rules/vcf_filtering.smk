@@ -12,7 +12,7 @@ rule bcftools_vcf_filtering:
     output:
         "results/bcftools/vcf_filtering/{size}.filtered.vcf"
     benchmark:
-        "benchmarks/vcf_filtering/bcftools/{size}.txt"
+        repeat("benchmarks/vcf_filtering/bcftools/{size}.txt", config["n_benchmark_repeats"])
     log:
         "log/{size}.view.vcf.log"
     #params:
@@ -33,7 +33,7 @@ rule bionumpy_vcf_filtering:
     output:
         "results/bionumpy/vcf_filtering/{size}.filtered.vcf"
     benchmark:
-        "benchmarks/vcf_filtering/bionumpy/{size}.txt"
+        repeat("benchmarks/vcf_filtering/bionumpy/{size}.txt", config["n_benchmark_repeats"])
     shell:
         """
         python3 -O ../scripts/vcf_allele_frequency_filtering_example.py {input} {output} 10
@@ -47,7 +47,7 @@ rule vcfpy_vcf_filtering:
     output:
         "results/vcfpy/vcf_filtering/{size}.filtered.vcf"
     benchmark:
-        "benchmarks/vcf_filtering/vcfpy/{size}.txt"
+        repeat("benchmarks/vcf_filtering/vcfpy/{size}.txt", config["n_benchmark_repeats"])
     run:
         import vcfpy
 
@@ -74,7 +74,7 @@ rule pyvcf_vcf_filtering:
     output:
         "results/pyvcf/vcf_filtering/{size}.filtered.vcf"
     benchmark:
-        "benchmarks/vcf_filtering/pyvcf/{size}.txt"
+        repeat("benchmarks/vcf_filtering/pyvcf/{size}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/pyvcf.yml"
     script:

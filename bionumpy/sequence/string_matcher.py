@@ -14,6 +14,28 @@ from ..util.typing import EncodedArrayLike, SingleEncodedArrayLike
 
 
 def match_string(sequence: EncodedArrayLike, matching_sequence: SingleEncodedArrayLike) -> ArrayLike:
+    """
+    Matches a sequence aginst sequences and returns a boolean RaggedArray representing positions
+    where the sequence matches.
+    Parameters
+    ----------
+    sequence :
+    matching_sequence :
+
+    Returns
+    -------
+    ArrayLike
+        A boolean RaggedArray representing positions where the sequence matches.
+
+    Examples
+    --------
+    >>> import bionumpy as bnp
+    >>> sequence = bnp.as_encoded_array(['ACGT', 'TACTAC'])
+    >>> matching_sequence = bnp.as_encoded_array('AC', sequence.encoding)
+    >>> bnp.match_string(sequence, matching_sequence)
+    ragged_array([ True False False]
+    [False  True False False  True])
+    """
     sequence = as_encoded_array(sequence)
     enforced_encoding = sequence.encoding
     matching_sequence = as_encoded_array(matching_sequence, enforced_encoding)

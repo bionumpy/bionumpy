@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from typing import Dict
+from typing import Dict, List, Optional
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
@@ -36,11 +36,43 @@ class Genome:
             self._genome_context = GenomeContext.from_dict(chrom_sizes, filter_function)
         self._fasta_filename = fasta_filename
 
-    def with_ignored_added(self, ignored):
+    def with_ignored_added(self, ignored: List[str]) -> 'Genome':
+        '''
+        Make a new GenomeContext with additional ignored chromosomes. This is useful for allowing but ignoring
+        chromosome names that are not in the origin genome.
+        Parameters
+        ----------
+        ignored: Iterable[str]
+
+        Returns
+        -------
+        Genome
+
+        '''
         return self.__class__(self._genome_context.with_ignored_added(ignored), self._fasta_filename)
 
     @classmethod
-    def from_dict(cls, chrom_sizes: Dict[str, int], *args, **kwargs):
+    def from_dict(cls, chrom_sizes: Dict[str, int], *args, **kwargs) -> 'Genome':
+        '''
+        Create a Genome object from a dictionary of chromosome sizes
+
+        Parameters
+        ----------
+        chrom_sizes: Dict[str, int]
+        args: Additional args to be passed to the Genome constructor
+        kwargs: Additional kwargs to be passed to the Genome constructor
+
+        Returns
+        -------
+        Genome
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> bnp.Genome.from_dict({'chr1': 1000, 'chr2': 2000})
+        Genome(['chr1', 'chr2'])
+
+        '''
         return cls(chrom_sizes, *args, **kwargs)
 
     @classmethod
@@ -62,6 +94,12 @@ class Genome:
         -------
         'Genome'
             A `Genome` object created from the read chromosome sizes
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> bnp.Genome.from_file('example_data/hg38.chrom.sizes')
+        Genome(['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...'])
 
         """
         path = PurePath(filename)
@@ -96,6 +134,16 @@ class Genome:
         Returns
         -------
         GenomicArray
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> bedgraph = bnp.datatypes.BedGraph(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5], value=[1, 2, 3])
+        >>> genome = bnp.Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_track(bedgraph)
+        chr1: [1 1 1 1 1 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0]
+        chr2: [3 3 3 3 3 0 0 0 0 0]
+
         """
         bedgraph = self._mask_data_on_extra_chromosomes(bedgraph)
         return GenomicArray.from_bedgraph(bedgraph, self._genome_context)
@@ -112,6 +160,19 @@ class Genome:
             Filename for the bedgraph file
         stream : bool
             Whether or not to read as stream
+
+        Returns
+        -------
+        GenomicArray
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_dict({'chr1': 30000, 'chr2': 31000, 'chr3': 32000})
+        >>> genome.read_track('example_data/small_treat_pileup.bdg')
+        chr1: [ 0.0 0.0 1.0 ... 0.0 0.0 0.0]
+        chr2: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
+        chr3: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
 
         """
         content = self._open(filename, stream)
@@ -130,6 +191,20 @@ class Genome:
         Returns
         -------
         GenomicIntervals
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> intervals = bnp.Interval(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5])
+        >>> genome = bnp.Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_intervals(intervals)
+        Genomic Intervals on ['chr1', 'chr2']:
+        Interval with 3 entries
+                       chromosome                    start                     stop
+                             chr1                        0                        5
+                             chr1                       10                       15
+                             chr2                        0                        5
+
         """
         return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
@@ -151,6 +226,26 @@ class Genome:
         Returns
         -------
         GenomicIntervals
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_intervals('example_data/small_summits.bed')
+        Genomic Intervals on ['chr1', 'chr2', 'chr3']:
+        Interval with 13 entries
+                       chromosome                    start                     stop
+                             chr1                      639                      640
+                             chr1                     6023                     6024
+                             chr1                     7124                     7125
+                             chr2                      849                      850
+                             chr2                     6320                     6321
+                             chr2                     8483                     8484
+                             chr2                    11342                    11343
+                             chr2                    12527                    12528
+                             chr2                    13092                    13093
+                             chr2                    18943                    18944
+
         """
         path = PurePath(filename)
         suffix = path.suffixes[-1]
@@ -164,7 +259,6 @@ class Genome:
                 buffer_type = BamIntervalBuffer
         content = self._open(filename, stream, buffer_type=buffer_type)
         return self.get_intervals(content, stranded)
-    # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
     def read_locations(self, filename: str, stranded: bool = False, stream: bool = False, has_numeric_chromosomes=False, buffer_type=None) -> GenomicLocation:
         """Read a set of locations from file and convert them to `GenomicLocation`        
@@ -189,8 +283,29 @@ class Genome:
         GenomicLocation
             (Stranded) GenomicLocation
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/hg38.chrom.sizes')
+        >>> genome.read_locations('example_data/thousand_genomes.vcf', has_numeric_chromosomes=True)
+        Genomic Locations on ['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...']:
+        LocationEntry with 74 entries
+                       chromosome                 position
+                            chr21                  5033883
+                            chr21                  5035657
+                            chr21                  5038297
+                            chr21                  5038312
+                            chr21                  5052250
+                            chr21                  5053935
+                            chr21                  5053961
+                            chr21                  5063903
+                            chr21                  5063916
+                            chr21                  5064678
+
+
         """
         assert not (stream and has_numeric_chromosomes)
+        assert not stranded, "Stranded locations are not supported yet"
         f = bnp_open(filename, buffer_type=buffer_type)
         data = f.read_chunks()
         if not stream:
@@ -222,13 +337,26 @@ class Genome:
         -------
         GenomicLocation
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.get_locations(bnp.datatypes.LocationEntry(chromosome=['chr1', 'chr1', 'chr2'], position=[0, 10, 0]))
+        Genomic Locations on ['chr1', 'chr2', 'chr3']:
+        LocationEntry with 3 entries
+                       chromosome                 position
+                             chr1                        0
+                             chr1                       10
+                             chr2                        0
+
+
         """
         if has_numeric_chromosomes:
             data = replace(data, chromosome=as_encoded_array(['chr'+chromosome.to_string() for chromosome in data.chromosome]))
         data = self._mask_data_on_extra_chromosomes(data)
         return GenomicLocation.from_data(data, self._genome_context)
 
-    def read_sequence(self, filename: str = None) -> GenomicSequence:
+    def read_sequence(self, filename: Optional[str] = None) -> GenomicSequence:
         """Read the genomic sequence from file.
 
         If a `fasta` file was used to create the Genome object, `filename` can be `None`
@@ -242,6 +370,15 @@ class Genome:
         -------
         GenomicSequence
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_sequence()
+        GenomicSequence over chromosomes: ['chr1', 'chr2', 'chr3']
+        >>> genome = bnp.Genome.from_file('example_data/small.chrom.sizes')
+        >>> genome.read_sequence('example_data/small_sequence.fa')
+        GenomicSequence over chromosomes: ['chr1', 'chr2', 'chr3']
         """
         
         if filename is None:
@@ -265,6 +402,20 @@ class Genome:
         GenomicAnnotation
             `GenomicAnnotation` containing the genes, transcripts and exons
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_annotation('example_data/small.gtf')
+        GenomicAnnotation(genome_context=['chr1', 'chr2', 'chr3'], data=GTFEntry with 5 entries
+                       chromosome                   source             feature_type                    start                     stop                    score                   strand                    phase                atributes
+                             chr1                knownGene               transcript                    17369                    17436                        .                        -                        .  gene_id "ENST0000061921
+                             chr1                knownGene                     exon                    17369                    17436                        .                        -                        .  gene_id "ENST0000061921
+                             chr1                knownGene               transcript                    29554                    31097                        .                        +                        .  gene_id "ENST0000047335
+                             chr1                knownGene                     exon                    29554                    30039                        .                        +                        .  gene_id "ENST0000047335
+                             chr1                knownGene                     exon                    30564                    30667                        .                        +                        .  gene_id "ENST0000047335)
+
+
         """
         
         gtf_entries = self._open(filename, stream=False)
@@ -278,10 +429,17 @@ class Genome:
             ((key, value) for key, value in self._genome_context.chrom_sizes.items() if '_' not in key),
             headers=["Chromosome", "Size"])
 
-    def get_genome_context(self):
+    def get_genome_context(self) -> GenomeContext:
+        '''
+        Get the genome context of the Genome
+        Returns
+        -------
+        GenomeContext
+        '''
+
         return self._genome_context
 
     @property
-    def size(self):
+    def size(self) -> int:
         '''The size of the genome'''
         return self._genome_context.size

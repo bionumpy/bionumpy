@@ -1,4 +1,5 @@
 from itertools import takewhile, repeat
+from typing import Optional
 
 from .delimited_buffers import DelimitedBufferWithInernalComments
 from .parser import NumpyFileReader
@@ -30,6 +31,7 @@ class NpDataclassReader:
         self._reader.close()
 
     def close(self):
+        """Close the file reader"""
         self._reader.close()
 
     def read(self) -> BNPDataClass:
@@ -40,7 +42,7 @@ class NpDataclassReader:
         Returns
         -------
         bnpdataclass
-            A dataclass holdin all the entries in the class
+            A dataclass holding all the entries in the class
 
         Examples
         --------
@@ -55,20 +57,6 @@ class NpDataclassReader:
             return self._reader._buffer_type.dataclass.empty()
         return chunk.get_data()
 
-    def _get_lazy_class(self, dataclass, header=None):
-        if self.__lazy_class is None:
-            self.__lazy_class = create_lazy_class(dataclass, header=header)
-        return self.__lazy_class
-
-    def _should_be_lazy(self, chunk):
-        if ((not config.LAZY) and self._lazy is None) or (self._lazy is False):
-            return False
-        should_be_lazy = False
-        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
-            if not issubclass(chunk.dataclass, (GTFEntry)):
-                should_be_lazy = True
-        return should_be_lazy
-
     def read_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> BNPDataClass:
         """Read a single chunk into memory
 
@@ -78,18 +66,15 @@ class NpDataclassReader:
 
         Parameters
         ----------
-        chunk_size: int
-            How many bytes to read from file
+        min_chunk_size: int
+            How many bytes to minimally read from file
+        max_chunk_size: int
+            How many bytes to maximally read from file  in order to get a full entry
 
         Returns
         -------
-        bnpdataclass
-            A dataclass holdin all the entries in the next chunk
-
-
-        Examples
-        --------
-        5
+        BNPDataClass
+            A dataclass holding all the entries in the next chunk
 
         """
         n_lines_read = self._reader.n_lines_read
@@ -106,7 +91,7 @@ class NpDataclassReader:
             raise e
         return data
 
-    def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: int = None) -> NpDataclassStream:
+    def read_chunks(self, min_chunk_size: int = 5000000, max_chunk_size: Optional[int] = None) -> NpDataclassStream:
         """Read the whole file in chunks
 
         This returns a generator yielding all the entries in the file 
@@ -115,31 +100,44 @@ class NpDataclassReader:
 
         Parameters
         ----------
-        chunk_size : int
-            Number of bytes to read per chunk
+        min_chunk_size : int
+            Minimum size of each chunk
+        max_chunk_size : int
+            Maximum size of each chunk
 
         Returns
         -------
         NpDataclassStream
-            4
 
         Examples
         --------
-        5
-
         """
         data_stream = takewhile(len, (self.read_chunk(min_chunk_size, max_chunk_size) for _ in repeat(None)))
 
         return NpDataclassStream(data_stream, dataclass=self._reader._buffer_type.dataclass)
 
-
     def __iter__(self) -> NpDataclassStream:
-        """Iteratate over chunks in the file
+        """Iteratate over chunks in the file see `read_chunks`
 
         Returns
         -------
         NpDataclassStream
-            3
 
         """
         return self.read_chunks()
+
+
+    def _get_lazy_class(self, dataclass, header=None):
+        if self.__lazy_class is None:
+            self.__lazy_class = create_lazy_class(dataclass, header=header)
+        return self.__lazy_class
+
+    def _should_be_lazy(self, chunk):
+        if ((not config.LAZY) and self._lazy is None) or (self._lazy is False):
+            return False
+        should_be_lazy = False
+        if hasattr(chunk, 'get_field_by_number') and hasattr(chunk, 'dataclass'):
+            if not issubclass(chunk.dataclass, (GTFEntry)):
+                should_be_lazy = True
+        return should_be_lazy
+

@@ -1,3 +1,5 @@
+from typing import List, Dict, Optional
+
 import numpy as np
 from numpy.typing import ArrayLike
 from numbers import Number
@@ -7,6 +9,10 @@ from ..encoded_array import EncodedArray
 
 
 class EncodedCounts:
+    """
+    Class for storing counts of encoded data.
+    """
+
     alphabet: list
     counts: np.ndarray
     row_names: list = None
@@ -29,7 +35,7 @@ class EncodedCounts:
             return False
         return True
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: str):
         return self.counts[..., self.alphabet.index(idx)]
 
     def __add__(self, other):
@@ -50,8 +56,28 @@ class EncodedCounts:
 
     # return dataclasses.replace(self, counts=self.counts+o_counts)
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method == "__call__":
+            assert all(i.alphabet == self.alphabet for i in inputs if isinstance(i, EncodedCounts))
+            assert all(i.alphabet == self.alphabet for i in kwargs.values() if isinstance(i, EncodedCounts))
+            arrays = [i.counts if isinstance(i, EncodedCounts) else i for i in inputs]
+            kwargs = {k: i.counts if isinstance(i, EncodedCounts) else i for k, i in kwargs.items()}
+            return self.__class__(self.alphabet, getattr(ufunc, method)(*arrays, **kwargs))
+        else:
+            return NotImplemented
+
+
     @property
-    def proportions(self):
+    def proportions(self) -> np.ndarray:
+        """
+        Calculate the proportions of each label in the counts.
+
+        Returns
+        -------
+        np.ndarray
+            The proportions of each label in the counts.
+
+        """
         s = self.counts.sum(axis=-1, keepdims=True)
         return np.where(s > 0, self.counts / s, 0)
 
@@ -60,11 +86,23 @@ class EncodedCounts:
         s = self.counts.sum(axis=-1, keepdims=True)
         return Matrix(np.where(s > 0, self.counts / s, 0), col_names=self.alphabet)
 
-    def get_count_for_label(self, label):
+    def get_count_for_label(self, label: str) -> int:
+        """
+        Get the count for a specific label.
+
+        Parameters
+        ----------
+        label: str
+
+        Returns
+        -------
+        int
+
+        """
         return np.sum(self.counts[..., self.alphabet.index(l)] for l in label)
 
     @property
-    def labels(self):
+    def labels(self) -> List[str]:
         return self.alphabet
 
     @classmethod
@@ -77,7 +115,19 @@ class EncodedCounts:
             ret.row_names = [count.row_names for count in counts]
         return ret
 
-    def most_common(self, n=None):
+    def most_common(self, n: Optional[int]=None) -> 'EncodedCounts':
+        """
+        Extract counts for the n most common labels.
+        Parameters
+        ----------
+        n
+
+        Returns
+        -------
+        EncodedCounts
+
+        """
+
         args = np.argsort(self.counts)[::-1]
         if n is not None:
             args = args[:n]
@@ -85,18 +135,28 @@ class EncodedCounts:
             [self.alphabet[i] for i in args],
             self.counts[args])
 
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, np.ndarray]:
+        """
+        Convert the counts to a dictionary.
+
+        Returns
+        -------
+        Dict[str, np.ndarray]
+
+        """
         return dict(zip(self.alphabet, self.counts.T))
 
 
 def count_encoded(values: EncodedArrayLike, weights: ArrayLike = None, axis: int = -1) -> EncodedCounts:
-    """Count the occurances of encoded entries. Works on any encoding with finite alphabet
+    """Count the occurances of encoded entries. Works on any encoding with finite alphabet.
 
     Parameters
     ----------
     values : EncodedArrayLike
     weights : ArrayLike
+        Weights for each entry
     axis : int
+        0 for column counts, -1 or 1 for row counts None for flattened counts
 
     Returns
     -------

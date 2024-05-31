@@ -25,7 +25,7 @@ class Plotter:
         if self._plt is None and not self._tried:
             try:
                 import matplotlib.pyplot as _plt
-                plt.style.use('Solarize_Light2')
+                _plt.style.use('Solarize_Light2')
                 self._plt = _plt
             except:
                 pass

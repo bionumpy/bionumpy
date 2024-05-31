@@ -32,7 +32,9 @@ rule make_runtime_report:
         data="results/reports/{analysis}/{dataset_size}.data",
         figure="results/reports/{analysis}/{dataset_size}.html",
         png="results/reports/{analysis}/{dataset_size}.png",
-        json="results/reports/{analysis}/{dataset_size}.json"
+        json="results/reports/{analysis}/{dataset_size}.json",
+        boxplot="results/reports/{analysis}/{dataset_size}.boxplot.png",
+        boxplot_json="results/reports/{analysis}/{dataset_size}.boxplot.json",
     params:
         report_name=get_report_name
     script:
@@ -41,7 +43,7 @@ rule make_runtime_report:
 
 rule main_report:
     input:
-        ["results/reports/" + analysis + "/{run_size}.png" for analysis in config["analysis"]],
+        ["results/reports/" + analysis + "/{run_size}.boxplot.png" for analysis in config["analysis"]],
         'validation_report_{run_size}.md'
     output:
         md="report_{run_size}.md",
@@ -64,7 +66,7 @@ rule main_report:
 
 rule main_report_as_png:
     input:
-        ["results/reports/" + analysis + "/{run_size}.json" for analysis in config["analysis"]]
+        ["results/reports/" + analysis + "/{run_size}.boxplot.json" for analysis in config["analysis"]]
     output:
         png="report_{run_size}.png",
     run:
@@ -86,19 +88,28 @@ rule main_report_as_png:
             print(type(subfig))
             subfigures.append(subfig.data[0])
 
-        fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=titles, y_title="Time in seconds")
+        fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=titles, shared_yaxes=False)
+        #for row in range(1, n_rows+1):
+        #    for col in range(1, n_cols+1):
+        #        fig.update_yaxes(title_text="Runtime (seconds)", row=row, col=col)
 
         for i, subfig in enumerate(subfigures):
             col = i % n_cols + 1
             row = i // n_cols + 1
             print(col, row)
-            fig.add_trace(subfig, row=row, col=col)
+            subfig = fig.add_trace(subfig, row=row, col=col)
+            fig.update_yaxes(title_text="Runtime (seconds)", row=row, col=col)
+            subfig.update_layout(font={"size": 16})
 
         fig.update_layout(
             font={
-                "size": 18
+                "size": 16
             }
         )
+
+        # hack to set subfig title font size
+        for i in fig['layout']['annotations']:
+            i['font'] = dict(size=22)
 
         fig.update_layout(height=2200,width=1500)
         fig.write_image(output[0])

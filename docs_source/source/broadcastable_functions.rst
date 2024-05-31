@@ -24,9 +24,9 @@ Elementwise broadcasting is quite common to utilize. But one can also write func
 
     >>> v = np.array([2, 3, 5])
     >>> w = np.array([3, 5, 7])
-    >>> v.dot(w)
+    >>> print(v.dot(w))
     56
-    >>> (v*w).sum()
+    >>> print((v*w).sum())
     56
 
 Now the broadcasting does not work as it would with the elementwise operations. A dot product between `[3, 2, 1]` and `[1]`, will yield an error since it is not natural to think that the ones should be broadcasted to a vector. For vector functions, the last axis needs to be of the same size. For all the other axes, the broadcasting works as usual.
@@ -45,7 +45,7 @@ However, if we give this function an array of 10 sequences, it will just count t
     def count_gs(sequence):
         return np.sum(sequence == "G", axis=-1)
 
-This, trick of doing reductions along the last axis will often be enough to make seuqnece->scalar functions broadcast as sequences. (reductions are for instance `np.sum, np.max, np.argmax, np.mean` or other functions that map arrays to scalars).
+This trick of doing reductions along the last axis will often be enough to make sequence->scalar functions broadcast as sequences (reductions are for instance `np.sum, np.max, np.argmax, np.mean` or other functions that map arrays to scalars).
 
 Another general rule is to add axis to the very end, when adding axes to an array. This is not so common with sequences, but one example is one-hot encoding. One hot encoding maps letters in an alphabet of size `N` to `n`-dimensional binary vectors. For a single letter, this function could be written::
 

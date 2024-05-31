@@ -3,18 +3,7 @@ from typing  import Generator
 import numpy as np
 
 def _chunk_entries(stream: BnpStream, n_entries: int) -> Generator:
-    """Chunkk a stream into fixed number of entries
 
-    Parameters
-    ----------
-    stream : BnpStream
-    n_chunks : int
-
-    Returns
-    -------
-    BnpStream
-
-    """
     b = []
     buffer_size = 0
     for chunk in stream:
@@ -30,4 +19,15 @@ def _chunk_entries(stream: BnpStream, n_entries: int) -> Generator:
 
 
 def chunk_entries(stream: BnpStream, n_entries: int) -> BnpStream:
+    """Chunk a stream into fixed number of entries
+
+    Parameters
+    ----------
+    stream : BnpStream
+    n_entries : int
+
+    Returns
+    -------
+    BnpStream
+    """
     return stream.__class__(_chunk_entries(stream, n_entries))

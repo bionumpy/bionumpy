@@ -1,6 +1,5 @@
 from pathlib import PurePath
-from typing import Union
-
+from typing import Union, Optional
 
 from .gzip_reading import gzip
 # import gzip
@@ -39,7 +38,7 @@ buffer_types = {
     ".gff": GFFBuffer,
     ".gtf": GTFBuffer,
     ".gff3": GFFBuffer,
-    ".sam": SAMBuffer, #, comment="@"),
+    ".sam": SAMBuffer,
     ".bam": BamBuffer,
     ".sizes": ChromosomeSizeBuffer,
     '.wig': WigBuffer,
@@ -225,8 +224,20 @@ def count_entries(filename: str, buffer_type: FileBuffer = None) -> int:
     return sum(chunk_counts)
 
 
-def read(filename: str, mode: str = None, buffer_type=None) -> NpDataclassReader:
-    'openes a file, reads it and closes it '
+def read(filename: str, mode: str = None, buffer_type: Optional[FileBuffer]=None) -> BNPDataClass:
+    """
+    Read the content of a file
+    Parameters
+    ----------
+    filename: str
+    mode: str
+    buffer_type:
+
+    Returns
+    -------
+    BNPDataClass
+
+    """
     with bnp_open(filename, mode, buffer_type) as f:
         content = f.read()
     return content

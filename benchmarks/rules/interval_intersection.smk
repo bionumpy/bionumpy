@@ -8,7 +8,7 @@ rule unique_intersect_bedtools:
     output:
         "results/bedtools/unique_intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/unique_intersect/bedtools/{a}-vs-{b}.txt"
+        repeat("benchmarks/unique_intersect/bedtools/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     params:
         extra="-u"
     wrapper:
@@ -22,7 +22,7 @@ rule unique_intersect_bionumpy:
     output:
         "results/bionumpy/unique_intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/unique_intersect/bionumpy/{a}-vs-{b}.txt"
+        repeat("benchmarks/unique_intersect/bionumpy/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     shell:
         "python ../scripts/unique_intersect_example.py {input} {output}"
         #        "../scripts/bionumpy_unique_intersect.py"
@@ -36,7 +36,7 @@ rule intersect_bionumpy:
     output:
         "results/bionumpy/intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/intersect/bionumpy/{a}-vs-{b}.txt"
+        repeat("benchmarks/intersect/bionumpy/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     script:
         "../scripts/bionumpy_intersect.py"
 
@@ -48,7 +48,7 @@ rule intersect_bedtools:
     output:
         "results/bedtools/intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/intersect/bedtools/{a}-vs-{b}.txt"
+        repeat("benchmarks/intersect/bedtools/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     log:
         "logs/bedtools/intersect/{a}-vs-{b}.log"
     params:
@@ -64,7 +64,7 @@ rule unique_intersect_pyranges:
     output:
         "results/pyranges/unique_intersect/{a}-vs-{b}.bed"
     benchmark:
-        "benchmarks/unique_intersect/pyranges/{a}-vs-{b}.txt"
+        repeat("benchmarks/unique_intersect/pyranges/{a}-vs-{b}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/pyranges.yml"
     shell:

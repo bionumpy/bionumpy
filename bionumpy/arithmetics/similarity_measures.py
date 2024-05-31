@@ -45,7 +45,7 @@ def forbes(chromosome_sizes: ChromosomeSize, intervals_a: Interval, intervals_b:
     ms = MultiStream(chromosome_sizes, a=intervals_a, b=intervals_b)
     ((a, b), (c, d)) = get_contingency_table(ms.a, ms.b, ms.lengths)
     N = (a+b+c+d)
-    return a*N/((a+b)*(a+c))
+    return float(a*N/((a+b)*(a+c)))
 
 
 def jaccard(chromosome_sizes: ChromosomeSize, intervals_a: Interval, intervals_b: Interval) -> float:
@@ -72,4 +72,4 @@ def jaccard(chromosome_sizes: ChromosomeSize, intervals_a: Interval, intervals_b
     ms = MultiStream(chromosome_sizes, a=intervals_a, b=intervals_b)
     ((a, b), (c, d)) = get_contingency_table(ms.a, ms.b, ms.lengths)
     N = (a+b+c+d)
-    return a/(N-d)
+    return float(a/(N-d))

@@ -10,7 +10,7 @@ Working with intervals is a central part of many bioinformatics analyses. In Bio
 Independent Operations
 ======================
 
-Independent operations covers any thing we want to do with a set of intervals that can be done one interval at a time. This covers simple geometric operations such as shifting and resizing; filtering based on properties of intervals. Since both the start and stop (and strand) attribute are numpy arrays, we can implement alot of functionality simply by using numpy indexing and ufuncs:
+Independent operations covers any thing we want to do with a set of intervals that can be done one interval at a time. This covers simple geometric operations such as shifting and resizing; filtering based on properties of intervals. Since both the start and stop (and strand) attribute are NumPy arrays, we can implement a lot of functionality simply by using NumPy indexing and ufuncs:
 
     >>> import bionumpy as bnp
     >>> intervals = bnp.open("example_data/small_interval.bed").read()
@@ -18,11 +18,11 @@ Independent operations covers any thing we want to do with a set of intervals th
     >>> shifted = bnp.replace(intervals, start=intervals.start+5, stop=intervals.stop+5)
     >>> small = intervals[(intervals.stop-intervals.start)<50]
 
-Even though it is possible to write these kinds of functions using simple numpy functionality, it is often better to wrap them in functions with instructive names. In the `bnp.interval` module, a set of utility funcitons ffor working with intervals is provided.
+Even though it is possible to write these kinds of functions using simple NumPy functionality, it is often better to wrap them in functions with instructive names. In the `bnp.interval` module, a set of utility funcitons ffor working with intervals is provided.
 
 Operations with dependencies
 ============================
-Some queries cannot be answered just by looking at intervals as independent entries. For instance: "All regions" covered by at least two intervals". In order to answer such questions, we need to look at the intervals as a coherent set. In BioNumPy, such queries are by reducing all the relevant information from the intervals into a  `npstructures.RunLengthArray`. The two main ways of doing this is to do make a pileup, i.e. counting how many intevals overlap with each position in the genome, or to make a boolean mask indicating which positions are covered by any interval.
+Some queries cannot be answered just by looking at intervals as independent entries. Consider the query "all regions covered by at least two intervals". In order to answer such questions, we need to look at the intervals as a coherent set. In BioNumPy, such queries are done by reducing all the relevant information from the intervals into a  `npstructures.RunLengthArray`. The two main ways of doing this is to do make a pileup, i.e. counting how many intevals overlap with each position in the genome, or to make a boolean mask indicating which positions are covered by any interval.
 
     >>> from bionumpy.datatypes import Interval
     >>> from bionumpy.arithmetics import get_boolean_mask, get_pileup
@@ -35,7 +35,7 @@ Some queries cannot be answered just by looking at intervals as independent entr
     array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 2,
               1, 0])
 
-These run length encoded arrays stores the data in a smart way, but are supposed to work a much like a numpy array as possible. So we can do numpy-like operations on them to achieve common goals:
+These run length encoded arrays stores the data in a smart way, but are supposed to work a much like a NumPy array as possible. So we can do NumPy-like operations on them to achieve common goals:
 
 Working with boolean masks
 --------------------------

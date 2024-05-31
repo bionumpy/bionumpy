@@ -39,6 +39,9 @@ class GenomicAnnotation:
     def __str__(self):
         return f'GenomicAnnotation with {len(self._genes)} genes, {len(self._transcripts)} transcripts and {len(self._exons)} exons'
 
+    def __repr__(self):
+        return f'GenomicAnnotation(genome_context={self._genome_context}, data={self._data})'
+
     @property
     def genes(self) -> Genes:
         if self._genes is None:

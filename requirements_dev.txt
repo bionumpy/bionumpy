@@ -17,3 +17,4 @@ kaleido
 nbsphinx
 more_itertools
 pandas
+biopython

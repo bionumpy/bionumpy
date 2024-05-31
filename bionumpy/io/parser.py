@@ -1,8 +1,12 @@
 import codecs
+import io
 import logging
 import numpy as np
+
+from ..bnpdataclass import BNPDataClass
+
 try:
-    from typing import IO
+    from typing import IO, Union, Iterable
 except ImportError:
     from typing.io import IO
 from npstructures import npdataclass
@@ -194,13 +198,6 @@ class NumpyFileReader:
         # Ensure that the last entry ends with newline. Makes logic easier later
         if self._is_finished:
             a, bytes_read = self.__add_newline_to_end(a, bytes_read)
-        # 
-        #     if a[bytes_read - 1] != ord("\n"):
-        #         a = np.append(a, ord("\n"))
-        #         bytes_read += 1
-        #     if hasattr(self._buffer_type, "_new_entry_marker"):
-        #         a = np.append(a, self._buffer_type._new_entry_marker)
-        #         bytes_read += 1
         return a[:bytes_read]
 
     def __read_raw_chunk(self, min_chunk_size: int = 5000000, max_chunk_size: int = None):
@@ -211,11 +208,10 @@ class NumpyFileReader:
 
 class NpBufferedWriter:
     """ 
-    File writer that can write @npdataclass objects
-    to file
+    File writer that can write BNPDataClass objects to file
     """
 
-    def __init__(self, file_obj, buffer_type):
+    def __init__(self, file_obj: io.FileIO, buffer_type: FileBuffer):
         self._file_obj = file_obj
         self._buffer_type = buffer_type
         self._f_name = (
@@ -235,13 +231,13 @@ class NpBufferedWriter:
     def close(self):
         self._file_obj.close()
 
-    def write(self, data: npdataclass):
+    def write(self, data: Union[BNPDataClass, BnpStream, grouped_stream]):
         """Write the provided data to file
 
         Parameters
         ----------
-        data : npdataclass
-            dataset containing entries
+        data : Union[BNPDataClass, BnpStream, grouped_stream]
+            dataset containing entries, or stram of datasets
 
         """
         if isinstance(data, BnpStream):
@@ -257,7 +253,6 @@ class NpBufferedWriter:
 
         if hasattr(self._buffer_type, 'make_header') and \
                 (not hasattr(self._file_obj, "mode") or self._file_obj.mode != 'ab'): # and \
-                #getattr(self._buffer_type, 'HAS_UNCOMMENTED_HEADER_LINE', False):
             if not self._header_written:
                 header_array = self._buffer_type.make_header(data)
                 self._file_obj.write(header_array)
@@ -267,24 +262,22 @@ class NpBufferedWriter:
 
         if hasattr(data, 'get_data_object'):
             bytes_array = data.get_buffer(buffer_class=self._buffer_type)
-            # if not hasattr(self._buffer_type, 'get_column_range_as_text'):
-            #     data = data.get_data_object()
-            #     bytes_array = self._buffer_type.from_data(data)
-            # else:
-            #
         else:
             bytes_array = self._buffer_type.from_data(data)
 
         if isinstance(bytes_array, EncodedArray):
             bytes_array = bytes_array.raw()
-        self._file_obj.write(bytes(bytes_array))  # .tofile(self._file_obj)
-        # self._file_obj.flush()
+        self._file_obj.write(bytes(bytes_array))
         logger.debug(
             f"Wrote chunk of size {repr_bytes(bytes_array.size)} to {self._f_name}"
         )
 
 
 class NumpyBamWriter(NpBufferedWriter):
+    """
+    Class for handling writing of BAM files
+    """
+
     EOF_MARKER = b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -293,7 +286,22 @@ class NumpyBamWriter(NpBufferedWriter):
             f.write(self.EOF_MARKER)
 
 
-def chunk_lines(stream, n_lines):
+def chunk_lines(stream: Iterable[FileBuffer], n_lines: int) -> Iterable[FileBuffer]:
+    """
+    Chunk the content of the stream so that each chunk contains exactly `n_lines` lines (except the last)
+
+    Parameters
+    ----------
+    stream : Iterable[FileBuffer]
+        Stream of FileBuffers
+    n_lines : int
+        Number of lines in each chunk
+
+    Returns
+    -------
+    Iterable[FileBuffer]
+        Stream of FileBuffers, each containing `n_lines` lines
+    """
     cur_buffers = []
     remaining_lines = n_lines
     for chunk in stream:

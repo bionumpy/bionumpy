@@ -8,7 +8,7 @@ rule bionumpy_reverse_complement:
     output:
         "results/bionumpy/reverse_complement/{filename}.fa"
     benchmark:
-        "benchmarks/reverse_complement/bionumpy/{filename}.txt"
+        repeat("benchmarks/reverse_complement/bionumpy/{filename}.txt", config["n_benchmark_repeats"])
     shell:
         "python3 ../scripts/reverse_compliment_example.py {input} {output}"
     # run:
@@ -28,7 +28,7 @@ rule seqtk_reverse_complement:
     params:
         extra="-r",
     benchmark:
-        "benchmarks/reverse_complement/seqtk/{filename}.txt"
+        repeat("benchmarks/reverse_complement/seqtk/{filename}.txt", config["n_benchmark_repeats"])
     wrapper:
         "v1.19.2/bio/seqtk/seq"
 
@@ -39,7 +39,7 @@ rule biopython_reverse_complement:
     output:
         "results/biopython/reverse_complement/{filename}.fa"
     benchmark:
-        "benchmarks/reverse_complement/biopython/{filename}.txt"
+        repeat("benchmarks/reverse_complement/biopython/{filename}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biopython.yml"
     script: "../scripts/biopython_reverse_complement.py"
@@ -51,7 +51,7 @@ rule python_reverse_complement:
     output:
         "results/python/reverse_complement/{filename}.fa"
     benchmark:
-        "benchmarks/reverse_complement/python/{filename}.txt"
+        repeat("benchmarks/reverse_complement/python/{filename}.txt", config["n_benchmark_repeats"])
     run:
         def reverse_complement(sequence):
             mapping = {"A": "T", "T": "A", "C": "G", "G": "C",
@@ -75,7 +75,7 @@ rule biotite_reverse_complement:
     output:
         "results/biotite/reverse_complement/{name}.fa"
     benchmark:
-        "benchmarks/reverse_complement/biotite/{name}.txt"
+        repeat("benchmarks/reverse_complement/biotite/{name}.txt", config["n_benchmark_repeats"])
     conda:
         "../envs/biotite.yml"
     script:

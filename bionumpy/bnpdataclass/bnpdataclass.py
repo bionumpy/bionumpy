@@ -2,7 +2,7 @@ import dataclasses
 import inspect
 import logging
 from collections import defaultdict
-from typing import List, Type, Dict, Iterable, Union, Optional
+from typing import List, Type, Dict, Iterable, Union, Optional, Any, Tuple
 from numpy.typing import ArrayLike
 from npstructures.npdataclasses import npdataclass, NpDataClass, shallow_tuple
 from npstructures import RaggedArray
@@ -36,7 +36,14 @@ def get_vanilla_generator(object):
 
 class BNPDataClass(NpDataClass):
 
-    def todict(self):
+    def todict(self) -> Dict[str, ArrayLike]:
+        '''
+        Convert the data into a dictionary with the field names as keys and the corresponding data as values.
+
+        Returns
+        -------
+            dict[str, ArrayLike]
+        '''
         field_dict = {}
         for field in dataclasses.fields(self):
             pandas_obj = pandas_adaptor.pandas_converter(getattr(self, field.name))
@@ -47,17 +54,46 @@ class BNPDataClass(NpDataClass):
 
         return field_dict
 
-    def topandas(self):
+    def topandas(self) -> 'pandas.DataFrame':
+        '''
+        Convert the data into a pandas DataFrame with the fields as columns
+
+        Returns
+        -------
+            pandas.DataFrame
+        '''
         return pandas_adaptor.get_data_frame(self.todict())
         # return pd.DataFrame(self.todict())
 
     @classmethod
-    def from_data_frame(cls, df):
+    def from_data_frame(cls, df: 'pandas.DataFrame') -> 'BNPDataClass':
+        '''
+        Convert a pandas DataFrame into a BNPDataClass object.
+        The columns of the dataframe are used as fields in the BNPDataClass object.
+
+        Parameters
+        ----------
+        df: pandas.DataFrame
+
+        Returns
+        -------
+            BNPDataClass
+        '''
         d = df.to_dict('series')
         return cls.from_dict(d)
 
     @classmethod
-    def from_dict(cls, dict_object: Dict) -> 'BNPDataClass':
+    def from_dict(cls, dict_object: Dict[str, Any]) -> 'BNPDataClass':
+        '''
+        Convert a dictionary into a BNPDataClass object. The keys of the dictionary are used as field names in the BNPDataClass object.
+        Parameters
+        ----------
+        dict_object: dict
+
+        Returns
+        -------
+            BNPDataClass
+        '''
         dict_names = [name.split('.')[0] for name in dict_object.keys()]
         field_names = {field.name for field in dataclasses.fields(cls)}
         logger.info(f'Dropping columns: {[n for n in dict_names if n not in field_names]}')
@@ -82,6 +118,7 @@ class BNPDataClass(NpDataClass):
         This is good for debugging, but for real applications
         requires a lot of memory allocation. For iterating over
         the data, use `toiter` instead.
+
         Returns
         -------
             list[cls.dataclass]
@@ -90,7 +127,16 @@ class BNPDataClass(NpDataClass):
         lists = tuple(f.tolist() for f in shallow_tuple(self))
         return list(self.dataclass(*row) for row in zip(*lists))
 
-    def toiter(self):
+    def toiter(self) -> Iterable['dataclass']:
+        """
+        Convert the data into an iterator of entries from the
+        corrsponding dataclass with normal python types.
+
+        Returns
+        -------
+            Iterable[cls.dataclass]
+
+        """
         iters = tuple(get_vanilla_generator(f)
                       for f in shallow_tuple(self))
         return (self.dataclass(*row) for row in zip(*iters))
@@ -171,18 +217,52 @@ class BNPDataClass(NpDataClass):
         return new_class(**{**vars(self), **fields})
 
     @classmethod
-    def from_entry_tuples(cls, tuples):
+    def from_entry_tuples(cls, tuples: Iterable[tuple]) -> 'BNPDataClass':
         return cls(*(list(c) for c in zip(*tuples)))
 
     def sort_by(self, field_name: str) -> 'BNPDataClass':
+        """
+        Sort the data by the given field
+
+        Parameters
+        ----------
+        field_name: str
+
+        Returns
+        -------
+        BNPDataClass
+
+        """
         return self[np.argsort(getattr(self, field_name))]
 
-    def set_context(self, name, value):
+    def set_context(self, name: str, value: Any):
+        """
+        Set a context value for the object, typycally used for storing auxillary information like header information
+        Parameters
+        ----------
+        name: str
+        value: Any
+
+        Returns
+        -------
+
+        """
         if not hasattr(self, '_context'):
             self._context = dict()
         self._context[name] = value
 
-    def get_context(self, name):
+    def get_context(self, name: str)->Any:
+        """
+        Get a context value for the object, typycally used for storing auxillary information like header information
+        Parameters
+        ----------
+        name: str
+
+        Returns
+        -------
+
+        """
+        logger.warning(f'Deprecated method set_context in BNPDataClass')
         if not hasattr(self, '_context'):
             self._context = dict()
         return self._context[name]
@@ -210,7 +290,7 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
 
     Returns
     -------
-    npdataclass
+    bnpdataclass
         `bnpdataclass` object that supports numpy like indexing
 
     Examples
@@ -316,11 +396,11 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
 
     NewClass.__name__ = base_class.__name__
     NewClass.__qualname__ = base_class.__qualname__
-
+    NewClass.__doc__ = dataclasses.dataclass(base_class).__doc__
     return NewClass
 
 
-def make_dataclass(fields: list, name: str = "DynamicDC", bases=()) -> Type[BNPDataClass]:
+def make_dataclass(fields: List[Tuple], name: str = "DynamicDC", bases=()) -> Type[BNPDataClass]:
     """
     Constructs a dynamic dataclass from a list of attributes
 
@@ -339,7 +419,22 @@ def make_dataclass(fields: list, name: str = "DynamicDC", bases=()) -> Type[BNPD
     """
     return bnpdataclass(dataclasses.make_dataclass(name, fields=fields, bases=bases))
 
-def narrow_type(bnp_dc, field_name, field_type):
+
+def narrow_type(bnp_dc: Type[BNPDataClass], field_name: str, field_type: type):
+    """
+    Resticts the type of a field in a BNPDataClass
+
+    Parameters
+    ----------
+    bnp_dc: Type[BNPDataClass]
+    field_name: str
+    field_type: type
+
+    Returns
+    -------
+    Type[BNPDataClass]
+
+    """
     new_fields = [(f.name, field_type) if f.name==field_name else (f.name, f.type, f) for f in dataclasses.fields(bnp_dc)]
     return make_dataclass(new_fields, name=bnp_dc.__name__, bases=(bnp_dc,))
 

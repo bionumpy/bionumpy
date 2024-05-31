@@ -6,7 +6,7 @@ from ..computation_graph import StreamNode, ComputationNode
 from ..datatypes import Interval, BedGraph
 from ..arithmetics.intervals import GenomicRunLengthArray
 from npstructures import RunLengthRaggedArray
-from typing import List, Union, Iterable, Tuple, Dict, Any
+from typing import List, Union, Iterable, Tuple, Dict, Any, Callable
 
 
 class GenomicArray(GenomicData):
@@ -15,15 +15,15 @@ class GenomicArray(GenomicData):
     '''
 
     @property
-    def genome_context(self):
+    def genome_context(self) -> GenomeContextBase:
         return self._genome_context
 
     @abstractmethod
-    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs) -> 'GenomicArray':
+    def __array_ufunc__(self, ufunc: Callable, method: str, *inputs, **kwargs) -> 'GenomicArray':
         return NotImplemented
 
     @abstractmethod
-    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict) -> Any:
+    def __array_function__(self, func: Callable, types: List, args: List, kwargs: Dict) -> Any:
         return NotImplemented
 
     @abstractmethod
@@ -34,8 +34,9 @@ class GenomicArray(GenomicData):
         return NotImplemented
 
     @classmethod
-    def from_global_data(cls, global_pileup: GenomicRunLengthArray, genome_context: GenomeContextBase) -> 'GenomicArray':
-        """Create the genomic array from data represened on a flat/concatenated genome.
+    def from_global_data(cls, global_pileup: GenomicRunLengthArray,
+                         genome_context: GenomeContextBase) -> 'GenomicArray':
+        """Create the genomic array from data represented on a flat/concatenated genome.
 
         Parameters
         ----------
@@ -48,16 +49,8 @@ class GenomicArray(GenomicData):
         -------
         'GenomicArray'
         """
-        
-        return GenomicArrayGlobal(global_pileup, genome_context)
 
-    def _get_intervals_from_data(self, name, data):
-        if data.dtype == bool:
-            return Interval([name]*len(data.starts),
-                            data.starts, data.ends)[data.values]
-        else:
-            return BedGraph([name]*len(data.starts),
-                            data.starts, data.ends, data.values)
+        return GenomicArrayGlobal(global_pileup, genome_context)
 
     @classmethod
     def from_bedgraph(cls, bedgraph: BedGraph, genome_context: GenomeContextBase) -> 'GenomicData':
@@ -74,7 +67,7 @@ class GenomicArray(GenomicData):
         -------
         'GenomicData'
         """
-        
+
         if isinstance(bedgraph, BedGraph):
             go = genome_context.global_offset
             gi = go.from_local_interval(bedgraph)
@@ -84,21 +77,31 @@ class GenomicArray(GenomicData):
         # filled = fill_grouped(groupby(bedgraph, 'chromosome'), chrom_sizes.keys(), BedGraph)
         interval_stream = StreamNode(filled)
         return GenomicArrayNode(ComputationNode(GenomicRunLengthArray.from_bedgraph,
-                                                [interval_stream, StreamNode(iter(genome_context.chrom_sizes.values()))]),
+                                                [interval_stream,
+                                                 StreamNode(iter(genome_context.chrom_sizes.values()))]),
                                 genome_context)
+
+    def _get_intervals_from_data(self, name, data):
+        if data.dtype == bool:
+            return Interval([name] * len(data.starts),
+                            data.starts, data.ends)[data.values]
+        else:
+            return BedGraph([name] * len(data.starts),
+                            data.starts, data.ends, data.values)
 
 
 class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     '''
     Class for holding the the enitre genomic array in memory
     '''
+
     def __init__(self, global_track: GenomicRunLengthArray, genome_context: GenomeContextBase):
         assert isinstance(global_track, GenomicRunLengthArray), global_track
         self._global_track = global_track
         self._genome_context = genome_context
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         return self._global_track.dtype
 
     def _index_boolean(self, idx):
@@ -106,10 +109,13 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         assert isinstance(idx, GenomicArrayGlobal)
         return self._global_track[idx._global_track]
 
-    def sum(self) -> float:
+    def sum(self, axis=None) -> float:
+        '''Sum the data in the array'''
+        assert axis is None
         return self._global_track.sum(axis=None)
 
-    def extract_chromsome(self, chromosome: Union[str, List[str]]) -> Union[GenomicRunLengthArray, RunLengthRaggedArray]:
+    def extract_chromsome(self, chromosome: Union[str, List[str]]) -> Union[
+        GenomicRunLengthArray, RunLengthRaggedArray]:
         """Get the data on one or more chromosomes
         Parameters
         ----------
@@ -135,19 +141,45 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         return '\n'.join(lines)
 
     def to_dict(self) -> Dict[str, GenomicRunLengthArray]:
+        """
+        Convert the genomic array to a dict of arrays with chromosomes as keys
+
+        Returns
+        -------
+        Dict[str, GenomicRunLengthArray]
+
+        """
         go = self._genome_context.global_offset
         names = go.names()
         offsets = go.get_offset(names)
         sizes = go.get_size(names)
-        return {name: self._global_track[offset:offset+size].to_array()
+        return {name: self._global_track[offset:offset + size].to_array()
                 for name, offset, size in zip(names, offsets, sizes)}
 
-    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+    def __array_ufunc__(self, ufunc: np.ufunc, method: str, *inputs, **kwargs):
+        '''
+        Handle numpy ufuncs on the genomic array
+
+        Parameters
+        ----------
+        ufunc: np.ufunc
+        method: str
+            How to call the ufunc
+        inputs: List
+            Args for  the ufunc
+        kwargs: Dict
+            Additional arguments
+
+        Returns
+        -------
+        GenomicArrayGlobal
+
+        '''
         inputs = [(i._global_track if isinstance(i, GenomicArrayGlobal) else i) for i in inputs]
         r = self._global_track.__array_ufunc__(ufunc, method, *inputs, **kwargs)
         return self.__class__(r, self._genome_context)
 
-    def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):
+    def __array_function__(self, func: Callable, types: List, args: List, kwargs: Dict):
         """Handles any numpy array functions called on a raggedarray
 
         Parameters
@@ -172,11 +204,11 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         Union[Interval, BedGraph]
             If boolean mask,return the intervals where True. Else a bedgraph containing the data
         """
-        
-        go = self._genome_context._global_offset
+
+        go = self._genome_context.global_offset
         names = go.names()
         starts = go.get_offset(names)
-        stops = starts+go.get_size(names)
+        stops = starts + go.get_size(names)
         intervals_list = []
         for name, start, stop in zip(names, starts, stops):
             assert isinstance(self._global_track, GenomicRunLengthArray)
@@ -185,7 +217,8 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
             intervals_list.append(self._get_intervals_from_data(name, data))
         return np.concatenate(intervals_list)
 
-    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'], stranded: bool = False) -> RunLengthRaggedArray:
+    def extract_intervals(self, intervals: Union[Interval, 'GenomicIntervals'],
+                          stranded: bool = False) -> RunLengthRaggedArray:
         """Extract the data contained in a set of intervals
 
         Parameters
@@ -217,14 +250,15 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         -------
         RunLengthRaggedArray
         """
-        global_intervals = self._genome_context.global_offset.from_local_coordinates(locations.chromosome, locations.position)
+        assert stranded is None, 'Stranded not implemented for locations'
+        global_intervals = self._genome_context.global_offset.from_local_coordinates(locations.chromosome,
+                                                                                     locations.position)
         return self._global_track[global_intervals]
         # if not stranded:
         #     return rle
         # r = rle[:, ::-1]
         # return np.where((intervals.strand.ravel() == '+')[:, np.newaxis],
         #                 rle, r)
-
 
     @classmethod
     def from_dict(cls, d: Dict[str, GenomicRunLengthArray], genome_context: GenomeContextBase) -> 'GenomicData':
@@ -245,6 +279,19 @@ class GenomicArrayGlobal(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
     @classmethod
     def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]],
                     genome_context: GenomeContextBase) -> 'GenomicData':
+        '''
+        Create a genomic array from a stream of data
+
+        Parameters
+        ----------
+        stream: Iterable[Tuple[str, GenomicRunLengthArray]]
+        genome_context: GenomeContextBase
+
+        Returns
+        -------
+        GenomicData
+
+        '''
         return cls.from_dict(dict(stream))
 
 
@@ -264,7 +311,7 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         self._chrom_name_node = StreamNode(iter(genome_context.chrom_sizes.keys()))
         self._genome_context = genome_context
 
-    def __array_ufunc__(self, ufunc: callable, method: str, *inputs, **kwargs):
+    def __array_ufunc__(self, ufunc: np.ufunc, method: str, *inputs, **kwargs):
         args = [gtn._run_length_node if isinstance(gtn, GenomicArrayNode) else gtn for gtn in inputs]
         return self.__class__(ufunc(*args, **kwargs), self._genome_context)
 
@@ -275,7 +322,7 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         ComputationNode
             A lazy compution node representing the data from the array
         """
-        
+
         return ComputationNode(self._get_intervals_from_data, [self._chrom_name_node, self._run_length_node])
 
     def _index_boolean(self, idx):
@@ -299,8 +346,9 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         ComputationNode:
             A computation node representing the raggedarray containing data from all the intervals
         """
-        
+
         def stranded_func(ra: GenomicRunLengthArray, start: int, stop: int, strand: str):
+
             assert np.all(stop <= ra.size), (np.max(stop), ra.size)
             rle = ra[start:stop]
             r = rle[:, ::-1]
@@ -311,7 +359,8 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
             assert np.all(stop <= ra.size), (np.max(stop), ra.size)
             return ra[start:stop]
 
-        assert self.genome_context.is_compatible(intervals.genome_context), (self.genome_context, intervals.genome_context)
+        assert self.genome_context.is_compatible(intervals.genome_context), (
+        self.genome_context, intervals.genome_context)
         intervals = intervals.as_stream()
         if stranded:
             return ComputationNode(stranded_func, [self._run_length_node,
@@ -321,9 +370,27 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         return ComputationNode(unstranded_func, [self._run_length_node, intervals.start, intervals.stop])
 
     def extract_chromsome(self, chromosome: Union[str, List[str]]) -> 'GenomicData':
+        '''
+        Extract the data for a chromosome
+        Unimplemented
+        '''
         assert False
 
-    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]], genome_context: GenomeContextBase) -> 'GenomicData':
+    def from_stream(cls, stream: Iterable[Tuple[str, GenomicRunLengthArray]],
+                    genome_context: GenomeContextBase) -> 'GenomicData':
+        '''
+        Create a genomic array from a stream of data
+
+        Parameters
+        ----------
+        stream: Iterable[Tuple[str, GenomicRunLengthArray]]
+        genome_context: GenomeContextBase
+
+        Returns
+        -------
+        GenomicData
+
+        '''
         stream_node = StreamNode((array for _, array in stream))
         return cls(stream_node, genome_context)
 
@@ -344,9 +411,11 @@ class GenomicArrayNode(GenomicArray, np.lib.mixins.NDArrayOperatorsMixin):
         return cls(stream_node, genome_context)
 
     def to_dict(self):
+        '''Unimplemented'''
         assert False
 
     def sum(self, axis=None) -> float:
+        '''Sum the data in the array'''
         return np.sum(self._run_length_node)
 
     def __array_function__(self, func: callable, types: List, args: List, kwargs: Dict):

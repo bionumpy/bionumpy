@@ -1,5 +1,7 @@
 from functools import lru_cache
 from itertools import accumulate, repeat, takewhile, chain
+from typing import Union, Tuple, List, Any
+
 import numpy as np
 from npstructures.raggedshape import RaggedView, RaggedView2
 from npstructures import RaggedArray, ragged_slice
@@ -14,7 +16,12 @@ from ..util import cached_property
 
 
 class BamBufferExtractor:
-    def __init__(self, data, starts, ends, header_data, is_contigous=True):
+    '''
+    Class to handle the extraction of data from a buffer from a BAM file.
+    '''
+
+    def __init__(self, data: np.ndarray, starts: np.ndarray, ends: np.ndarray, header_data: Any,
+                 is_contigous: bool = True):
         self._data = data
         self._new_lines = starts
         self._ends = ends
@@ -45,16 +52,17 @@ class BamBufferExtractor:
         self._is_contigous = True
 
     @property
-    def data(self):
+    def data(self) -> np.ndarray:
         if not self._is_contigous:
             self._make_contigous()
         return self._data
 
     def __getitem__(self, item):
-        return self.__class__(self._data, self._new_lines[item], self._ends[item], self._header_data, is_contigous=False)
+        return self.__class__(self._data, self._new_lines[item], self._ends[item], self._header_data,
+                              is_contigous=False)
 
     def _get_ints(self, offsets, n_bytes, dtype):
-        tmp = self._data[(self._new_lines+offsets)[:, None] + np.arange(n_bytes)].ravel()
+        tmp = self._data[(self._new_lines + offsets)[:, None] + np.arange(n_bytes)].ravel()
         ints = (tmp).view(dtype).ravel()
         assert len(ints) == len(self._new_lines), (len(ints), offsets, len(self._new_lines), n_bytes, dtype)
         return ints
@@ -108,7 +116,7 @@ class BamBufferExtractor:
         return self._sequence_start + (self._get_sequence_length() + 1) // 2
 
     def _get_read_name(self):
-        read_names = ragged_slice(self._data, self._read_name_start, self._cigar_start-1)
+        read_names = ragged_slice(self._data, self._read_name_start, self._cigar_start - 1)
         read_names = EncodedRaggedArray(
             EncodedArray(read_names.ravel(), BaseEncoding), read_names.shape)
         return read_names
@@ -134,23 +142,40 @@ class BamBufferExtractor:
         chromosome = self._chromosome_names[ref_id]
         return chromosome
 
-    def get_field_by_number(self, i):
+    def get_field_by_number(self, i: int) -> Union[np.ndarray, EncodedArray, EncodedRaggedArray]:
+        '''
+        Get the data from the field with the given number.
+        Parameters
+        ----------
+        i: int
+            The field number.
+
+        Returns
+        -------
+        Union[np.ndarray, EncodedArray, EncodedRaggedArray]
+            The data from the field.
+        '''
         return self._functions[i]()
 
     @property
-    def size(self):
+    def size(self) -> int:
         if self._is_contigous:
             return self._data.size
         else:
-            return (self._ends-self._new_lines).sum()
+            return (self._ends - self._new_lines).sum()
+
 
 class BamHeader:
+    """
+    Class to handle the header of a BAM file.
+    """
+
     def __init__(self, file_object):
         self._file_object = file_object
         self._header_data = []
         self.info = self.read_header()
 
-    def read(self, n_bytes):
+    def read(self, n_bytes: int) -> bytes:
         bytes = self._file_object.read(n_bytes)
         self._header_data.append(bytes)
         return bytes
@@ -163,7 +188,16 @@ class BamHeader:
                 break
         return "".join(c.decode("ascii") for c in chars[:-1])
 
-    def read_header(self):
+    def read_header(self) -> List[Tuple[str, int]]:
+        """
+        Read the header of the BAM file. Returns a list of tuples with the reference names and lengths.
+
+        Returns
+        -------
+        List[Tuple[str, int]]
+            The reference names and lengths.
+
+        """
         magic = self.read(4)
         assert magic == b"BAM\1", magic
         header_length = self._read_int()
@@ -183,9 +217,17 @@ class BamHeader:
     def _read_int(self):
         return int.from_bytes(self.read(4), byteorder="little")
 
-    def bytes(self):
-        return b''.join(self._header_data)
+    def bytes(self) -> bytes:
+        """
+        Get the header as bytes.
 
+        Returns
+        -------
+        bytes
+            The header as bytes.
+
+        """
+        return b''.join(self._header_data)
 
 
 class BamBuffer(FileBuffer):
@@ -194,6 +236,7 @@ class BamBuffer(FileBuffer):
     '''
     dataclass = BamEntry
     supports_modified_write = False
+
     def __init__(self, buffer_extractor, header_data=None):
         self._buffer_extractor = buffer_extractor
         self._header_data = header_data
@@ -206,15 +249,15 @@ class BamBuffer(FileBuffer):
         raise Exception('Cannot write BAM file with set values')
 
     @property
-    def size(self):
+    def size(self) -> int:
         return self._buffer_extractor.size
 
     @property
-    def data(self):
+    def data(self) -> np.ndarray:
         return self._buffer_extractor.data
 
     @property
-    def n_lines(self):
+    def n_lines(self) -> int:
         return len(self._buffer_extractor)
 
     @classmethod
@@ -231,19 +274,13 @@ class BamBuffer(FileBuffer):
         return "".join(c.decode("ascii") for c in chars[:-1])
 
     @classmethod
-    def make_header(cls, data):
+    def make_header(cls, data: BamEntry) -> bytes:
         header = data.get_context("header")
         return header.bytes()
 
     @classmethod
-    def read_header(cls, file_object):
+    def read_header(cls, file_object) -> BamHeader:
         return BamHeader(file_object)
-        magic = file_object.read(4)
-        assert magic == b"BAM\1", magic
-        header_length = cls._read_int(file_object)
-        file_object.read(header_length)
-        n_ref = cls._read_int(file_object)
-        return cls._handle_refs(n_ref, file_object)
 
     @classmethod
     def _handle_refs(cls, n_refs, file_object):
@@ -258,8 +295,8 @@ class BamBuffer(FileBuffer):
     @staticmethod
     def _find_starts(chunk):
         chunk = bytes(chunk)
-        new_start = lambda start, _: start + int.from_bytes(chunk[start:start+4], byteorder="little") + 4
-        _starts = accumulate(repeat(0), new_start)# chain([0], accumulate(repeat(0), new_start))
+        new_start = lambda start, _: start + int.from_bytes(chunk[start:start + 4], byteorder="little") + 4
+        _starts = accumulate(repeat(0), new_start)  # chain([0], accumulate(repeat(0), new_start))
         starts = list(takewhile(lambda start: start <= len(chunk), _starts))
         return starts
 
@@ -268,19 +305,28 @@ class BamBuffer(FileBuffer):
         return True
 
     @classmethod
-    def from_raw_buffer(cls, chunk, header_data):
+    def from_raw_buffer(cls, chunk: np.ndarray, header_data: BamHeader) -> "BamBuffer":
         chunk = np.asarray(chunk)
         starts = np.asanyarray(cls._find_starts(chunk))
-        buffer_extractor = BamBufferExtractor(chunk[:starts[-1]], starts[:-1],starts[1:], header_data.info)
+        buffer_extractor = BamBufferExtractor(chunk[:starts[-1]], starts[:-1], starts[1:], header_data.info)
         return cls(buffer_extractor, header_data)
 
-    def get_data(self):
+    def get_data(self)-> BamEntry:
+        """
+        Get the data from the buffer.
+
+        Returns
+        -------
+        BamEntry
+            The data from the buffer.
+
+        """
         return BamEntry(*(self.get_field_by_number(i) for i in range(9)))
 
-    def get_field_by_number(self, i, dtype=None):
+    def get_field_by_number(self, i, dtype=None)-> Union[np.ndarray, EncodedArray, EncodedRaggedArray]:
         return self._buffer_extractor.get_field_by_number(i)
 
-    def count_entries(self):
+    def count_entries(self) -> int:
         return len(self._buffer_extractor)
 
 
@@ -291,11 +337,14 @@ class BamIntervalBuffer(BamBuffer):
         funcs = [
             lambda: self._buffer_extractor.get_field_by_number(0),
             lambda: self._buffer_extractor.get_field_by_number(3),
-            lambda: self._buffer_extractor.get_field_by_number(3)+count_reference_length(*(self._buffer_extractor.get_field_by_number(i) for i in (5, 6))),
+            lambda: self._buffer_extractor.get_field_by_number(3) + count_reference_length(
+                *(self._buffer_extractor.get_field_by_number(i) for i in (5, 6))),
             lambda: self._buffer_extractor.get_field_by_number(1),
             lambda: self._buffer_extractor.get_field_by_number(4),
-            lambda: EncodedArray(np.where(self._buffer_extractor.get_field_by_number(2) & np.uint16(16), ord("-"), ord("+"))[:, None], BaseEncoding)
-            ]
+            lambda: EncodedArray(
+                np.where(self._buffer_extractor.get_field_by_number(2) & np.uint16(16), ord("-"), ord("+"))[:, None],
+                BaseEncoding)
+        ]
         return funcs[i]()
 
     def get_data(self):
@@ -310,7 +359,7 @@ class BamIntervalBuffer(BamBuffer):
         length = count_reference_length(cigar_symbol, cigar_length)
         return Bed6(chromosome,
                     start,
-                    start+length,
+                    start + length,
                     read_names,
                     mapq,
                     strand)
