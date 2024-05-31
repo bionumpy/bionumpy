@@ -68,7 +68,8 @@ class Genome:
 
         Examples
         --------
-        >>> Genome.from_dict({'chr1': 1000, 'chr2': 2000})
+        >>> import bionumpy as bnp
+        >>> bnp.Genome.from_dict({'chr1': 1000, 'chr2': 2000})
         Genome(['chr1', 'chr2'])
 
         '''
@@ -96,7 +97,8 @@ class Genome:
 
         Examples
         --------
-        >>> Genome.from_file('example_data/hg38.chrom.sizes')
+        >>> import bionumpy as bnp
+        >>> bnp.Genome.from_file('example_data/hg38.chrom.sizes')
         Genome(['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...'])
 
         """
@@ -135,8 +137,9 @@ class Genome:
 
         Examples
         --------
-        >>> bedgraph = BedGraph(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5], value=[1, 2, 3])
-        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> import bionumpy as bnp
+        >>> bedgraph = bnp.datatypes.BedGraph(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5], value=[1, 2, 3])
+        >>> genome = bnp.Genome.from_dict({'chr1': 20, 'chr2': 10})
         >>> genome.get_track(bedgraph)
         chr1: [1 1 1 1 1 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0]
         chr2: [3 3 3 3 3 0 0 0 0 0]
@@ -164,7 +167,8 @@ class Genome:
 
         Examples
         --------
-        >>> genome = Genome.from_dict({'chr1': 30000, 'chr2': 31000, 'chr3': 32000})
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_dict({'chr1': 30000, 'chr2': 31000, 'chr3': 32000})
         >>> genome.read_track('example_data/small_treat_pileup.bdg')
         chr1: [ 0.0 0.0 1.0 ... 0.0 0.0 0.0]
         chr2: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
@@ -190,8 +194,9 @@ class Genome:
 
         Examples
         --------
-        >>> intervals = Interval(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5])
-        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> import bionumpy as bnp
+        >>> intervals = bnp.Interval(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5])
+        >>> genome = bnp.Genome.from_dict({'chr1': 20, 'chr2': 10})
         >>> genome.get_intervals(intervals)
         Genomic Intervals on ['chr1', 'chr2']:
         Interval with 3 entries
