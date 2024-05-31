@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pathlib import PurePath
 from ..io import bnp_open, Bed6Buffer, BedBuffer, open_indexed
 from ..io.files import buffer_types, BamBuffer, BamIntervalBuffer
@@ -337,13 +337,26 @@ class Genome:
         -------
         GenomicLocation
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.get_locations(bnp.datatypes.LocationEntry(chromosome=['chr1', 'chr1', 'chr2'], position=[0, 10, 0]))
+        Genomic Locations on ['chr1', 'chr2', 'chr3']:
+        LocationEntry with 3 entries
+                       chromosome                 position
+                             chr1                        0
+                             chr1                       10
+                             chr2                        0
+
+
         """
         if has_numeric_chromosomes:
             data = replace(data, chromosome=as_encoded_array(['chr'+chromosome.to_string() for chromosome in data.chromosome]))
         data = self._mask_data_on_extra_chromosomes(data)
         return GenomicLocation.from_data(data, self._genome_context)
 
-    def read_sequence(self, filename: str = None) -> GenomicSequence:
+    def read_sequence(self, filename: Optional[str] = None) -> GenomicSequence:
         """Read the genomic sequence from file.
 
         If a `fasta` file was used to create the Genome object, `filename` can be `None`
@@ -357,6 +370,15 @@ class Genome:
         -------
         GenomicSequence
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_sequence()
+        GenomicSequence over chromosomes: ['chr1', 'chr2', 'chr3']
+        >>> genome = bnp.Genome.from_file('example_data/small.chrom.sizes')
+        >>> genome.read_sequence('example_data/small_sequence.fa')
+        GenomicSequence over chromosomes: ['chr1', 'chr2', 'chr3']
         """
         
         if filename is None:
