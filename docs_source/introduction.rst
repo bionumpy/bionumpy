@@ -32,7 +32,7 @@ We start by downloading a fastq file:
 
 .. code-block:: bash
 
-    wget https://github.com/bionumpy/bionumpy/raw/master/example_data/big.fq.gz
+    wget https://github.com/bionumpy/bionumpy/raw/main/example_data/big.fq.gz
 
 In the following, we assume you have the big.fq.gz in a directory called `example_data`.
 
