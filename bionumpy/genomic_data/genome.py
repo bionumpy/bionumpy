@@ -402,6 +402,20 @@ class Genome:
         GenomicAnnotation
             `GenomicAnnotation` containing the genes, transcripts and exons
 
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_annotation('example_data/small.gtf')
+        GenomicAnnotation(genome_context=['chr1', 'chr2', 'chr3'], data=GTFEntry with 5 entries
+                       chromosome                   source             feature_type                    start                     stop                    score                   strand                    phase                atributes
+                             chr1                knownGene               transcript                    17369                    17436                        .                        -                        .  gene_id "ENST0000061921
+                             chr1                knownGene                     exon                    17369                    17436                        .                        -                        .  gene_id "ENST0000061921
+                             chr1                knownGene               transcript                    29554                    31097                        .                        +                        .  gene_id "ENST0000047335
+                             chr1                knownGene                     exon                    29554                    30039                        .                        +                        .  gene_id "ENST0000047335
+                             chr1                knownGene                     exon                    30564                    30667                        .                        +                        .  gene_id "ENST0000047335)
+
+
         """
         
         gtf_entries = self._open(filename, stream=False)
