@@ -24,9 +24,9 @@ Elementwise broadcasting is quite common to utilize. But one can also write func
 
     >>> v = np.array([2, 3, 5])
     >>> w = np.array([3, 5, 7])
-    >>> v.dot(w)
+    >>> print(v.dot(w))
     56
-    >>> (v*w).sum()
+    >>> print((v*w).sum())
     56
 
 Now the broadcasting does not work as it would with the elementwise operations. A dot product between `[3, 2, 1]` and `[1]`, will yield an error since it is not natural to think that the ones should be broadcasted to a vector. For vector functions, the last axis needs to be of the same size. For all the other axes, the broadcasting works as usual.
