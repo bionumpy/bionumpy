@@ -158,6 +158,18 @@ class Genome:
         stream : bool
             Whether or not to read as stream
 
+        Returns
+        -------
+        GenomicArray
+
+        Examples
+        --------
+        >>> genome = Genome.from_dict({'chr1': 30000, 'chr2': 31000, 'chr3': 32000})
+        >>> genome.read_track('example_data/small_treat_pileup.bdg')
+        chr1: [ 0.0 0.0 1.0 ... 0.0 0.0 0.0]
+        chr2: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
+        chr3: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
+
         """
         content = self._open(filename, stream)
         return self.get_track(content)
@@ -175,6 +187,19 @@ class Genome:
         Returns
         -------
         GenomicIntervals
+
+        Examples
+        --------
+        >>> intervals = Interval(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5])
+        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_intervals(intervals)
+        Genomic Intervals on ['chr1', 'chr2']:
+        Interval with 3 entries
+                       chromosome                    start                     stop
+                             chr1                        0                        5
+                             chr1                       10                       15
+                             chr2                        0                        5
+
         """
         return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
