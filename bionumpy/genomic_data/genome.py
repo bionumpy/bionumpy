@@ -66,6 +66,11 @@ class Genome:
         -------
         Genome
 
+        Examples
+        --------
+        >>> Genome.from_dict({'chr1': 1000, 'chr2': 2000})
+        Genome(['chr1', 'chr2'])
+
         '''
         return cls(chrom_sizes, *args, **kwargs)
 
@@ -88,6 +93,11 @@ class Genome:
         -------
         'Genome'
             A `Genome` object created from the read chromosome sizes
+
+        Examples
+        --------
+        >>> Genome.from_file('example_data/hg38.chrom.sizes')
+        Genome(['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...'])
 
         """
         path = PurePath(filename)
@@ -122,6 +132,15 @@ class Genome:
         Returns
         -------
         GenomicArray
+
+        Examples
+        --------
+        >>> bedgraph = BedGraph(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5], value=[1, 2, 3])
+        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_track(bedgraph)
+        chr1: [1 1 1 1 1 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0]
+        chr2: [3 3 3 3 3 0 0 0 0 0]
+
         """
         bedgraph = self._mask_data_on_extra_chromosomes(bedgraph)
         return GenomicArray.from_bedgraph(bedgraph, self._genome_context)
@@ -138,6 +157,18 @@ class Genome:
             Filename for the bedgraph file
         stream : bool
             Whether or not to read as stream
+
+        Returns
+        -------
+        GenomicArray
+
+        Examples
+        --------
+        >>> genome = Genome.from_dict({'chr1': 30000, 'chr2': 31000, 'chr3': 32000})
+        >>> genome.read_track('example_data/small_treat_pileup.bdg')
+        chr1: [ 0.0 0.0 1.0 ... 0.0 0.0 0.0]
+        chr2: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
+        chr3: [ 0.0 0.0 0.0 ... 0.0 0.0 0.0]
 
         """
         content = self._open(filename, stream)
@@ -156,6 +187,19 @@ class Genome:
         Returns
         -------
         GenomicIntervals
+
+        Examples
+        --------
+        >>> intervals = Interval(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5])
+        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_intervals(intervals)
+        Genomic Intervals on ['chr1', 'chr2']:
+        Interval with 3 entries
+                       chromosome                    start                     stop
+                             chr1                        0                        5
+                             chr1                       10                       15
+                             chr2                        0                        5
+
         """
         return GenomicIntervals.from_intervals(intervals, self._genome_context, is_stranded=stranded)
 
