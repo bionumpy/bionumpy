@@ -137,6 +137,9 @@ class GenomicLocationGlobal(GenomicLocation, ABC):
         self._is_stranded = is_stranded
         self._field_dict = field_dict
 
+    def __repr__(self):
+        return f'Genomic Locations on {self._genome_context}:\n{self._locations.astype(LocationEntry)}'
+
     @property
     def data(self) -> BNPDataClass:
         '''

@@ -226,6 +226,26 @@ class Genome:
         Returns
         -------
         GenomicIntervals
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/small_sequence.fa')
+        >>> genome.read_intervals('example_data/small_summits.bed')
+        Genomic Intervals on ['chr1', 'chr2', 'chr3']:
+        Interval with 13 entries
+                       chromosome                    start                     stop
+                             chr1                      639                      640
+                             chr1                     6023                     6024
+                             chr1                     7124                     7125
+                             chr2                      849                      850
+                             chr2                     6320                     6321
+                             chr2                     8483                     8484
+                             chr2                    11342                    11343
+                             chr2                    12527                    12528
+                             chr2                    13092                    13093
+                             chr2                    18943                    18944
+
         """
         path = PurePath(filename)
         suffix = path.suffixes[-1]
@@ -239,7 +259,6 @@ class Genome:
                 buffer_type = BamIntervalBuffer
         content = self._open(filename, stream, buffer_type=buffer_type)
         return self.get_intervals(content, stranded)
-    # return GenomicIntervals.from_intervals(content, self._chrom_sizes)
 
     def read_locations(self, filename: str, stranded: bool = False, stream: bool = False, has_numeric_chromosomes=False, buffer_type=None) -> GenomicLocation:
         """Read a set of locations from file and convert them to `GenomicLocation`        
@@ -263,6 +282,26 @@ class Genome:
         -------
         GenomicLocation
             (Stranded) GenomicLocation
+
+        Examples
+        --------
+        >>> import bionumpy as bnp
+        >>> genome = bnp.Genome.from_file('example_data/hg38.chrom.sizes')
+        >>> genome.read_locations('example_data/thousand_genomes.vcf', has_numeric_chromosomes=True)
+        Genomic Locations on ['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...']:
+        LocationEntry with 74 entries
+                       chromosome                 position
+                            chr21                  5033883
+                            chr21                  5035657
+                            chr21                  5038297
+                            chr21                  5038312
+                            chr21                  5052250
+                            chr21                  5053935
+                            chr21                  5053961
+                            chr21                  5063903
+                            chr21                  5063916
+                            chr21                  5064678
+
 
         """
         assert not (stream and has_numeric_chromosomes)
