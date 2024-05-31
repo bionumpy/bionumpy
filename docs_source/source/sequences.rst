@@ -113,7 +113,7 @@ Getting unique elements and counting occurrences
 -------------------------------------------------
 
     >>> bnp.count_encoded(my_seqs.get_column_values(0)) # count the number of occurrences of each amino acid at the first position (similar to numpy.unique)
-    EncodedCounts(alphabet=['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', '*'], counts=array([0, 1, 2, 0, 1, 1, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 1, 0, 0, 0, 0]), row_names=None)
+	EncodedCounts(alphabet=['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', '*'], counts=array([0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 1, 0, 0, 1, 1, 2, 0, 1, 0, 0]), row_names=None)
 
 Counting the number of occurrences of a specific element in each sequence
 --------------------------------------------------------------------------
