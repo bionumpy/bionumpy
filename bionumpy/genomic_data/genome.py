@@ -94,6 +94,11 @@ class Genome:
         'Genome'
             A `Genome` object created from the read chromosome sizes
 
+        Examples
+        --------
+        >>> Genome.from_file('example_data/hg38.chrom.sizes')
+        Genome(['chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10', '...'])
+
         """
         path = PurePath(filename)
         suffix = path.suffixes[-1]
@@ -127,6 +132,15 @@ class Genome:
         Returns
         -------
         GenomicArray
+
+        Examples
+        --------
+        >>> bedgraph = BedGraph(chromosome=['chr1', 'chr1', 'chr2'], start=[0, 10, 0], stop=[5, 15, 5], value=[1, 2, 3])
+        >>> genome = Genome.from_dict({'chr1': 20, 'chr2': 10})
+        >>> genome.get_track(bedgraph)
+        chr1: [1 1 1 1 1 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0]
+        chr2: [3 3 3 3 3 0 0 0 0 0]
+
         """
         bedgraph = self._mask_data_on_extra_chromosomes(bedgraph)
         return GenomicArray.from_bedgraph(bedgraph, self._genome_context)
