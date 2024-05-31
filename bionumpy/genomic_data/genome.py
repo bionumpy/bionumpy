@@ -66,6 +66,11 @@ class Genome:
         -------
         Genome
 
+        Examples
+        --------
+        >>> Genome.from_dict({'chr1': 1000, 'chr2': 2000})
+        Genome(['chr1', 'chr2'])
+
         '''
         return cls(chrom_sizes, *args, **kwargs)
 
