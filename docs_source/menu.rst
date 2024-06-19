@@ -22,12 +22,21 @@ BioNumPy documentation
     tutorials/subsetting_bed.rst
     tutorials/fastqc.rst
     tutorials/gc_content.rst
-    tutorials/numpy_operations.rst
     tutorials/position_weight_matrix.rst
     tutorials/set_of_sequences.rst
     tutorials/similarity_measures.rst
     tutorials/extracting_kmers_around_snps.rst
-    tutorials/working_with_biopython.rst
+
+
+.. toctree::
+    :maxdepth: 0
+    :glob:
+    :titlesonly:
+    :caption: Interoperability
+
+    interoperability/numpy_operations.rst
+    interoperability/working_with_biopython.rst
+    interoperability/pandas.rst
 
 
 .. toctree::

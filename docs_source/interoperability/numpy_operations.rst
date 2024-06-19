@@ -1,5 +1,8 @@
-Using NumPy functionality
--------------------------
+Numpy Interoperability
+----------------------
+
+Using Numpy functionality
+.........................
 
 This is a collection of short examples showing how NumPy concepts like indexing, broadcasting and reductions can be used effectively in BioNumPy:
 
@@ -51,7 +54,8 @@ This is a collection of short examples showing how NumPy concepts like indexing,
     plt.hist(g_count); plt.show()
 
 From NumPy to BioNumPy
-----------------------
+......................
+
 If you have an array of already encoded sequences, you can convert it to a BioNumPy sequence array by instantiating a 'EncodedArray' object with the array and the encoding you used. Here is an example:
 
 .. testcode::
@@ -70,7 +74,7 @@ If you have an array of already encoded sequences, you can convert it to a BioNu
         ACGTACGTACGT
 
 From BioNumPy to NumPy
-----------------------
+......................
 
 The most common way to get a NumPy array from a EncodedArray object is to either count occurances, or creating masks of certain bases. Here is an example:
 
