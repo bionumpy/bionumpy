@@ -32,6 +32,8 @@ buffer_types = {
     ".narrowPeak": NarrowPeakBuffer,
     ".fasta": MultiLineFastaBuffer,
     ".fa": MultiLineFastaBuffer,
+    ".fna": MultiLineFastaBuffer,
+    ".faa": MultiLineFastaBuffer,
     ".fastq": FastQBuffer,
     ".fq": FastQBuffer,
     ".gfa": GfaSequenceBuffer,
@@ -74,9 +76,10 @@ def _get_buffer_type(suffix):
     if suffix in buffer_types:
         return buffer_types[suffix]
     else:
+        all_buffer_types = {buffer.__name__ for buffer in buffer_types.values()}
         raise RuntimeError(f"File format {suffix} does not have a default buffer type. "
-                           f"Specify buffer_type argument using get_bufferclass_for_datatype function or"
-                           f"use one of {str(list(buffer_types.keys()))[1:-1]}")
+                           f"Specify buffer_type argument using  "
+                           f"one of {str(['bnp.'+b for b in all_buffer_types])} or change to a valid extension: {str(list(buffer_types.keys()))}")
 
 
 def bnp_open(filename: str, mode: str = None, buffer_type=None, lazy=None) -> Union[NpDataclassReader, NpBufferedWriter]:
