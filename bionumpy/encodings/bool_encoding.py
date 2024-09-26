@@ -7,6 +7,15 @@ from bionumpy.encodings.string_encodings import StringEncoding
 
 
 class BoolStringEncoding(Encoding):
+    '''
+    >>> from bionumpy.encodings.bool_encoding import bool_string
+    >>> bool_string.encode(['True', 'False', 'True'])
+    array([ True, False,  True])
+    >>> bool_string.decode([False, False])
+    encoded_ragged_array(['False',
+                          'False'])
+    '''
+
     def __init__(self, true_string: str = 'True', false_string: str = 'False'):
         self._true_string = true_string
         self._false_string = false_string
@@ -21,7 +30,7 @@ class BoolStringEncoding(Encoding):
         return s.raw().astype(bool)
 
     def decode(self, encoded_array):
-        a = EncodedArray(encoded_array.astype(int), self._string_encoding)
+        a = EncodedArray(np.asanyarray(encoded_array).astype(int), self._string_encoding)
         return self._string_encoding.decode(a)
 
 bool_string = BoolStringEncoding()
