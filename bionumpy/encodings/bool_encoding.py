@@ -15,7 +15,7 @@ class BoolStringEncoding(Encoding):
     encoded_ragged_array(['False',
                           'False'])
     '''
-
+    returns_raw = True
     def __init__(self, true_string: str = 'True', false_string: str = 'False'):
         self._true_string = true_string
         self._false_string = false_string
