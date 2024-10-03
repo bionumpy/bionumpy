@@ -371,11 +371,14 @@ def bnpdataclass(base_class: type) -> Type[BNPDataClass]:
                         assert isinstance(pre_val,
                                           (str, list, EncodedArray, EncodedRaggedArray, RaggedArray, np.ndarray)), \
                             (field, pre_val, type(pre_val))
+                        val = as_encoded_array(pre_val, field.type)
+                    elif getattr(field.type, 'returns_raw', False) and isinstance(pre_val, (np.ndarray, np.generic)):
+                        val = pre_val
                     else:
-                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray)) or hasattr(pre_val, 'to_numpy'), (field, pre_val)
+                        assert isinstance(pre_val, (str, list, EncodedArray, EncodedRaggedArray, bool)) or hasattr(pre_val, 'to_numpy'), (field, pre_val, type(pre_val), isinstance(pre_val, np.generic))
+                        val = as_encoded_array(pre_val, field.type)
                     # must do as_encoded and not explicit encode as pre_val might already
                     # be encoded
-                    val = as_encoded_array(pre_val, field.type)
                     if isinstance(field.type, FlatAlphabetEncoding):
                         val = val.ravel()
                 elif field.type == List[int] or field.type == List[bool] or field.type == List[float]:

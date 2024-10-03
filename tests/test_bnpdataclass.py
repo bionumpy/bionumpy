@@ -6,6 +6,8 @@ from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.bnpdataclass.bnpdataclass import make_dataclass, BNPDataClass, dynamic_concatenate
 from bionumpy.bnpdataclass.bnpdataclassfunction import bnpdataclassfunction
 from numpy.testing import assert_equal
+
+from bionumpy.encodings.bool_encoding import bool_string
 from bionumpy.util.testing import assert_bnpdataclass_equal
 # import pandas as pd
 import bionumpy as bnp
@@ -141,3 +143,14 @@ def test_tolist(data):
         assert isinstance(entry.name, str)
         assert isinstance(entry.age, int), type(entry.age)
 
+@pytest.fixture()
+def bool_class():
+    @bnpdataclass
+    class BNPDC:
+        test_field: bool_string
+
+    return BNPDC
+
+def test_bool_class(bool_class):
+    obj = bool_class(test_field=['True', 'False'])
+    print(obj)

@@ -171,3 +171,4 @@ def test_bool_encoding():
     encoded = encoding.encode(data)
     decoded = encoding.decode(encoded)
     assert np.all(decoded == data)
+    print(as_encoded_array(data, encoding))
