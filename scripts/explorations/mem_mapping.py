@@ -12,6 +12,7 @@ if __name__ == '__main__':
     data = np.memmap('data.dat',
                      dtype=dtype, mode='w+', shape=shape)
     data[:] = [ord(c) for c in 'abcdefghij']
+
     encoded_array = bnp.EncodedArray(
         data,
         bnp.BaseEncoding)  # type: ignore
