@@ -35,7 +35,7 @@ def test_load(basename, loader):
     assert_encoded_raggedarray_equal(all_sequences, loaded_mem_mapped_encoded_ragged_array)
 
 
-#@pytest.mark.skip('Needs pooch to download the file')
+@pytest.mark.skip('Needs pooch to download the file')
 def test_big_file(tmp_path):
     import pooch
     url = 'https://github.com/bionumpy/bionumpy-example-data/raw/refs/heads/master/big.fq.gz'
