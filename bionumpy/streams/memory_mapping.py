@@ -5,12 +5,9 @@ from typing import Iterator, Callable
 import numpy as np
 
 from bionumpy import EncodedRaggedArray, EncodedArray
-from bionumpy.encoded_array import Encoding
 
 
 class MemMapEncodedRaggedArray:
-    def __init__(self, basename):
-        self._basename = basename
 
     @classmethod
     def load(self, basename: str) -> EncodedRaggedArray:
