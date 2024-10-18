@@ -22,7 +22,6 @@ class MemMapEncodedRaggedArray:
         basename: str
             The base name of the memory-mapped files.
 
-
         Returns
         -------
         EncodedRaggedArray
@@ -37,11 +36,25 @@ class MemMapEncodedRaggedArray:
     def create(cls, loader_creator: Callable[[], Iterator[EncodedRaggedArray]], basename) -> EncodedRaggedArray:
         '''
         Create a memory-mapped encoded ragged array.
+        Takes in a callable that returns an iterator of EncodedRaggedArray objects.
+        It goes through the iterator twice, first to calculate the total size of the data and lengths arrays,
+        and then to write the data to disk.
+
+        Returns an EncodedRaggedArray object where the data and lengths are memory-mapped.
+
+        The basename provided is used to create the following files:
+        - basename_data.dat
+        - basename_lengths.dat
+        - basename_encoding.pkl
+
+        The same basename should be used to load the memory-mapped files later.
 
         Parameters
         ----------
-        loader_creator
-        basename
+        loader_creator: Callable[[], Iterator[EncodedRaggedArray]]
+            A callable that returns an iterator of EncodedRaggedArray objects.
+        basename: str
+            Where to store the memory-mapped files.
 
         Returns
         -------
