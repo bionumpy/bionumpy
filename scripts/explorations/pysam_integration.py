@@ -10,6 +10,7 @@ import bionumpy as bnp
 from bionumpy import Genome, Interval, BamEntry, EncodedArray, EncodedRaggedArray, BaseEncoding
 from bionumpy.alignments import alignment_to_interval
 from bionumpy.arithmetics import sort_intervals
+from bionumpy.arithmetics.intervals import fast_sort_intervals
 from bionumpy.encodings import CigarOpEncoding
 from bionumpy.util.testing import assert_bnpdataclass_equal
 
@@ -137,7 +138,7 @@ class IndexedBamFile:
         return np.concatenate(all_alignments)
 
     def get_all_overlapping(self, intervals: Interval) -> BamEntry:
-        item = sort_intervals(intervals)
+        item = fast_sort_intervals(intervals)
         return self._fetch_from_sorted_intervals(item)
 
 

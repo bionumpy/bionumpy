@@ -249,15 +249,22 @@ def sort_intervals(intervals: Interval, chromosome_key_function: callable = lamb
     if hasattr(intervals.chromosome, 'encoding') and isinstance(intervals.chromosome.encoding, StringEncoding):
         args = np.lexsort((intervals.start, intervals.chromosome))
         return intervals[args]
-    if isinstance(intervals.chromosome, StringArray):
-        args = np.lexsort((intervals.start, intervals.chromosome.raw()))
-        return intervals[args]
     if sort_order is not None:
         chromosome_key_function = {name: i for i, name in enumerate(sort_order)}.__getitem__
     s = sorted((chromosome_key_function(interval.chromosome.to_string()), interval.start, interval.stop, i)
                for i, interval in enumerate(intervals))
     indices = list(map(itemgetter(-1), s))
     return intervals[indices]
+
+def fast_sort_intervals(intervals: Interval) -> Interval:
+    if hasattr(intervals.chromosome, 'encoding') and isinstance(intervals.chromosome.encoding, StringEncoding):
+        args = np.lexsort((intervals.start, intervals.chromosome))
+        return intervals[args]
+    if isinstance(intervals.chromosome, StringArray):
+        args = np.lexsort((intervals.start, intervals.chromosome.raw()))
+        return intervals[args]
+    assert False, 'Fast sort intervals only works with StringEncoding and StringArray'
+
 
 
 @chromosome_map()
