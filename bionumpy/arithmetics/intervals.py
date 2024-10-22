@@ -7,7 +7,7 @@ import numpy as np
 from npstructures import RunLength2dArray, RunLengthArray
 from bionumpy.encodings.string_encodings import StringEncoding
 from .bedgraph import BedGraph
-from .. import streamable
+from ..streams.decorators import streamable
 from ..streams.grouped import chromosome_map
 from ..datatypes import Interval
 from ..bnpdataclass import bnpdataclass
