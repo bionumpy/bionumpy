@@ -116,7 +116,7 @@ class IndexedBamFile:
         if create_index:
             index_filename= Path(filename).with_suffix('.bam.bai')
             if not os.path.isfile(index_filename):
-                pysam.index(filename)
+                pysam.index(str(filename))
         self._samfile = pysam.AlignmentFile(filename, 'rb')
 
     def _fetch_from_sorted_intervals(self, intervals):
