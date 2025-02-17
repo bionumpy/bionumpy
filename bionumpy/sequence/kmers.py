@@ -81,7 +81,8 @@ def get_kmers(sequence: EncodedRaggedArray, k: int) -> EncodedArray:
 
     if sequence.encoding.alphabet_size == 4:
         # use the faster _get_dna_kmers
-        return _get_dna_kmers(sequence, k)
+        result = _get_dna_kmers(sequence, k)
+        return result
 
     return KmerEncoder(k, sequence.encoding).rolling_window(sequence)
 
@@ -94,7 +95,8 @@ def convolution(func):
             out = as_strided(convoluted, shape)
         else:
             out = EncodedRaggedArray(convoluted, shape, safe_mode=False) # FIXME: Should not use unsafe here
-
+        if window_size == 1:
+            return out
         return out[..., : (-window_size + 1)]
 
     return new_func

@@ -56,6 +56,11 @@ def test_get_kmers():
 
     print(decoded_kmers == correct)
 
+@pytest.mark.parametrize("encoding", [bnp.DNAEncoding, bnp.AminoAcidEncoding])
+def test_get_kmers_one(encoding):
+    sequence = bionumpy.encoded_array.as_encoded_array(["ACTG"], encoding)
+    kmers = bnp.sequence.get_kmers(sequence, 1)
+    assert len(kmers[0]) == 4, kmers[0]
 
 
 @pytest.mark.skip("Not correct")

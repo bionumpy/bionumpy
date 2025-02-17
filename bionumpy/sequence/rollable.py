@@ -60,6 +60,8 @@ class RollableFunction:
                 out = RaggedArray(convoluted, shape, safe_mode=False)
         elif isinstance(_sequence, (np.ndarray, EncodedArray)):
             out = as_strided(convoluted, shape)
+        if window_size == 1:
+            return out
         if mode == "valid":
             return out[..., : (-window_size + 1)]
         elif mode == "same":
