@@ -68,7 +68,7 @@ def create_lazy_class(dataclass: Type[BNPDataClass], header: Optional[Any] = Non
         """
         A class that lazily loads fields from a buffer
         """
-
+        __annotations__ = {field.name: field.type for field in dataclasses.fields(dataclass)}
         def __init__(self, item_getter, set_values=None, computed_values=None):
             self._itemgetter = item_getter
             self._set_values = set_values or {}
