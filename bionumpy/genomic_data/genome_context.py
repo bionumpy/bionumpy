@@ -33,9 +33,9 @@ class GenomeContext(GenomeContextBase):
         chrom_size_dict = {key: chrom_size_dict[key] for key in keys}
         self._included = [chrom for chrom in chrom_size_dict if chrom not in self._ignored]
         self._included_mask = np.array([chrom in self._included for chrom in chrom_size_dict])
-        self._string_endcoding = StringEncoding(list(chrom_size_dict.keys()))
+        self._string_encoding = StringEncoding(list(chrom_size_dict.keys()))
         self._chrom_size_dict = {key: value for key, value in chrom_size_dict.items() if key in self._included}
-        self._global_offset = GlobalOffset(self._chrom_size_dict, string_encoding=self._string_endcoding)
+        self._global_offset = GlobalOffset(self._chrom_size_dict, string_encoding=self._string_encoding)
 
     def with_ignored_added(self, ignored: Iterable[str]) -> 'GenomeContext':
         '''
@@ -64,7 +64,7 @@ class GenomeContext(GenomeContextBase):
 
     @property
     def encoding(self):
-        return self._string_endcoding
+        return self._string_encoding
 
     @property
     def chrom_sizes(self):
